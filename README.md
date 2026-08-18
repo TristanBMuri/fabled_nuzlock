@@ -46,6 +46,8 @@ project_overview.md  # the plan / roadmap
 
 - [x] Showdown + poke-env working, battle state readable (smoke test)
 - [x] Battle env + PPO + TensorBoard; smoke run shows learning signal
-      (reward -17.4→-12.7, win rate 0→10%, entropy stable over 61k steps)
-- [ ] Train to beat the heuristic reliably (longer runs; then team diversity)
+- [x] **Battler beats heuristic**: 500 updates / 512k steps / ~35 min single env →
+      95% win rate (crossed 50% at update ~128 / 130k steps), reward -17.9→+15.4,
+      entropy 1.59→0.54 (healthy), checkpoint `checkpoints/ppo_latest.pt`
+- [ ] Team diversity (distinct opponent teams → needs attention-based policy)
 - [ ] Nuzlocke gauntlet env (the actual goal — only after the battler works)
