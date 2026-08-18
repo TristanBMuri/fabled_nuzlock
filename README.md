@@ -49,5 +49,9 @@ project_overview.md  # the plan / roadmap
 - [x] **Battler beats heuristic**: 500 updates / 512k steps / ~35 min single env →
       95% win rate (crossed 50% at update ~128 / 130k steps), reward -17.9→+15.4,
       entropy 1.59→0.54 (healthy), checkpoint `checkpoints/ppo_latest.pt`
-- [ ] Team diversity (distinct opponent teams → needs attention-based policy)
+- [x] Team pool (16 teams harvested from Showdown's generator) + attention policy
+      (token obs, 1-layer transformer) + parallel envs (--envs N, ~2.9x at N=4)
+- [ ] **Pool of 4 is hard**: attention 1500 updates / 1.5M steps → 28% avg win
+      (peak 70%), still climbing slowly. MLP plateaued ~20% at 512k. Next levers:
+      curriculum (grow pool on win-rate milestones), warm-start, longer runs
 - [ ] Nuzlocke gauntlet env (the actual goal — only after the battler works)
