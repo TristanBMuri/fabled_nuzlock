@@ -27,8 +27,12 @@ cd pokemon-showdown && node pokemon-showdown start --no-security --port 8020 &
 
 ```bash
 uv run python scripts/smoke_test.py       # 3 random-vs-random battles, prints state
-tensorboard --logdir runs                 # once training exists
+uv run python scripts/train.py --random   # env sanity: 3 random-policy battles vs heuristic
+uv run python scripts/train.py --updates 60   # PPO smoke run (~25 min, ~450 steps/s)
+tensorboard --logdir runs
 ```
+
+Checkpoint lands in `checkpoints/ppo_latest.pt` after every update.
 
 ## Layout
 
@@ -41,6 +45,7 @@ project_overview.md  # the plan / roadmap
 ## Status
 
 - [x] Showdown + poke-env working, battle state readable (smoke test)
-- [ ] Battle env (Gymnasium wrapper around one battle, fixed team) + PPO
-- [ ] Beat heuristic opponent on fixed team
+- [x] Battle env + PPO + TensorBoard; smoke run shows learning signal
+      (reward -17.4→-12.7, win rate 0→10%, entropy stable over 61k steps)
+- [ ] Train to beat the heuristic reliably (longer runs; then team diversity)
 - [ ] Nuzlocke gauntlet env (the actual goal — only after the battler works)
