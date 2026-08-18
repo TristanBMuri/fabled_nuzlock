@@ -1,0 +1,57 @@
+Manectric (M) @ Choice Specs  
+Ability: Lightning Rod  
+Level: 86  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- thunderbolt  
+- voltswitch  
+- flamethrower  
+- switcheroo  
+
+Magnezone @ Choice Scarf  
+Ability: Analytic  
+Level: 84  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- voltswitch  
+- bodypress  
+- thunderbolt  
+- flashcannon  
+
+Mandibuzz (F) @ Heavy-Duty Boots  
+Ability: Overcoat  
+Level: 82  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- roost  
+- foulplay  
+- bravebird  
+- toxic  
+
+Lickilicky (M) @ Leftovers  
+Ability: Own Tempo  
+Level: 88  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- knockoff  
+- bodyslam  
+- protect  
+- wish  
+
+Unfezant (F) @ Scope Lens  
+Ability: Super Luck  
+Level: 85  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- roost  
+- nightslash  
+- bravebird  
+- uturn  
+
+Volcarona (M) @ Heavy-Duty Boots  
+Ability: Flame Body  
+Level: 75  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- gigadrain  
+- roost  
+- fireblast  
+- quiverdance  
+

@@ -9,6 +9,8 @@ import torch
 import torch.nn as nn
 from torch.distributions import Categorical
 
+from battle_env import N_TOKENS, TOKEN_DIM
+
 
 class MaskedPolicy(nn.Module):
     def __init__(self, obs_dim: int, n_actions: int, hidden: int = 256):
@@ -25,6 +27,47 @@ class MaskedPolicy(nn.Module):
         h = self.body(obs)
         logits = self.actor(h).masked_fill(mask == 0, -1e9)
         return logits, self.critic(h).squeeze(-1)
+
+    def get_action_and_value(self, obs, mask):
+        logits, value = self(obs, mask)
+        dist = Categorical(logits=logits)
+        action = dist.sample()
+        return action, dist.log_prob(action), dist.entropy(), value
+
+    def evaluate_actions(self, obs, mask, actions):
+        logits, value = self(obs, mask)
+        dist = Categorical(logits=logits)
+        return dist.log_prob(actions), dist.entropy(), value
+
+
+class AttentionPolicy(nn.Module):
+    """Token-based policy for varied teams: project tokens, one transformer
+    layer, mean-pool, actor/critic heads. No src_mask anywhere (PyTorch
+    TransformerEncoder NaN risk with float masks — see CLAUDE.md)."""
+
+    def __init__(self, n_actions: int, d_model: int = 128, nhead: int = 4):
+        super().__init__()
+        self.proj = nn.Linear(TOKEN_DIM, d_model)
+        self.encoder = nn.TransformerEncoder(
+            nn.TransformerEncoderLayer(
+                d_model, nhead, dim_feedforward=2 * d_model,
+                batch_first=True, norm_first=True, dropout=0.0,
+            ),
+            num_layers=1, enable_nested_tensor=False,
+        )
+        self.actor = nn.Linear(d_model, n_actions)
+        self.critic = nn.Linear(d_model, 1)
+
+    def forward(self, obs, mask):
+        if obs.dim() == 2:  # single step -> batch of 1
+            obs = obs.unsqueeze(0)
+        h = self.encoder(self.proj(obs))
+        pooled = h.mean(dim=1)
+        logits = self.actor(pooled).masked_fill(mask == 0, -1e9)
+        if torch.isnan(logits).any():
+            print("WARN: NaN logits -> nan_to_num applied")
+            logits = torch.nan_to_num(logits, nan=-1e9)
+        return logits, self.critic(pooled).squeeze(-1)
 
     def get_action_and_value(self, obs, mask):
         logits, value = self(obs, mask)

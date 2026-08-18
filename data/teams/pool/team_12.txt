@@ -1,0 +1,55 @@
+Basculin (Basculin-Blue-Striped) (F) @ Choice Band  
+Ability: Adaptability  
+Level: 86  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- flipturn  
+- liquidation  
+- aquajet  
+- superpower  
+
+Gurdurr (F) @ Eviolite  
+Ability: Guts  
+Level: 85  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- drainpunch  
+- machpunch  
+- defog  
+- knockoff  
+
+Haxorus (M) @ Lum Berry  
+Ability: Mold Breaker  
+Level: 77  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- poisonjab  
+- dragondance  
+- earthquake  
+- outrage  
+
+Salamence (M) @ Heavy-Duty Boots  
+Ability: Moxie  
+Level: 73  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- earthquake  
+- outrage  
+- dragondance  
+- dualwingbeat  
+
+Mew @ Life Orb  
+Ability: Synchronize  
+Level: 79  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- swordsdance  
+- psychicfangs  
+- closecombat  
+- bravebird  
+
+Vanilluxe (F) @ Light Clay  
+Ability: Snow Warning  
+Level: 81  
+EVs: 81 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- blizzard  
+- freezedry  
+- flashcannon  
+- auroraveil  
+

@@ -1,0 +1,56 @@
+Tapu Fini @ Leftovers  
+Ability: Misty Surge  
+Level: 78  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- surf  
+- knockoff  
+- defog  
+- moonblast  
+
+Dialga @ Choice Specs  
+Ability: Pressure  
+Level: 72  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- flashcannon  
+- dracometeor  
+- thunderbolt  
+- fireblast  
+
+Swampert (M) @ Leftovers  
+Ability: Torrent  
+Level: 81  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- earthquake  
+- scald  
+- stealthrock  
+- icebeam  
+
+Vespiquen (F) @ Heavy-Duty Boots  
+Ability: Pressure  
+Level: 98  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- toxic  
+- roost  
+- uturn  
+- airslash  
+
+Magnezone @ Leftovers  
+Ability: Analytic  
+Level: 84  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- bodypress  
+- flashcannon  
+- discharge  
+- irondefense  
+
+Zygarde (Zygarde-10%) @ Choice Band  
+Ability: Aura Break  
+Level: 81  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- outrage  
+- superpower  
+- thousandarrows  
+- extremespeed  
+

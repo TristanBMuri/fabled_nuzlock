@@ -1,0 +1,57 @@
+Whiscash (F) @ Leftovers  
+Ability: Oblivious  
+Level: 87  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- earthquake  
+- toxic  
+- scald  
+- protect  
+
+Tapu Fini @ Leftovers  
+Ability: Misty Surge  
+Level: 78  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- moonblast  
+- taunt  
+- surf  
+- calmmind  
+
+Tsareena (F) @ Choice Band  
+Ability: Queenly Majesty  
+Level: 85  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- uturn  
+- tripleaxel  
+- knockoff  
+- powerwhip  
+
+Kyurem (Kyurem-Black) @ Heavy-Duty Boots  
+Ability: Teravolt  
+Level: 70  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- outrage  
+- iciclespear  
+- dragondance  
+- fusionbolt  
+
+Stakataka @ Choice Band  
+Ability: Beast Boost  
+Level: 81  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpD  
+IVs: 0 SpA / 0 Spe  
+- stoneedge  
+- bodypress  
+- gyroball  
+- earthquake  
+
+Reuniclus (M) @ Life Orb  
+Ability: Magic Guard  
+Level: 84  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- recover  
+- calmmind  
+- focusblast  
+- psyshock  
+

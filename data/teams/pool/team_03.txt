@@ -1,0 +1,55 @@
+Froslass (F) @ Wide Lens  
+Ability: Cursed Body  
+Level: 84  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- taunt  
+- spikes  
+- tripleaxel  
+- poltergeist  
+
+Bronzong @ Leftovers  
+Ability: Levitate  
+Level: 84  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- ironhead  
+- toxic  
+- psychic  
+- earthquake  
+
+Gyarados (M) @ Heavy-Duty Boots  
+Ability: Moxie  
+Level: 74  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- waterfall  
+- dragondance  
+- powerwhip  
+- bounce  
+
+Cryogonal @ Heavy-Duty Boots  
+Ability: Levitate  
+Level: 86  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- rapidspin  
+- recover  
+- freezedry  
+- toxic  
+
+Azumarill (M) @ Choice Band  
+Ability: Huge Power  
+Level: 83  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- superpower  
+- playrough  
+- liquidation  
+- aquajet  
+
+Garbodor (F) @ Black Sludge  
+Ability: Aftermath  
+Level: 87  
+Gigantamax: Yes  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- spikes  
+- toxicspikes  
+- stompingtantrum  
+- gunkshot  
+

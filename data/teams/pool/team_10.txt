@@ -1,0 +1,57 @@
+Pangoro (F) @ Life Orb  
+Ability: Iron Fist  
+Level: 84  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- bulletpunch  
+- drainpunch  
+- swordsdance  
+- knockoff  
+
+Silvally (Silvally-Ghost) @ Ghost Memory  
+Ability: RKS System  
+Level: 83  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- flamecharge  
+- multiattack  
+- swordsdance  
+- xscissor  
+
+Suicune @ Leftovers  
+Ability: Pressure  
+Level: 79  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- calmmind  
+- sleeptalk  
+- rest  
+- scald  
+
+Mr. Rime (M) @ Heavy-Duty Boots  
+Ability: Screen Cleaner  
+Level: 88  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- freezedry  
+- psychic  
+- rapidspin  
+- slackoff  
+
+Pincurchin (M) @ Leftovers  
+Ability: Electric Surge  
+Level: 90  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- recover  
+- scald  
+- toxicspikes  
+- risingvoltage  
+
+Blissey (F) @ Heavy-Duty Boots  
+Ability: Natural Cure  
+Level: 85  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- toxic  
+- teleport  
+- seismictoss  
+- softboiled  
+

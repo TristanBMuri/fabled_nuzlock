@@ -1,0 +1,57 @@
+Butterfree (M) @ Heavy-Duty Boots  
+Ability: Compound Eyes  
+Level: 88  
+Gigantamax: Yes  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- bugbuzz  
+- sleeppowder  
+- hurricane  
+- quiverdance  
+
+Barraskewda (F) @ Choice Band  
+Ability: Swift Swim  
+Level: 79  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- liquidation  
+- crunch  
+- flipturn  
+- closecombat  
+
+Flygon (M) @ Leftovers  
+Ability: Levitate  
+Level: 80  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- earthquake  
+- outrage  
+- roost  
+- defog  
+
+Avalugg (F) @ Heavy-Duty Boots  
+Ability: Sturdy  
+Level: 85  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- avalanche  
+- bodypress  
+- curse  
+- recover  
+
+Poliwrath (M) @ Life Orb  
+Ability: Swift Swim  
+Level: 86  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- raindance  
+- liquidation  
+- closecombat  
+- darkestlariat  
+
+Stakataka @ Life Orb  
+Ability: Beast Boost  
+Level: 81  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpD  
+IVs: 0 SpA / 0 Spe  
+- stoneedge  
+- gyroball  
+- trickroom  
+- bodypress  
+

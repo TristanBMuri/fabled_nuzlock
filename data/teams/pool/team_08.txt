@@ -1,0 +1,56 @@
+Torkoal (F) @ Heavy-Duty Boots  
+Ability: Drought  
+Level: 87  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- lavaplume  
+- yawn  
+- solarbeam  
+- rapidspin  
+
+Vanilluxe (M) @ Light Clay  
+Ability: Snow Warning  
+Level: 81  
+EVs: 81 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- blizzard  
+- auroraveil  
+- freezedry  
+- explosion  
+
+Yveltal @ Heavy-Duty Boots  
+Ability: Dark Aura  
+Level: 67  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- oblivionwing  
+- suckerpunch  
+- roost  
+- knockoff  
+
+Palkia @ Lustrous Orb  
+Ability: Pressure  
+Level: 73  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- hydropump  
+- dracometeor  
+- thunderwave  
+- fireblast  
+
+Raikou @ Leftovers  
+Ability: Inner Focus  
+Level: 80  
+EVs: 85 HP / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+IVs: 0 Atk  
+- substitute  
+- scald  
+- thunderbolt  
+- calmmind  
+
+Necrozma @ Life Orb  
+Ability: Prism Armor  
+Level: 80  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- photongeyser  
+- knockoff  
+- dragondance  
+- brickbreak  
+

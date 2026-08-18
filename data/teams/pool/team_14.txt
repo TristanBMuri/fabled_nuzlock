@@ -1,0 +1,55 @@
+Glalie (F) @ Heavy-Duty Boots  
+Ability: Inner Focus  
+Level: 95  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- freezedry  
+- earthquake  
+- superfang  
+- taunt  
+
+Dhelmise @ Assault Vest  
+Ability: Steelworker  
+Level: 87  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- rapidspin  
+- powerwhip  
+- poltergeist  
+- anchorshot  
+
+Stakataka @ Life Orb  
+Ability: Beast Boost  
+Level: 81  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpD  
+IVs: 0 SpA / 0 Spe  
+- bodypress  
+- gyroball  
+- trickroom  
+- stoneedge  
+
+Runerigus (F) @ Leftovers  
+Ability: Wandering Spirit  
+Level: 85  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- toxicspikes  
+- poltergeist  
+- stealthrock  
+- earthquake  
+
+Claydol @ Leftovers  
+Ability: Levitate  
+Level: 87  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- icebeam  
+- toxic  
+- earthquake  
+- psychic  
+
+Mawile (M) @ Life Orb  
+Ability: Sheer Force  
+Level: 89  
+EVs: 85 HP / 85 Atk / 85 Def / 85 SpA / 85 SpD / 85 Spe  
+- knockoff  
+- playrough  
+- swordsdance  
+- ironhead  
+
