@@ -1,0 +1,14 @@
+# venv / tooling
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# logs & run artifacts
+showdown.log
+runs/
+checkpoints/
+
+# showdown server: vendored clone, not our code
+pokemon-showdown/
