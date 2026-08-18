@@ -8,6 +8,7 @@ Usage:
 """
 
 import argparse
+import os
 import time
 from collections import deque
 from concurrent.futures import ThreadPoolExecutor
@@ -22,7 +23,7 @@ from battle_env import N_ACTIONS, N_TEAMS_AVAIL, N_TOKENS, OBS_DIM, TOKEN_DIM, m
 from ppo import AttentionPolicy, MaskedPolicy, compute_gae, explained_variance, ppo_update
 
 # --- config (single place to tune) ---
-ROLLOUT = 1024  # env steps per update, across all envs (kept comparable)
+ROLLOUT = int(os.environ.get("ROLLOUT", 1024))  # env steps per update, across all envs
 GAMMA = 0.95
 LAM = 0.95
 CLIP = 0.2
