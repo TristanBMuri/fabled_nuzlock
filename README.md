@@ -51,7 +51,10 @@ project_overview.md  # the plan / roadmap
       entropy 1.59→0.54 (healthy), checkpoint `checkpoints/ppo_latest.pt`
 - [x] Team pool (16 teams harvested from Showdown's generator) + attention policy
       (token obs, 1-layer transformer) + parallel envs (--envs N, ~2.9x at N=4)
-- [ ] **Pool of 4 is hard**: attention 1500 updates / 1.5M steps → 28% avg win
-      (peak 70%), still climbing slowly. MLP plateaued ~20% at 512k. Next levers:
-      curriculum (grow pool on win-rate milestones), warm-start, longer runs
+- [x] **Pool of 4 solved by brute force**: 5000 updates x 2048 rollout / 10.2M
+      steps / 4 envs (~3.9h, ~880 it/s) → **94% win rate** (all teams ≥85%).
+      Diagnosis: sample starvation, not architecture. Curriculum unnecessary.
+      Checkpoint `checkpoints/ppo_latest_attention.pt`
+- [ ] Scale pool (8 → 16; species one-hot already sized for 16) or move to
+      nuzlocke gauntlet env
 - [ ] Nuzlocke gauntlet env (the actual goal — only after the battler works)
