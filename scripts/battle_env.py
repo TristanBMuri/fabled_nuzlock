@@ -29,6 +29,13 @@ from poke_env.teambuilder.constant_teambuilder import ConstantTeambuilder
 
 HOST, PORT = "localhost", 8020
 BATTLE_FORMAT = "gen8customgame"
+
+
+def server_config(port: int = PORT) -> ServerConfiguration:
+    return ServerConfiguration(
+        websocket_url=f"ws://{HOST}:{port}/showdown/websocket",
+        authentication_url=f"http://{HOST}:{port}/action.php",
+    )
 N_ACTIONS = 22
 N_TYPES = 18
 STATUSES = ["brn", "par", "psn", "tox", "slp", "frz"]
@@ -36,10 +43,7 @@ BOOSTS = ["atk", "def", "spa", "spd", "spe", "accuracy", "evasion"]
 WEATHERS = ["raindance", "sundane", "sandstorm", "hail", "snow"]  # none = all-zero
 OBS_DIM = 2 * 34 + 6 * 3 + 6 * 2 + 5 + 3  # 106
 
-SERVER = ServerConfiguration(
-    websocket_url=f"ws://{HOST}:{PORT}/showdown/websocket",
-    authentication_url=f"http://{HOST}:{PORT}/action.php",
-)
+SERVER = server_config()
 
 # --- team pool constants (computed once at import) ---
 POOL_DIR = os.path.join(os.path.dirname(__file__), "..", "data", "teams", "pool")
@@ -157,12 +161,12 @@ class CyclerTeambuilder(ConstantTeambuilder):
 
 
 class BattleEnv(SinglesEnv):
-    def __init__(self, team: str, obs_mode: str = "mlp", **kwargs):
+    def __init__(self, team: str, obs_mode: str = "mlp", port: int = PORT, **kwargs):
         self.obs_mode = obs_mode
         super().__init__(
             battle_format=BATTLE_FORMAT,
             team=team,
-            server_configuration=SERVER,
+            server_configuration=server_config(port),
             log_level=logging.WARNING,
             **kwargs,
         )
@@ -243,26 +247,27 @@ class BattleEnv(SinglesEnv):
 
 
 def make_env(team_mode: str = "pool", arch: str = "attention",
-             pool_size: int | None = None) -> SingleAgentWrapper:
+             pool_size: int | None = None, port: int = PORT) -> SingleAgentWrapper:
     """Build env + heuristic opponent. team_mode: "fixed" (mirror, needs
-    data/teams/fixed.txt) or "pool" (cycle data/teams/pool/*.txt[:pool_size])."""
+    data/teams/fixed.txt) or "pool" (cycle data/teams/pool/*.txt[:pool_size]).
+    port selects the Showdown server — use distinct ports for parallel envs."""
     if team_mode == "fixed":
         with open(os.path.join(os.path.dirname(__file__), "..", "data",
                                "teams", "fixed.txt")) as f:
             team = f.read()
-        env = BattleEnv(team=team, obs_mode=arch)
+        env = BattleEnv(team=team, obs_mode=arch, port=port)
     else:
         files = POOL_FILES if pool_size is None else POOL_FILES[:pool_size]
         packed = [
             Teambuilder.join_team(Teambuilder.parse_showdown_team(open(f).read()))
             for f in files
         ]
-        env = BattleEnv(team=packed[0], obs_mode=arch)
+        env = BattleEnv(team=packed[0], obs_mode=arch, port=port)
         env.agent1._team = CyclerTeambuilder(packed)  # our side
         env.agent2._team = CyclerTeambuilder(packed)  # opponent side
     opponent = SimpleHeuristicsPlayer(
         battle_format=BATTLE_FORMAT,
-        server_configuration=SERVER,
+        server_configuration=server_config(port),
         log_level=logging.WARNING,
     )
     return SingleAgentWrapper(env, opponent)
