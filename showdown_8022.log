@@ -3,5 +3,247 @@ RESTORE CHATROOM: staff
 Worker 1 now listening on 0.0.0.0:8022
 Test your server at http://localhost:8022
 
-[1787071315688] CRASH: Error: ENOENT: no such file or directory, rename '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/config/chat-plugins/mafia-logs.json.NEW' -> '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/config/chat-plugins/mafia-logs.json'
+[1787165704487] CRASH: Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Socket.Writable.write (node:internal/streams/writable:508:10)
+    at REPLServer.[_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704489] CRASH: Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Socket.Writable.write (node:internal/streams/writable:508:10)
+    at REPLServer.[_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+node:events:487
+      throw er; // Unhandled 'error' event
+      ^
+
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at [_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+Emitted 'error' event on REPLServer instance at:
+    at Socket.onerror (node:internal/readline/interface:259:10)
+    at Socket.emit (node:events:521:24)
+    at emitErrorNT (node:internal/streams/destroy:170:8)
+    at emitErrorCloseNT (node:internal/streams/destroy:129:3)
+    at process.processTicksAndRejections (node:internal/process/task_queues:90:21) {
+  errno: -32,
+  code: 'EPIPE',
+  syscall: 'write'
+}
+
+Node.js v26.0.0
+
+[1787165704492] CRASH: Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Socket.Writable.write (node:internal/streams/writable:508:10)
+    at REPLServer.[_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704492] CRASH: [2411237] @!!@["Error","write EPIPE","A simulator process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Socket.Writable.write (node:internal/streams/writable:508:10)
+    at REPLServer.[_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704493] CRASH: [2411237] @!!@["Error","write EPIPE","A simulator process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Socket.Writable.write (node:internal/streams/writable:508:10)
+    at REPLServer.[_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704493] CRASH: [2411241] @!!@["Error","write EPIPE","A local Artemis child process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at [_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704494] CRASH: [2411237] @!!@["Error","write EPIPE","A simulator process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Socket.Writable.write (node:internal/streams/writable:508:10)
+    at REPLServer.[_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704495] CRASH: [2411240] @!!@["Error","write EPIPE","A friends child process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at [_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704495] CRASH: [2411241] @!!@["Error","write EPIPE","A local Artemis child process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at [_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704502] CRASH: Error: IPC channel is already disconnected
+    at ChildProcess.target.disconnect (node:internal/child_process:910:26)
+    at QueryProcessWrapper.destroy (/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/lib/process-manager.ts:206:16)
+    at QueryProcessWrapper.release (/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/lib/process-manager.ts:192:9)
+    at QueryProcessManager.releaseCrashed (/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/lib/process-manager.ts:458:16)
+    at ChildProcess.<anonymous> (/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/lib/process-manager.ts:515:47)
+    at ChildProcess.emit (node:events:509:20)
+    at finish (node:internal/child_process:940:14)
+    at processTicksAndRejections (node:internal/process/task_queues:85:11)
+
+
+[1787165704503] CRASH: [2411240] @!!@["Error","write EPIPE","A friends child process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at [_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704503] CRASH: [2411240] @!!@["Error","write EPIPE","A friends child process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at [_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704503] CRASH: [2411241] @!!@["Error","write EPIPE","A local Artemis child process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at [_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704503] CRASH: [2411242] @!!@["Error","write EPIPE","A remote Artemis child process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at [_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704503] CRASH: [2411242] @!!@["Error","write EPIPE","A remote Artemis child process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at [_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
+
+
+[1787165704503] CRASH: [2411242] @!!@["Error","write EPIPE","A remote Artemis child process",null]
+Error: write EPIPE
+    at afterWriteDispatched (node:internal/stream_base_commons:159:15)
+    at writeGeneric (node:internal/stream_base_commons:150:3)
+    at Socket._writeGeneric (node:net:1025:11)
+    at Socket._write (node:net:1037:8)
+    at writeOrBuffer (node:internal/streams/writable:570:12)
+    at _write (node:internal/streams/writable:499:10)
+    at Writable.write (node:internal/streams/writable:508:10)
+    at [_writeToOutput] [as _writeToOutput] (node:internal/readline/interface:485:19)
+    at REPLServer.prompt (node:internal/readline/interface:435:27)
+    at REPLServer.displayPrompt (node:repl:1226:10)
 
