@@ -67,4 +67,14 @@ project_overview.md  # the plan / roadmap
 - [ ] Path forward options: (a) train battler on fresh random teams every
       battle (true entropy regime), (b) gauntlet env first to source realistic
       teams, (c) much larger fixed pool. Need decision.
+      → DECIDED (2026-08-19): build gauntlet env (b) with pluggable battle
+      policy (heuristic ships first), env records battles as realistic-team
+      training data, retrain battler on that distribution, swap in when good.
+      Player level rule: match highest enemy level seen, never decrease.
+- [ ] **TODO (later, exact approach TBD)**: player-side battler needs
+      Radical-Red-level competency — SimpleHeuristics is Showdown-oriented,
+      weak, and wrong-shaped for nuzlocke decision-making (HP conservation,
+      death-risk respect, sacrifice ordering). Opponent AI can stay dumber by
+      trainer class (random trainers < gym leaders < E4/champion); old project
+      reserved `radical_red`/`elite_redux` opponent keys the same way.
 - [ ] Nuzlocke gauntlet env (the actual goal)
