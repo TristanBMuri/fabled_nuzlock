@@ -55,6 +55,16 @@ project_overview.md  # the plan / roadmap
       steps / 4 envs (~3.9h, ~880 it/s) → **94% win rate** (all teams ≥85%).
       Diagnosis: sample starvation, not architecture. Curriculum unnecessary.
       Checkpoint `checkpoints/ppo_latest_attention.pt`
-- [ ] Scale pool (8 → 16; species one-hot already sized for 16) or move to
-      nuzlocke gauntlet env
-- [ ] Nuzlocke gauntlet env (the actual goal — only after the battler works)
+- [ ] **The real battler metric is performance under nuzlocke-level team
+      entropy** (effectively-unique teams every battle: random encounters,
+      deaths, level spread). Pool-of-4 mastery is necessary, not sufficient.
+      Gauntlet env doubles as the source of realistic training teams.
+- [ ] MEASURED (2026-08-19): the 94% pool-4 checkpoint scores **0/20 vs unseen
+      Showdown random teams** (greedy policy). Generalization gap is total.
+      Also found: harvested Therian formes (tornadusm etc.) mangle through
+      parse_showdown_team→join_team — server rejects team → challenge hangs;
+      eval_teams.py rebuilds env on timeout as workaround.
+- [ ] Path forward options: (a) train battler on fresh random teams every
+      battle (true entropy regime), (b) gauntlet env first to source realistic
+      teams, (c) much larger fixed pool. Need decision.
+- [ ] Nuzlocke gauntlet env (the actual goal)
