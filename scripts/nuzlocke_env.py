@@ -22,6 +22,7 @@ MAX_PARTY = 6
 N_META_ACTIONS = 1 + MAX_ROSTER
 BREAKPOINTS = ["none", "gym_leader", "elite_four", "champion"]
 SLICE_LEN = 50  # trainers per episode (through gym 1+ for v1)
+STARTERS = {"chimchar", "piplup", "turtwig"}
 
 TRAINERS, ORDER = load_trainers()
 
@@ -157,12 +158,15 @@ class NuzlockeEnv(Env):
             if (self.pending_encounter is not None
                     and len(self.roster) < MAX_ROSTER):
                 m[1] = 1  # catch
-        else:  # PRE_BATTLE
-            if self.party:
-                m[0] = 1  # done -> fight
+        else:  # PRE_BATTLE — nuzlocke rule: field everything you can.
+            # 'done' only legal once party holds all alive mons (cap 6).
+            alive_idx = [i for i, mon in enumerate(self.roster[:MAX_ROSTER])
+                         if mon.alive]
+            if len(self.party) >= min(len(alive_idx), MAX_PARTY):
+                m[0] = 1
             if len(self.party) < MAX_PARTY:
-                for i, mon in enumerate(self.roster[:MAX_ROSTER]):
-                    if mon.alive and i not in self.party:
+                for i in alive_idx:
+                    if i not in self.party:
                         m[1 + i] = 1
         return m
 
@@ -200,6 +204,13 @@ class NuzlockeEnv(Env):
                     if not any(m.alive for m in self.roster):
                         reward -= 5.0
                     self.done = True
+                if self.done:
+                    # End-of-run shaping: deeper runs and living catches are
+                    # worth something even on a loss — counters the learned
+                    # "solo the starter, skip everything" degenerate policy.
+                    reward += 0.5 * self.trainer_idx / SLICE_LEN * 10
+                    reward += 0.5 * sum(m.alive for m in self.roster
+                                        if m.species not in STARTERS)
             else:
                 i = action - 1
                 if i < len(self.roster) and self.roster[i].alive:

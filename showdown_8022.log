@@ -247,3 +247,12 @@ Error: write EPIPE
     at REPLServer.prompt (node:internal/readline/interface:435:27)
     at REPLServer.displayPrompt (node:repl:1226:10)
 
+
+[1787176800003] CRASH: Error: ENOENT: no such file or directory, rename '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/config/chat-plugins/spotlights.json.NEW' -> '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/config/chat-plugins/spotlights.json'
+
+
+[1787183116737] CRASH: Error: ENOENT: no such file or directory, rename '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/logs/lastbattle.txt.NEW' -> '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/logs/lastbattle.txt'
+
+
+[1787227208180] CRASH: Error: ENOENT: no such file or directory, rename '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/config/chat-plugins/seasons.json.NEW' -> '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/config/chat-plugins/seasons.json'
+

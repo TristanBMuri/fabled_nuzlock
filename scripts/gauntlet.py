@@ -65,11 +65,15 @@ def pack_team(mons: list[Mon]) -> str:
 
 
 def trainer_mons(trainer: dict) -> list[Mon]:
-    return [
-        Mon(p["species"].lower(), p["level"], p["moves"], p.get("ability"),
-            p.get("item"))
-        for p in trainer["party"]
-    ]
+    mons = []
+    for p in trainer["party"]:
+        moves = p["moves"]
+        if not moves:  # 2 records in source data have empty movesets;
+            # server rejects moveless mons — learnset fallback
+            moves = encounter_moves(p["species"].lower(), p["level"]) or ["tackle"]
+        mons.append(Mon(p["species"].lower(), p["level"], moves,
+                        p.get("ability"), p.get("item")))
+    return mons
 
 
 # ------------------------------------------------------------- battle running

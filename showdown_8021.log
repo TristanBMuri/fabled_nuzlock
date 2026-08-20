@@ -11,3 +11,9 @@ Test your server at http://localhost:8021
 
 [1787165709715] CRASH: Error: ENOENT: no such file or directory, rename '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/config/chat-plugins/sample-teams.json.NEW' -> '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/config/chat-plugins/sample-teams.json'
 
+
+[1787213368799] CRASH: Error: ENOENT: no such file or directory, rename '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/logs/lastbattle.txt.NEW' -> '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/logs/lastbattle.txt'
+
+
+[1787220004232] CRASH: Error: ENOENT: no such file or directory, rename '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/config/chat-plugins/seasons.json.NEW' -> '/var/home/tristan/CodingProjects/nuzlock_rl/pokemon-showdown/config/chat-plugins/seasons.json'
+

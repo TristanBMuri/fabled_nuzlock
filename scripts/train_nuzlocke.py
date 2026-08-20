@@ -10,6 +10,7 @@ import os
 import sys
 import time
 from collections import deque
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
@@ -23,7 +24,8 @@ from ppo import MaskedPolicy, compute_gae, explained_variance, ppo_update  # noq
 
 ROLLOUT = int(os.environ.get("ROLLOUT", 512))
 GAMMA, LAM = 0.99, 0.95  # longer horizon: a run is ~50 decisions
-CLIP, VF_CLIP, ENTROPY, LR = 0.2, 10.0, 0.05, 2.5e-4
+CLIP, VF_CLIP, ENTROPY, LR = 0.2, 10.0, 0.1, 2.5e-4  # higher entropy: 5-step
+# episodes collapse exploration at 0.05
 EPOCHS, MINIBATCHES = 4, 4
 
 
@@ -43,21 +45,28 @@ def manual_episode(env, seed=0):
             break
 
 
-def train(updates: int, seed: int, port: int, info_mode: str):
+def train(updates: int, seed: int, port: int, info_mode: str, n_envs: int):
     torch.manual_seed(seed)
     np.random.seed(seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    env = NuzlockeEnv(port=port, info_mode=info_mode, seed=seed)
+    envs = [NuzlockeEnv(port=port + i, info_mode=info_mode, seed=seed + i)
+            for i in range(n_envs)]
+    pool = ThreadPoolExecutor(max_workers=n_envs) if n_envs > 1 else None
     agent = MaskedPolicy(OBS_DIM, N_META_ACTIONS).to(device)
     opt = torch.optim.Adam(agent.parameters(), lr=LR)
-    writer = SummaryWriter(f"runs/{datetime.now():%Y%m%d-%H%M%S}-nuzlocke")
+    writer = SummaryWriter(
+        f"runs/{datetime.now():%Y%m%d-%H%M%S}-nuzlocke{'x' + str(n_envs) if n_envs > 1 else ''}")
     ckpt = Path("checkpoints")
     ckpt.mkdir(exist_ok=True)
 
-    ep_r, ep_len, cleared, deaths = deque(maxlen=20), deque(maxlen=20), deque(maxlen=20), deque(maxlen=20)
-    cur_r, cur_len, cur_deaths = 0.0, 0, 0
+    ep_r, ep_len, cleared = deque(maxlen=50), deque(maxlen=50), deque(maxlen=50)
+    cur_r = np.zeros(n_envs)
+    cur_len = np.zeros(n_envs, dtype=int)
+    steps_per_env = ROLLOUT // n_envs  # same total rollout per update
 
-    obs, info = env.reset(seed=seed)
+    initial = [e.reset(seed=seed + i) for i, e in enumerate(envs)]
+    obs = [o for o, _ in initial]
+    infos = [i for _, i in initial]
     s = torch.zeros(ROLLOUT, OBS_DIM, device=device)
     masks = torch.zeros(ROLLOUT, N_META_ACTIONS, device=device)
     acts = torch.zeros(ROLLOUT, dtype=torch.long, device=device)
@@ -69,30 +78,56 @@ def train(updates: int, seed: int, port: int, info_mode: str):
     gstep = 0
     for update in range(1, updates + 1):
         t0 = time.time()
-        for t in range(ROLLOUT):
-            o = torch.as_tensor(obs, device=device)
-            m = torch.as_tensor(info["action_mask"], device=device,
-                                dtype=torch.float32)
+        for t in range(steps_per_env):
+            # batched forward across envs
+            o = torch.as_tensor(np.stack(obs), device=device)
+            m = torch.as_tensor(
+                np.stack([i["action_mask"] for i in infos]), device=device,
+                dtype=torch.float32)
             with torch.no_grad():
                 a, lp, _, v = agent.get_action_and_value(o, m)
-            s[t], masks[t], acts[t], lps[t], vals[t] = o, m, a, lp, v
-            obs, r, term, trunc, info = env.step(int(a.item()))
-            rews[t], dones[t] = r, term or trunc
-            cur_r += r
-            cur_len += 1
-            gstep += 1
-            if term or trunc:
-                ep_r.append(cur_r)
-                ep_len.append(cur_len)
-                cleared.append(env.trainer_idx)
-                cur_r, cur_len = 0.0, 0
-                obs, info = env.reset()
+            base = t * n_envs
+            s[base:base + n_envs] = o
+            masks[base:base + n_envs] = m
+            acts[base:base + n_envs] = a
+            lps[base:base + n_envs] = lp
+            vals[base:base + n_envs] = v
+            actions_np = [int(x) for x in a.tolist()]
+
+            if n_envs > 1:  # concurrent steps (each blocks on its own battle)
+                results = list(pool.map(
+                    lambda i: envs[i].step(actions_np[i]), range(n_envs)))
+            else:
+                results = [envs[0].step(actions_np[0])]
+
+            for i, (ob, r, term, trunc, info) in enumerate(results):
+                rews[base + i] = r
+                dones[base + i] = term or trunc
+                cur_r[i] += r
+                cur_len[i] += 1
+                gstep += 1
+                if term or trunc:
+                    ep_r.append(cur_r[i])
+                    ep_len.append(cur_len[i])
+                    cleared.append(envs[i].trainer_idx)
+                    cur_r[i], cur_len[i] = 0.0, 0
+                    obs[i], infos[i] = envs[i].reset()
+                else:
+                    obs[i], infos[i] = ob, info
         with torch.no_grad():
-            o = torch.as_tensor(obs, device=device)
-            m = torch.as_tensor(info["action_mask"], device=device,
-                                dtype=torch.float32)
+            o = torch.as_tensor(np.stack(obs), device=device)
+            m = torch.as_tensor(
+                np.stack([i["action_mask"] for i in infos]), device=device,
+                dtype=torch.float32)
             _, _, _, last_v = agent.get_action_and_value(o, m)
-        adv, ret = compute_gae(rews, vals, dones, last_v, GAMMA, LAM)
+        # GAE per env over its strided slice (scalar bootstrap each), like train.py
+        adv = torch.zeros_like(rews)
+        for j in range(n_envs):
+            sl = slice(j, ROLLOUT, n_envs)
+            adv_j, _ = compute_gae(rews[sl], vals[sl], dones[sl],
+                                   last_v[j], GAMMA, LAM)
+            adv[sl] = adv_j
+        ret = adv + vals
         stats = ppo_update(agent, opt, s, masks, acts, lps, adv, ret, vals,
                            clip_coef=CLIP, vf_clip=VF_CLIP,
                            entropy_coef=ENTROPY, epochs=EPOCHS,
@@ -119,13 +154,14 @@ if __name__ == "__main__":
     p.add_argument("--updates", type=int, default=60)
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--port", type=int, default=8020)
+    p.add_argument("--envs", type=int, default=1,
+                   help="parallel runs (one server per env on port..port+N-1)")
     p.add_argument("--info", choices=["none", "revealed", "full"],
                    default="full")
     p.add_argument("--random", action="store_true")
     args = p.parse_args()
-    env = NuzlockeEnv(port=args.port, info_mode=args.info, seed=args.seed)
     if args.random:
-        manual_episode(env, args.seed)
+        manual_episode(NuzlockeEnv(port=args.port, info_mode=args.info,
+                                   seed=args.seed), args.seed)
     else:
-        env.close() if hasattr(env, "close") else None
-        train(args.updates, args.seed, args.port, args.info)
+        train(args.updates, args.seed, args.port, args.info, args.envs)
