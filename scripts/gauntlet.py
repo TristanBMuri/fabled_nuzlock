@@ -92,6 +92,8 @@ class BattleRunner:
         # challenge (server waits for an interactive accept-button click that
         # bots never send; verified 2026-08-19). Full info comes self-sourced
         # instead: the env knows both teams it constructed.
+        # Don't pass loop=: poke-env waits for login in __init__, which deadlocks
+        # if the loop isn't already running.
         placeholder = pack_team([Mon("bidoof", 5, ["tackle", "growl"])])
         kw = dict(battle_format=BATTLE_FORMAT,
                   server_configuration=server_config(self.port),
@@ -100,15 +102,26 @@ class BattleRunner:
         self.p2 = SimpleHeuristicsPlayer(team=ConstantTeambuilder(placeholder),
                                          **kw)
 
-    def run(self, player_packed: str, enemy_packed: str):
+    def run(self, player_packed: str, enemy_packed: str, timeout: float = 60.0):
         """One battle. Returns (won, alive_mask) aligned to player_packed
-        order, or None on failure (players rebuilt)."""
+        order, or None on failure (players rebuilt).
+
+        Timeout matters: a rejected/empty team makes poke-env wait forever
+        on the challenge. Combined with per-env rollouts (train_nuzlocke),
+        one hung battle no longer stalls sibling envs."""
         import asyncio
+        if not player_packed or not enemy_packed:
+            print("BattleRunner: empty packed team")
+            return None
         self.p1._team = ConstantTeambuilder(player_packed)
         self.p2._team = ConstantTeambuilder(enemy_packed)
         before = set(self.p1.battles)
         try:
-            asyncio.run(self.p1.battle_against(self.p2, n_battles=1))
+            async def _one():
+                await asyncio.wait_for(
+                    self.p1.battle_against(self.p2, n_battles=1),
+                    timeout=timeout)
+            asyncio.run(_one())
         except Exception as e:
             print(f"BattleRunner: rebuild after {type(e).__name__}: {e}")
             self._make_players()
@@ -134,15 +147,24 @@ class BattleRunner:
         return won, alive
 
 
+_HARVEST_LOCK = None
+
+
 def record_battle(run_id: str, trainer_id: int | None, info_mode: str,
                   won: bool, player_packed: str, enemy_packed: str):
+    global _HARVEST_LOCK
+    if _HARVEST_LOCK is None:
+        import threading
+        _HARVEST_LOCK = threading.Lock()
     HARVEST.parent.mkdir(parents=True, exist_ok=True)
-    with open(HARVEST, "a") as f:
-        f.write(json.dumps({
-            "run_id": run_id, "trainer_id": trainer_id, "info": info_mode,
-            "won": won, "player_team": player_packed,
-            "enemy_team": enemy_packed,
-        }) + "\n")
+    line = json.dumps({
+        "run_id": run_id, "trainer_id": trainer_id, "info": info_mode,
+        "won": won, "player_team": player_packed,
+        "enemy_team": enemy_packed,
+    }) + "\n"
+    with _HARVEST_LOCK:
+        with open(HARVEST, "a") as f:
+            f.write(line)
 
 
 # --------------------------------------------------------------- moves builder
