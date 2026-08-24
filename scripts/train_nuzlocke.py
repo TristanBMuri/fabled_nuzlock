@@ -84,7 +84,17 @@ def _worker_main(conn, i: int, port: int, info_mode: str, seed: int):
                 out_a[t] = a_i
                 out_lp[t] = float(lp.item())
                 out_v[t] = float(v.item())
-                ob, r, term, trunc, info = env.step(a_i)
+                try:
+                    ob, r, term, trunc, info = env.step(a_i)
+                except Exception as e:
+                    # Don't kill the whole train job on one bad battle
+                    # (empty party / Showdown reject used to raise here).
+                    print(f"worker {i}: step failed ({type(e).__name__}: {e}); "
+                          f"forcing episode end", flush=True)
+                    r, term, trunc = -5.0, True, False
+                    info = {"action_mask": np.zeros(N_META_ACTIONS, np.int64)}
+                    info["action_mask"][0] = 1
+                    ob = obs
                 out_r[t] = r
                 out_d[t] = float(term or trunc)
                 cr += r

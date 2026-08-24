@@ -111,11 +111,13 @@ class NuzlockeEnv(Env):
                 m.moves = encounter_moves(m.species, m.level) or m.moves
         player_packed = pack_team(party)
         enemy_packed = pack_team(enemy)
+        if not player_packed or not enemy_packed:
+            return None
         result = self.runner.run(player_packed, enemy_packed)
         if result is None:  # rebuild happened; retry once
             result = self.runner.run(player_packed, enemy_packed)
         if result is None:
-            raise RuntimeError("battle failed twice")
+            return None
         won, alive = result
         record_battle(self.run_id, entry["trainer_id"], self.info_mode,
                       won, player_packed, enemy_packed)
@@ -159,15 +161,21 @@ class NuzlockeEnv(Env):
                     and len(self.roster) < MAX_ROSTER):
                 m[1] = 1  # catch
         else:  # PRE_BATTLE — nuzlocke rule: field everything you can.
-            # 'done' only legal once party holds all alive mons (cap 6).
             alive_idx = [i for i, mon in enumerate(self.roster[:MAX_ROSTER])
                          if mon.alive]
-            if len(self.party) >= min(len(alive_idx), MAX_PARTY):
+            if not alive_idx:
+                # No mons left — only "confirm", which ends the run (no battle).
+                # Without this, min(0, 6)==0 made empty-party confirm legal and
+                # crashed workers on pack_team([]) (seen run5 update ~330).
                 m[0] = 1
-            if len(self.party) < MAX_PARTY:
-                for i in alive_idx:
-                    if i not in self.party:
-                        m[1 + i] = 1
+            else:
+                need = min(len(alive_idx), MAX_PARTY)
+                if len(self.party) >= need and len(self.party) > 0:
+                    m[0] = 1
+                if len(self.party) < MAX_PARTY:
+                    for i in alive_idx:
+                        if i not in self.party:
+                            m[1 + i] = 1
         return m
 
     # ------------------------------------------------------------------ step
@@ -179,31 +187,46 @@ class NuzlockeEnv(Env):
                 self.pending_encounter = None
             self.phase = "PRE_BATTLE"
         else:  # PRE_BATTLE
-            if action == 0:  # confirm -> battle
-                won, alive = self._run_battle()
-                party = [self.roster[i] for i in self.party]
-                for mon, a in zip(party, alive):
-                    if not a:
-                        mon.alive = False
-                        reward -= 1.0
-                if won:
-                    reward += 1.0
-                    self.trainer_idx += 1
-                    if self.trainer_idx >= SLICE_LEN:
-                        reward += 10.0
+            if action == 0:  # confirm -> battle (or end if no alive mons)
+                alive_left = any(m.alive for m in self.roster)
+                if not self.party or not alive_left:
+                    reward -= 5.0
+                    self.done = True
+                else:
+                    result = self._run_battle()
+                    if result is None:
+                        # Showdown reject / timeout — end run, don't crash worker.
+                        reward -= 5.0
                         self.done = True
                     else:
-                        self.party = []
-                        self._maybe_sample_encounter()
-                        if self.pending_encounter is None:
-                            self.phase = "PRE_BATTLE"
-                else:
-                    # A lost battle ends the run (nuzlocke: you'd reload a
-                    # save; for RL, retry loops would dilute credit). Wipe
-                    # penalty only when everyone died.
-                    if not any(m.alive for m in self.roster):
-                        reward -= 5.0
-                    self.done = True
+                        won, alive = result
+                        party = [self.roster[i] for i in self.party]
+                        for mon, a in zip(party, alive):
+                            if not a:
+                                mon.alive = False
+                                reward -= 1.0
+                        if won:
+                            reward += 1.0
+                            self.trainer_idx += 1
+                            if self.trainer_idx >= SLICE_LEN:
+                                reward += 10.0
+                                self.done = True
+                            elif not any(m.alive for m in self.roster):
+                                # Won on a wipe — can't continue the gauntlet. <-- Shouldnt be possible but just in case
+                                reward -= 5.0
+                                self.done = True
+                            else:
+                                self.party = []
+                                self._maybe_sample_encounter()
+                                if self.pending_encounter is None:
+                                    self.phase = "PRE_BATTLE"
+                        else:
+                            # A lost battle ends the run (nuzlocke: you'd reload a
+                            # save; for RL, retry loops would dilute credit). Wipe
+                            # penalty only when everyone died.
+                            if not any(m.alive for m in self.roster):
+                                reward -= 5.0
+                            self.done = True
                 if self.done:
                     # End-of-run shaping: deeper runs and living catches are
                     # worth something even on a loss — counters the learned
@@ -214,7 +237,8 @@ class NuzlockeEnv(Env):
             else:
                 i = action - 1
                 if i < len(self.roster) and self.roster[i].alive:
-                    self.party.append(i)
+                    if i not in self.party:
+                        self.party.append(i)
         return (self._obs(), reward, self.done, False,
                 {"action_mask": self._mask()})
 

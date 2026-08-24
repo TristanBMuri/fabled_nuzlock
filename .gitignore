@@ -6,6 +6,7 @@ __pycache__/
 .ruff_cache/
 
 # logs & run artifacts
+logs/
 showdown.log
 showdown_*.log
 runs/
