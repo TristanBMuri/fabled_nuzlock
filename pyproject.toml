@@ -9,6 +9,7 @@ dependencies = [
     "gymnasium<1.2.3",
     "numpy",
     "tensorboard",
+    "stable-baselines3>=2.9.0",
 ]
 
 [dependency-groups]

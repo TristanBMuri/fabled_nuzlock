@@ -11,7 +11,7 @@ async def mock_check_battler_env(num_servers: int, starting_port: int=8020):
 
     results = await asyncio.gather(*tasks)
     for result in results:
-        if result["e"] != None:
+        if result["error"] != None:
             raise Exception(f"Battle on server {result['port']} failed: {result['error']}")
 
     return True
