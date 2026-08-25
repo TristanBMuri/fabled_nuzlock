@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 from typing import Any, Awaitable
 import sys
 from pathlib import Path
@@ -198,7 +199,14 @@ def train():
         gamma=0.99,
         ent_coef=0.01,
         device="cuda" if torch.cuda.is_available() else "cpu",
+        verbose=1,
+        tensorboard_log=f"logs/tensorboard/policy_player_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}",
     )
+
+    if not torch.cuda.is_available():
+        print("No CUDA available, using CPU")
+    else:
+        print("CUDA available, using GPU")
 
     # train
     ppo.learn(98_304)

@@ -68,19 +68,23 @@ Showdown + train text logs live under `logs/` (gitignored).
 ## TensorBoard
 
 ```bash
+# for AI code project: 
 uv run tensorboard --logdir runs --port 6006
+
+# for no AI code project: 
+uv run tensorboard --logdir logs/tensorboard --port 6006
 # then open http://localhost:6006
 ```
 
 - Every training run writes its own `runs/<timestamp>-<tag>/` directory — the
-  tag tells you which (`-attention-pool`, `-mlp-pool`, `-nuzlocke`, `-nuzlockex4`,
-  `-nuzlockex12`, `-nuzlockex24`).
+tag tells you which (`-attention-pool`, `-mlp-pool`, `-nuzlocke`, `-nuzlockex4`,
+`-nuzlockex12`, `-nuzlockex24`).
 - All runs show in one view (left sidebar: toggle runs on/off, color per run).
-  Useful scalars: `win_rate_20`, `episode_reward`, `entropy`, `explained_variance`,
-  `approx_kl`, `steps_per_sec`; meta-policy runs add `trainers_cleared`;
-  pool runs add per-team `win_oppNN`.
+Useful scalars: `win_rate_20`, `episode_reward`, `entropy`, `explained_variance`,
+`approx_kl`, `steps_per_sec`; meta-policy runs add `trainers_cleared`;
+pool runs add per-team `win_oppNN`.
 - What healthy looks like: entropy decays smoothly (not instantly to 0),
-  `explained_variance` trends above 0, `approx_kl` stays small (< ~0.02).
+`explained_variance` trends above 0, `approx_kl` stays small (< ~0.02).
 - Without a browser: quick check of the latest run's scalars —
 
 ```bash
@@ -96,6 +100,8 @@ for tag in ea.Tags()['scalars']:
 "
 ```
 
+
+
 ## Layout
 
 ```
@@ -108,56 +114,79 @@ pokemon-showdown/   # local server (cloned)
 project_overview.md # the plan / roadmap
 ```
 
+
+
 ## Status
 
 - [x] Showdown + poke-env working, battle state readable (smoke test)
 - [x] Battle env + PPO + TensorBoard; smoke run shows learning signal
 - [x] **Battler beats heuristic**: 500 updates / 512k steps / ~35 min single env →
-      95% win rate (crossed 50% at update ~128 / 130k steps), reward -17.9→+15.4,
-      entropy 1.59→0.54 (healthy), checkpoint `checkpoints/ppo_latest.pt`
+  ```
+  95% win rate (crossed 50% at update ~128 / 130k steps), reward -17.9→+15.4,
+  entropy 1.59→0.54 (healthy), checkpoint `checkpoints/ppo_latest.pt`
+  ```
 - [x] Team pool (16 teams harvested from Showdown's generator) + attention policy
-      (token obs, 1-layer transformer) + parallel envs (--envs N, ~2.9x at N=4)
+  ```
+  (token obs, 1-layer transformer) + parallel envs (--envs N, ~2.9x at N=4)
+  ```
 - [x] **Pool of 4 solved by brute force**: 5000 updates x 2048 rollout / 10.2M
-      steps / 4 envs (~3.9h, ~880 it/s) → **94% win rate** (all teams ≥85%).
-      Diagnosis: sample starvation, not architecture. Curriculum unnecessary.
-      Checkpoint `checkpoints/ppo_latest_attention.pt`
+  ```
+  steps / 4 envs (~3.9h, ~880 it/s) → **94% win rate** (all teams ≥85%).
+  Diagnosis: sample starvation, not architecture. Curriculum unnecessary.
+  Checkpoint `checkpoints/ppo_latest_attention.pt`
+  ```
 - [x] MEASURED (2026-08-19): the 94% pool-4 checkpoint scores **0/20 vs unseen
-      Showdown random teams** (greedy policy). Generalization gap is total.
-      Therian formes in harvested random teams mangle through
-      parse_showdown_team→join_team → server reject / hang; eval_teams.py
-      rebuilds env on timeout as workaround.
+  ```
+  Showdown random teams** (greedy policy). Generalization gap is total.
+  Therian formes in harvested random teams mangle through
+  parse_showdown_team→join_team → server reject / hang; eval_teams.py
+  rebuilds env on timeout as workaround.
+  ```
 - [x] Path decided (2026-08-19): gauntlet env first (heuristic battler),
-      harvest realistic teams, retrain battler on that distribution.
-      Player level rule: match highest enemy level seen, never decrease.
+  ```
+  harvest realistic teams, retrain battler on that distribution.
+  Player level rule: match highest enemy level seen, never decrease.
+  ```
 - [x] **Nuzlocke gauntlet env + healthy meta-policy (run 4, 2026-08-20)**:
-      500 updates / 4 envs / ~2h → trainers cleared ~2.1 (was flat 1.0),
-      battle win ~66%, harvest ~60% two-mon parties, explained variance ~0.60.
-      Greedy probe: catches encounters, fields both mons, ep 6 cleared 7
-      trainers. Checkpoint `checkpoints/nuzlocke_latest.pt` (commit `84dce2d`).
-      Lesson: reward shaping alone hit degenerate optima (solo-starter, then
-      catch-and-bench); the forced-full-party action mask fixed alignment.
-      Harvest: `data/teams/gauntlet_harvest/battles.jsonl` (grew past 240k
-      during run 5; BDSP species, levels ~3–14) — battler retrain distribution.
+  ```
+  500 updates / 4 envs / ~2h → trainers cleared ~2.1 (was flat 1.0),
+  battle win ~66%, harvest ~60% two-mon parties, explained variance ~0.60.
+  Greedy probe: catches encounters, fields both mons, ep 6 cleared 7
+  trainers. Checkpoint `checkpoints/nuzlocke_latest.pt` (commit `84dce2d`).
+  Lesson: reward shaping alone hit degenerate optima (solo-starter, then
+  catch-and-bench); the forced-full-party action mask fixed alignment.
+  Harvest: `data/teams/gauntlet_harvest/battles.jsonl` (grew past 240k
+  during run 5; BDSP species, levels ~3–14) — battler retrain distribution.
+  ```
 - [ ] **Next: battler retrain on gauntlet_harvest** — small JSONL loader into
-      existing pool-mode training, then `eval_teams` on held-out gauntlet
-      battles (closes the OOD loop). Meta-policy headroom remains (dies ~trainer
-      3–5; entropy ~0.02 at heuristic-vs-heuristic ceiling) — push deeper via
-      longer training, level-rule revisit, or a better battler.
+  ```
+  existing pool-mode training, then `eval_teams` on held-out gauntlet
+  battles (closes the OOD loop). Meta-policy headroom remains (dies ~trainer
+  3–5; entropy ~0.02 at heuristic-vs-heuristic ceiling) — push deeper via
+  longer training, level-rule revisit, or a better battler.
+  ```
 - [ ] **TODO (later, exact approach TBD)**: player-side battler needs
-      Radical-Red-level competency — SimpleHeuristics is Showdown-oriented,
-      weak, and wrong-shaped for nuzlocke decision-making (HP conservation,
-      death-risk respect, sacrifice ordering). Opponent AI can stay dumber by
-      trainer class (random trainers < gym leaders < E4/champion); old project
-      reserved `radical_red`/`elite_redux` opponent keys the same way.
+  ```
+  Radical-Red-level competency — SimpleHeuristics is Showdown-oriented,
+  weak, and wrong-shaped for nuzlocke decision-making (HP conservation,
+  death-risk respect, sacrifice ordering). Opponent AI can stay dumber by
+  trainer class (random trainers < gym leaders < E4/champion); old project
+  reserved `radical_red`/`elite_redux` opponent keys the same way.
+  ```
 - [x] **Throughput (2026-08-21)**: sync-per-step ThreadPool capped ~40 st/s
-      (one battling env stalled all siblings). Fix: one process per env
-      (GIL bypass; SimpleHeuristics is Python-CPU-bound) + independent
-      rollouts + 60s battle `wait_for` + checkpoint resume. Measured:
-      threads ~80 st/s → 12 proc ~110 → **24 proc ~130 st/s** (~580MB/worker).
-      Meta-step ≠ battler turn-step (each confirm is a full Showdown match).
-      RAM: 24 envs needs ~22GB train+sd; OOM'd at 59/60 when desktop+swap
-      were already hot — fine after reboot with ~45GB free.
+  ```
+  (one battling env stalled all siblings). Fix: one process per env
+  (GIL bypass; SimpleHeuristics is Python-CPU-bound) + independent
+  rollouts + 60s battle `wait_for` + checkpoint resume. Measured:
+  threads ~80 st/s → 12 proc ~110 → **24 proc ~130 st/s** (~580MB/worker).
+  Meta-step ≠ battler turn-step (each confirm is a full Showdown match).
+  RAM: 24 envs needs ~22GB train+sd; OOM'd at 59/60 when desktop+swap
+  were already hot — fine after reboot with ~45GB free.
+  ```
 - [ ] Meta-policy run 5: 24 envs / ports 8020–8043, `ROLLOUT=1024`, seed 1,
-      log `logs/nuzlocke_train5.log` (also `/tmp/nuzlocke_train5.log` from
-      earlier). Crashed at update 330 on empty-party confirm (fixed in
-      nuzlocke_env mask/step + worker try/except).
+  ```
+  log `logs/nuzlocke_train5.log` (also `/tmp/nuzlocke_train5.log` from
+  earlier). Crashed at update 330 on empty-party confirm (fixed in
+  nuzlocke_env mask/step + worker try/except).
+  ```
+
