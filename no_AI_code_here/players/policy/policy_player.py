@@ -182,7 +182,7 @@ def make_env() -> LazyPokeEnv:
 
 def train():
     # One Showdown (8020) gets overloaded past ~4–8 concurrent envs (2 clients each).
-    num_envs = 4
+    num_envs = 6
 
     env = SubprocVecEnv(
         [make_env for _ in range(num_envs)],
@@ -209,7 +209,7 @@ def train():
         policy=ppo.policy, battle_format=BATTLE_FORMAT, max_concurrent_battles=10, server_configuration=SERVER
     )
     opponents: list[Player] = [
-        c(battle_format=BATTLE_FORMAT, max_concurrent_battles=10, server_configuration=server)
+        c(battle_format=BATTLE_FORMAT, max_concurrent_battles=10, server_configuration=SERVER)
         for c in [RandomPlayer, MaxBasePowerPlayer, SimpleHeuristicsPlayer]
     ]
     asyncio.run(agent.battle_against(*opponents, n_battles=100))
