@@ -10,6 +10,7 @@ dependencies = [
     "numpy",
     "tensorboard",
     "stable-baselines3>=2.9.0",
+    "supersuit>=3.11.0",
 ]
 
 [dependency-groups]

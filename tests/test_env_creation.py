@@ -63,8 +63,8 @@ def test_make_env_exposes_expected_spaces():
     env.close()
 
 
-def test_example_env_reset_and_step(showdown_8020):
-    assert SERVER.websocket_url.startswith("ws://localhost:8020")
+def test_example_env_reset_and_step(showdown_8000):
+    assert SERVER.websocket_url.startswith("ws://localhost:8000")
     env = ExampleEnv.create_env(SERVER)
     obs, info = env.reset()
     assert "observation" in obs and "action_mask" in obs
@@ -79,7 +79,7 @@ def test_example_env_reset_and_step(showdown_8020):
     env.close()
 
 
-def test_subproc_make_env_reset(showdown_8020):
+def test_subproc_make_env_reset(showdown_8000):
     env = SubprocVecEnv([make_env, make_env], start_method="spawn")
     try:
         obs = env.reset()

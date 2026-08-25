@@ -3,7 +3,7 @@ from unittest import result
 from poke_env import AccountConfiguration, RandomPlayer, ServerConfiguration
 import uuid
 
-async def mock_check_battler_env(num_servers: int, starting_port: int=8020):
+async def mock_check_battler_env(num_servers: int, starting_port: int=8000):
     tasks = [
             _battle_on_server(server_id, starting_port)
             for server_id in range(num_servers)
@@ -16,7 +16,7 @@ async def mock_check_battler_env(num_servers: int, starting_port: int=8020):
 
     return True
 
-async def _battle_on_server(server_id: int, starting_port: int=8020):
+async def _battle_on_server(server_id: int, starting_port: int=8000):
     server = ServerConfiguration(
         websocket_url=f"ws://localhost:{starting_port + server_id}/showdown/websocket",
         authentication_url=f"http://localhost:{starting_port + server_id}/action.php",

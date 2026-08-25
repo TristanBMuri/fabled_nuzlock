@@ -27,7 +27,7 @@ from poke_env.player import SimpleHeuristicsPlayer
 from poke_env.teambuilder import Teambuilder
 from poke_env.teambuilder.constant_teambuilder import ConstantTeambuilder
 
-HOST, PORT = "localhost", 8020
+HOST, PORT = "localhost", 8000
 BATTLE_FORMAT = "gen8customgame"
 
 

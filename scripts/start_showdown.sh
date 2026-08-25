@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Start N local Showdown servers on START_PORT .. START_PORT+N-1.
 # Usage: ./scripts/start_showdown.sh NUM_SERVERS [START_PORT]
-# Default START_PORT=8020. Ports 8000-8007 belong to the old project — don't collide.
+# Default START_PORT=8000. Ports 8000-8007 belong to the old project — don't collide.
 set -euo pipefail
 
 if [[ $# -lt 1 ]]; then
@@ -10,13 +10,13 @@ if [[ $# -lt 1 ]]; then
 fi
 
 NUM=$1
-START_PORT=${2:-8020}
+START_PORT=${2:-8000}
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 SD="$ROOT/pokemon-showdown"
 LOGDIR="$ROOT/logs"
 
-if (( START_PORT < 8020 )); then
-  echo "START_PORT must be >= 8020 (8000-8007 belong to the old project)" >&2
+if (( START_PORT < 8000 )); then
+  echo "START_PORT must be >= 8000 (8000-8007 belong to the old project)" >&2
   exit 1
 fi
 

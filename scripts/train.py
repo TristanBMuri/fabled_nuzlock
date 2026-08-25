@@ -1,5 +1,5 @@
 """Train the battler with masked PPO. Requires the local Showdown server on
-port 8020 (see README).
+port 8000 (see README).
 
 Usage:
   uv run python scripts/train.py --random                       # pool-mode sanity
@@ -71,7 +71,7 @@ def train(total_updates: int, seed: int, arch: str, team_mode: str, pool_size,
     torch.manual_seed(seed)
     np.random.seed(seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    ports = [8020 + i for i in range(n_envs)]  # one Showdown server per env
+    ports = [8000 + i for i in range(n_envs)]  # one Showdown server per env
     envs = [make_env(team_mode=team_mode, arch=arch, pool_size=pool_size, port=p)
             for p in ports]
     agent = make_policy(arch).to(device)
@@ -192,7 +192,7 @@ if __name__ == "__main__":
     p.add_argument("--team-mode", choices=["pool", "fixed"], default="pool")
     p.add_argument("--pool-size", type=int, default=4)
     p.add_argument("--envs", type=int, default=1,
-                   help="parallel envs (needs a Showdown server per env on ports 8020..)")
+                   help="parallel envs (needs a Showdown server per env on ports 8000..)")
     p.add_argument("--random", action="store_true", help="random-play sanity check")
     args = p.parse_args()
     if args.random:

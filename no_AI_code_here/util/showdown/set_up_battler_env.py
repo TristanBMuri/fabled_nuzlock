@@ -5,7 +5,7 @@ import project_config
 _SCRIPTS = project_config.PROJECT_ROOT / "scripts"
 
 
-def setup_battler_env(num_servers: int, starting_port: int = 8020):
+def setup_battler_env(num_servers: int, starting_port: int = 8000):
     subprocess.run(
         [str(_SCRIPTS / "start_showdown.sh"), str(num_servers), str(starting_port)],
         check=True,
@@ -24,7 +24,7 @@ def setup_battler_env(num_servers: int, starting_port: int = 8020):
     return True
 
 
-def teardown_env(num_servers: int, starting_port: int = 8020):
+def teardown_env(num_servers: int, starting_port: int = 8000):
     subprocess.run(
         [str(_SCRIPTS / "stop_showdown.sh"), str(num_servers), str(starting_port)],
         check=True,

@@ -82,7 +82,7 @@ class BattleRunner:
     """Persistent heuristic-vs-heuristic battler on one server port.
     Policy pluggable: p1 can be any poke-env Player subclass."""
 
-    def __init__(self, port: int = 8020, policy_cls=SimpleHeuristicsPlayer,
+    def __init__(self, port: int = 8000, policy_cls=SimpleHeuristicsPlayer,
                  info_mode: str = "full"):
         self.port, self.policy_cls, self.info_mode = port, policy_cls, info_mode
         self._make_players()

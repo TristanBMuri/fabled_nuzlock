@@ -1,7 +1,7 @@
 #!/bin/bash
 # Register the no-gimmicks battle format for gauntlet training.
 # Writes pokemon-showdown/config/custom-formats.ts, then servers must be restarted:
-#   pkill -f "pokemon-showdown start" ; then restart on 8020-8023 (see README)
+#   pkill -f "pokemon-showdown start" ; then restart on 8000-8023 (see README)
 set -euo pipefail
 
 SHOWDOWN_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../pokemon-showdown" && pwd)"

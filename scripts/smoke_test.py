@@ -1,6 +1,6 @@
 """Smoke test: two random bots battle on the local Showdown server.
 
-Usage: uv run python scripts/smoke_test.py [--host localhost --port 8020]
+Usage: uv run python scripts/smoke_test.py [--host localhost --port 8000]
 
 Proves the full stack: poke-env connects, battles run, and we can read
 back the results. This is the pattern the RL env will reuse.
@@ -50,6 +50,6 @@ async def main(host: str, port: int) -> None:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="localhost")
-    parser.add_argument("--port", type=int, default=8020)
+    parser.add_argument("--port", type=int, default=8000)
     args = parser.parse_args()
     asyncio.run(main(args.host, args.port))

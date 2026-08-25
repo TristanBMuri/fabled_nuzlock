@@ -35,8 +35,8 @@ N_FEATURES = 12
 N_ACTIONS = SinglesEnv.get_action_space_size(9)
 
 SERVER = ServerConfiguration(
-    websocket_url="ws://localhost:8020/showdown/websocket",
-    authentication_url="http://localhost:8020/action.php",
+    websocket_url="ws://localhost:8000/showdown/websocket",
+    authentication_url="http://localhost:8000/action.php",
 )
 
 class MaskedActorCriticPolicy(ActorCriticPolicy):
@@ -182,8 +182,7 @@ def make_env() -> LazyPokeEnv:
 
 
 def train():
-    # One Showdown (8020) gets overloaded past ~4–8 concurrent envs (2 clients each).
-    num_envs = 6
+    num_envs = 10
 
     env = SubprocVecEnv(
         [make_env for _ in range(num_envs)],

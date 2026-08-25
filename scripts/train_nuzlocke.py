@@ -235,7 +235,7 @@ if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("--updates", type=int, default=60)
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--port", type=int, default=8020)
+    p.add_argument("--port", type=int, default=8000)
     p.add_argument("--envs", type=int, default=1,
                    help="parallel runs (one server+process per env on port..)")
     p.add_argument("--info", choices=["none", "revealed", "full"],

@@ -42,7 +42,7 @@ def main() -> None:
     p.add_argument("--mode", choices=["pool", "random"], default="random")
     p.add_argument("--pool-size", type=int, default=4)
     p.add_argument("--battles", type=int, default=20)
-    p.add_argument("--port", type=int, default=8020)
+    p.add_argument("--port", type=int, default=8000)
     args = p.parse_args()
 
     ck = torch.load(args.checkpoint, weights_only=False)

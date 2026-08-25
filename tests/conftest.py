@@ -1,4 +1,4 @@
-"""Shared fixtures for integration tests. Requires Showdown on :8020 for live cases."""
+"""Shared fixtures for integration tests. Requires Showdown on :8000 for live cases."""
 
 from __future__ import annotations
 
@@ -37,7 +37,7 @@ def _port_open(host: str, port: int, timeout: float = 0.5) -> bool:
 
 
 @pytest.fixture(scope="session")
-def showdown_8020():
-    if not _port_open("127.0.0.1", 8020):
-        pytest.skip("Showdown not listening on 8020")
-    return "ws://localhost:8020/showdown/websocket"
+def showdown_8000():
+    if not _port_open("127.0.0.1", 8000):
+        pytest.skip("Showdown not listening on 8000")
+    return "ws://localhost:8000/showdown/websocket"

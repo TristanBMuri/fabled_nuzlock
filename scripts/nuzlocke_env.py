@@ -46,7 +46,7 @@ OBS_DIM = 12 * (V + 3) + 10 + 6 * (V + 1) + 2 + 2
 
 
 class NuzlockeEnv(Env):
-    def __init__(self, port: int = 8020, info_mode: str = "full",
+    def __init__(self, port: int = 8000, info_mode: str = "full",
                  seed: int | None = None):
         self.info_mode = info_mode
         self.rng = random.Random(seed)
