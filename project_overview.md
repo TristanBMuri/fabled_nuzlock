@@ -455,8 +455,10 @@ Attention will also be interesting to track depending on performance.
 - [ ] add features 
 - [ ] adjust based on run
 - [ ] repeat until battler works
-- [ ] optional: self play later
+- [x] optional: self play later (2026-08-27: 20M steps gen9randombattle →
+      Random 97% / MaxBP 72% / SimpleHeuristics 33%; entropy collapsed 1.77→0.31)
 	- [ ] if implemented check for correct loading of model
+	      (`self_play.py` does not save — weights from that run are gone)
 - [ ] optional: look into pretraining if rl doesnt converge as wanted
 
 validation should be a mix between battle against heuristics with different teams an mirror matchup

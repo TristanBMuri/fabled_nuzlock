@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 from typing import Any, Awaitable
 
 import numpy as np
@@ -146,7 +147,7 @@ class SelfPlayEnv(SinglesEnv):
 
 def train():
     # setup
-    num_envs = 2
+    num_envs = 12
     env = SelfPlayEnv(battle_format=BATTLE_FORMAT, log_level=40, open_timeout=None)
     vec_env = ss.pettingzoo_env_to_vec_env_v1(env)
     vec_env = ss.concat_vec_envs_v1(
@@ -163,11 +164,14 @@ def train():
         batch_size=128,
         gamma=0.99,
         ent_coef=0.01,
-        device="cpu",
+        device="cuda" if torch.cuda.is_available() else "cpu",
+        verbose=1,
+        tensorboard_log=f"logs/tensorboard/self_play_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}",
     )
 
     # train
-    ppo.learn(98_304)
+    ppo.learn(20_000_000)
+    ppo.save(f"models/self_play_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}")
     vec_env.close()
 
     # evaluate

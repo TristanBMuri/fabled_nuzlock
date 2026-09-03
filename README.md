@@ -106,10 +106,19 @@ for tag in ea.Tags()['scalars']:
 
 ```
 scripts/            # runnable entry points (train, train_nuzlocke, eval, harvest...)
+ai_util/            # battler (AI-side track; no_AI_code_here is user-written)
+  train_battler.py  #   trainer CLI (--single | --envs N --servers M, --init-from)
+  pretrain_bc.py    #   BC: collect SimpleHeuristics decisions -> masked-CE pretrain -> eval
+  battler_obs.py    #   observation encoder (1014-dim full-state vector)
+  battler_policy.py #   masked policy net + eval player
+  battler_env.py    #   env stack (rotating fixed opponents) + server helpers
+  battler_eval.py   #   win-rate/behavior diagnostics + training EvalCallback
+  self_play.py      #   the 33% baseline experiment (kept for reference)
 data/               # teams, pool, BDSP trainers, encounters, gauntlet_harvest/
 checkpoints/        # saved models
+models/             # battler / self_play / BC checkpoints
 runs/               # TensorBoard event files (one dir per run)
-logs/               # showdown_*.log, nuzlocke_train.log (gitignored)
+logs/               # showdown_*.log, battler_*.log, tensorboard/ (gitignored)
 pokemon-showdown/   # local server (cloned)
 project_overview.md # the plan / roadmap
 ```
@@ -188,5 +197,130 @@ project_overview.md # the plan / roadmap
   log `logs/nuzlocke_train5.log` (also `/tmp/nuzlocke_train5.log` from
   earlier). Crashed at update 330 on empty-party confirm (fixed in
   nuzlocke_env mask/step + worker try/except).
+  ```
+- [ ] **Battler v2 vs SimpleHeuristics** (`ai_util/train_battler.py`; baseline:
+  ```
+  self_play.py 33% n=100). Two changes vs baseline: full-info obs (12 mon
+  slots × 58: hp/status/boosts/types/moves/base-stats + field block = 714
+  dims; opponent bench encoded once revealed) and fixed-opponent mix
+  (SimpleHeuristics 50 / MaxBP 25 / Random 25) instead of pure self-play.
+  PPO: gamma 0.95, ent_coef 0.05, max_grad_norm 5.0 (CLAUDE.md lessons).
+  - Stage A obs dump (2026-09-02): sane — no NaN, ranges as expected,
+    active flags track switches, battles complete vs SimpleHeuristics.
+  - Stage B smoke 51k steps / 2 envs: 665–719 fps (old run: 636), entropy
+    ~1.6 healthy, value_loss 43→17, no NaN, checkpoints written. Win rates
+    at this scale are noise (Random 74%, MaxBP 18%, heuristics 5%).
+  - Stage C 500k steps / 12 envs (~1150 fps): **win rates flat** (heuristics
+    0–10%, MaxBP 22–24%) BUT reward −33→−17.5, explained_variance →0.6,
+    entropy 1.64→1.31 (healthy). Reads as "learns HP/status shaping, hasn't
+    converted to wins yet" — same ordering as the old run's final numbers,
+    which took 20M steps. Proceeding to Stage D 4M before touching
+    ent_coef/reward weights.
+  - Stage D crash found + fixed: heuristic opponents can pick a move that
+    poke-env can't map back to an action (`available_moves` vs known-moves
+    desync, ~1/250k steps) — killed a worker. Fix: SafeSingleAgentWrapper
+    degrades that opponent order to a default order (RL side stays strict).
+  - **Stage D 4M verdict: reward-structure bug, not slow learning.** Win
+    rates flat the whole run (heuristics 0–8%, MaxBP 6–30%, final n=200:
+    Random 72 / MaxBP 22 / heuristics 4). ep_rew_mean plateaued ~−20 from
+    25% on, entropy pinned 1.28, EV ~0.6: converged to a "farm HP shaping"
+    local optimum. Cause: 40-turn episodes × gamma 0.95 → the +30 win is
+    worth ~3.9 at turn 1 while HP shaping pays ±1/turn. **Fix for D2:
+    gamma 0.99 + shaping down (hp 1.0→0.25, status 0.5→0.1)** — win is now
+    worth ~20 at turn 1 vs ~±15 total shaping swing.
+  - **Stage D2 verdict: reward rebalance necessary but not sufficient.**
+    Flat again (heuristics 0–10%, final n=200: Random 74 / MaxBP 26 /
+    heuristics 4). Behavior stats on the final checkpoint (`--eval`):
+    **switch rate 25%** (vs opponents that never switch — every switch is
+    a free hit) and max-effectiveness move only 68% of the time; entropy
+    pinned ~1.2 nats both runs (ent_coef 0.05). **Fix for D3: ent_coef
+    0.01** (matches the 33% baseline run, which sharpened to entropy
+    0.31 / 72% vs MaxBP), keep D2 reward, switch_rate now logged to TB.
+  - **Env-fairness check + corrected baseline (2026-09-02)**: drove the RL
+    side of the training env with MaxBP's brain — 3/30, 0/20 vs
+    SimpleHeuristics, matching the direct head-to-head. Env is fair; the
+    earlier "MaxBP 88% vs heuristics" note was this metric inverted —
+    `_win_rate` returns the subject's LOSSES; **SimpleHeuristics beats
+    MaxBP 88–12**. So heuristics is genuinely strong vs naive play and the
+    plateau is under-training, not sabotage.
+  - **Stage D3 (ent_coef 0.01) verdict: right trajectory, needs steps.**
+    Entropy 1.67→0.88 (was pinned at 1.2 with 0.05), switch_rate
+    0.50→0.30, EV ~0.7, evals still climbing at the 4M cutoff (last eval
+    MaxBP 44% / heuristics 10%; final n=200: Random 80 / MaxBP 32 /
+    heuristics 8). D4 = same config, 12M steps.
+  - **Stage D4 verdict (12M): more steps don't move it.** Heuristics
+    pinned 2–8% the whole run, MaxBP noise 20–42%, switch_rate stuck
+    ~0.33, entropy healthy ~0.7. Knob-tuning within PPO+this obs is
+    exhausted; **budget capped at 5–6M steps for this model size**.
+    Trainer split into two tiers (`train_battler.py`): `--single` (1 env,
+    main process, as simple as possible) and default distributed
+    (`--envs N --servers M`: round-robin over ports 8020..8020+M-1).
+  - **Stage E1 final verdict (6M, update-noise fix)**: approx_kl ~0.007
+    (vs 0.03–0.06 before) — fix confirmed. Final n=200: Random 89 /
+    MaxBP 45 / **heuristics 14%** — roughly 2x every D-series run, but
+    the curve oscillated 2–16% with no trend after 500k: that's the
+    from-scratch ceiling within the 5–6M budget. Mainline is now
+    BC-init + RL finetune (F1).
+  - **E2 pre-registration (written BEFORE results)**: behavior cloning
+    from SimpleHeuristics (`ai_util/pretrain_bc.py`: collect → masked-CE
+    pretrain → `--init-from` RL finetune).
+    *What the model receives* (714 dims): per mon slot (12 × 58): hp_frac,
+    fainted, is_active, revealed; status one-hot 6; boosts 6 (÷6); types
+    20; 4 moves × [bp/100, dmg_mult vs opposing active, is_status,
+    is_priority]; base stats 6 (÷255). Field (18): weather 5, terrain 4,
+    turn/20, hazards 4+4. **Not in obs** (expected impact order): move
+    category physical/special (boosts unattributable to atk vs spa),
+    accuracy, PP, species identity beyond the types+base-stats proxy, own
+    items/abilities, tera state, volatile statuses (confusion, leech
+    seed), sleep/tox counters. *Structurally hidden on randombattle*
+    (irreducible for anyone): opponent bench until revealed, opponent
+    items/abilities until shown, opponent EVs/nature → their true speed.
+    *BC metrics*: floor = uniform-over-valid CE (measured on the data);
+    **val CE stuck > 1.5 ≈ teacher uses info the obs lacks** → feature
+    ablation next, not more depth. Switch acc ~0 with move acc high =
+    missing switch-relevant info. CE low + win rate poor = memorization →
+    more data, not capacity. Train AND val CE high = underfit (info or
+    depth); train low / val high = too big for the data (505k params vs
+    ~100k pairs → unlikely; val split decides). *BC eval expectations*:
+    ≥95% vs Random, ≥80% vs MaxBP, 40–60% vs heuristics mirror; much
+    lower = compounding error (open-loop BC limit), not capacity. *RL
+    finetune expectations*: step-0 eval must ≈ BC mirror number (else
+    init/mask bug); no collapse below half of init in the first 500k
+    (else catastrophic forgetting → lower lr); switch_rate starts at the
+    teacher's (~2–5%) and stays <15%; approx_kl <0.02; EV starts negative
+    (fresh value head) and must climb >0.5 by 500k. *Headline: cross 33%
+    within the 6M budget; target >50%.*
+  - **E2 results (v1→v3)**: 714-dim obs: val CE 1.237, BC policy 37%
+    MaxBP / 6% mirror — compounding-error clause fired. Patch 1 (move
+    category, accuracy, speed flag, canonical opp slots → 870 dims):
+    CE 1.212, no change. **Read the teacher's source**: score = bp × STAB
+    × stat-ratio × accuracy × expected-hits × type-mult; we encoded
+    neither STAB nor expected-hits nor self-boost. Patch 2 (→1014 dims):
+    CE 1.208, no change (Random 84 / MaxBP 42 / mirror 7%). Three
+    named-feature hypotheses falsified → remaining candidates per
+    pre-registration: **undertraining** (train CE still falling at epoch
+    7, never converged) vs **architecture** (flat MLP can't cheaply
+    express argmax-over-computed-scores). Test in flight: 48-epoch
+    pretrain; if val CE floors >1.0, the architecture lever (set/attention
+    head over candidate actions) is next.
+  - **E2 breakthrough: it was undertraining, not information.** 48-epoch
+    pretrain: val CE 1.208 → **0.588**, top-1 fidelity 47% → **80%** (8
+    epochs had never converged — the "obs deficit" was an artifact). The
+    converged BC policy alone: Random 91 / **MaxBP 72 / heuristics 26%**
+    (≈ the 20M-step baseline, from ~55 min of collect+pretrain),
+    switch_rate 16% (teacher 18%), max-effectiveness move 85%
+    (teacher 94%).
+  - **Stage F1 (running)**: 6M RL finetune from the BC init
+    (`--init-from`, E1 hyperparams, port 8022). Step-0 eval MaxBP 82 /
+    heuristics 32% — init transferred cleanly. Pre-registered: cross 33%
+    within 6M, no early collapse, approx_kl <0.02.
+  ```
+- [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
+  ```
+  vec envs / ~8.7h / 636 fps. Entropy 1.77→0.31 (collapsed), explained
+  variance -0.00→0.53, approx_kl ~0.006. Eval 100 battles: Random 97%,
+  MaxBasePower 72%, SimpleHeuristics 33%. TB
+  `logs/tensorboard/self_play_20260827_103605`. Weights not saved —
+  `self_play.py` never calls `ppo.save()`; only in-memory eval after learn().
   ```
 

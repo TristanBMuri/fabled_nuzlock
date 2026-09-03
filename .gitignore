@@ -14,3 +14,6 @@ checkpoints/
 
 # showdown server: vendored clone, not our code
 pokemon-showdown/
+
+# model checkpoints (regenerable by training; 100s of MB)
+models/
