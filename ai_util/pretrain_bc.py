@@ -19,6 +19,7 @@ sys.path.insert(0, str(_here.parent))
 
 import argparse
 import datetime
+import json
 import multiprocessing as mp
 
 import numpy as np
@@ -34,11 +35,13 @@ from ai_util.battler_env import (
 )
 from ai_util.battler_eval import _eval_policy
 from ai_util.battler_obs import N_FEATURES, _damage_multiplier
-from ai_util.battler_policy import N_ACTIONS, MaskedActorCriticPolicy
+from ai_util.battler_policy import N_ACTIONS, MaskedActorCriticPolicy, PolicyPlayer
 from poke_env.battle import Move
 from poke_env.battle.move_category import MoveCategory
 from poke_env.environment import SinglesEnv
 from poke_env.player import DefaultBattleOrder, SimpleHeuristicsPlayer
+
+GAME_FORMAT = "gen8customgamenogimmicks"
 
 
 def collect_worker(worker: int, n_battles: int, port: int, out_dir: Path) -> None:
@@ -125,10 +128,57 @@ def collect(args: argparse.Namespace) -> Path:
 
 
 def _batch(arrays, idx, device):
+    mask = arrays["mask"][idx].astype(np.int64)
+    if mask.shape[1] < N_ACTIONS:  # gen8 battles have a 22-dim mask
+        mask = np.pad(mask, ((0, 0), (0, N_ACTIONS - mask.shape[1])))
     return {
         "observation": torch.as_tensor(arrays["obs"][idx].astype(np.float32), device=device),
-        "action_mask": torch.as_tensor(arrays["mask"][idx].astype(np.int64), device=device),
+        "action_mask": torch.as_tensor(mask, device=device),
     }
+
+
+def _gauntlet_winrate(policy, pairs: list, server, n: int) -> float:
+    """Policy plays the player side of held-out gauntlet pairs vs SimpleHeuristics.
+
+    Same hardening as the collector: stagger, per-battle timeout, retry —
+    otherwise the 100-battle connection burst fails logins and leaks sockets."""
+    import asyncio
+
+    async def _stop(p) -> None:
+        try:
+            await asyncio.wait_for(p.ps_client.stop_listening(), timeout=10)
+        except Exception:
+            pass
+
+    async def one(p_team, e_team) -> bool | None:
+        agent = PolicyPlayer(policy, deterministic=True, battle_format=GAME_FORMAT,
+                             server_configuration=server, log_level=40, team=p_team)
+        foe = SimpleHeuristicsPlayer(battle_format=GAME_FORMAT,
+                                     server_configuration=server, log_level=40, team=e_team)
+        try:
+            await asyncio.wait_for(agent.battle_against(foe, n_battles=1), timeout=180)
+            return bool(agent.n_won_battles)
+        except Exception:
+            return None
+        finally:
+            await _stop(agent)
+            await _stop(foe)
+
+    async def run() -> float:
+        await asyncio.sleep(5)  # let post-training connections settle
+        wins, played = 0, 0
+        for p_team, e_team in pairs[:n]:
+            result = await one(p_team, e_team)
+            if result is None:
+                await asyncio.sleep(3)
+                result = await one(p_team, e_team)  # one retry on failure
+            if result is not None:
+                wins += result
+                played += 1
+            await asyncio.sleep(0.25)
+        return wins / max(1, played)
+
+    return asyncio.run(run())
 
 
 def pretrain(args: argparse.Namespace) -> Path:
@@ -173,6 +223,14 @@ def pretrain(args: argparse.Namespace) -> Path:
     print(f"baseline: uniform-over-valid CE = {uniform_ce:.3f} (avg {valid_counts.mean():.1f} valid actions)")
 
     opt = policy.optimizer
+    eval_pairs = None
+    if args.eval_pairs:
+        eval_pairs = json.loads(Path(args.eval_pairs).read_text())
+        preflight(args.port)
+    best_wr, patience_left, last_out = -1.0, args.patience, None
+    out_dir = Path(args.out).parent if args.out else Path("models")
+    tag = Path(args.out).stem if args.out else "policy"
+
     for epoch in range(args.epochs):
         order = np.random.default_rng(epoch).permutation(len(train_idx))
         for i in range(0, len(order), args.batch):
@@ -187,8 +245,24 @@ def pretrain(args: argparse.Namespace) -> Path:
             opt.step()
         tl, ta, ts = _metrics(train_idx[:20000], 4096)
         vl, va, vs = _metrics(val_idx, 4096)
-        print(f"epoch {epoch}: train CE {tl:.3f} acc {ta:.0%} (switch {ts:.0%}) | "
-              f"val CE {vl:.3f} acc {va:.0%} (switch {vs:.0%})")
+        msg = (f"epoch {epoch}: train CE {tl:.3f} acc {ta:.0%} (switch {ts:.0%}) | "
+               f"val CE {vl:.3f} acc {va:.0%} (switch {vs:.0%})")
+        if eval_pairs is not None and (epoch + 1) % args.eval_every == 0:
+            wr = _gauntlet_winrate(policy, eval_pairs, server_conf(args.port), args.eval_battles)
+            last_out = out_dir / f"{tag}_epoch{epoch}.pt"
+            torch.save(policy.state_dict(), last_out)
+            if wr > best_wr:
+                best_wr, patience_left = wr, args.patience
+                best_out = out_dir / f"{tag}_best.pt"
+                torch.save(policy.state_dict(), best_out)
+                msg += f" | gauntlet win rate {wr:.1%} * (best, saved)"
+            else:
+                patience_left -= 1
+                msg += f" | gauntlet win rate {wr:.1%} (patience {patience_left}/{args.patience})"
+        print(msg, flush=True)
+        if eval_pairs is not None and patience_left <= 0:
+            print(f"early stop: no improvement for {args.patience} evals (best {best_wr:.1%})")
+            break
 
     out = Path(args.out) if args.out else Path(f"models/policy_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pt")
     torch.save(policy.state_dict(), out)
@@ -220,6 +294,11 @@ def main() -> None:
     p.add_argument("--epochs", type=int, default=8)
     p.add_argument("--net-arch", default="256,256", help="comma-separated MLP widths")
     p.add_argument("--out", help="where to save policy.pt (default: timestamped in models/)")
+    p.add_argument("--eval-pairs", help="json of held-out (player, enemy) gauntlet pairs; "
+                                        "enables win-rate checkpointing + early stop")
+    p.add_argument("--eval-battles", type=int, default=100)
+    p.add_argument("--eval-every", type=int, default=5, help="epochs between win-rate evals")
+    p.add_argument("--patience", type=int, default=3, help="evals without improvement before stop")
     p.add_argument("--batch", type=int, default=1024)
     p.add_argument("--n", type=int, default=100, help="battles per opponent for eval")
     args = p.parse_args()

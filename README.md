@@ -344,6 +344,25 @@ project_overview.md # the plan / roadmap
     in order: stabilized finetune (freeze policy trunk ~300k while the
     value head learns, then low-lr unfreeze), DAgger-style relabeling of
     BC-visited states, self-play league for beyond-teacher signal.
+  - **Prototype battler on game teams (2026-09-04)**: `collect_game.py`
+    samples real gauntlet matchups from `data/teams/gauntlet_harvest/
+    battles.jsonl` (483k BDSP player-party vs trainer-team pairs) and BC's
+    SimpleHeuristics in `gen8customgamenogimmicks`. Reference baseline:
+    SimpleHeuristics-vs-SimpleHeuristics on holdout pairs = **68.5%**
+    (n=200; matches the harvest's 68.4% over 483k — there is a structural
+    ~68/32 first-side advantage). Collection: 240k pairs / 20k matchups /
+    ~15 min (needs a turn>100 forfeit cap: some low-level pairs cannot
+    damage each other and would battle forever; masks are gen8-22-dim,
+    padded to the 26-dim head). Imitation here is near-perfect: val CE
+    0.002, 100% top-1 by epoch 1 (vs 0.61/82% on gen9randombattle).
+    Training with proper checkpointing (`--eval-pairs/--eval-every/
+    --patience`), clean run: epoch-2 eval 64%, **best 70.0% @ epoch 5**,
+    then 65/66/70 (never strictly above best) → **early stop @ epoch 14,
+    patience 3**. The prototype converges in ~5 epochs (≈2 min GPU) and
+    plateaus at teacher strength — `models/game_policy_best.pt` = Random
+    n/a / **70% vs enemy heuristic on holdout game matchups** (baseline
+    68.5%). Matches the gen9 finetune finding: pure imitation tops out at
+    the teacher; exceeding it needs RL/self-play/DAgger on top.
   ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```

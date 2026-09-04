@@ -74,6 +74,8 @@ class PolicyPlayer(Player):
             return DefaultBattleOrder()
         obs = embed_battle(battle)
         mask = np.array(SinglesEnv.get_action_mask(battle))
+        if len(mask) < N_ACTIONS:  # gen8 battles have a 22-dim action mask
+            mask = np.pad(mask, (0, N_ACTIONS - len(mask)))
         with torch.no_grad():
             obs_dict = {
                 "observation": torch.as_tensor(obs, device=self.policy.device).unsqueeze(0),
