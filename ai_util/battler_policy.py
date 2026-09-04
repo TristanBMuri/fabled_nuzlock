@@ -23,10 +23,13 @@ _SWITCH_ACTIONS = 6
 
 class MaskedActorCriticPolicy(ActorCriticPolicy):
     def __init__(self, *args: Any, **kwargs: Any):
+        # default kept at [256, 256]: existing checkpoints (state-dict
+        # shapes) depend on it; pass net_arch explicitly to go bigger
+        net_arch = kwargs.pop("net_arch", [256, 256])
         super().__init__(
             *args,
             **kwargs,
-            net_arch=[256, 256],
+            net_arch=net_arch,
             features_extractor_class=FeaturesExtractor,
         )
 

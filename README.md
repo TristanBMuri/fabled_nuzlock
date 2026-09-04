@@ -314,6 +314,36 @@ project_overview.md # the plan / roadmap
     (`--init-from`, E1 hyperparams, port 8022). Step-0 eval MaxBP 82 /
     heuristics 32% — init transferred cleanly. Pre-registered: cross 33%
     within 6M, no early collapse, approx_kl <0.02.
+  - **Lunch experiments (2026-09-03, unattended)**:
+    *Data scaling*: v3 (91k) + v4 (183k) = 274k pairs, 60-epoch pretrain →
+    val CE 0.611 (vs 0.588 on 91k) — **data scale doesn't move the
+    imitation ceiling**. *Capacity*: 512×512 net → val CE 0.626, train CE
+    0.128 (big overfit gap) — **capacity doesn't either**. CE ~0.6 /
+    ~82% fidelity is intrinsic: the teacher's near-tie argmaxes + the
+    hidden-info minority are irreducible labels. *But play strength
+    still improved with the cleaner run*: BC v5 256×256 = **Random 98 /
+    MaxBP 78 / heuristics 40%** (vs 26–32% before) — above the 33%
+    baseline with zero RL. 512×512 plays 36% (no gain; keep 256×256).
+    *Stage F2 (running)*: 6M finetune from the 40% init on 8021; step-0
+    eval 54% (n=50) / 40% (n=100). Only difference vs F1 is init quality,
+    so F2-vs-F1 isolates what a stronger init buys.
+  - **F1 final verdict (6M finetune)**: n=200: Random 94 / MaxBP 78 /
+    **heuristics 29%**. The whole curve is a random walk around the init
+    (20–38%, no trend) — **RL as configured preserves but does not exceed
+    the BC init.** Shared early-dip pattern in F1+F2 (init → −30–50% at
+    ~500k → partial recovery): the freshly-random value head produces
+    garbage advantages that knock the policy off its init before the
+    critic catches up (F1 end: approx_kl 0.027, EV 0.67). F2 at 4M: 40%
+    vs heuristics — same oscillation, higher level.
+  - **F2 (terminated externally at 4.45M, verdict already clear)**:
+    identical shape to F1 — oscillates 22–44% around its ~40% init, no
+    trend. **F1+F2 together: RL finetuning as configured neither collapses
+    nor exceeds the BC init.** Current best artifact is the BC policy
+    itself: `models/bc_v5_256.pt` = Random 98 / MaxBP 78 / **heuristics
+    40%** (n=100) — above the 33% baseline with zero RL. Next levers,
+    in order: stabilized finetune (freeze policy trunk ~300k while the
+    value head learns, then low-lr unfreeze), DAgger-style relabeling of
+    BC-visited states, self-play league for beyond-teacher signal.
   ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```

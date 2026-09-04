@@ -144,7 +144,8 @@ def pretrain(args: argparse.Namespace) -> Path:
         "observation": Box(-1, 4, shape=(N_FEATURES,), dtype=np.float32),
         "action_mask": Box(low=0, high=1, shape=(N_ACTIONS,), dtype=np.int64),
     })
-    policy = MaskedActorCriticPolicy(obs_space, Discrete(N_ACTIONS), lambda _: 3e-4).to(device)
+    policy = MaskedActorCriticPolicy(obs_space, Discrete(N_ACTIONS), lambda _: 3e-4,
+                                     net_arch=[int(a) for a in args.net_arch.split(",")]).to(device)
     params = sum(p.numel() for p in policy.parameters())
     print(f"pretraining {params / 1e3:.0f}k-param policy on {len(train_idx)} pairs "
           f"(val {len(val_idx)}), device={device}")
@@ -189,7 +190,7 @@ def pretrain(args: argparse.Namespace) -> Path:
         print(f"epoch {epoch}: train CE {tl:.3f} acc {ta:.0%} (switch {ts:.0%}) | "
               f"val CE {vl:.3f} acc {va:.0%} (switch {vs:.0%})")
 
-    out = Path(args.data).parent / "policy.pt"
+    out = Path(args.out) if args.out else Path(f"models/policy_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pt")
     torch.save(policy.state_dict(), out)
     print(f"saved {out}")
     return out
@@ -201,7 +202,8 @@ def eval_bc(args: argparse.Namespace) -> None:
         "observation": Box(-1, 4, shape=(N_FEATURES,), dtype=np.float32),
         "action_mask": Box(low=0, high=1, shape=(N_ACTIONS,), dtype=np.int64),
     })
-    policy = MaskedActorCriticPolicy(obs_space, Discrete(N_ACTIONS), lambda _: 3e-4).to(device)
+    policy = MaskedActorCriticPolicy(obs_space, Discrete(N_ACTIONS), lambda _: 3e-4,
+                                     net_arch=[int(a) for a in args.net_arch.split(",")]).to(device)
     policy.load_state_dict(torch.load(args.policy, map_location=device))
     server = preflight(args.port)
     _eval_policy(policy, server, args.n, deterministic=True)
@@ -216,6 +218,8 @@ def main() -> None:
     p.add_argument("--data", help="data.npz for pretrain")
     p.add_argument("--policy", help="policy.pt for eval")
     p.add_argument("--epochs", type=int, default=8)
+    p.add_argument("--net-arch", default="256,256", help="comma-separated MLP widths")
+    p.add_argument("--out", help="where to save policy.pt (default: timestamped in models/)")
     p.add_argument("--batch", type=int, default=1024)
     p.add_argument("--n", type=int, default=100, help="battles per opponent for eval")
     args = p.parse_args()
