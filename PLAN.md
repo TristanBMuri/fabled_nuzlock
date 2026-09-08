@@ -1,361 +1,549 @@
-# Nuzlocke Gauntlet RL — Implementation Plan
+# Nuzlocke Gauntlet RL — Agent-Executable Implementation Plan
 
-Status: proposal, 2026-09-08. Companion to the spec in `README.md`.
-Everything in this document was checked against the *current* versions of the
-tools (poke-env 0.16.1, Pokémon Showdown 0.11.11, Node ≥ 16) on 2026-09-08.
-Previous attempts at this project died on stale APIs, unverified setup and
-"build everything at once". This plan is built around small, testable steps
-with explicit exit criteria and known-pitfall notes.
-
----
-
-## 0. Decisions made up front (and why)
-
-| Decision | Choice | Why |
-|---|---|---|
-| Generation | **Gen 4** (`gen4customgame` on Showdown) | No team preview (matches in-game), physical/special split, no mega/Z/dynamax/tera so the battle action space is only 10 (6 switches + 4 moves). It is the one gen supported by *all three* engines we may want: Showdown, `poke-engine` (Rust search engine, gens 4–8) and Metamon (human-replay datasets, gens 1–4 + 9). Renegade Platinum, the archetypal hard hack, is Gen 4. |
-| Battle format | `gen4customgame` | Only Showdown format with no restrictions: any level, teams of 1–6 (rule `Max Team Size = 24`), illegal movesets allowed. This is what makes trainer-style teams (level 14 Starly, 3 mons) possible. Verified in `config/formats.ts`. |
-| Battle engine | Showdown via poke-env, **behind a `Battler` interface** | Ground truth for mechanics. The interface lets us swap in a faster/searchable engine later without touching the run-level code. |
-| First battler | Scripted heuristic, then search, then RL | The run-level environment must not block on the RL battler. A search-based battler also becomes the *teacher* for the RL battler (behaviour cloning warm start), which is the cheapest form of the "pretrain on good heuristics" idea from the README. |
-| RL algorithm (battler) | PPO with invalid-action masking (`sb3-contrib` `MaskablePPO`) | Discrete masked actions, well tested, works with Gymnasium 1.x. No need for self-play/league: the opponents are *scripted trainers*, not humans. |
-| Opponent AI | Our own `TrainerAI` player mimicking in-game AI, plus poke-env's `SimpleHeuristicsPlayer` as the "hard" AI | Nuzlocke difficulty comes from team composition and permadeath, not from clever opponents. In-game AI: highest expected damage with type awareness, rarely switches. |
-| Information model | Env-side **known opponent team** injected into observations, with a `blind` toggle | The run env owns the `TrainerSpec`, so it can hand the battler the full enemy team (like a player reading a guide). No dependence on Showdown open-team-sheets, which Gen 4 lacks anyway. |
-| Python / packaging | `uv`, Python 3.12, single package `nuzlocke_gauntlet_rl` | Matches README layout. Poke-env pins `gymnasium==1.3.0` and `websockets==16.1.1`; everything else must be chosen to be compatible with those pins. |
-| Node.js | Installed **user-space via `nodeenv` into the uv venv** (fallback: Docker) | No Node on this machine and no sudo assumed. `nodeenv` gives one `uv run` toolchain for both Python and the Showdown server. |
-| Showdown source | Cloned into `third_party/pokemon-showdown` at a **pinned commit** by a script; `third_party/` is git-ignored | Showdown moves fast and poke-env occasionally breaks on new commits. Pin, and bump deliberately. |
-
-Non-goals for v0: doubles, items/shops/money, XP curves, ROM-hack mods, human
-replay pretraining, playing on the public ladder.
+Spec: `README.md` (do not edit its design sections). This file is the work
+order. Written 2026-09-08 against verified versions: poke-env 0.16.1,
+Pokémon Showdown commit `6b4bc34e44cc2541929cc4b8fff96e756ab3f268`
+(package 0.11.11, needs Node ≥ 16), Node 24.20.0 LTS, Python 3.12,
+stable-baselines3 / sb3-contrib 2.9.0 (accepts gymnasium 1.3, torch ≥ 2.8).
 
 ---
 
-## 1. Architecture
+## 0. Protocol for the executing agent
 
-```
-                      ┌──────────────────────────────┐
-                      │   NuzlockeGauntletEnv (Gym)   │  run-level, phases:
-                      │   PRE_BATTLE / ENCOUNTER /    │  party selection, catch/skip,
-                      │   MOVE_SELECTION / DONE       │  move learning, permadeath
-                      └──────────────┬───────────────┘
-                                     │ simulate_battle(party, trainer, importance)
-                      ┌──────────────▼───────────────┐
-                      │   Battler (interface)         │  -> BattleResult(win, alive_mask,
-                      │   HeuristicBattler            │     hp_left, turns, log)
-                      │   SearchBattler (poke-engine) │
-                      │   RLBattler (PPO policy)      │
-                      └──────────────┬───────────────┘
-                                     │ poke-env Player / SinglesEnv
-                      ┌──────────────▼───────────────┐
-                      │   BattleBackend (interface)   │
-                      │   ShowdownWebsocketBackend    │  local server, --no-security
-                      │   (later) ShowdownStdioBackend│  `simulate-battle` subprocess
-                      └──────────────────────────────┘
-```
+1. Work tasks **in order** (P1.1, P1.2, …). Do not start a task until the
+   previous task's **Verify** block passes.
+2. Each task ends with one commit: `[P1.3] <task title>`; tick the task's
+   checkbox in this file in the same commit. Commit from a clean tree.
+3. If Verify fails three times, write what happened under
+   **§8 Decision log**, commit, and stop with a report. Do not "work around"
+   a failing verification by weakening it.
+4. Source of truth for poke-env is the **installed package**, not blogs:
+   `uv run python -c "import poke_env, os; print(os.path.dirname(poke_env.__file__))"`
+   and read `environment/env.py`, `environment/singles_env.py`,
+   `environment/single_agent_wrapper.py`, `player/player.py`,
+   `teambuilder/teambuilder_pokemon.py`. Old class names
+   (`Gen8EnvSinglePlayer`, `EnvPlayer`) do not exist any more.
+5. Never commit `third_party/`, `.venv/`, `.nodeenv/`, `replays/`,
+   `checkpoints/`, `runs/`, `*.log`.
+6. Unit tests: `uv run pytest -m "not integration"`. Integration tests
+   (start a Showdown server): `uv run pytest -m integration`. Both must be
+   green at every commit from P1.6 on.
+7. Keep functions small and typed. Every public function gets a docstring
+   with its contract. No global mutable state except the poke-env loop.
+8. Machine facts: Linux, 32 CPU cores, 60 GB RAM, RTX 5090 32 GB, `uv 0.12`,
+   Python 3.12.3 system, Docker available, **Node not installed**, no sudo
+   assumed. GitHub push works via `gh` auth.
 
-Two independent tracks share the `Battler` interface:
+---
 
-* **Track A — battle policy.** Train `RLBattler` on `BattleEnv` (a thin
-  Gymnasium env wrapping poke-env `SinglesEnv` + `SingleAgentWrapper`).
-* **Track B — run-level policy.** Build `NuzlockeGauntletEnv`, first with
-  `HeuristicBattler`, then with whatever battler is best.
+## 1. Fixed decisions (do not re-open without a Decision-log entry)
 
-Neither track can block the other. Both end in the same evaluation harness.
+| Topic | Decision |
+|---|---|
+| Generation / format | Gen 4, Showdown format id `gen4customgame` (no restrictions: any level, 1–6 mons, illegal movesets ok; verified in `config/formats.ts`). No team preview, no gimmicks → battle action space `Discrete(10)` = 6 switches + 4 moves (poke-env `SinglesEnv.get_action_space_size(4)`). |
+| Battle engine | Showdown via poke-env websocket, behind the `Battler` and `BattleBackend` interfaces in §2. |
+| Battler order | `HeuristicBattler` (poke-env `SimpleHeuristicsPlayer`) → `RLBattler` (MaskablePPO) → optional `SearchBattler` (poke-engine). Run-level work never waits for the RL battler. |
+| Opponent AI | `TrainerAI` (ours, in-game style) is the default opponent; `SimpleHeuristicsPlayer` is the "hard" opponent. |
+| Opponent information | Run env injects the known `TrainerSpec` into battler observations; `blind=True` disables that. No open team sheets. |
+| RL library | `stable-baselines3==2.9.0` + `sb3-contrib==2.9.0` (`MaskablePPO`) + `torch>=2.8`. Fallback if the resolver refuses the poke-env pins: hand-written PPO in `models/ppo.py` (CleanRL style). |
+| Node | `nodeenv` into `./.nodeenv` (user-space). Fallback: Docker `node:24` container running the same commands. |
+| Showdown source | `third_party/pokemon-showdown` cloned by script at the commit in `SHOWDOWN_COMMIT`; git-ignored. |
+| Package | `nuzlocke_gauntlet_rl` (README layout), `uv`-managed, Python 3.12. |
+| Stats | v0: all mons IVs 31, EVs 0, nature Hardy, ability = first dex ability, no items. Trainer mons identical rules. Documented in `utils/specs.py`. |
+| Config | YAML under `nuzlocke_gauntlet_rl/config/`; every species/move/ability validated against poke-env `GenData.from_gen(4)` at load. |
 
-### Data model (`utils/specs.py`)
+Non-goals for v0: doubles, items/shops, XP, ROM-hack mods, human-replay
+pretraining, public ladder.
+
+---
+
+## 2. Contracts (implement exactly these signatures)
 
 ```python
+# nuzlocke_gauntlet_rl/utils/specs.py
 @dataclass(frozen=True)
-class PokemonSpec:      # static definition, also used for trainer mons
-    species: str; level: int; moves: tuple[str, ...]
-    ability: str | None = None; item: str | None = None
-    nature: str = "Hardy"; ivs: int = 31; evs: int = 0   # simple, uniform for v0
+class PokemonSpec:
+    species: str                 # Showdown id, e.g. "starly"
+    level: int
+    moves: tuple[str, ...]       # Showdown ids, 1..4
+    ability: str | None = None   # None -> first dex ability
+    item: str | None = None
 
 @dataclass
-class MonInstance:      # per-run instance
-    uid: int; spec: PokemonSpec; level: int; moves: list[str]
-    alive: bool = True; in_party: bool = False; importance: float = 1.0
+class MonInstance:
+    uid: int
+    spec: PokemonSpec
+    level: int
+    moves: list[str]
+    alive: bool = True
+    in_party: bool = False
+    importance: float = 1.0      # set by run policy, read by battler reward
 
 @dataclass(frozen=True)
-class TrainerSpec:      name: str; team: tuple[PokemonSpec, ...]; ai: str = "trainer"
+class TrainerSpec:
+    name: str
+    team: tuple[PokemonSpec, ...]
+    ai: str = "trainer"          # "trainer" | "hard"
+
 @dataclass(frozen=True)
-class RouteSpec:        name: str; encounters: tuple[tuple[PokemonSpec, float], ...]; unlock_after: int
+class RouteSpec:
+    name: str
+    encounters: tuple[tuple[PokemonSpec, float], ...]  # probabilities sum to 1
+    unlock_after: int            # trainer index after which the route unlocks
+
 @dataclass(frozen=True)
-class GauntletSpec:     name: str; trainers: tuple[TrainerSpec, ...]; routes: tuple[RouteSpec, ...]; starters: tuple[PokemonSpec, ...]
+class MoveEventSpec:
+    species: str; move: str; after_trainer: int; source: str  # "level_up"|"tm"
+
+@dataclass(frozen=True)
+class GauntletSpec:
+    name: str
+    starters: tuple[PokemonSpec, ...]
+    trainers: tuple[TrainerSpec, ...]
+    routes: tuple[RouteSpec, ...] = ()
+    move_events: tuple[MoveEventSpec, ...] = ()
+    max_roster: int = 12
+
+def load_gauntlet(path: str | Path) -> GauntletSpec   # validates against Gen 4 dex, raises ValueError with the offending field
 ```
 
-Specs live in YAML under `config/gauntlets/` and `config/builds/`; a loader
-validates every species/move/ability against Showdown's Gen 4 dex (poke-env
-ships this data via `GenData`) so typos fail at load time, not mid-battle.
-
-Conversion to Showdown: `specs_to_packed_team(list[MonInstance]) -> str`
-(Showdown packed format; level and fewer-than-6 mons are legal in Custom Game).
-
-### Battle result contract
+```python
+# nuzlocke_gauntlet_rl/utils/teams.py
+def spec_to_teambuilder_pokemon(spec: PokemonSpec, level: int | None = None, moves: Sequence[str] | None = None) -> TeambuilderPokemon
+def mons_to_packed_team(mons: Sequence[MonInstance | PokemonSpec]) -> str   # uses Teambuilder.join_team
+class QueueTeambuilder(Teambuilder):
+    """yield_team() pops the next packed team pushed with push(team). Raises if empty."""
+```
 
 ```python
+# nuzlocke_gauntlet_rl/battle/result.py
 @dataclass
 class BattleResult:
     win: bool
-    alive_mask: list[bool]      # same order as the party passed in
-    hp_fraction: list[float]    # remaining HP per party mon (0 for dead)
+    alive_mask: list[bool]       # same order as the party passed to simulate()
+    hp_fraction: list[float]     # 0.0 for fainted
     turns: int
-    log: str | None             # Showdown log for debugging/replays
+    battle_tag: str
+def result_from_battle(battle: Battle, party_size: int) -> BattleResult
 ```
 
----
-
-## 2. Milestones
-
-Each milestone has a **done-when** that is an executable check. Do not start
-the next milestone until the current one's check passes in CI (`pytest -m
-integration` spins up the local server).
-
-### M1 — Toolchain and a battle you can watch (≈1–2 days)
-
-1. `uv init`, `pyproject.toml` with `poke-env==0.16.1`, `numpy`, `pyyaml`,
-   `pytest`, `pytest-asyncio`. Python 3.12.
-2. `scripts/setup_showdown.sh`: installs Node via `nodeenv` into `.venv`,
-   clones Showdown at the commit in `third_party/SHOWDOWN_COMMIT`, runs
-   `npm install`, copies `config/config-example.js` → `config/config.js`.
-3. `scripts/run_showdown.sh [port]`: `node pokemon-showdown start --no-security --port N`.
-   `--no-security` = no login, no rate limiting (this is the "no account" README item).
-4. `utils/showdown.py`: `ShowdownServer` context manager that starts/stops a
-   server subprocess on a free port and waits until the websocket answers
-   (needed by tests and by multi-server training later).
-5. `utils/teams.py`: `PokemonSpec → packed team string`, plus
-   `QueueTeambuilder(Teambuilder)` whose `yield_team()` pops the next team.
-   (poke-env asks the teambuilder for a team at every battle start; this is
-   how per-battle teams work without recreating players.)
-6. Smoke test: `RandomPlayer` vs `RandomPlayer`, 20 battles, format
-   `gen4customgame`, each side a 3-mon level-15 team, `save_replays=True`.
-
-**Done when:** `pytest -m integration tests/test_smoke.py` passes: 20 battles
-finish, no exceptions, replay HTML files are written, battles/sec is logged.
-Also generate a random Gen 4 team via `node pokemon-showdown generate-team
-gen4randombattle` from Python (last README checkbox of milestone 1).
-
-### M2 — Battler interface, scripted battlers, opponent AI (≈2–3 days)
-
-1. `battle/battler.py`: `Battler` ABC with `simulate(party, enemy, importance, blind) -> BattleResult`.
-2. `battle/opponents.py`: `TrainerAI(Player)` — Gen 4-style in-game AI:
-   score = expected damage (use poke-env's damage estimate or a simple
-   `base_power × STAB × type_eff × accuracy`), prefer KO, never switch unless
-   forced; `HardTrainerAI` = poke-env `SimpleHeuristicsPlayer`.
-3. `battle/heuristic_battler.py`: `HeuristicBattler` = `SimpleHeuristicsPlayer`
-   playing our side through `Player.battle_against`.
-4. `battle/result.py`: build `BattleResult` from the finished poke-env `Battle`
-   (`battle.won`, `battle.team[...].fainted`, `current_hp_fraction`, `turn`).
-5. Throughput benchmark script: N concurrent battles per player
-   (`max_concurrent_battles`), K server processes. Record battles/sec on this
-   box (32 cores). Expect tens of battles/sec with several servers; a single
-   Showdown process is single-threaded.
-
-**Done when:** `HeuristicBattler` beats `TrainerAI` ≥ 80 % over 200 battles
-on a hand-made "fair" matchup, and `RandomPlayer` beats `TrainerAI` < 30 %.
-(Sanity ordering: random < trainer AI < heuristics. If this ordering fails,
-the AI or the result extraction is wrong; fix before anything else.)
-
-### M3 — Run-level environment with a scripted battler (≈3–5 days)
-
-1. `utils/specs.py` + YAML loader + dex validation.
-2. `config/gauntlets/toy_3.yaml`: 3 trainers, 2 routes, 3 starters, ~10 species.
-   `config/gauntlets/sinnoh_early.yaml`: first two gyms of Platinum-like
-   content (8–10 trainers), built from public trainer data.
-3. `envs/nuzlocke_env.py`: `NuzlockeGauntletEnv(gym.Env)` exactly as in
-   README §5, with:
-   * **Fixed-size party action**: Stage 0 uses `MultiBinary(max_roster)` masked
-     to alive mons, capped at 6 (invalid → pick top-6 by index, log a flag).
-     Keeps the action space simple; upgrade later.
-   * `ENCOUNTER` action: `Discrete(2 + max_roster)` = skip / add to box /
-     replace slot i.
-   * `MOVE_SELECTION` action: `Discrete(5)`.
-   * Observation: `Dict` with per-mon feature block (species id, types, level,
-     alive, in_party, 4 move ids, hp), trainer index, next-trainer team block,
-     phase one-hot, pending event block. All ids are integer indices into
-     Gen 4 tables so policies can use embeddings.
-   * Reward: `+1` per trainer beaten, `−death_penalty × importance` per death,
-     `+run_bonus` on clearing, `0` otherwise. All coefficients in config.
-4. Scripted run policies for baselines: `RandomRunPolicy`,
-   `GreedyRunPolicy` (bring the 6 highest-level alive mons, always catch if
-   box has space, always learn the higher-power move).
-5. `scripts/run_evaluation.py`: runs N episodes with a (run policy, battler)
-   pair over a gauntlet distribution and prints README §7 metrics
-   (success rate, mean depth, expected survivors, deaths/run).
-
-**Done when:** `GreedyRunPolicy + HeuristicBattler` clears `toy_3` ≥ 90 % of
-episodes and reaches a *non-trivial* success rate (say 20–60 %) on
-`sinnoh_early`. Non-trivial matters: if it is 0 % or 100 % the gauntlet is
-mis-tuned and no policy can be evaluated on it. Also: a `MonInstance` that
-died never appears in a later party (property test).
-
-### M4 — RL battler, entropy-managed curriculum (≈1–2 weeks)
-
-This is the part that killed earlier attempts, so it is deliberately staged.
-
-1. `envs/battle_env.py`: subclass poke-env `SinglesEnv`; implement
-   `embed_battle`, `describe_embedding`, `calc_reward`. Wrap in
-   `SingleAgentWrapper(env, opponent=TrainerAI(...))`. Action space is
-   poke-env's `Discrete(10)` for Gen 4; always pass the action mask from
-   `SinglesEnv.get_action_mask` to `MaskablePPO`.
-   Observation = own 6 mons (features + move ids) + opponent known/seen mons +
-   field state (weather, hazards, boosts) + `importance` vector + `blind`
-   flag. `blind=False` fills the opponent block from the `TrainerSpec`.
-2. Reward: `+1 win / −1 loss`, `+Σ importance_i × alive_i / n` at the end,
-   small per-turn HP-difference shaping (`0.01`, ablatable). Nothing else.
-3. Curriculum, each level must pass before the next:
-   * **L0 fixed matchup**: one party vs one trainer, `TrainerAI`.
-     Done when win rate ≥ 90 % (heuristic battler's rate is the bar).
-     If PPO cannot learn L0 in ≤ 1 M steps, the env/obs/mask is broken —
-     stop and debug, do not scale.
-   * **L1 fixed party, sampled trainers** from one gauntlet.
-   * **L2 party sampled from a pool of 20 hand-built rosters**, trainers sampled.
-   * **L3 party sampled from the run env's actual roster distribution**
-     (log parties from M3 episodes and replay them).
-   The README's key insight is honoured: the agent keeps a team for a while
-   (each level fixes more than the previous one), and the entropy is raised
-   only when the previous level is solved.
-4. Warm start (only if L2/L3 stalls): behaviour cloning on
-   (observation, action) pairs generated by `HeuristicBattler` or the
-   `SearchBattler` (M6), then continue with PPO. This is the "pretrain on
-   heuristics" option; it needs no external data.
-5. Throughput: `SubprocVecEnv` with N envs, each env its own poke-env players
-   with unique usernames, K Showdown servers on distinct ports (round-robin).
-   Target ≥ 50 env-steps/sec aggregate before starting L2.
-
-**Done when:** `RLBattler` ≥ `HeuristicBattler` win rate on the L3
-distribution vs `TrainerAI`, and ≥ 60 % vs `HardTrainerAI`. Then plug it into
-M3's evaluation and compare run-level metrics to the heuristic battler.
-
-### M5 — Run-level policy (≈1–2 weeks)
-
-1. **Win-chance estimator** `WinProbModel(party_feats, enemy_feats) -> p`
-   trained supervised on outcomes from thousands of `Battler.simulate` calls
-   (data generation is cheap and embarrassingly parallel). This is the helper
-   policy the README asks for and it makes party selection a search problem.
-2. `SearchRunPolicy`: at `PRE_BATTLE`, enumerate candidate parties (all
-   subsets of size ≤ 6 for small rosters, else greedy/beam), score with
-   `WinProbModel` × survival estimate, pick best. Same for encounters
-   (marginal value of the new mon) and move choices.
-3. `RLRunPolicy`: PPO on `NuzlockeGauntletEnv` with the battler frozen.
-   Episodes are short (10–30 decisions) so this is cheap; the expensive part
-   is the inner battles, cached by `(party, trainer, seed)` where possible.
-4. Ablations from README §7 (with/without move events, encounters, penalty scales).
-
-**Done when:** `RLRunPolicy` or `SearchRunPolicy` beats `GreedyRunPolicy` on
-success rate over a held-out set of gauntlet seeds, with confidence intervals.
-
-### M6 — Faster / searchable battle engine (side goal, parallel, optional)
-
-* `ShowdownStdioBackend`: drive `node pokemon-showdown simulate-battle` over
-  stdin/stdout (protocol in `sim/SIM-PROTOCOL.md`: `>start`, `>player p1 …`,
-  `>p1 move 2`). No websocket, no server, one process per worker. Likely 5–10×
-  faster than the websocket path and trivially parallel across 32 cores.
-* `SearchBattler` on `poke-engine` (Rust, `pip install poke-engine`, PyPI
-  0.0.48; build with the Gen 4 feature flag — verify the exact
-  `--config-settings` at install time). Expectiminimax/MCTS gives a strong,
-  deterministic, explainable battler and a teacher for BC. Caveat: it is an
-  approximation of Showdown, so always **evaluate** on Showdown.
-
-**Done when:** results of `ShowdownStdioBackend` and the websocket backend
-agree on 1000 seeded battles, and the speed-up is measured.
-
----
-
-## 3. Repository layout (matches README, concrete)
-
-```
-fabled_nuzlock/
-├── README.md, PLAN.md, pyproject.toml, uv.lock, .gitignore
-├── nuzlocke_gauntlet_rl/
-│   ├── config/gauntlets/{toy_3,sinnoh_early}.yaml
-│   ├── config/builds/gen4_builds.yaml
-│   ├── utils/{specs,teams,showdown,dex,observation_builder,evaluation}.py
-│   ├── battle/{battler,heuristic_battler,rl_battler,search_battler,opponents,result}.py
-│   ├── envs/{battle_env,nuzlocke_env}.py
-│   ├── models/{battle_policy,run_policy,win_prob}/
-│   └── showdown/{server_config/,mods/}
-├── scripts/{setup_showdown.sh,run_showdown.sh,bench_throughput.py,
-│            train_battle_policy.py,train_nuzlocke_policy.py,run_evaluation.py}
-├── tests/ (unit: specs, packing, masks, permadeath; integration: server)
-└── third_party/pokemon-showdown   (git-ignored, pinned by SHOWDOWN_COMMIT)
+```python
+# nuzlocke_gauntlet_rl/battle/battler.py
+class Battler(ABC):
+    def simulate(self, party: Sequence[MonInstance], enemy: TrainerSpec,
+                 importance: Sequence[float] | None = None, blind: bool = False,
+                 seed: int | None = None) -> BattleResult: ...
+    def close(self) -> None: ...
 ```
 
----
+```python
+# nuzlocke_gauntlet_rl/utils/showdown.py
+class ShowdownServer:
+    """Context manager. Starts `node pokemon-showdown start --no-security PORT`
+    from third_party/pokemon-showdown, waits until the websocket accepts a
+    connection (timeout 120 s), kills the process on exit."""
+    def __init__(self, port: int | None = None, log_path: str | None = None): ...
+    port: int
+    def server_configuration(self) -> ServerConfiguration   # ws://localhost:{port}/showdown/websocket
+def free_port() -> int
+```
 
-## 4. Known pitfalls (read before writing code)
+Run-level env spaces (P3.3), fixed for v0:
 
-1. **Stale poke-env API.** Old tutorials use `Gen8EnvSinglePlayer` /
-   `EnvPlayer`. In 0.16.x the RL classes are
-   `poke_env.environment.SinglesEnv` (a PettingZoo `ParallelEnv` with two
-   agents) and `SingleAgentWrapper` (Gymnasium single-agent view with a
-   scripted opponent). Do not copy old code.
-2. **Version pins.** poke-env pins `gymnasium==1.3.0` and `websockets==16.1.1`.
-   Check that the chosen `stable-baselines3` / `sb3-contrib` release supports
-   Gymnasium 1.3 before adding it; otherwise use CleanRL-style PPO in plain
-   PyTorch (≈300 lines, no dependency conflict). Decide this in M4, not M1.
-3. **Node is not installed** on the dev machine. `nodeenv` (Python package)
-   installs Node into the venv without sudo. Showdown needs Node ≥ 16.
-4. **Server flags.** Always `--no-security` locally. Multiple servers need
-   distinct `--port`. Each poke-env player needs a unique username per server.
-5. **Per-battle teams.** `team=` is fixed at construction; use a
-   `Teambuilder` subclass whose `yield_team()` returns the next team.
-6. **Custom Game details.** Level goes in the packed team; default level is
-   100 if omitted. Teams may have fewer than 6 mons. No team preview in Gen 4.
-   Species/moves must be Gen 4 dex names in Showdown id form
-   (lowercase, no spaces).
-7. **Action masking is mandatory.** Unmasked PPO in poke-env wastes most of
-   its updates on illegal actions and looks like "RL doesn't learn".
-8. **asyncio.** poke-env runs its own event loop thread (`POKE_LOOP`). Do not
-   call its async APIs from a different loop; use `SingleAgentWrapper` /
-   `battle_against` and keep one player set per process.
-9. **Determinism.** Showdown battles are seeded per battle; poke-env does not
-   expose the seed on the websocket path. For reproducible evaluation use
-   many battles and CIs, or the stdio backend (M6) which accepts a seed.
-10. **Mis-tuned gauntlets** make every policy look identical (0 % or 100 %).
-    Tune difficulty until the greedy baseline lands in the middle.
-11. **Throughput before scale.** Measure battles/sec in M2 and env-steps/sec
-    in M4 before launching long runs. Add servers/processes, not hope.
+* Observation `Dict`:
+  `phase` `Discrete(4)` one-hot; `roster` `Box(max_roster × F_MON)`;
+  `next_trainer` `Box(6 × F_MON)`; `trainer_idx` `Box(1)`;
+  `pending_event` `Box(F_EVENT)`; `encounter` `Box(F_MON)`;
+  `action_mask` `MultiBinary(A)`.
+  `F_MON` = [species_id, type1_id, type2_id, level/100, hp_frac, alive,
+  in_party, move_id×4, importance] (ids are integer indices into tables
+  built from `GenData.from_gen(4)`; embed them in the policy).
+* Action `Discrete(A)` with `A = max(max_roster + 2, 5)`, interpreted per phase:
+  `PRE_BATTLE`: toggle mon *i* in/out of party, action `max_roster` = "confirm
+  party" (≥1 alive mon required); `ENCOUNTER`: 0 skip, 1 add to box,
+  2+i replace roster slot i; `MOVE_SELECTION`: 0 skip, 1–4 replace slot.
+  The mask makes illegal choices impossible.
+* Reward: `+1.0` per trainer beaten, `−death_penalty·importance` per death
+  (default 0.5), `+clear_bonus` (default 5.0) on finishing, else 0.
 
 ---
 
-## 5. Risks and kill criteria
+## 3. Phase 1 — Toolchain and first battle
 
-| Risk | Signal | Response |
-|---|---|---|
-| RL battler cannot learn even L0 | < 90 % win after 1 M steps | Bug hunt in obs/mask/reward; compare with BC from heuristics; do **not** add complexity. |
-| Battler generalises poorly across parties (L2/L3) | L1 fine, L2 flat | BC warm start from `SearchBattler`; larger embedding tables; more parties per rollout batch. |
-| Showdown websocket too slow | < 10 battles/sec on 4 servers | Move to `ShowdownStdioBackend` (M6) early. |
-| `poke-engine` diverges from Showdown for Gen 4 mons/moves | disagreement > 5 % on seeded battles | Use it only as a teacher/search prior, never for evaluation. |
-| poke-env breaks on new Showdown commit | integration tests fail after bump | Revert `SHOWDOWN_COMMIT`; bump only with green tests. |
-| Run-level RL is too sample-hungry | flat after 10 k episodes | Prefer `SearchRunPolicy` with the win-prob model; RL only as fine-tuning. |
+### P1.1 Project skeleton  [ ]
+Create:
+```
+pyproject.toml   .gitignore   nuzlocke_gauntlet_rl/__init__.py
+nuzlocke_gauntlet_rl/{utils,battle,envs,models,config}/__init__.py
+tests/__init__.py   tests/conftest.py   scripts/   SHOWDOWN_COMMIT
+```
+`pyproject.toml` (uv, PEP 621): `requires-python = ">=3.12,<3.13"`,
+dependencies `poke-env==0.16.1`, `numpy>=2.0`, `pyyaml>=6`;
+dev group `pytest>=8`, `pytest-asyncio>=0.25`, `pytest-timeout>=2.3`,
+`nodeenv>=1.10`, `ruff`. Configure `[tool.pytest.ini_options]`
+`markers = ["integration: needs a local Showdown server"]`, `timeout = 300`.
+`.gitignore`: `.venv/ .nodeenv/ third_party/ replays/ checkpoints/ runs/
+__pycache__/ *.log .pytest_cache/ .ruff_cache/`.
+`SHOWDOWN_COMMIT` contains `6b4bc34e44cc2541929cc4b8fff96e756ab3f268`.
+**Verify:** `uv sync --all-groups && uv run python -c "import poke_env; print(poke_env.__version__)"` prints `0.16.1`.
+
+### P1.2 Node + Showdown setup script  [ ]
+`scripts/setup_showdown.sh` (bash, `set -euo pipefail`, idempotent):
+1. `uv run nodeenv --node=24.20.0 --prebuilt .nodeenv` if `.nodeenv/bin/node` missing.
+2. `git clone https://github.com/smogon/pokemon-showdown.git third_party/pokemon-showdown` if missing; `git -C third_party/pokemon-showdown checkout $(cat SHOWDOWN_COMMIT)`.
+3. `cp -n config/config-example.js config/config.js` inside the clone.
+4. `PATH="$PWD/.nodeenv/bin:$PATH" npm --prefix third_party/pokemon-showdown install`.
+5. Print `node --version` and the Showdown commit.
+`scripts/run_showdown.sh [PORT]`: `cd third_party/pokemon-showdown && exec ../../.nodeenv/bin/node pokemon-showdown start --no-security "${1:-8000}"`.
+(Check `node pokemon-showdown --help` once: PORT is positional; `--no-security`
+disables login and rate limiting. If the flag name differs at this commit,
+fix the script and note it in §8.)
+**Verify:** run setup, then `scripts/run_showdown.sh 8000 &`, wait, then
+`curl -s http://localhost:8000/ | head -c 200` returns HTML; kill it.
+Fallback if nodeenv fails: `docker run --rm -v $PWD/third_party/pokemon-showdown:/ps -w /ps -p 8000:8000 node:24 sh -c "npm install && node pokemon-showdown start --no-security 8000"` and document it.
+
+### P1.3 `ShowdownServer` context manager  [ ]
+Implement §2 `utils/showdown.py`. Readiness check: open a websocket to
+`ws://localhost:{port}/showdown/websocket` with the `websockets` package
+(already a poke-env dependency) and wait for the first message. Kill the
+whole process group on exit. Add `tests/conftest.py` fixture
+`showdown_server` (session scope, marker `integration`).
+**Verify:** `uv run pytest -m integration tests/test_showdown_server.py`
+starts a server on a free port, connects, stops it, and leaves no `node`
+process behind (`pgrep -f pokemon-showdown` empty after the test).
+
+### P1.4 Team packing  [ ]
+Implement §2 `utils/teams.py` plus `utils/dex.py`:
+`gen4() -> GenData`, `species_ids()`, `move_ids()`, `first_ability(species)`,
+`to_id(name)` (use `poke_env.data.to_id_str`), and integer index tables
+`SPECIES_INDEX`, `MOVE_INDEX`, `TYPE_INDEX` (sorted ids, 0 = padding).
+Packed format (Showdown `sim/TEAMS.md`):
+`NICK|SPECIES|ITEM|ABILITY|MOVES|NATURE|EVS|GENDER|IVS|SHINY|LEVEL|HAPPINESS]…`;
+build it with `TeambuilderPokemon(...)` and `Teambuilder.join_team`, never by
+hand. Set `level`, `ability`, `moves`, `ivs=[31]*6`, `evs=[0]*6`, `nature="Hardy"`.
+**Verify (unit):** `tests/test_teams.py`: a 3-mon level-15 team packs to a
+string with exactly 2 `]` separators, contains `|15|`, parses back through
+`Teambuilder.parse_packed_team` with the same species, and
+`load`-style validation rejects `"starlyy"` and move `"tackel"`.
+
+### P1.5 Random-team generation utility  [ ]
+`utils/showdown_cli.py`: `generate_random_team(format_id="gen4randombattle", seed=None) -> str`
+running `.nodeenv/bin/node pokemon-showdown generate-team <format> [seed]`
+in `third_party/pokemon-showdown` and returning the packed string;
+`validate_team(packed, format_id) -> tuple[bool, str]` via `validate-team`.
+**Verify (integration):** `generate_random_team()` returns 6 mons that
+`validate_team(..., "gen4customgame")` accepts; a 3-mon level-15 team from
+P1.4 is also accepted (this proves Custom Game allows short low-level teams).
+
+### P1.6 First battles (smoke test)  [ ]
+`tests/test_smoke.py` (integration): with `showdown_server`, create two
+`RandomPlayer(battle_format="gen4customgame", team=QueueTeambuilder(...),
+server_configuration=server.server_configuration(),
+account_configuration=AccountConfiguration(<unique ≤18 chars>, None),
+max_concurrent_battles=5, save_replays="replays/smoke")`, push 20 packed
+3-mon teams to each, run `await p1.battle_against(p2, n_battles=20)`
+(use `asyncio.run` in the test), assert `p1.n_finished_battles == 20`,
+`p1.n_won_battles + p2.n_won_battles == 20`, and at least one `.html` in
+`replays/smoke`. Print battles/sec.
+**Verify:** test passes in < 120 s. Record battles/sec in §8.
+Then tick the four "# 1" checkboxes in `README.md` in this commit.
 
 ---
 
-## 6. Compute plan
+## 4. Phase 2 — Battler interface and scripted battlers
 
-Dev box: 32 cores, 60 GB RAM, RTX 5090. Showdown is CPU-bound and
-single-threaded per server, so run 8–16 servers and 16–32 env processes;
-the GPU is more than enough for the policies (small MLPs/transformers over
-per-mon embeddings). Log with Weights & Biases or TensorBoard; keep
-checkpoints out of git.
+### P2.1 `BattleResult` extraction  [ ]
+Implement §2 `battle/result.py`. Map party order → `battle.team` order by
+species+level (nickname-free packing keeps Showdown order = packed order;
+assert it). `win = bool(battle.won)`, `turns = battle.turn`,
+`alive_mask[i] = not mon.fainted`, `hp_fraction[i] = mon.current_hp_fraction`.
+**Verify (integration):** after one battle, `len(alive_mask) == party_size`
+and `win` agrees with `battle.won`; the loser has `all(not a for a in alive_mask)`.
+
+### P2.2 Opponent AIs  [ ]
+`battle/opponents.py`:
+* `TrainerAI(Player)`: if `battle.available_moves` empty → best switch
+  (highest level). Else score each move: `base_power × STAB(1.5) ×
+  type_effectiveness(vs opponent_active_pokemon types, Gen 4 chart) ×
+  accuracy`; status moves score 0 except on turn 1 with 20 % probability
+  (mimics in-game "sometimes uses status"). Pick argmax; never voluntarily
+  switch. Use `move.base_power`, `move.type.damage_multiplier(...)`.
+* `HardTrainerAI = SimpleHeuristicsPlayer` (alias, imported from `poke_env.player`).
+* `make_opponent(kind: str, **kw) -> Player`.
+**Verify (integration):** `tests/test_opponents.py`, 100 battles each on a
+fixed fair matchup: `RandomPlayer` vs `TrainerAI` win rate < 0.35;
+`SimpleHeuristicsPlayer` vs `TrainerAI` win rate > 0.6. If the ordering
+random < trainer < heuristic does not hold, fix the AI before continuing.
+
+### P2.3 `HeuristicBattler`  [ ]
+`battle/heuristic_battler.py`: implements §2 `Battler` using a persistent
+pair (`SimpleHeuristicsPlayer` for us, `make_opponent(enemy.ai)` for them),
+both with `QueueTeambuilder`s, one server configuration, unique usernames
+per process. `simulate()` packs both teams, pushes them, runs
+`battle_against(n_battles=1)` on the poke-env loop via
+`asyncio.run_coroutine_threadsafe(..., POKE_LOOP).result()`, and returns
+`result_from_battle(last_battle, len(party))`. `importance`/`blind`/`seed`
+are accepted and ignored here (documented).
+**Verify (integration):** `Battler.simulate` called 50 times in a loop
+returns 50 results with no leaked battles (`len(player.battles)` bounded)
+and no exceptions; average wall time per call logged.
+
+### P2.4 Throughput benchmark  [ ]
+`scripts/bench_throughput.py --servers K --concurrent C --battles N`:
+starts K `ShowdownServer`s, runs `RandomPlayer` pairs round-robin, prints
+battles/sec per configuration. Try K∈{1,4,8}, C∈{1,5,10}.
+**Verify:** table written to `docs/benchmarks.md`. Decide from it how many
+servers P4 will use. If best < 10 battles/sec, schedule P6.1 right after P3.
 
 ---
 
-## 7. Immediate next actions (M1, in order)
+## 5. Phase 3 — Run-level environment with scripted battler
 
-1. `uv init --package nuzlocke_gauntlet_rl`, add pins, `.gitignore` with
-   `third_party/`, `.venv/`, `replays/`, `checkpoints/`.
-2. `scripts/setup_showdown.sh` + `SHOWDOWN_COMMIT` (record the commit tested).
-3. `utils/showdown.py` server context manager.
-4. `utils/teams.py` packing + `QueueTeambuilder`.
-5. `tests/test_smoke.py` (integration) and `tests/test_teams.py` (unit).
-6. Tick the four M1 checkboxes in `README.md`.
+### P3.1 Specs, YAML loader, dex validation  [ ]
+Implement §2 `utils/specs.py`. YAML schema example
+(`config/gauntlets/toy_3.yaml`):
+```yaml
+name: toy_3
+max_roster: 8
+starters:
+  - {species: turtwig, level: 10, moves: [tackle, withdraw, absorb]}
+  - {species: starly,  level: 8,  moves: [tackle, growl, quickattack]}
+trainers:
+  - name: youngster_1
+    ai: trainer
+    team:
+      - {species: bidoof, level: 7, moves: [tackle, growl]}
+  - name: lass_1
+    team:
+      - {species: shinx,  level: 9, moves: [tackle, leer, charge]}
+      - {species: budew,  level: 8, moves: [absorb, growth]}
+  - name: rival_1
+    team:
+      - {species: chimchar, level: 12, moves: [scratch, ember, leer]}
+      - {species: starly,   level: 10, moves: [tackle, quickattack]}
+routes:
+  - name: route_202
+    unlock_after: 0
+    encounters:
+      - [{species: bidoof, level: 5, moves: [tackle]}, 0.6]
+      - [{species: kricketot, level: 5, moves: [bide, growl]}, 0.4]
+move_events:
+  - {species: turtwig, move: razorleaf, after_trainer: 1, source: level_up}
+```
+Also create `config/gauntlets/sinnoh_early.yaml`: 8–10 trainers up to and
+including the first gym (Roark: geodude 12 / onix 12 / cranidos 14), routes
+201/202/203/204, starters = one of the three Sinnoh starters at level 10
+plus a level-5 bidoof and a level-5 starly. Use public Platinum trainer data;
+exact fidelity is not required, plausibility is.
+**Verify (unit):** both YAML files load; a copy with `species: starlyy`
+raises `ValueError` naming the field; encounter probabilities not summing to
+1 (±1e-6) raise.
 
-References checked while writing this plan:
-poke-env 0.16.1 source (`environment/singles_env.py`, `env.py`,
-`single_agent_wrapper.py`, `player/player.py`, `pyproject.toml`),
-Showdown `config/formats.ts`, `COMMANDLINE.md`, `sim/SIM-PROTOCOL.md`,
-`package.json` (`engines.node >= 16`),
-[UT-Austin-RPL/metamon](https://github.com/UT-Austin-RPL/metamon),
-[pmariglia/poke-engine](https://github.com/pmariglia/poke-engine),
-[pmariglia/foul-play](https://github.com/pmariglia/foul-play).
+### P3.2 Observation builder  [ ]
+`utils/observation_builder.py`: `mon_features(mon | PokemonSpec | None) -> np.ndarray(F_MON)`
+(None → zeros) using `dex` index tables; `build_observation(state) -> dict`
+matching §2 spaces; `F_MON`, `F_EVENT` exported constants.
+**Verify (unit):** shapes match the declared spaces for a random state;
+padding rows are all zero; species index is stable across calls.
+
+### P3.3 `NuzlockeGauntletEnv`  [ ]
+`envs/nuzlocke_env.py`, `gymnasium.Env`, constructor
+`(gauntlets: Sequence[GauntletSpec], battler: Battler, cfg: RunConfig, seed=None)`.
+State: `roster: list[MonInstance]`, `trainer_idx`, `phase`, `event_queue`,
+`pending_encounter`. Phase machine exactly as README §5.2. `PRE_BATTLE`
+uses toggle actions + confirm (§2). On confirm: party = alive mons with
+`in_party`, call `battler.simulate(party, trainer, importance)`, apply
+permadeath, reward, advance. `info` returns `{"trainer_idx", "deaths",
+"alive", "cleared"}`. `reset()` samples a gauntlet uniformly with the env RNG.
+**Verify (unit, with a `FakeBattler` that returns scripted results):**
+`tests/test_nuzlocke_env.py`: (a) a mon reported dead never appears in a
+later party (property test, 200 random episodes); (b) wiping ends the
+episode; (c) clearing gives `clear_bonus`; (d) illegal actions are masked
+(`action_mask` never allows confirming an empty party); (e) `gymnasium.utils.env_checker.check_env` passes.
+
+### P3.4 Scripted run policies  [ ]
+`models/run_policy/scripted.py`: `RunPolicy` protocol
+`act(obs, info, env_state) -> int`; `RandomRunPolicy`; `GreedyRunPolicy`
+(bring the 6 highest-level alive mons; catch if roster has room else skip;
+learn a move if its base power exceeds the weakest current move's).
+**Verify (unit):** with `FakeBattler` always winning with no deaths,
+`GreedyRunPolicy` clears `toy_3` 100 %.
+
+### P3.5 Evaluation script  [ ]
+`scripts/run_evaluation.py --gauntlet <yaml>... --policy greedy|random
+--battler heuristic --episodes N --servers K --seed S` → prints and writes
+JSON to `runs/eval_<ts>.json`: success rate, mean trainer depth, expected
+survivors, deaths/run, with 95 % bootstrap CIs. `utils/evaluation.py` holds
+the metric code.
+**Verify (integration):** `greedy + heuristic` on `toy_3`, 30 episodes:
+success ≥ 0.9. On `sinnoh_early`, 50 episodes: success strictly between
+0.15 and 0.7 — if not, **tune the YAML** (levels/team sizes) until it is,
+and log the change in §8. Also `random` < `greedy` on `sinnoh_early`.
+
+---
+
+## 6. Phase 4 — RL battler with entropy-managed curriculum
+
+### P4.1 Add RL dependencies  [ ]
+`uv add stable-baselines3==2.9.0 sb3-contrib==2.9.0 torch tensorboard`.
+**Verify:** `uv run python -c "import torch, sb3_contrib; print(torch.cuda.is_available())"` prints `True`.
+If the resolver conflicts with poke-env's `gymnasium==1.3.0` pin, log it in
+§8 and implement `models/ppo.py` (masked PPO, ~300 lines) instead.
+
+### P4.2 `BattleEnv` (poke-env `SinglesEnv` subclass)  [ ]
+`envs/battle_env.py`:
+* Constructor takes `matchup_sampler: Callable[[], tuple[list[MonInstance], TrainerSpec]]`,
+  `opponent_kind`, `blind`, `server_configuration`, `reward_cfg`.
+  Uses `QueueTeambuilder`s for both agents; on every `reset()` draws a
+  matchup, pushes both teams, stores the `TrainerSpec` for observation
+  injection, then calls `super().reset()`.
+* `embed_battle(battle) -> np.ndarray` (float32, fixed length):
+  own 6 × [species_idx, type1, type2, level/100, hp_frac, fainted, active,
+  status_idx, 7 boosts/6, move_idx×4, move_pp_frac×4, importance] +
+  opponent 6 × [known-or-seen block same layout, `known` flag] +
+  field [weather idx, own/opp hazards, turn/100] + `blind` flag.
+  With `blind=False` the opponent block is filled from the `TrainerSpec`;
+  with `blind=True` only from `battle.opponent_team`.
+  Set `self.observation_spaces = {a: Box(low, high, shape) for a in self.possible_agents}` in `__init__` (read `env.py` to confirm the attribute the base class expects).
+* `calc_reward(battle)`: use `self.reward_computing_helper(battle, fainted_value=…, hp_value=0.01, victory_value=1.0)` and add `Σ importance_i·alive_i / n` at battle end.
+* `envs/masked_wrapper.py`: `MaskedSingleAgentEnv(gymnasium.Env)` wrapping
+  `SingleAgentWrapper(env, opponent)`: observation = `obs["observation"]`,
+  stores `obs["action_mask"]`, exposes `action_masks()` for `MaskablePPO`
+  (`sb3_contrib.common.wrappers.ActionMasker` compatible).
+**Verify (integration):** `check_env` (sb3) passes; 200 random masked steps
+never raise; `action_masks().sum() >= 1` at every step; obs has no NaN.
+
+### P4.3 Vectorised training script  [ ]
+`scripts/train_battle_policy.py --level L0|L1|L2|L3 --gauntlet <yaml>
+--servers K --envs N --steps S --opponent trainer|hard --blind --run-name`.
+`SubprocVecEnv` with N envs; env *i* uses server `i % K` (started by the
+script via `ShowdownServer`), unique usernames `b{pid}{i}` (≤ 18 chars).
+`MaskablePPO("MlpPolicy", …)` with an embedding feature extractor
+(`models/battle_policy/features.py`: `nn.Embedding` for species/moves/types,
+concat with scalars). Log to TensorBoard under `runs/`, checkpoint to
+`checkpoints/` every 100 k steps, eval callback = 100 battles vs the same
+opponent every 200 k steps, `EvalCallback`-style JSON.
+**Verify:** `--level L0 --steps 2000 --envs 2` runs end-to-end and writes a
+checkpoint. Measure env-steps/sec with `--envs 16 --servers 4`; record in
+`docs/benchmarks.md`. Target ≥ 50 steps/sec before L2.
+
+### P4.4 Curriculum L0 → L3  [ ]
+Matchup samplers in `envs/matchups.py`:
+* **L0**: one fixed party vs one fixed trainer (`sinnoh_early` rival_1 vs
+  the starters). **Gate:** win rate ≥ 0.9 vs `TrainerAI` within 1 M steps.
+  If not reached, the env/obs/mask/reward has a bug — debug (compare with
+  `HeuristicBattler`'s win rate on the same matchup) and do not continue.
+* **L1**: fixed party, trainer sampled uniformly from the gauntlet. Gate: ≥ heuristic win rate − 5 pp.
+* **L2**: party sampled from `config/rosters/pool20.yaml` (20 hand-built
+  parties of 3–6 mons, levels 8–20), trainers sampled. Gate: ≥ heuristic.
+* **L3**: party sampled from `runs/party_log.jsonl` written by P3.5
+  (actual parties the run env produces). Gate: ≥ heuristic, and ≥ 0.6 vs
+  `hard`.
+Each level starts from the previous level's checkpoint. Keep `importance`
+sampled uniformly in [0.5, 1] per mon from L1 on so the policy learns to
+read it.
+**Verify:** `docs/curriculum.md` with a table (level, steps, win rate vs
+trainer, vs hard, heuristic baseline). All gates met.
+
+### P4.5 Behaviour-cloning warm start (only if L2 or L3 stalls)  [ ]
+`scripts/collect_bc.py` records `(obs, mask, action)` from
+`SimpleHeuristicsPlayer` (or `SearchBattler` if P6.2 exists) over 50 k
+steps; `scripts/bc_pretrain.py` trains the same policy network with masked
+cross-entropy, saves weights loadable by `MaskablePPO.set_parameters`.
+**Verify:** BC policy win rate ≥ 0.8 × teacher's; PPO from BC init beats
+PPO from scratch at equal steps on the stalled level.
+
+### P4.6 `RLBattler`  [ ]
+`battle/rl_battler.py`: `Battler` backed by a `MaskablePPO` checkpoint
+driving a poke-env `Player` subclass whose `choose_move` runs the policy
+(`deterministic=True`) on `embed_battle` + mask. Same server/teambuilder
+plumbing as `HeuristicBattler`.
+**Verify (integration):** `run_evaluation.py --battler rl` on
+`sinnoh_early` ≥ `--battler heuristic` on success rate (CIs reported).
+
+---
+
+## 7. Phase 5 — Run-level policy
+
+### P5.1 Win-probability dataset + model  [ ]
+`scripts/collect_winprob.py`: sample (party, trainer) pairs from the
+gauntlets and roster pool, run `Battler.simulate` in parallel (K servers),
+write `runs/winprob.parquet` with features + outcome + survivors.
+`models/win_prob/model.py`: MLP over pooled mon embeddings; predicts P(win)
+and expected deaths. Train/val split by gauntlet seed.
+**Verify:** ≥ 20 k battles collected; val AUC ≥ 0.8; calibration plot saved.
+
+### P5.2 `SearchRunPolicy`  [ ]
+At `PRE_BATTLE` enumerate candidate parties (all subsets ≤ 6 when roster ≤ 10,
+else greedy-add beam width 8), score = P(win) − λ·E[deaths·importance];
+`ENCOUNTER`: catch if marginal best-party score improves or box has room;
+`MOVE_SELECTION`: pick the move that maximises the estimator for the next
+trainer. λ in config.
+**Verify:** beats `GreedyRunPolicy` on `sinnoh_early` success rate with
+non-overlapping 95 % CIs over 200 episodes.
+
+### P5.3 `RLRunPolicy`  [ ]
+`scripts/train_nuzlocke_policy.py`: `MaskablePPO` on `NuzlockeGauntletEnv`
+with the frozen best battler; N envs each with its own battler/server; cache
+`simulate` results keyed by `(party hash, trainer, seed)` for evaluation
+reproducibility. Optionally initialise from `SearchRunPolicy` rollouts by BC.
+**Verify:** ≥ `SearchRunPolicy` on held-out gauntlet seeds; ablations from
+README §7 run by `scripts/run_ablations.py` and summarised in `docs/results.md`.
+
+---
+
+## 8. Phase 6 — Faster / searchable engine (optional, parallel after P3)
+
+### P6.1 Stdio backend  [ ]
+`battle/backends/stdio.py`: drive `node pokemon-showdown simulate-battle`
+(protocol `sim/SIM-PROTOCOL.md`: write `>start {"formatid":"gen4customgame","seed":[…]}`,
+`>player p1 {"name":"p1","team":"<packed>"}`, `>player p2 …`, then
+`>p1 move 2` / `>p1 switch 3`; read `sideupdate`/`update`/`end` blocks) with
+one subprocess per worker. Feed the `|request|` JSON into a poke-env
+`Battle` object so existing players/embeddings work unchanged.
+**Verify:** 1000 seeded battles, `HeuristicBattler` results identical between
+websocket and stdio backends (same seed → same log); speed-up recorded.
+
+### P6.2 `SearchBattler` on poke-engine  [ ]
+`uv add poke-engine` (PyPI 0.0.48; build with the Gen 4 feature flag — read
+its README for the exact `--config-settings`). Convert a poke-env `Battle`
+to a poke-engine state, run expectiminimax depth 2–3 per turn.
+**Verify:** ≥ `SimpleHeuristicsPlayer` win rate vs `hard` over 300 battles
+on Showdown; disagreement rate between engines logged.
+
+---
+
+## 9. Pitfalls (read before each phase)
+
+1. poke-env 0.16 RL classes: `SinglesEnv` (PettingZoo `ParallelEnv`,
+   observations are `{"observation", "action_mask"}` dicts) and
+   `SingleAgentWrapper`. `SingleAgentWrapper.reset` returns only the wrapped
+   dict; you must unwrap for SB3.
+2. poke-env pins `gymnasium==1.3.0`, `websockets==16.1.1`; SB3 2.9.0 accepts
+   both. Do not add anything that pins gymnasium < 1.
+3. `team=` is fixed at player construction; per-battle teams go through
+   `Teambuilder.yield_team()` → `QueueTeambuilder`.
+4. Usernames ≤ 18 chars, unique per server; `AccountConfiguration(name, None)`
+   is enough with `--no-security`.
+5. One Showdown process is single-threaded: scale with more servers on more
+   ports, not more concurrency on one server.
+6. poke-env runs its own loop thread (`poke_env.concurrency.POKE_LOOP`);
+   call coroutines with `asyncio.run_coroutine_threadsafe(coro, POKE_LOOP)`.
+   Never create players inside a different running loop.
+7. Custom Game: level goes in the packed team (blank = 100); species/move
+   ids must be lowercase Showdown ids; set an explicit ability.
+8. Action masking is mandatory for PPO here; without it training "does
+   nothing".
+9. A gauntlet on which the greedy baseline scores 0 % or 100 % cannot
+   discriminate policies; tune it first (P3.5).
+10. Measure throughput (P2.4, P4.3) before any long run.
+11. Never bump `SHOWDOWN_COMMIT` without green integration tests.
+
+---
+
+## 10. Decision log
+
+Append entries as `YYYY-MM-DD — task — what changed and why`.
+
+* 2026-09-08 — plan — initial version; versions verified against PyPI and
+  GitHub on this date.
