@@ -2,6 +2,13 @@
 
 Nuzlocke gauntlet RL — minimal rebuild (attempt 3). Full plan: `project_overview.md`.
 
+**Direction (reframed 2026-09-15):** general solver for unseen gauntlets.
+Battler = BC prior + search over the real engine with a risk objective, returning
+win/death probabilities; run layer proposes parties and queries it. Primary metric
+is trainers cleared without a death on the gauntlet distribution, train vs held-out.
+The Status section below is the lab notebook that led there; the roadmap in
+`project_overview.md` is what comes next.
+
 **Rule of this repo: as little code as possible.** Complexity is only added when a
 concrete failure demands it. Two prior attempts died of scope bloat.
 
@@ -363,6 +370,61 @@ project_overview.md # the plan / roadmap
     n/a / **70% vs enemy heuristic on holdout game matchups** (baseline
     68.5%). Matches the gen9 finetune finding: pure imitation tops out at
     the teacher; exceeding it needs RL/self-play/DAgger on top.
+  ```
+- [x] **Step 1: in-process sim + line evaluator + search (2026-09-15)**
+  ```
+  `ai_util/sim_bridge.js` drives Showdown's simulator over JSON lines (new /
+  choose / fork+reseed / forcelose / state), no websocket server, no logins.
+  `ai_util/sim.py` mirrors each side's protocol stream into poke-env Battle
+  objects, so PolicyPlayer / SimpleHeuristics / embed_battle run unchanged;
+  fork rebuilds mirrors by replaying history. `ai_util/evaluate.py`:
+  evaluate() = Monte Carlo P(win), P(death_i), risk for one matchup (the
+  run-layer interface); Searcher = top-k rollout search over the BC prior
+  (fork, play each candidate out `rollouts` times vs the enemy AI, pick best
+  win − death_weight·deaths). Checks, in order:
+    uv run pytest -q tests/test_sim.py
+    uv run python ai_util/evaluate.py --check --n-pairs 200      # expect ~68.5%
+    uv run python ai_util/evaluate.py --policy models/game_policy_best.pt --n-pairs 100   # expect ~70%
+    uv run python ai_util/evaluate.py --policy models/game_policy_best.pt --search --n-pairs 30 --k 3 --rollouts 8
+  Go/no-go: search beats the prior-alone number on the same pairs.
+  - Sim runs (2026-09-15): `--check` on holdout **61.5%** (n=200), `--check
+    --from-harvest` (same seed-0 sample as the old baseline) **62.0%** (n=200,
+    7.5 turns avg, ~0.01 s/battle). Same sample on a live server today:
+    **69.0%** (`collect_game.py baseline`). **Cause found** (`diff_sets.py`):
+    the server's TeamValidator fills **252 EVs in every stat** when the
+    format has no EV limit (Custom Game); the raw sim used 0 EVs, so every
+    mon was weaker (L5 Turtwig 22 vs 25 HP). Fix: the bridge now unpacks +
+    validates teams like the server. Confirmed: `diff_sets.py` 0 diffs,
+    `--check --from-harvest` **69.5%** (server 69.0%).
+  - **Second defect, shared with the server path**: 16% of choices rejected
+    ("can't switch to an active Pokémon"), 6% brain defaults — harvest
+    parties often carry two of a species, and poke-env keys teams by
+    nickname so duplicates collapse into one entry. Fix: `sim.py`
+    dedupes nicknames (Bidoof, Bidoof2) and pre-populates our own team
+    before any protocol line (poke-env's lazy path renames same-species
+    entries). After: **0.00%** rejected/default, heuristic mirror 69.0%.
+    `--raw-names` reproduces the old collapse for apples-to-apples checks.
+  - **Prior alone in the sim** (`models/game_policy_best.pt`, deduped teams):
+    holdout[:100] **68.0%**, holdout[:30] 66.7% (server number was 70%
+    with collapsed teams; within noise). 0 rejected choices.
+  - Search pilot v1 (k=3, r=8): expanded **0/269** decisions — the
+    `confident=0.9` gate skipped everything because the converged BC prior
+    is >0.9 almost always. Gate removed (opt-in `--confident`).
+  - **Step-1 go/no-go (holdout[:100], 3 battles/pair, ~4 s/pair)**:
+    | brain | win | deaths/mon |
+    |---|---|---|
+    | prior (greedy BC) | 68.3% | 0.40 |
+    | search k=3 r=8, death_weight 0.5 | **70.3%** | **0.33** |
+    | search k=3 r=8, death_weight 0 | 71.3% | 0.38 |
+    | search k=3 r=16, death_weight 0.5 | 71.0% | 0.32 |
+    Every search run (30/100/300-battle) landed above every prior run
+    (66.7–68.3), so the direction is consistent; the win gain (+2–3 pts) is
+    inside n=300 noise (SE ~2.6), the death reduction (−18%) is the clearer
+    effect and is what the run layer needs. Verdict: **go**, modestly. The
+    ceiling is the rollout policy: values are "how the prior would finish
+    from here", 1-ply. Levers next: deeper/PUCT search reusing forks,
+    expert iteration (retrain prior on search choices), stronger enemy
+    model (RR AI port) for boss fights.
   ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```

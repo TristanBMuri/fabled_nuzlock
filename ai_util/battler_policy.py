@@ -55,6 +55,22 @@ class FeaturesExtractor(BaseFeaturesExtractor):
         return obs["observation"]
 
 
+def load_policy(path: str, net_arch=(256, 256), device: str | None = None) -> MaskedActorCriticPolicy:
+    """Rebuild the masked policy from a saved state_dict (BC or PPO checkpoint)."""
+    from gymnasium.spaces import Box, Dict, Discrete
+
+    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    obs_space = Dict({
+        "observation": Box(-1, 4, shape=(N_FEATURES,), dtype=np.float32),
+        "action_mask": Box(low=0, high=1, shape=(N_ACTIONS,), dtype=np.int64),
+    })
+    policy = MaskedActorCriticPolicy(obs_space, Discrete(N_ACTIONS), lambda _: 3e-4,
+                                     net_arch=list(net_arch)).to(device)
+    policy.load_state_dict(torch.load(path, map_location=device))
+    policy.eval()
+    return policy
+
+
 class PolicyPlayer(Player):
     """Plays embed_battle/action_mask through a policy; used for eval."""
 
