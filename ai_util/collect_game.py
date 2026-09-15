@@ -144,32 +144,43 @@ def recording_brain(record: list, ctx: dict):
     return brain
 
 
+KEYS = ("obs", "mask", "action", "value")
+
+
+def _save_shard(path: Path, record: list, values: list) -> None:
+    """record rows are (obs, mask, action); value = the battle's outcome_value
+    (win - 0.5 * fainted fraction), the Monte Carlo target for the value head."""
+    np.savez_compressed(path, obs=np.asarray([r[0] for r in record]),
+                        mask=np.asarray([r[1] for r in record]),
+                        action=np.asarray([r[2] for r in record]),
+                        value=np.asarray(values, dtype=np.float16))
+
+
 def collect_worker_sim(worker: int, pairs: list, out_dir: Path) -> None:
-    from ai_util.evaluate import heuristic_brain
+    from ai_util.evaluate import heuristic_brain, outcome_value
     from ai_util.sim import SimBattle, SimBridge
 
-    record, ctx, failures = [], {"n": 0, "switch": 0}, 0
+    record, values, ctx, failures = [], [], {"n": 0, "switch": 0}, 0
     bridge, me, foe = SimBridge(), None, heuristic_brain()
     me = recording_brain(record, ctx)
     for i, (p_team, e_team) in enumerate(pairs):
+        start = len(record)
         try:
             sb = SimBattle(bridge, GAME_FORMAT, p_team, e_team)
             sb.play({"p1": me, "p2": foe}, max_turns=100)
+            values += [outcome_value(sb.state(), "p1")] * (len(record) - start)
             sb.close()
         except Exception as e:
             failures += 1
+            del record[start:]
             print(f"worker {worker}: battle failed ({type(e).__name__}: {e})", flush=True)
             bridge = SimBridge()
         if (i + 1) % 500 == 0:
             print(f"worker {worker}: {i + 1}/{len(pairs)} battles, {ctx['n']} pairs, "
                   f"{failures} failures", flush=True)
     bridge.close()
-    np.savez_compressed(
-        out_dir / f"shard_{worker}.npz",
-        obs=np.asarray([r[0] for r in record]),
-        mask=np.asarray([r[1] for r in record]),
-        action=np.asarray([r[2] for r in record]))
-    print(f"worker {worker} done: {ctx['n']} pairs, switch={ctx['switch'] / max(ctx['n'], 1):.1%}, "
+    _save_shard(out_dir / f"shard_{worker}.npz", record, values)
+    print(f"worker {worker} done: {len(record)} pairs, switch={ctx['switch'] / max(ctx['n'], 1):.1%}, "
           f"{failures} failed battles", flush=True)
 
 
@@ -177,12 +188,13 @@ def collect_worker_search(worker: int, pairs: list, out_dir: Path, policy: str,
                           k: int, rollouts: int) -> None:
     """Expert iteration labels: the search's chosen action on each decision."""
     from ai_util.battler_policy import load_policy
-    from ai_util.evaluate import Searcher, heuristic_brain
+    from ai_util.evaluate import Searcher, heuristic_brain, outcome_value
     from ai_util.sim import SimBattle, SimBridge
 
     bridge, foe = SimBridge(), heuristic_brain()
     searcher = Searcher(load_policy(policy, device="cpu"), foe, k=k, rollouts=rollouts)
-    record, ctx, failures = [], {"n": 0, "switch": 0, "searched": 0, "changed": 0}, 0
+    searcher.leaf_record = leaves = []  # (leaf obs, mask, -1, rollout outcome) per rollout
+    record, values, ctx, failures = [], [], {"n": 0, "switch": 0, "searched": 0, "changed": 0}, 0
 
     def me(sb, side):
         m = sb.mirrors[side]
@@ -200,12 +212,15 @@ def collect_worker_search(worker: int, pairs: list, out_dir: Path, policy: str,
         return choice
 
     for i, (p_team, e_team) in enumerate(pairs):
+        start = len(record)
         try:
             sb = SimBattle(bridge, GAME_FORMAT, p_team, e_team)
             sb.play({"p1": me, "p2": foe}, max_turns=100)
+            values += [outcome_value(sb.state(), "p1")] * (len(record) - start)
             sb.close()
         except Exception as e:
             failures += 1
+            del record[start:]
             print(f"worker {worker}: battle failed ({type(e).__name__}: {e})", flush=True)
             bridge = SimBridge()
             searcher.enemy = foe
@@ -213,12 +228,9 @@ def collect_worker_search(worker: int, pairs: list, out_dir: Path, policy: str,
             print(f"worker {worker}: {i + 1}/{len(pairs)} battles, {ctx['n']} pairs "
                   f"({ctx['searched']} searched), {failures} failures", flush=True)
     bridge.close()
-    np.savez_compressed(
-        out_dir / f"shard_{worker}.npz",
-        obs=np.asarray([r[0] for r in record]),
-        mask=np.asarray([r[1] for r in record]),
-        action=np.asarray([r[2] for r in record]))
-    print(f"worker {worker} done: {ctx['n']} pairs, searched {ctx['searched']}, "
+    _save_shard(out_dir / f"shard_{worker}.npz", record, values)
+    _save_shard(out_dir / f"leaf_{worker}.npz", [r[:3] for r in leaves], [r[3] for r in leaves])
+    print(f"worker {worker} done: {len(record)} pairs, {len(leaves)} leaves, searched {ctx['searched']}, "
           f"switch={ctx['switch'] / max(ctx['n'], 1):.1%}, {failures} failed battles", flush=True)
 
 
@@ -239,12 +251,13 @@ def collect_search(args: argparse.Namespace) -> None:
         p.start()
     for p in procs:
         p.join()
-    shards = sorted(out_dir.glob("shard_*.npz"))
-    data = {k: np.concatenate([np.load(s)[k] for s in shards]) for k in ("obs", "mask", "action")}
-    np.savez_compressed(out_dir / "data.npz", **data)
-    for s in shards:
-        s.unlink()
-    print(f"collected {len(data['action'])} search-labelled pairs -> {out_dir / 'data.npz'}")
+    for kind, name in (("shard", "data"), ("leaf", "leaves")):
+        shards = sorted(out_dir.glob(f"{kind}_*.npz"))
+        data = {k: np.concatenate([np.load(s)[k] for s in shards]) for k in KEYS}
+        np.savez_compressed(out_dir / f"{name}.npz", **data)
+        for s in shards:
+            s.unlink()
+        print(f"collected {len(data['action'])} {name} -> {out_dir / name}.npz")
 
 
 def holdout(args: argparse.Namespace) -> None:
@@ -273,7 +286,7 @@ def collect(args: argparse.Namespace) -> None:
     for p in procs:
         p.join()
     shards = sorted(out_dir.glob("shard_*.npz"))
-    data = {k: np.concatenate([np.load(s)[k] for s in shards]) for k in ("obs", "mask", "action")}
+    data = {k: np.concatenate([np.load(s)[k] for s in shards]) for k in KEYS}
     np.savez_compressed(out_dir / "data.npz", **data)
     for s in shards:
         s.unlink()

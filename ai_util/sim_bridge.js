@@ -4,7 +4,8 @@
 //   {"op":"new","id":"b0","format":"gen8customgamenogimmicks",
 //    "p1":{"name":"p1","team":"<packed>"},"p2":{...},"seed":[..]?}   -> flush
 //   {"op":"choose","id":"b0","p1":"move 1","p2":"switch 2"}          -> flush
-//   {"op":"fork","id":"b0","new":"b1","reseed":true}                 -> {"ok":true}
+//   {"op":"fork","id":"b0","new":"b1","reseed":true,"seed":[..]?}    -> {"ok":true}
+//     seed = 4 ints (Gen5 PRNG) fixes the fork's RNG; reseed=true rolls a fresh one
 //   {"op":"forcelose","id":"b0","side":"p1"}                         -> flush
 //   {"op":"state","id":"b0"}   -> hp/fainted per mon in original team order
 //   {"op":"close","id":"b0"}
@@ -95,7 +96,8 @@ function handle(msg) {
       const b = Battle.fromJSON(JSON.stringify(entry.battle.toJSON()));
       const e = { battle: b, out: { p1: [], p2: [] } };
       attach(e);
-      if (msg.reseed !== false) b.resetRNG(null);
+      if (msg.seed) b.resetRNG(msg.seed);
+      else if (msg.reseed !== false) b.resetRNG(null);
       battles.set(msg.new, e);
       return { ok: true };
     }

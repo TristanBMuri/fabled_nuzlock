@@ -154,9 +154,14 @@ def _gauntlet_winrate(policy, pairs: list, server, n: int) -> float:
 def pretrain(args: argparse.Namespace) -> Path:
     paths = args.data if isinstance(args.data, list) else [args.data]
     loaded = [np.load(p) for p in paths]
-    arrays = {k: np.concatenate([d[k] for d in loaded]) for k in ("obs", "mask", "action")}
+    # "value" (battle outcome per decision, collect_game >= 2026-09-15) trains the
+    # critic; datasets without it train the actor only
+    keys = ("obs", "mask", "action") + (("value",) if all("value" in d for d in loaded) else ())
+    arrays = {k: np.concatenate([d[k] for d in loaded]) for k in keys}
     if len(paths) > 1:
         print("datasets: " + ", ".join(f"{p} ({len(d['action'])})" for p, d in zip(paths, loaded)))
+    if args.value_only and "value" not in arrays:
+        raise SystemExit("--value-only needs datasets with a value column")
     n = len(arrays["action"])
     perm = np.random.default_rng(0).permutation(n)
     n_val = max(n // 20, 100)
@@ -169,31 +174,47 @@ def pretrain(args: argparse.Namespace) -> Path:
     })
     policy = MaskedActorCriticPolicy(obs_space, Discrete(N_ACTIONS), lambda _: 3e-4,
                                      net_arch=[int(a) for a in args.net_arch.split(",")]).to(device)
+    if args.init:
+        policy.load_state_dict(torch.load(args.init, map_location=device))
     params = sum(p.numel() for p in policy.parameters())
     print(f"pretraining {params / 1e3:.0f}k-param policy on {len(train_idx)} pairs "
-          f"(val {len(val_idx)}), device={device}")
+          f"(val {len(val_idx)}), device={device}"
+          + (f", init {args.init}" if args.init else "")
+          + (", value head" + (" only" if args.value_only else "") if "value" in arrays else ""))
+
+    def _value_target(chunk):
+        return torch.as_tensor(arrays["value"][chunk].astype(np.float32), device=device)
 
     def _metrics(idx, bs):
-        losses, correct, switch_n, switch_c = [], 0, 0, 0
+        losses, vlosses, correct, switch_n, switch_c = [], [], 0, 0, 0
         with torch.no_grad():
             for i in range(0, len(idx), bs):
                 chunk = idx[i:i + bs]
                 obs = _batch(arrays, chunk, device)
-                act = torch.as_tensor(arrays["action"][chunk].astype(np.int64), device=device)
-                policy._mask = obs["action_mask"]
-                dist = policy.get_distribution(obs)
-                losses.append(-dist.log_prob(act).mean().item())
-                pred = dist.distribution.logits.argmax(-1)
-                ok = (pred == act).cpu().numpy()
-                correct += int(ok.sum())
-                is_switch = (arrays["action"][chunk] < 6)
-                switch_n += int(is_switch.sum())
-                switch_c += int(ok[is_switch].sum())
-        return float(np.mean(losses)), correct / len(idx), (switch_c / switch_n if switch_n else float("nan"))
+                if not args.value_only:  # leaf datasets carry no action labels (-1)
+                    act = torch.as_tensor(arrays["action"][chunk].astype(np.int64), device=device)
+                    policy._mask = obs["action_mask"]
+                    dist = policy.get_distribution(obs)
+                    losses.append(-dist.log_prob(act).mean().item())
+                    pred = dist.distribution.logits.argmax(-1)
+                    ok = (pred == act).cpu().numpy()
+                    correct += int(ok.sum())
+                    is_switch = (arrays["action"][chunk] < 6)
+                    switch_n += int(is_switch.sum())
+                    switch_c += int(ok[is_switch].sum())
+                if "value" in arrays:
+                    v = policy.predict_values(obs).squeeze(-1)
+                    vlosses.append(((v - _value_target(chunk)) ** 2).mean().item())
+        return (float(np.mean(losses)) if losses else float("nan"), correct / len(idx),
+                (switch_c / switch_n if switch_n else float("nan")),
+                float(np.mean(vlosses)) if vlosses else float("nan"))
 
     valid_counts = arrays["mask"][val_idx].sum(1)
     uniform_ce = float(np.log(valid_counts.mean()))
     print(f"baseline: uniform-over-valid CE = {uniform_ce:.3f} (avg {valid_counts.mean():.1f} valid actions)")
+    if "value" in arrays:
+        vv = arrays["value"][val_idx].astype(np.float32)
+        print(f"baseline: value MSE = {vv.var():.3f} (predicting the mean {vv.mean():+.3f})")
 
     opt = policy.optimizer
     eval_pairs = None
@@ -210,15 +231,19 @@ def pretrain(args: argparse.Namespace) -> Path:
             obs = _batch(arrays, chunk, device)
             act = torch.as_tensor(arrays["action"][chunk].astype(np.int64), device=device)
             policy._mask = obs["action_mask"]
-            dist = policy.get_distribution(obs)
-            loss = -dist.log_prob(act).mean()
+            loss = 0.0 if args.value_only else -policy.get_distribution(obs).log_prob(act).mean()
+            if "value" in arrays:
+                v = policy.predict_values(obs).squeeze(-1)
+                loss = loss + args.value_coef * ((v - _value_target(chunk)) ** 2).mean()
             opt.zero_grad()
             loss.backward()
             opt.step()
-        tl, ta, ts = _metrics(train_idx[:20000], 4096)
-        vl, va, vs = _metrics(val_idx, 4096)
+        tl, ta, ts, tv = _metrics(train_idx[:20000], 4096)
+        vl, va, vs, vv = _metrics(val_idx, 4096)
         msg = (f"epoch {epoch}: train CE {tl:.3f} acc {ta:.0%} (switch {ts:.0%}) | "
                f"val CE {vl:.3f} acc {va:.0%} (switch {vs:.0%})")
+        if "value" in arrays:
+            msg += f" | value MSE train {tv:.3f} val {vv:.3f}"
         if eval_pairs is not None and (epoch + 1) % args.eval_every == 0:
             wr = _gauntlet_winrate(policy, eval_pairs, server_conf(args.port), args.eval_battles)
             last_out = out_dir / f"{tag}_epoch{epoch}.pt"
@@ -272,6 +297,10 @@ def main() -> None:
     p.add_argument("--eval-every", type=int, default=5, help="epochs between win-rate evals")
     p.add_argument("--patience", type=int, default=3, help="evals without improvement before stop")
     p.add_argument("--batch", type=int, default=1024)
+    p.add_argument("--init", help="state_dict to start from (e.g. to add a value head to a prior)")
+    p.add_argument("--value-only", action="store_true",
+                   help="train only the value head (actor untouched; needs --init to be useful)")
+    p.add_argument("--value-coef", type=float, default=1.0, help="weight of the value MSE loss")
     p.add_argument("--n", type=int, default=100, help="battles per opponent for eval")
     args = p.parse_args()
     if args.phase == "collect":

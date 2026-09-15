@@ -67,3 +67,18 @@ def test_fork_continues_independently(bridge):
     assert sb.ended
     sb.close()
     f.close()
+
+
+def test_fork_seed_is_reproducible(bridge):
+    """Same seed -> same chance events (common random numbers for search)."""
+    sb = SimBattle(bridge, FMT, TEAM_A, TEAM_B)
+    b = brains()
+    sb.step({s: b[s](sb, s) for s in ("p1", "p2") if sb.pending[s]})
+    runs = []
+    for _ in range(2):
+        f = sb.fork(seed=[1, 2, 3, 4])
+        f.play(b, max_turns=60)
+        runs.append((f.turn, f.winner, [(m["hp"], m["fainted"]) for m in f.state()["p1"]]))
+        f.close()
+    assert runs[0] == runs[1]
+    sb.close()

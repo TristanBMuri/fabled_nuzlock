@@ -252,14 +252,17 @@ interface end to end, and it needs no training run to produce a number.
       `search_all=True` in NuzlockeEnv. ~50 s/episode.
 - [x] **2j. Planner cost**: planner runs with `risk_features=False`
       (it queries candidates directly); the obs re-queries were +50%.
-- [ ] **2k. Measure the combined default**: risk-based parties (2h) +
-      search-all (2i') on the 51-slice, 40 episodes. Expected: >95% clears,
-      <3 deaths. Then make it the default run config and the baseline table
-      that step 2e's learned run layer must beat.
-- [ ] **2l. Value estimate is the next battler ceiling.** Rollouts under the
-      prior are 1-ply and noisy (r=8). Options in order: reuse forks across
-      candidates (common random numbers), r=16 at bosses only, a learned
-      value head trained on rollout outcomes (cheap: the sim produces them).
+- [x] **2k. Combined default measured** (20 eps): 100% clears, 2.65
+      deaths/run, 0 lost battles. This is the baseline table step 2e's
+      learned run layer must beat. Deaths now come from Roark (20) and
+      Hiker Daniel (11) only.
+- [x] **2l. Value estimate.** Common random numbers across candidates:
+      67.2% vs 63.7% win, 0.35 vs 0.37 deaths/mon on the match-rule holdout
+      (prior 59.2%); free, default now. Learned value head as rollout leaf:
+      null twice (teacher-outcome data 22.7%, on-policy search-leaf data
+      41.2% — both below the prior alone). Rollouts over the engine remain
+      the value estimate. Gauntlet default with CRN: 100% / 2.40 deaths /
+      36.25 no-death (was 2.65 / 33.8). Details in README → Status 2l.
 - [ ] **2m. Evolution.** Not modelled; matters from gym 2 (starters evolve
       at 16–18). Showdown species data has evos + evoLevel; apply on level-up
       in `_apply_level_rule`. Do before extending the slice past Roark.

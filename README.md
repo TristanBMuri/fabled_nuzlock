@@ -2,6 +2,8 @@
 
 Nuzlocke gauntlet RL — minimal rebuild (attempt 3). Full plan: `project_overview.md`.
 
+**Start here: `HANDOFF.md`** — compressed state, findings, defects, next steps.
+
 **Direction (reframed 2026-09-15):** general solver for unseen gauntlets.
 Battler = BC prior + search over the real engine with a risk objective, returning
 win/death probabilities; run layer proposes parties and queries it. Primary metric
@@ -508,10 +510,41 @@ project_overview.md # the plan / roadmap
   run level: prior for candidates, engine for the value. The remaining
   battler gap is not the prior — it's the value estimate (rollouts under
   the prior, 1-ply).
-  **Combined default (risk-based parties + search-all), preliminary**, 9
-  episodes seed 300: **51.0 cleared / 33.7 no-death / 2.00 deaths / 100%
-  clear**, ~90 s/episode (`logs/plan_cap_full.log`). Roadmap 2k: confirm
-  on 40 episodes, then this is the baseline a learned run layer must beat.
+  **Combined default (risk-based parties + search-all)**, 20 episodes
+  seed 300: **51.0 cleared / 33.8 no-death / 2.65 deaths / 100% clear**,
+  0 lost battles anywhere (Roark 20 deaths, Hiker Daniel 11), ~90
+  s/episode (`logs/plan_cap_full.log`). This is the run config to beat.
+  **2l. Value estimate (2026-09-15, evening).** Benchmark: the match-rule
+  holdout (`models/gauntlet_holdout.json`, 200 pairs x3, seed 7) — the cap
+  prior is OOD there (59.2% win / 0.44 deaths per mon), which leaves room
+  for search to matter; the cap holdout saturates at 99%.
+    prior:                                59.2% / 0.44
+    search k=3 r=8, fresh RNG per rollout: 63.7% / 0.37   (`logs/search_nocrn.log`)
+    search k=3 r=8, common random numbers: 67.2% / 0.35   (`logs/search_crn.log`)
+  **Common random numbers** (same engine seed for rollout j of every
+  candidate; `SimBattle.fork(seed=)`, Searcher default) is free and worth
+  +3.5 pts / −0.02 deaths per mon; 600 battles so ~2 pts is noise. Default now.
+  **Learned value head — null, twice.** Critic trained by MSE on the battle
+  outcome (win ±1 − 0.5·fainted fraction), actor frozen (`pretrain_bc.py
+  --init --value-only`), used as the leaf of truncated rollouts (`--horizon`):
+    v1 teacher data (305k decisions from both harvests; val MSE 0.72 → 0.30):
+      h=0: 22.7% / 0.81   h=3: 42.5% / 0.62   h=0 k=6 r=16: 22.8% / 0.81
+    v2 on-policy data (233k search leaves, outcome under the prior;
+      val MSE 1.11 → 0.44):  h=0: 41.2% / 0.67
+  Both are below the prior alone. Diagnostic (`temp/diag_value.py`): argmax
+  agreement with full rollouts 44% (v1) / 57% (v2) over 3 candidates, and
+  v1 scores every switch candidate low — the teacher only switches when
+  already losing, so "just switched" states are labelled as losses
+  (off-policy value). Also: the value head is OOD on wait states (enemy's
+  forced switch after our KO); the Searcher settles those before scoring
+  (`_settle`). Verdict: rollouts over the engine stay the value estimate;
+  a 658k-param MLP critic does not resolve candidate differences that the
+  rollouts see. Kept the code paths (off by default) for one more attempt
+  with more leaf data / a bigger critic; delete them if that is also flat.
+  Gauntlet default re-measured with CRN (20 eps, seed 300,
+  `logs/plan_cap_crn.log`): **51.0 cleared / 36.25 no-death / 2.40 deaths /
+  100% clear**, 0 lost battles (was 33.8 / 2.65; Roark 20 deaths again,
+  Hiker Daniel 13). Same direction as the holdout, within 20-episode noise.
   ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```

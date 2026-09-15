@@ -12,7 +12,10 @@ The prior attempt lives at `~/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_
 
 ## Workflow
 
-- Read `README.md` Status section + `project_overview.md` roadmap at task start.
+- Read `HANDOFF.md` first, then `project_overview.md` roadmap; `README.md`
+  Status is the full notebook.
+- Everything runs in-process through `ai_util/sim*` — no Showdown server
+  unless you are cross-checking the sim against it.
 - The battler (BC prior + search) must return trustworthy win/death
   probabilities on held-out gauntlet matchups before the run layer is trained
   on top of it. Roadmap step 1 before step 2.
@@ -53,6 +56,14 @@ decisions:
 - "The obs is missing X" was undertraining every time. Converge BC first.
 - gamma 0.95 on 40-turn episodes makes the win reward negligible; the agent
   farms shaping instead.
+- Progression rule > policy: the level rule decided the gauntlet ceiling.
+  Any change to it means regenerating the harvest and retraining the prior.
+- Search over the engine beats training the prior harder (search-all: 52%
+  → 95% clears; expert iteration v1: nothing).
+- poke-env pitfalls with same-species mons (team collapse, species-based
+  mask/labels) and the server's 252-EV fill are documented in HANDOFF.md.
+  Use `ai_util.battler_policy.action_mask/order_to_action`, never
+  `SinglesEnv.get_action_mask/order_to_action` directly.
 
 ## Hard-won lessons from attempt #2 (do not relearn these)
 

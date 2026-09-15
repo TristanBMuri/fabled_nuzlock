@@ -47,15 +47,39 @@ def prior_brain(policy) -> Brain:
                                      start_listening=False, log_level=50))
 
 
+def _obs_dict(policy, mirror) -> dict:
+    return {"observation": torch.as_tensor(embed_battle(mirror), device=policy.device).unsqueeze(0),
+            "action_mask": torch.as_tensor(action_mask(mirror), device=policy.device).unsqueeze(0)}
+
+
 def prior_probs(policy, mirror) -> tuple[np.ndarray, np.ndarray]:
-    obs = embed_battle(mirror)
-    mask = action_mask(mirror)
     with torch.no_grad():
-        od = {"observation": torch.as_tensor(obs, device=policy.device).unsqueeze(0),
-              "action_mask": torch.as_tensor(mask, device=policy.device).unsqueeze(0)}
+        od = _obs_dict(policy, mirror)
         policy._mask = od["action_mask"]
         probs = policy.get_distribution(od).distribution.probs[0].cpu().numpy()
-    return probs, mask
+    return probs, od["action_mask"][0].cpu().numpy()
+
+
+def prior_value(policy, mirror) -> float:
+    """The policy's value head: expected outcome_value from this state (only
+    meaningful for checkpoints trained with pretrain_bc --value)."""
+    with torch.no_grad():
+        return float(policy.predict_values(_obs_dict(policy, mirror))[0, 0])
+
+
+def outcome_value(state: dict, side: str, death_weight: float = 0.5,
+                  importance: list[float] | None = None) -> float:
+    """win (+1/-1) minus death_weight * importance-weighted fainted fraction of
+    `side`'s team; unresolved battles score an hp-lead proxy. The Searcher's
+    objective and the value head's training target."""
+    opp = "p2" if side == "p1" else "p1"
+    mine, theirs = state[side], state[opp]
+    imp = importance or [1.0 / len(mine)] * len(mine)
+    deaths = sum(w * m["fainted"] for w, m in zip(imp, mine))
+    if not state["ended"]:
+        hp = lambda team: np.mean([m["hp"] / max(m["maxhp"], 1) for m in team])
+        return 0.5 * (hp(mine) - hp(theirs)) - death_weight * deaths
+    return (1.0 if state["winner"] == side else -1.0) - death_weight * deaths
 
 
 class Searcher:
@@ -63,25 +87,35 @@ class Searcher:
 
     def __init__(self, policy, enemy: Brain, k: int = 3, rollouts: int = 8,
                  max_turns: int = 100, importance: list[float] | None = None,
-                 death_weight: float = 0.5, confident: float | None = None):
+                 death_weight: float = 0.5, confident: float | None = None,
+                 crn: bool = True, seed: int | None = None, horizon: int | None = None):
         self.policy, self.enemy = policy, enemy
         self.prior = prior_brain(policy)
         self.k, self.rollouts, self.max_turns = k, rollouts, max_turns
         self.importance, self.death_weight, self.confident = importance, death_weight, confident
+        # Common random numbers: rollout j uses the same engine seed for every
+        # candidate, so candidates differ only by the action, not by luck.
+        self.crn, self.rng = crn, np.random.default_rng(seed)
+        # horizon=None: play rollouts to the end. horizon=h: play h more turns,
+        # then score the leaf with the policy's value head (0 = one step + value).
+        self.horizon = horizon
         self.n_decisions = self.n_searched = 0
         self.last_action: int | None = None  # chosen action index (for expert-iteration labels)
         self.searched_last = False
+        # set to a list to record (leaf obs, mask, -1, rollout outcome) per rollout:
+        # on-policy training data for the value head (collect_game collect_search)
+        self.leaf_record: list | None = None
 
     def value(self, sb: SimBattle, side: str) -> float:
-        st = sb.state()
-        opp = "p2" if side == "p1" else "p1"
-        mine, theirs = st[side], st[opp]
-        imp = self.importance or [1.0 / len(mine)] * len(mine)
-        deaths = sum(w * m["fainted"] for w, m in zip(imp, mine))
-        if not st["ended"]:  # truncated by max_turns: hp lead as a weak proxy
-            hp = lambda team: np.mean([m["hp"] / max(m["maxhp"], 1) for m in team])
-            return 0.5 * (hp(mine) - hp(theirs)) - self.death_weight * deaths
-        return (1.0 if st["winner"] == side else -1.0) - self.death_weight * deaths
+        if self.horizon is not None and not sb.ended:
+            return prior_value(self.policy, sb.mirrors[side])
+        return outcome_value(sb.state(), side, self.death_weight, self.importance)
+
+    def _settle(self, f: SimBattle, side: str, opp: str) -> None:
+        """The value head is trained on our decision states: if the leaf is the
+        enemy's forced switch (we just KO'd), let it happen first."""
+        while not f.ended and f.mirrors[side].wait and f.pending[opp]:
+            f.step({opp: f.choice(opp, self.enemy)})
 
     def __call__(self, sb: SimBattle, side: str) -> str:
         m = sb.mirrors[side]
@@ -99,18 +133,30 @@ class Searcher:
         self.n_searched += 1
         self.searched_last = True
         opp = "p2" if side == "p1" else "p1"
+        seeds = [self.rng.integers(1, 2 ** 16, 4).tolist() if self.crn else None
+                 for _ in range(self.rollouts)]
         best, best_score = None, -np.inf
         for a in cands:
             msg = order_to_choice(SinglesEnv.action_to_order(np.int64(a), m))
             vals = []
-            for _ in range(self.rollouts):
-                f = sb.fork()
+            for seed in seeds:
+                f = sb.fork(seed=seed)
                 first = {side: msg}
                 if f.pending[opp]:
                     first[opp] = self.enemy(f, opp)
                 f.step(first)
-                f.play({side: self.prior, opp: self.enemy}, self.max_turns)
+                leaf = None
+                if self.leaf_record is not None and self.horizon is None:
+                    self._settle(f, side, opp)
+                    if not f.ended:
+                        leaf = (embed_battle(f.mirrors[side]).astype(np.float16),
+                                action_mask(f.mirrors[side]).astype(np.int8), np.int16(-1))
+                until = None if self.horizon is None else f.turn + self.horizon
+                f.play({side: self.prior, opp: self.enemy}, self.max_turns, until=until)
+                self._settle(f, side, opp)
                 vals.append(self.value(f, side))
+                if leaf is not None:
+                    self.leaf_record.append(leaf + (vals[-1],))
                 f.close()
             score = float(np.mean(vals))
             if score > best_score:
@@ -167,6 +213,11 @@ def main() -> None:
     p.add_argument("--confident", type=float,
                    help="skip search when the prior's top prob >= this (default: never skip; "
                         "the converged BC prior is >0.9 almost everywhere, so 0.9 disabled search)")
+    p.add_argument("--no-crn", action="store_true",
+                   help="fresh RNG per rollout instead of common random numbers across candidates")
+    p.add_argument("--horizon", type=int,
+                   help="truncate rollouts after this many turns and score the leaf with the "
+                        "policy's value head (needs a --value-trained checkpoint); default: play out")
     p.add_argument("--max-turns", type=int, default=100)
     p.add_argument("--raw-names", action="store_true",
                    help="keep duplicate-species nicknames (reproduces the server/poke-env "
@@ -194,8 +245,11 @@ def main() -> None:
         if args.search:
             searcher = Searcher(policy, enemy, k=args.k, rollouts=args.rollouts,
                                 max_turns=args.max_turns, death_weight=args.death_weight,
-                                confident=args.confident)
-            brain, tag = searcher, f"search k={args.k} r={args.rollouts}"
+                                confident=args.confident, crn=not args.no_crn, seed=args.seed,
+                                horizon=args.horizon)
+            tag = (f"search k={args.k} r={args.rollouts}{' nocrn' if args.no_crn else ''}"
+                   f"{'' if args.horizon is None else f' h={args.horizon}'}")
+            brain = searcher
         else:
             brain, tag = prior_brain(policy), "prior"
 

@@ -171,10 +171,11 @@ class SimBattle:
                      f"active={m.active_pokemon is not None} turn={min(self.turn, 1)}"] += 1
         return c
 
-    def play(self, brains: dict[str, Brain], max_turns: int = 100) -> "SimBattle":
-        """Run to the end. Past max_turns p1 is declared the loser (some
-        low-level pairs cannot damage each other)."""
-        while not self.ended:
+    def play(self, brains: dict[str, Brain], max_turns: int = 100,
+             until: int | None = None) -> "SimBattle":
+        """Run to the end, or stop (unresolved) once turn >= until. Past max_turns
+        p1 is declared the loser (some low-level pairs cannot damage each other)."""
+        while not self.ended and (until is None or self.turn < until):
             if self.turn > max_turns:
                 self._absorb(self.bridge.call(op="forcelose", id=self.id, side="p1"))
                 break
@@ -184,7 +185,10 @@ class SimBattle:
             self.step(choices)
         return self
 
-    def fork(self, reseed: bool = True) -> "SimBattle":
+    def fork(self, reseed: bool = True, seed: list[int] | None = None) -> "SimBattle":
+        """Copy of the battle at this point. seed (4 ints) fixes the copy's RNG so
+        two forks with the same seed replay the same chance events (common random
+        numbers across search candidates); reseed=True rolls a fresh one."""
         new = SimBattle.__new__(SimBattle)
         new.bridge, new.fmt, new.gen = self.bridge, self.fmt, self.gen
         new.id = f"b{next(_IDS)}"
@@ -195,7 +199,7 @@ class SimBattle:
         new.stats = {k: 0 for k in self.stats}
         new.why = Counter()
         new.ended, new.winner, new.turn = self.ended, self.winner, self.turn
-        self.bridge.call(op="fork", id=self.id, new=new.id, reseed=reseed)
+        self.bridge.call(op="fork", id=self.id, new=new.id, reseed=reseed, seed=seed)
         new.mirrors = {}
         for side in SIDES:  # replay history -> identical mirror + pending state
             m = new._mirror(side)
