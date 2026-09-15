@@ -488,6 +488,30 @@ project_overview.md # the plan / roadmap
   (`--fast`). Same battler, same fights, 3× fewer deaths, 0 lost battles at
   Hiker Daniel (27 deaths vs 65). Cost ~25 s/episode vs ~1 s. This is the
   run layer's first real lever.
+  **Expert iteration v1 — null result.** `collect_game.py collect_search`
+  (Searcher's chosen action as label) on ~890 Roark/Hiker Daniel
+  matchups → 14k pairs (95% searched; search switches 12% vs teacher
+  3.5%). Trained with the 104k teacher pairs (val CE 0.186; early stop on
+  the route holdout is useless — it saturates at 99% — so full 20 epochs).
+  `models/game_policy_ei.pt` on the 51-slice, 40 eps, fast:
+    ei prior:              47.0 / 31.4 / 8.62 / 45%   (cap prior: 47.5 / 31.8 / 8.62 / 52%)
+    ei prior + Roark search 45.5 / 32.2 / 7.38 / 48%; Roark deaths 98→55, losses 12→6
+  14k search labels diluted in 104k teacher labels changed nothing; search
+  itself keeps paying at the boss. Hiker Daniel (not a breakpoint) is then
+  the top killer → `--search-all`.
+  **Finding 5 — search at every trainer is the battler.** Cap prior +
+  Searcher(k=3, r=8) on all 51 trainers, 20 eps, fast parties:
+    **50.95 cleared / 33.8 no-death / 4.10 deaths / 95% clear**
+    (same prior, no search: 47.5 / 31.8 / 8.62 / 52%; heuristic: 50.5 / 32.4 / 6.97 / 75%)
+  Roark: 14 deaths, 1 loss (was 98 / 12). Hiker Daniel 30 deaths, 0 losses
+  (was 68 / 5). Cost ~50 s/episode. This is the step-1 thesis holding at
+  run level: prior for candidates, engine for the value. The remaining
+  battler gap is not the prior — it's the value estimate (rollouts under
+  the prior, 1-ply).
+  **Combined default (risk-based parties + search-all), preliminary**, 9
+  episodes seed 300: **51.0 cleared / 33.7 no-death / 2.00 deaths / 100%
+  clear**, ~90 s/episode (`logs/plan_cap_full.log`). Roadmap 2k: confirm
+  on 40 episodes, then this is the baseline a learned run layer must beat.
   ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```

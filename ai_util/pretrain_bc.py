@@ -152,12 +152,15 @@ def _gauntlet_winrate(policy, pairs: list, server, n: int) -> float:
 
 
 def pretrain(args: argparse.Namespace) -> Path:
-    data = np.load(args.data)
-    n = len(data["action"])
+    paths = args.data if isinstance(args.data, list) else [args.data]
+    loaded = [np.load(p) for p in paths]
+    arrays = {k: np.concatenate([d[k] for d in loaded]) for k in ("obs", "mask", "action")}
+    if len(paths) > 1:
+        print("datasets: " + ", ".join(f"{p} ({len(d['action'])})" for p, d in zip(paths, loaded)))
+    n = len(arrays["action"])
     perm = np.random.default_rng(0).permutation(n)
     n_val = max(n // 20, 100)
     val_idx, train_idx = perm[:n_val], perm[n_val:]
-    arrays = {k: data[k] for k in ("obs", "mask", "action")}
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     obs_space = Dict({
@@ -258,7 +261,7 @@ def main() -> None:
     p.add_argument("--battles", type=int, default=4000)
     p.add_argument("--workers", type=int, default=8)
     p.add_argument("--port", type=int, default=8022)
-    p.add_argument("--data", help="data.npz for pretrain")
+    p.add_argument("--data", nargs="+", help="data.npz file(s) for pretrain (concatenated)")
     p.add_argument("--policy", help="policy.pt for eval")
     p.add_argument("--epochs", type=int, default=8)
     p.add_argument("--net-arch", default="256,256", help="comma-separated MLP widths")

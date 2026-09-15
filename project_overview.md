@@ -244,15 +244,25 @@ interface end to end, and it needs no training run to produce a number.
       (Hiker Daniel), not the boss. Slice extended to 51 to include Roark.
 - [x] **2h. Risk-based party selection**: 2.20 vs 6.78 deaths/run, 98% vs
       85% slice clears, same battler and seeds (Finding 4 in README).
-- [ ] **2i. Next battler lever: expert iteration on the deadliest fights.**
-      Collect search choices (k=3, r=8) specifically on Roark and Hiker
-      Daniel matchups (the harvest has thousands), retrain the prior on
-      teacher+search labels, re-run the 51-slice table. Success = prior
-      ≥ heuristic on clear rate with fewer deaths.
-- [ ] **2j. Planner cost**: risk queries are 8 battles × ~13 candidates per
-      trainer (~25 s/episode). Reuse across steps (cache is per party) and
-      skip queries when the roster ≤ 6 (already forced) — cheap wins before
-      any learned run layer is trained on these features.
+- [x] **2i. Expert iteration v1 — null.** 14k search labels + 104k teacher
+      labels → no change in the gauntlet. Not pursued further for now.
+- [x] **2i'. Search everywhere instead.** Cap prior + search on all 51
+      trainers: 95% clears / 4.1 deaths vs 52% / 8.6 without search and
+      75% / 7.0 for the heuristic. `--search-all` in plan_gauntlet,
+      `search_all=True` in NuzlockeEnv. ~50 s/episode.
+- [x] **2j. Planner cost**: planner runs with `risk_features=False`
+      (it queries candidates directly); the obs re-queries were +50%.
+- [ ] **2k. Measure the combined default**: risk-based parties (2h) +
+      search-all (2i') on the 51-slice, 40 episodes. Expected: >95% clears,
+      <3 deaths. Then make it the default run config and the baseline table
+      that step 2e's learned run layer must beat.
+- [ ] **2l. Value estimate is the next battler ceiling.** Rollouts under the
+      prior are 1-ply and noisy (r=8). Options in order: reuse forks across
+      candidates (common random numbers), r=16 at bosses only, a learned
+      value head trained on rollout outcomes (cheap: the sim produces them).
+- [ ] **2m. Evolution.** Not modelled; matters from gym 2 (starters evolve
+      at 16–18). Showdown species data has evos + evoLevel; apply on level-up
+      in `_apply_level_rule`. Do before extending the slice past Roark.
 - [ ] **2e. Learned run layer vs scripted.** Retrain `train_nuzlocke.py` on
       the sim backend with the 2b features. Success = beats the 2c table on
       trainers cleared without a death; otherwise the scripted planner *is*

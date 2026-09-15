@@ -35,10 +35,12 @@ from poke_env.player import ForfeitBattleOrder, SimpleHeuristicsPlayer
 GAME_FORMAT = "gen8customgamenogimmicks"
 
 
-def sample_pairs(jsonl: str, n: int, seed: int) -> list:
-    rows = []
+def sample_pairs(jsonl: str, n: int, seed: int, trainer_ids: set | None = None) -> list:
+    """(player_team, enemy_team) pairs; trainer_ids restricts to those enemies."""
     with open(jsonl) as f:
         rows = [json.loads(line) for line in f]
+    if trainer_ids:
+        rows = [r for r in rows if r.get("trainer_id") in trainer_ids]
     rng = np.random.default_rng(seed)
     idx = rng.choice(len(rows), size=min(n, len(rows)), replace=False)
     return [(rows[i]["player_team"], rows[i]["enemy_team"]) for i in idx]
@@ -171,6 +173,80 @@ def collect_worker_sim(worker: int, pairs: list, out_dir: Path) -> None:
           f"{failures} failed battles", flush=True)
 
 
+def collect_worker_search(worker: int, pairs: list, out_dir: Path, policy: str,
+                          k: int, rollouts: int) -> None:
+    """Expert iteration labels: the search's chosen action on each decision."""
+    from ai_util.battler_policy import load_policy
+    from ai_util.evaluate import Searcher, heuristic_brain
+    from ai_util.sim import SimBattle, SimBridge
+
+    bridge, foe = SimBridge(), heuristic_brain()
+    searcher = Searcher(load_policy(policy, device="cpu"), foe, k=k, rollouts=rollouts)
+    record, ctx, failures = [], {"n": 0, "switch": 0, "searched": 0, "changed": 0}, 0
+
+    def me(sb, side):
+        m = sb.mirrors[side]
+        if m.wait:
+            return "default"
+        obs, mask = embed_battle(m), action_mask(m)
+        choice = searcher(sb, side)
+        if searcher.last_action is not None and mask.sum() > 0:
+            record.append((obs.astype(np.float16), mask.astype(np.int8),
+                           np.int16(searcher.last_action)))
+            ctx["n"] += 1
+            ctx["searched"] += searcher.searched_last
+            if searcher.last_action < 6:
+                ctx["switch"] += 1
+        return choice
+
+    for i, (p_team, e_team) in enumerate(pairs):
+        try:
+            sb = SimBattle(bridge, GAME_FORMAT, p_team, e_team)
+            sb.play({"p1": me, "p2": foe}, max_turns=100)
+            sb.close()
+        except Exception as e:
+            failures += 1
+            print(f"worker {worker}: battle failed ({type(e).__name__}: {e})", flush=True)
+            bridge = SimBridge()
+            searcher.enemy = foe
+        if (i + 1) % 50 == 0:
+            print(f"worker {worker}: {i + 1}/{len(pairs)} battles, {ctx['n']} pairs "
+                  f"({ctx['searched']} searched), {failures} failures", flush=True)
+    bridge.close()
+    np.savez_compressed(
+        out_dir / f"shard_{worker}.npz",
+        obs=np.asarray([r[0] for r in record]),
+        mask=np.asarray([r[1] for r in record]),
+        action=np.asarray([r[2] for r in record]))
+    print(f"worker {worker} done: {ctx['n']} pairs, searched {ctx['searched']}, "
+          f"switch={ctx['switch'] / max(ctx['n'], 1):.1%}, {failures} failed battles", flush=True)
+
+
+def collect_search(args: argparse.Namespace) -> None:
+    """Search labels on matchups vs the given trainers (the deadliest fights)."""
+    stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+    out_dir = Path(f"models/bc_search_{stamp}")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    ids = {int(t) for t in args.trainers.split(",")} if args.trainers else None
+    pairs = sample_pairs(args.jsonl, args.battles, args.seed, ids)
+    print(f"{len(pairs)} matchups vs trainers {sorted(ids) if ids else 'all'}", flush=True)
+    chunks = [pairs[i::args.workers] for i in range(args.workers)]
+    ctx = mp.get_context("spawn")
+    procs = [ctx.Process(target=collect_worker_search,
+                         args=(w, chunks[w], out_dir, args.policy, args.k, args.rollouts))
+             for w in range(args.workers)]
+    for p in procs:
+        p.start()
+    for p in procs:
+        p.join()
+    shards = sorted(out_dir.glob("shard_*.npz"))
+    data = {k: np.concatenate([np.load(s)[k] for s in shards]) for k in ("obs", "mask", "action")}
+    np.savez_compressed(out_dir / "data.npz", **data)
+    for s in shards:
+        s.unlink()
+    print(f"collected {len(data['action'])} search-labelled pairs -> {out_dir / 'data.npz'}")
+
+
 def holdout(args: argparse.Namespace) -> None:
     """Held-out pairs (seed offset so they don't overlap a seed-0 collect sample)."""
     pairs = sample_pairs(args.jsonl, args.n, args.seed + 1)
@@ -238,7 +314,11 @@ def baseline(args: argparse.Namespace) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("mode", choices=["collect", "holdout", "baseline"])
+    p.add_argument("mode", choices=["collect", "collect_search", "holdout", "baseline"])
+    p.add_argument("--policy", help="prior for collect_search")
+    p.add_argument("--trainers", help="comma-separated trainer_ids to restrict collect_search to")
+    p.add_argument("--k", type=int, default=3)
+    p.add_argument("--rollouts", type=int, default=8)
     p.add_argument("--jsonl", default="data/teams/gauntlet_harvest/battles.jsonl")
     p.add_argument("--battles", type=int, default=20000)
     p.add_argument("--n", type=int, default=100)
@@ -250,6 +330,8 @@ def main() -> None:
     args = p.parse_args()
     if args.mode == "collect":
         collect(args)
+    elif args.mode == "collect_search":
+        collect_search(args)
     elif args.mode == "holdout":
         holdout(args)
     else:

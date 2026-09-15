@@ -54,7 +54,7 @@ class NuzlockeEnv(Env):
                  seed: int | None = None, backend: str = "sim",
                  policy: str | None = None, search: tuple[int, int] | None = None,
                  level_margin: int = 0, level_rule: str = "cap",
-                 risk_features: bool = True):
+                 risk_features: bool = True, search_all: bool = False):
         """backend 'sim' (in-process, default) or 'server' (Showdown on `port`).
         policy selects the sim battler (None = SimpleHeuristics); search=(k, r)
         switches boss fights (breakpoint trainers) to rollout search.
@@ -64,6 +64,7 @@ class NuzlockeEnv(Env):
         self.info_mode = info_mode
         self.level_margin, self.level_rule = level_margin, level_rule
         self.risk_features = risk_features  # off = no sim queries in _obs (harvesting)
+        self.search_all = search_all  # search on every trainer, not just breakpoints
         self.rng = random.Random(seed)
         if backend == "sim":
             self.runner = SimBattleRunner(policy=policy, search=search, info_mode=info_mode)
@@ -159,7 +160,7 @@ class NuzlockeEnv(Env):
         player_packed, enemy_packed, entry = self._packed_matchup(self.party)
         if not player_packed or not enemy_packed:
             return None
-        boss = entry["breakpoint"] != "none"
+        boss = self.search_all or entry["breakpoint"] != "none"
         result = self.runner.run(player_packed, enemy_packed, boss=boss)
         if result is None:  # rebuild happened; retry once
             result = self.runner.run(player_packed, enemy_packed, boss=boss)

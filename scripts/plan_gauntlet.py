@@ -88,6 +88,7 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--policy", help="BC prior for the battler (default SimpleHeuristics)")
     ap.add_argument("--search", help="k,rollouts for boss fights, e.g. 3,8")
+    ap.add_argument("--search-all", action="store_true", help="search on every trainer")
     ap.add_argument("--lam", type=float, default=1.0, help="death penalty weight")
     ap.add_argument("--level-margin", type=int, default=0,
                     help="player level = rule level + this (XP proxy)")
@@ -98,9 +99,12 @@ def main() -> None:
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
     search = tuple(int(x) for x in args.search.split(",")) if args.search else None
+    # risk_features off: the planner queries env.risk() for its candidates
+    # directly and never reads the obs; leaving them on re-queried every
+    # intermediate party while the team was being built (+50% cost).
     env = NuzlockeEnv(seed=args.seed, backend="sim", policy=args.policy, search=search,
                       level_margin=args.level_margin, level_rule=args.level_rule,
-                      risk_features=not args.fast)
+                      risk_features=False, search_all=args.search_all)
     t0, rows = time.time(), []
     for e in range(args.episodes):
         r = episode(env, args.seed + e, args.lam, args.verbose, args.fast)
@@ -110,7 +114,8 @@ def main() -> None:
               f"({(time.time() - t0) / (e + 1):.0f}s/ep)", flush=True)
     k = lambda f: np.mean([r[f] for r in rows])
     print(f"\n{args.episodes} episodes | battler={args.policy or 'SimpleHeuristics'} "
-          f"search={search} lam={args.lam} level_rule={args.level_rule} "
+          f"search={search}{' (all)' if args.search_all else ''} lam={args.lam} "
+          f"level_rule={args.level_rule} "
           f"margin={args.level_margin}\n"
           f"  trainers cleared        {k('cleared'):.2f}\n"
           f"  cleared without a death {k('cleared_no_death'):.2f}\n"

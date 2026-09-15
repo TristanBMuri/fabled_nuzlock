@@ -69,6 +69,8 @@ class Searcher:
         self.k, self.rollouts, self.max_turns = k, rollouts, max_turns
         self.importance, self.death_weight, self.confident = importance, death_weight, confident
         self.n_decisions = self.n_searched = 0
+        self.last_action: int | None = None  # chosen action index (for expert-iteration labels)
+        self.searched_last = False
 
     def value(self, sb: SimBattle, side: str) -> float:
         st = sb.state()
@@ -83,14 +85,19 @@ class Searcher:
 
     def __call__(self, sb: SimBattle, side: str) -> str:
         m = sb.mirrors[side]
+        self.last_action, self.searched_last = None, False
         if m.wait:
             return "default"
         self.n_decisions += 1
         probs, mask = prior_probs(self.policy, m)
         cands = [int(a) for a in np.argsort(-probs) if mask[a]][:self.k]
+        if not cands:
+            return "default"
+        self.last_action = cands[0]
         if len(cands) <= 1 or (self.confident is not None and probs[cands[0]] >= self.confident):
             return order_to_choice(SinglesEnv.action_to_order(np.int64(cands[0]), m))
         self.n_searched += 1
+        self.searched_last = True
         opp = "p2" if side == "p1" else "p1"
         best, best_score = None, -np.inf
         for a in cands:
@@ -107,7 +114,7 @@ class Searcher:
                 f.close()
             score = float(np.mean(vals))
             if score > best_score:
-                best, best_score = msg, score
+                best, best_score, self.last_action = msg, score, a
         return best
 
 
