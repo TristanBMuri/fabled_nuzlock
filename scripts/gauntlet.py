@@ -10,6 +10,7 @@ import argparse
 import json
 import logging
 import os
+import re
 import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -42,6 +43,25 @@ def load_encounters():
     return json.load(open(DATA / "encounters.json"))
 
 
+def species_name(species: str) -> str:
+    """Showdown's display name ('mrmime' -> 'Mr. Mime', 'shellos (east sea)' ->
+    'Shellos-East'). The nickname must equal it exactly: Showdown replaces a
+    nickname that matches the species with the canonical name, and poke-env keys
+    the team by nickname — 'Mr. mime' vs 'Mr. Mime' made three Mr. Mimes collapse
+    (AssertionError at order 158); a literal '(East Sea)' parsed as species
+    'eastsea' (KeyError at order 162). Formes in the source data are
+    'Base (Forme Words)'; Showdown ids are base + forme, or base + first word."""
+    from poke_env.data import GenData, to_id_str
+    dex = GenData.from_gen(8).pokedex
+    m = re.fullmatch(r"\s*(.+?)\s*\((.+?)\)\s*", species)
+    candidates = ([m.group(1) + m.group(2), m.group(1) + m.group(2).split()[0], m.group(1)]
+                  if m else [species])
+    for c in candidates:
+        if to_id_str(c) in dex:
+            return dex[to_id_str(c)]["name"]
+    return species.capitalize()
+
+
 @dataclass
 class Mon:
     species: str
@@ -53,7 +73,7 @@ class Mon:
 
     def pack(self) -> str:
         """Showdown text -> packed string. Level line survives the roundtrip."""
-        lines = [f"{self.species.capitalize()} (M)"]
+        lines = [f"{species_name(self.species)} (M)"]
         if self.ability:
             lines.append(f"Ability: {self.ability}")
         if self.item:
@@ -208,7 +228,9 @@ class SimBattleRunner:
             won, dead = sb.outcome()
             sb.close()
         except Exception as e:
-            print(f"SimBattleRunner: rebuild after {type(e).__name__}: {e}")
+            import traceback
+            print(f"SimBattleRunner: rebuild after {type(e).__name__}: {e}\n"
+                  + "".join(traceback.format_exc().splitlines(True)[-4:]))
             try:
                 self.bridge.close()
             except Exception:

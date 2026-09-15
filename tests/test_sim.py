@@ -69,6 +69,19 @@ def test_fork_continues_independently(bridge):
     f.close()
 
 
+def test_duplicate_multiword_species(bridge):
+    """Three Mr. Mime: the nickname must be Showdown's canonical species name or
+    the mirror collapses them (poke-env keys by nickname; Showdown renames a
+    nickname equal to the species). Was an AssertionError at gauntlet order 158."""
+    team = packed("Mr. Mime\nLevel: 17\n- Confusion\n\nMr. Mime\nLevel: 20\n- Confusion\n\n"
+                  "Mr. Mime\nLevel: 20\n- Confusion")
+    sb = SimBattle(bridge, FMT, TEAM_A, team)
+    assert len(sb.mirrors["p2"].team) == 3
+    sb.play(brains(), max_turns=60)
+    assert sb.ended
+    sb.close()
+
+
 def test_fork_seed_is_reproducible(bridge):
     """Same seed -> same chance events (common random numbers for search)."""
     sb = SimBattle(bridge, FMT, TEAM_A, TEAM_B)

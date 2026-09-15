@@ -565,9 +565,32 @@ project_overview.md # the plan / roadmap
   slice 186 (`GAUNTLET_HARVEST=... --fast --slice 186`), collect, retrain,
   re-measure. Harvest recording is now opt-in (env var unset = no writes);
   earlier evaluation runs had been appending to `battles.jsonl` silently
-  (483k → 515k lines). Open defect: the heuristic + risk-party run on the
-  186 slice logged `SimBattleRunner.estimate failed: AssertionError` (13x in
-  3 episodes, 2 runner rebuilds); the runner now prints the traceback tail.
+  (483k → 515k lines).
+  **OOD loop on the 186 slice** (one job at a time): harvest 300 fast
+  episodes (`battles_cap186.jsonl`, 35k matchups; heuristic 116.7 cleared /
+  34.6 no-death / 11.0 deaths / 0% clears), collect 91k BC pairs, 20 epochs
+  (val CE 0.102, acc 96%, switch 48%) → `models/game_policy_cap186.pt`.
+  With search-all + risk parties, 10 eps: **154.0 cleared / 60.7 no-death /
+  6.10 deaths / 0% clears** — but every episode ended at #158 regardless of
+  deaths (3 of 10 had ≤2 deaths). **Two defects, not a wall:** #158 is
+  Collector Fernando's 3x Mr. Mime — `Mon.pack` capitalized 'mr. mime' to
+  'Mr. mime', Showdown renames a nickname equal to the species to 'Mr. Mime',
+  poke-env keys by our nickname, three species matches → AssertionError;
+  #162 Tuber Jared's 'Shellos (East Sea)' packed literally → species
+  'eastsea' → KeyError. A runner exception ends the run as a loss, so both
+  looked like impossible trainers. Fix: `gauntlet.species_name` (pokedex
+  display name + forme resolution) + regression test.
+  **186-slice after the fixes** (cap186 prior + search-all + risk parties,
+  10 eps, seed 300, ~300 s/ep, `logs/plan_cap186_search2.log`):
+    **162.9 cleared / 63.5 no-death / 12.0 deaths / 0% clears**
+  Every run ends by roster wipe (12 = MAX_ROSTER) between #154 and #170.
+  Deaths: Collector Edwin #139 (3x Sudowoodo@19) 22, Jogger Craig #163 12,
+  Commander Jupiter #159 11, rival Cedric #165 10 (Starly/Buizel/Roselia/
+  Monferno@21), Fernando #158 10, Roark 6. The first half (≤ #138) is
+  nearly free (3 of 10 runs had no death before #116); the Eterna stretch
+  at L19–21 vs our L22 roster of route catches is the new frontier — parity
+  again, now with a weak roster instead of a level rule. Encounters stop at
+  trainer 44 (12 hand-written routes), so no new catches arrive there.
   ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```

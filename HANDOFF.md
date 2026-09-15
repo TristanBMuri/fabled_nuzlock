@@ -124,10 +124,22 @@ boss's max level (14 = Roark). ~85 s/episode.
   full epochs or build a boss-only holdout.
 - **Obs risk queries in the planner** cost +50%; planner runs with
   `risk_features=False` and queries candidates directly.
+- **Species names in packed teams** (found on the 186 slice): `Mon.pack`
+  used `capitalize()`, so 'Mr. mime' ≠ Showdown's 'Mr. Mime'; Showdown
+  renames a nickname equal to the species, poke-env keys the team by our
+  nickname, and three Mr. Mimes collapsed (AssertionError, order 158 —
+  every run "ended" there). Source formes 'Shellos (East Sea)' packed
+  literally became species 'eastsea' (KeyError, order 162). Fix:
+  `gauntlet.species_name` (pokedex display name, forme resolution);
+  `tests/test_sim.py::test_duplicate_multiword_species`. A runner failure
+  ends the episode as a loss, so a crash looks like a wall in the death
+  histogram: check the log for `rebuild after` before believing a wall.
 
 ## Artifacts
 
-- `models/game_policy_cap_best.pt` — current prior (cap-rule data, 104k pairs).
+- `models/game_policy_cap_best.pt` — 51-slice prior (cap-rule data, 104k pairs).
+- `models/game_policy_cap186.pt` — 186-slice prior (`models/bc_game_20260915_194709`,
+  91k pairs from `data/teams/gauntlet_harvest/battles_cap186.jsonl`, 35k matchups).
 - `models/game_policy_cap_value.pt` / `_value2.pt` — same actor + trained
   critic (teacher outcomes / search leaves). Null as a search leaf; reference only.
 - `models/bc_game_20260915_164023` (match, 178k) / `_164025` (cap, 127k) —
@@ -151,11 +163,22 @@ boss's max level (14 = Roark). ~85 s/episode.
    still needs to improve later, the remaining levers are deeper search
    (2-ply over the enemy's likely replies) or a candidate-conditioned value.
 2. **Evolution is in** (level-up only; `data/evolutions.json`, move table to
-   L50). **The slice now extends** (`plan_gauntlet.py --slice 186` =
-   through Gardenia, cap 22 after Roark). The L14 prior is OOD there: default
-   config cleared 146/186 in one episode with 12 deaths spread over route
-   trainers it outlevels by 3–7; heuristic fast 115 cleared / 0% clears.
-   **Pending pipeline, one job at a time (RAM!):**
+   L50) and **the slice extends**: `plan_gauntlet.py --slice 186` = through
+   Gardenia (cap 22 after Roark). The OOD loop was run there (harvest
+   `battles_cap186.jsonl` 35k → 91k BC pairs → `models/game_policy_cap186.pt`,
+   val CE 0.102). Table, 10 eps, search-all + risk parties:
+   **162.9 cleared / 63.5 no-death / 12.0 deaths / 0% clears** (heuristic
+   fast: 116.7 / 34.6 / 11.0 / 0%). Every run is a roster wipe between #154
+   and #170: Collector Edwin #139 (3x Sudowoodo@19), then the Eterna stretch
+   #158–166 (Jupiter, rival with 4 mons at 19–21) grinds the L22 roster of
+   route catches down. That stretch is the new frontier. Levers, in order:
+   (a) roster quality — encounters stop at trainer 44 (12 hand-written
+   routes; add Eterna Forest / Route 205 N / 211 tables with real levels),
+   (b) the run layer's party choice when candidates all score +1.00 at n=8
+   (raise RISK_BATTLES or score by expected HP loss), (c) battler at parity
+   (search depth). Also still owed: the 51-slice default with evolution
+   (5/20 episodes done: all clear, 2.2 deaths).
+   Pipeline commands (one job at a time — RAM):
    ```bash
    GAUNTLET_HARVEST=data/teams/gauntlet_harvest/battles_cap186.jsonl \
      uv run python -u scripts/plan_gauntlet.py --episodes 300 --seed 1000 --fast --slice 186
@@ -163,12 +186,6 @@ boss's max level (14 = Roark). ~85 s/episode.
    uv run python -u ai_util/pretrain_bc.py pretrain --data models/bc_game_<stamp>/data.npz --epochs 20 --out models/game_policy_cap186.pt
    uv run python -u scripts/plan_gauntlet.py --episodes 10 --seed 300 --policy models/game_policy_cap186.pt --search 3,8 --search-all --slice 186
    ```
-   Compare against the 1-episode number above and the heuristic; also
-   re-measure the 51-slice default with evolution (only 5/20 episodes done:
-   all clear, 2.2 deaths). Open defect: heuristic + risk parties on the 186
-   slice hit `estimate failed: AssertionError` (poke-env) — the runner now
-   prints the traceback tail; reproduce with
-   `plan_gauntlet.py --episodes 2 --seed 300 --slice 186`.
 3. **Learned run layer (2e)**: retrain `train_nuzlocke.py` on the sim backend
    with the risk features; it must beat the scripted table (100% / 2.65).
    If it can't, the scripted planner *is* the run layer.

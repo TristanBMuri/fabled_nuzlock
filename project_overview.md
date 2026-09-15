@@ -265,10 +265,12 @@ interface end to end, and it needs no training run to produce a number.
       36.25 no-death (was 2.65 / 33.8). Details in README → Status 2l.
 - [x] **2m. Evolution.** Level-up evolutions from Showdown species data
       (`data/evolutions.json`, applied in `_apply_level_rule`); move table
-      to L50. `--slice 186` reaches Gardenia. First look: heuristic fast
-      115/186 cleared, 0% clears; default config 146 cleared in 1 episode,
-      deaths spread over route trainers ⇒ the L14 prior is OOD at L22.
-      Pending: harvest at 186 → collect → retrain → re-measure (README 2m).
+      to L50. `--slice 186` reaches Gardenia. OOD loop rerun there
+      (`game_policy_cap186.pt`). Table: 162.9 cleared / 63.5 no-death /
+      12.0 deaths / 0% clears (heuristic fast 116.7 / 34.6 / 11.0). Runs end
+      by roster wipe in the Eterna stretch (#139, #158–166, L19–21 vs our
+      L22 route catches). Two packing defects fixed on the way (species
+      display names, formes). Next levers in HANDOFF next-steps 2.
 - [ ] **2e. Learned run layer vs scripted.** Retrain `train_nuzlocke.py` on
       the sim backend with the 2b features. Success = beats the 2c table on
       trainers cleared without a death; otherwise the scripted planner *is*
