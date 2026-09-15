@@ -45,14 +45,16 @@ def manual_episode(env, seed=0):
             break
 
 
-def _worker_main(conn, i: int, port: int, info_mode: str, seed: int):
+def _worker_main(conn, i: int, port: int, info_mode: str, seed: int,
+                 backend: str = "sim", policy: str | None = None):
     """One env in its own process — bypasses the GIL (SimpleHeuristics is
     Python-CPU-bound; threads capped us at ~80 st/s on one core)."""
     sys.path.insert(0, str(Path(__file__).parent))
     from nuzlocke_env import N_META_ACTIONS, OBS_DIM, NuzlockeEnv
     from ppo import MaskedPolicy
 
-    env = NuzlockeEnv(port=port + i, info_mode=info_mode, seed=seed + i)
+    env = NuzlockeEnv(port=port + i, info_mode=info_mode, seed=seed + i,
+                      backend=backend, policy=policy)
     agent = MaskedPolicy(OBS_DIM, N_META_ACTIONS)  # CPU
     obs, info = env.reset(seed=seed + i)
     cr, cl = 0.0, 0
@@ -116,7 +118,8 @@ def _worker_main(conn, i: int, port: int, info_mode: str, seed: int):
         conn.close()
 
 
-def train(updates: int, seed: int, port: int, info_mode: str, n_envs: int):
+def train(updates: int, seed: int, port: int, info_mode: str, n_envs: int,
+          backend: str = "sim", policy: str | None = None):
     torch.manual_seed(seed)
     np.random.seed(seed)
     device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -126,9 +129,13 @@ def train(updates: int, seed: int, port: int, info_mode: str, n_envs: int):
     ckpt.mkdir(exist_ok=True)
     latest = ckpt / "nuzlocke_latest.pt"
     if latest.exists():
-        agent.load_state_dict(
-            torch.load(latest, map_location=device)["model"])
-        print(f"resumed weights from {latest}", flush=True)
+        saved = torch.load(latest, map_location=device)
+        if saved.get("obs_dim") == OBS_DIM:
+            agent.load_state_dict(saved["model"])
+            print(f"resumed weights from {latest}", flush=True)
+        else:
+            print(f"not resuming {latest}: obs_dim {saved.get('obs_dim')} != {OBS_DIM} "
+                  f"(risk features added)", flush=True)
     writer = SummaryWriter(
         f"runs/{datetime.now():%Y%m%d-%H%M%S}-nuzlocke{'x' + str(n_envs) if n_envs > 1 else ''}")
 
@@ -139,15 +146,16 @@ def train(updates: int, seed: int, port: int, info_mode: str, n_envs: int):
         parent, child = ctx.Pipe()
         p = ctx.Process(
             target=_worker_main,
-            args=(child, i, port, info_mode, seed),
+            args=(child, i, port, info_mode, seed, backend, policy),
             daemon=True,
         )
         p.start()
         child.close()
         pipes.append(parent)
         procs.append(p)
-    print(f"spawned {n_envs} env processes on ports {port}..{port + n_envs - 1}",
-          flush=True)
+    where = (f"in-process sim, battler={policy or 'SimpleHeuristics'}" if backend == "sim"
+             else f"ports {port}..{port + n_envs - 1}")
+    print(f"spawned {n_envs} env processes ({where})", flush=True)
 
     ep_r, ep_len, cleared = deque(maxlen=50), deque(maxlen=50), deque(maxlen=50)
     steps_per_env = ROLLOUT // n_envs
@@ -241,9 +249,14 @@ if __name__ == "__main__":
     p.add_argument("--info", choices=["none", "revealed", "full"],
                    default="full")
     p.add_argument("--random", action="store_true")
+    p.add_argument("--backend", choices=["sim", "server"], default="sim",
+                   help="sim = in-process Showdown (no servers); server = --port..")
+    p.add_argument("--policy", help="BC prior state_dict for the sim battler "
+                                    "(default: SimpleHeuristics)")
     args = p.parse_args()
     if args.random:
-        manual_episode(NuzlockeEnv(port=args.port, info_mode=args.info,
-                                   seed=args.seed), args.seed)
+        manual_episode(NuzlockeEnv(port=args.port, info_mode=args.info, seed=args.seed,
+                                   backend=args.backend, policy=args.policy), args.seed)
     else:
-        train(args.updates, args.seed, args.port, args.info, args.envs)
+        train(args.updates, args.seed, args.port, args.info, args.envs,
+              args.backend, args.policy)

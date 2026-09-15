@@ -426,6 +426,69 @@ project_overview.md # the plan / roadmap
     expert iteration (retrain prior on search choices), stronger enemy
     model (RR AI port) for boss fights.
   ```
+- [x] **Step 2a–2d: sim-backed gauntlet + scripted planner (2026-09-15)**
+  ```
+  `SimBattleRunner` in gauntlet.py (same contract; no servers; `--backend sim`
+  default in train_nuzlocke), `estimate()` death-probability query,
+  7 risk features appended to the PRE_BATTLE obs (OBS_DIM +7; old
+  nuzlocke_latest.pt not resumed), boss fights use search when
+  `search=(k,r)`. `scripts/plan_gauntlet.py` = scripted planner: candidate
+  parties = top-6-by-level ∪ single swaps, scored P(win) − λ·mean P(death).
+  **Finding 1 — level rule dominates.** 20 episodes, heuristic battler,
+  old "match max enemy level" rule + margin:
+    margin 0: 2.0 cleared / 1.0 no-death / 0% clear   (= run-4 ceiling)
+    margin 2: 18.6 / 3.2 / 15%   margin 4: 50 / 21.4 / 100%   margin 6: 50 / 39 / 100%
+  The meta-policy's ~2.1 was the environment, not the policy. New default
+  `level_rule="cap"` (hardcore nuzlocke): player level = next boss's max
+  level; route trainers below you, boss at parity.
+  **Finding 2 — the prior is OOD under the cap rule.** Cap rule, 20 eps:
+    heuristic:            49.8 cleared / 32.9 no-death / 3.05 deaths / 95% clear
+    BC prior:             34.2 / 16.4 / 5.60 / 25%
+    prior + boss search:  36.3 / 16.0 / 6.55 / 30%
+  The harvest (483k, match rule, L3–14) doesn't cover cap-rule levels/
+  movesets; SimpleHeuristics is level-agnostic. Boss search can't help
+  when deaths happen on routes. Next: regenerate harvest under cap
+  (`GAUNTLET_HARVEST=... plan_gauntlet.py --fast`), recollect BC, retrain,
+  re-measure — the OOD loop, now minutes instead of hours.
+  Pipeline is now server-free end to end: `collect_game.py collect` runs
+  in the sim (200 matchups → 1047 pairs in seconds, 0 failures),
+  `collect_game.py holdout` writes eval pairs, `pretrain_bc.py`'s
+  win-rate eval uses the sim. `plan_gauntlet.py --fast` also disables the
+  obs risk queries (they made harvesting 10x slower: 5 s/episode).
+  **Third defect (poke-env mask)**: `get_action_mask` marks a switch slot
+  legal by *species*, so with two of a species the active one is marked
+  too → rejected order → runner exception → run counted lost; and
+  `order_to_action` labels a switch as the first slot of that species (bad
+  BC labels). Fix: `battler_policy.action_mask` / `order_to_action` by
+  identity. Old prior in the gauntlet after the fix: 37.1 / 16.3 / 45%.
+  **OOD loop result** (cap harvest 24k battles → 104k BC pairs, 20 epochs,
+  val CE 0.084 / acc 97%, holdout win 100%): `models/game_policy_cap_best.pt`
+    cap prior:            48.2 cleared / 29.1 no-death / 3.45 deaths / 90% clear
+    cap prior + search:   47.3 / 29.0 / 4.45 / 80%
+    (heuristic reference: 49.8 / 32.9 / 3.05 / 95%)
+  Prior ≈ heuristic now (20-episode noise); boss search still no effect →
+  find where deaths happen (per-trainer histogram) before tuning search.
+  Cap-rule holdout itself is easy (heuristic 99%, old prior 95%): the
+  route trainers are below the player; only bosses are at parity.
+  **Finding 3 — the slice had no boss.** Roark is order_index 50; the
+  50-trainer slice ended at 49, so "boss search" never fired and the cap
+  fell back to L13. `SLICE_LEN=51` now (through Roark). Per-trainer death
+  histogram (`plan_gauntlet.py` prints the deadliest 8): Roark first,
+  Hiker Daniel (#32, 2×Geodude/Machop/Bidoof @11) second, everything else
+  small. 40 episodes, seed 300, `--fast` (top-6-by-level parties):
+    heuristic:               50.5 cleared / 32.4 no-death / 6.97 deaths / 75% clear
+    cap prior:               47.5 / 31.8 / 8.62 / 52%
+    cap prior + Roark search 46.5 / 31.7 / 7.50 / 57%  (Roark losses 11→7)
+  Search at the boss again buys deaths, not much else; the prior still
+  trails the heuristic on the routes (Hiker Daniel).
+  **Finding 4 — risk-based party selection works.** Same seeds, 50-slice,
+  heuristic battler, 40 episodes: planner parties (P(win) − λ·mean
+  P(death), n=8 per candidate) → **2.20 deaths/run, 34.7 no-death, 98%
+  clear**, vs 6.78 deaths / 26.9 no-death / 85% clear with top-6-by-level
+  (`--fast`). Same battler, same fights, 3× fewer deaths, 0 lost battles at
+  Hiker Daniel (27 deaths vs 65). Cost ~25 s/episode vs ~1 s. This is the
+  run layer's first real lever.
+  ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```
   vec envs / ~8.7h / 636 fps. Entropy 1.77→0.31 (collapsed), explained

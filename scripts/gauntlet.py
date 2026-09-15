@@ -22,7 +22,11 @@ from battle_env import BATTLE_FORMAT, server_config
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
-HARVEST = DATA / "teams" / "gauntlet_harvest" / "battles.jsonl"
+# GAUNTLET_HARVEST=path overrides where battles are recorded (e.g. a fresh
+# file when the progression rule changes — the battler's data distribution
+# must follow the rule the run layer plays under).
+HARVEST = Path(os.environ.get("GAUNTLET_HARVEST",
+                              DATA / "teams" / "gauntlet_harvest" / "battles.jsonl"))
 BATTLE_FORMAT = "gen8customgamenogimmicks"
 
 # ---------------------------------------------------------------- data loading
@@ -102,9 +106,11 @@ class BattleRunner:
         self.p2 = SimpleHeuristicsPlayer(team=ConstantTeambuilder(placeholder),
                                          **kw)
 
-    def run(self, player_packed: str, enemy_packed: str, timeout: float = 60.0):
+    def run(self, player_packed: str, enemy_packed: str, timeout: float = 60.0,
+            boss: bool = False):
         """One battle. Returns (won, alive_mask) aligned to player_packed
-        order, or None on failure (players rebuilt).
+        order, or None on failure (players rebuilt). `boss` is ignored here
+        (server backend has no search).
 
         Timeout matters: a rejected/empty team makes poke-env wait forever
         on the challenge. Combined with per-env rollouts (train_nuzlocke),
@@ -145,6 +151,69 @@ class BattleRunner:
             else:
                 alive.append(False)
         return won, alive
+
+
+class SimBattleRunner:
+    """Same contract as BattleRunner, but battles run in-process through
+    ai_util.sim (no Showdown server, ~100 battles/s). Player brain is
+    SimpleHeuristics (default) or the BC prior at `policy`, optionally with
+    top-k rollout search `search=(k, rollouts)` for boss fights."""
+
+    def __init__(self, policy: str | None = None, search: tuple[int, int] | None = None,
+                 max_turns: int = 100, info_mode: str = "full"):
+        import sys
+        sys.path.insert(0, str(ROOT))
+        from ai_util.evaluate import Searcher, heuristic_brain, prior_brain
+        from ai_util.sim import SimBridge
+        self.info_mode, self.max_turns = info_mode, max_turns
+        self.bridge = SimBridge()
+        self.enemy = heuristic_brain()
+        self.searcher = None  # compute dial: used for boss fights when set
+        if policy:
+            from ai_util.battler_policy import load_policy
+            pol = load_policy(policy, device="cpu")
+            self.player = prior_brain(pol)
+            if search:
+                self.searcher = Searcher(pol, self.enemy, k=search[0], rollouts=search[1],
+                                         max_turns=max_turns)
+        else:
+            self.player = heuristic_brain()
+
+    def estimate(self, player_packed: str, enemy_packed: str, n: int = 8):
+        """Death-probability query: (P(win), [P(death_i)] in packed order) under
+        the fast player brain, n fresh-seed battles. None on failure."""
+        from ai_util.evaluate import evaluate
+        try:
+            r = evaluate(self.bridge, player_packed, enemy_packed, self.player, self.enemy,
+                         n=n, max_turns=self.max_turns)
+        except Exception as e:
+            print(f"SimBattleRunner.estimate failed: {type(e).__name__}: {e}")
+            return None
+        return r["p_win"], r["p_death"]
+
+    def run(self, player_packed: str, enemy_packed: str, timeout: float = 0.0,
+            boss: bool = False):
+        """One battle. Returns (won, alive_mask) aligned to player_packed order,
+        or None on failure (bridge rebuilt). boss=True uses search if configured."""
+        from ai_util.sim import SimBattle, SimBridge
+        if not player_packed or not enemy_packed:
+            print("SimBattleRunner: empty packed team")
+            return None
+        brain = self.searcher if (boss and self.searcher is not None) else self.player
+        try:
+            sb = SimBattle(self.bridge, BATTLE_FORMAT, player_packed, enemy_packed)
+            sb.play({"p1": brain, "p2": self.enemy}, self.max_turns)
+            won, dead = sb.outcome()
+            sb.close()
+        except Exception as e:
+            print(f"SimBattleRunner: rebuild after {type(e).__name__}: {e}")
+            try:
+                self.bridge.close()
+            except Exception:
+                pass
+            self.bridge = SimBridge()
+            return None
+        return won, [not d for d in dead]
 
 
 _HARVEST_LOCK = None

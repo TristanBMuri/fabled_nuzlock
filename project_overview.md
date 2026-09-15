@@ -226,33 +226,38 @@ Principle: build the *scripted* planner first and measure it. It is the
 baseline any learned run policy must beat, it exercises the battler
 interface end to end, and it needs no training run to produce a number.
 
-- [ ] **2a. Sim-backed BattleRunner.** `scripts/gauntlet.py::BattleRunner`
-      gets a sim backend: `run(player_packed, enemy_packed)` → one
-      `SimBattle` (prior brain vs SimpleHeuristics), returns `(won, alive)`
-      from `outcome()`. Keep the signature; `nuzlocke_env` and the harvest
-      writer don't change. Consequence: no Showdown servers, no
-      one-process-per-env, ~100 battles/s. Delete the server path once the
-      sim one reproduces run-4 numbers (`--random` probe, trainers cleared).
-- [ ] **2b. Death-probability query.** `evaluate(party, enemy, n=8)` before
-      each fight. Expose `P(win)` and `P(death_i)` for the *current party*
-      as observation features in `PRE_BATTLE` (7 floats appended to
-      `OBS_DIM`). The meta-policy can then see risk instead of inferring it.
-- [ ] **2c. Scripted planner (`scripts/plan_gauntlet.py`).** For each
-      trainer: enumerate candidate parties = current party ∪ single swaps
-      from the box (≤ ~13 candidates), `evaluate` each with n=8, pick
-      argmax `P(win) − λ·risk` (λ = 1 to start; deaths are permanent).
-      Encounters: catch if box has room (scripted). Report per episode:
-      trainers cleared, trainers cleared **without a death**, deaths, and
-      whether the slice was cleared. 50 episodes on the BDSP 50-trainer
-      slice = the baseline table.
-- [ ] **2d. Compute dial.** Route trainers use the prior brain; breakpoint
-      trainers (`gym_leader`/`elite_four`/`champion` in
-      `bdsp_gauntlet_order.json`) use `Searcher(k=3, r=8)`. Measure the
-      delta on gym-1 clear rate specifically.
+- [x] **2a. Sim-backed BattleRunner.** `SimBattleRunner` in `gauntlet.py`,
+      same contract; `--backend sim` default. Server path kept for now.
+- [x] **2b. Death-probability query.** `SimBattleRunner.estimate` +
+      `NuzlockeEnv.risk()`; 7 risk floats in the PRE_BATTLE obs.
+- [x] **2c. Scripted planner** `scripts/plan_gauntlet.py`. Baseline table in
+      README. **Result: the level rule, not the policy, set the old ceiling**
+      (match rule: 2 trainers; cap rule: heuristic clears 95% of the slice).
+- [x] **2d. Compute dial** (search on breakpoint trainers). No effect yet:
+      deaths happen on routes, and the prior is OOD under the cap rule.
+- [x] **2f. Progression model.** `level_rule="cap"` (player level = next
+      boss's max level) is the default: hardcore-nuzlocke semantics, derived
+      from the data, bosses at parity. `level_margin` kept as a knob.
+- [x] **2g. OOD loop** done server-free in ~15 min: cap harvest (24k) →
+      104k BC pairs → `models/game_policy_cap_best.pt`. Prior went from
+      37/45% to 47.5/52% (heuristic 50.5/75%). Remaining gap is on routes
+      (Hiker Daniel), not the boss. Slice extended to 51 to include Roark.
+- [x] **2h. Risk-based party selection**: 2.20 vs 6.78 deaths/run, 98% vs
+      85% slice clears, same battler and seeds (Finding 4 in README).
+- [ ] **2i. Next battler lever: expert iteration on the deadliest fights.**
+      Collect search choices (k=3, r=8) specifically on Roark and Hiker
+      Daniel matchups (the harvest has thousands), retrain the prior on
+      teacher+search labels, re-run the 51-slice table. Success = prior
+      ≥ heuristic on clear rate with fewer deaths.
+- [ ] **2j. Planner cost**: risk queries are 8 battles × ~13 candidates per
+      trainer (~25 s/episode). Reuse across steps (cache is per party) and
+      skip queries when the roster ≤ 6 (already forced) — cheap wins before
+      any learned run layer is trained on these features.
 - [ ] **2e. Learned run layer vs scripted.** Retrain `train_nuzlocke.py` on
       the sim backend with the 2b features. Success = beats the 2c table on
       trainers cleared without a death; otherwise the scripted planner *is*
-      the run layer and effort goes to the battler.
+      the run layer and effort goes to the battler. Note the slice may need
+      to extend past gym 1 for the heuristic baseline to leave headroom.
 
 Not in step 2: move events, builds, new gauntlets. Metric stays
 "trainers cleared without a death"; report on the training slice only

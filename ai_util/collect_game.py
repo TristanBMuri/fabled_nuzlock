@@ -5,10 +5,12 @@ real BDSP matchups, game levels/movesets — and plays them in
 gen8customgamenogimmicks with SimpleHeuristics on the player side,
 recording (obs, action_mask, action) per decision.
 
-Two modes:
-  collect  harvest BC pairs from sampled matchups
-  baseline play SimpleHeuristics-vs-SimpleHeuristics on holdout pairs
-           (the reference line the prototype policy is judged against)
+Modes:
+  collect  harvest BC pairs from sampled matchups (in-process sim by default;
+           --backend server for the old websocket path)
+  holdout  write a json of held-out (player, enemy) pairs for pretrain --eval-pairs
+  baseline play SimpleHeuristics-vs-SimpleHeuristics on holdout pairs on a server
+           (the sim equivalent is `evaluate.py --check --from-harvest`)
 """
 
 import sys
@@ -27,7 +29,7 @@ import numpy as np
 
 from ai_util.battler_env import preflight, server_conf
 from ai_util.battler_obs import embed_battle
-from poke_env.environment import SinglesEnv
+from ai_util.battler_policy import action_mask, order_to_action
 from poke_env.player import ForfeitBattleOrder, SimpleHeuristicsPlayer
 
 GAME_FORMAT = "gen8customgamenogimmicks"
@@ -56,12 +58,12 @@ class RecordingHeuristics(SimpleHeuristicsPlayer):
             # cap those battles run forever (both sides are heuristics)
             if battle.turn > 100:
                 return ForfeitBattleOrder()
-            mask = np.array(SinglesEnv.get_action_mask(battle))
+            mask = action_mask(battle)
             if mask.sum() > 0:
                 order = super().choose_move(battle)
                 try:
-                    action = SinglesEnv.order_to_action(order, battle, fake=True, strict=False)
-                except ValueError:
+                    action = order_to_action(order, battle)
+                except (ValueError, StopIteration):
                     return order
                 self._record.append(
                     (embed_battle(battle).astype(np.float16), mask.astype(np.int8), np.int16(action)))
@@ -114,6 +116,69 @@ def collect_worker(worker: int, pairs: list, port: int, out_dir: Path) -> None:
           f"{failures} failed battles", flush=True)
 
 
+def recording_brain(record: list, ctx: dict):
+    """SimpleHeuristics as a sim Brain that records (obs, mask, action) per decision."""
+    from ai_util.sim import order_to_choice
+    teacher = SimpleHeuristicsPlayer(battle_format=GAME_FORMAT, start_listening=False, log_level=50)
+
+    def brain(sb, side):
+        battle = sb.mirrors[side]
+        if battle.wait:
+            return "default"
+        order = teacher.choose_move(battle)
+        mask = action_mask(battle)
+        if mask.sum() > 0:
+            try:
+                action = order_to_action(order, battle)
+            except (ValueError, StopIteration):
+                return order_to_choice(order)
+            record.append(
+                (embed_battle(battle).astype(np.float16), mask.astype(np.int8), np.int16(action)))
+            ctx["n"] += 1
+            if action < 6:
+                ctx["switch"] += 1
+        return order_to_choice(order)
+
+    return brain
+
+
+def collect_worker_sim(worker: int, pairs: list, out_dir: Path) -> None:
+    from ai_util.evaluate import heuristic_brain
+    from ai_util.sim import SimBattle, SimBridge
+
+    record, ctx, failures = [], {"n": 0, "switch": 0}, 0
+    bridge, me, foe = SimBridge(), None, heuristic_brain()
+    me = recording_brain(record, ctx)
+    for i, (p_team, e_team) in enumerate(pairs):
+        try:
+            sb = SimBattle(bridge, GAME_FORMAT, p_team, e_team)
+            sb.play({"p1": me, "p2": foe}, max_turns=100)
+            sb.close()
+        except Exception as e:
+            failures += 1
+            print(f"worker {worker}: battle failed ({type(e).__name__}: {e})", flush=True)
+            bridge = SimBridge()
+        if (i + 1) % 500 == 0:
+            print(f"worker {worker}: {i + 1}/{len(pairs)} battles, {ctx['n']} pairs, "
+                  f"{failures} failures", flush=True)
+    bridge.close()
+    np.savez_compressed(
+        out_dir / f"shard_{worker}.npz",
+        obs=np.asarray([r[0] for r in record]),
+        mask=np.asarray([r[1] for r in record]),
+        action=np.asarray([r[2] for r in record]))
+    print(f"worker {worker} done: {ctx['n']} pairs, switch={ctx['switch'] / max(ctx['n'], 1):.1%}, "
+          f"{failures} failed battles", flush=True)
+
+
+def holdout(args: argparse.Namespace) -> None:
+    """Held-out pairs (seed offset so they don't overlap a seed-0 collect sample)."""
+    pairs = sample_pairs(args.jsonl, args.n, args.seed + 1)
+    out = Path(args.out or "models/gauntlet_holdout_cap.json")
+    out.write_text(json.dumps(pairs))
+    print(f"wrote {len(pairs)} holdout pairs -> {out}")
+
+
 def collect(args: argparse.Namespace) -> None:
     stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     out_dir = Path(f"models/bc_game_{stamp}")
@@ -121,10 +186,12 @@ def collect(args: argparse.Namespace) -> None:
     pairs = sample_pairs(args.jsonl, args.battles, args.seed)
     chunks = [pairs[i::args.workers] for i in range(args.workers)]
     ctx = mp.get_context("spawn")
-    procs = [
-        ctx.Process(target=collect_worker, args=(w, chunks[w], args.port, out_dir))
-        for w in range(args.workers)
-    ]
+    if args.backend == "sim":
+        procs = [ctx.Process(target=collect_worker_sim, args=(w, chunks[w], out_dir))
+                 for w in range(args.workers)]
+    else:
+        procs = [ctx.Process(target=collect_worker, args=(w, chunks[w], args.port, out_dir))
+                 for w in range(args.workers)]
     for p in procs:
         p.start()
     for p in procs:
@@ -171,16 +238,20 @@ def baseline(args: argparse.Namespace) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("mode", choices=["collect", "baseline"])
+    p.add_argument("mode", choices=["collect", "holdout", "baseline"])
     p.add_argument("--jsonl", default="data/teams/gauntlet_harvest/battles.jsonl")
     p.add_argument("--battles", type=int, default=20000)
     p.add_argument("--n", type=int, default=100)
     p.add_argument("--workers", type=int, default=8)
     p.add_argument("--port", type=int, default=8021)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--backend", choices=["sim", "server"], default="sim")
+    p.add_argument("--out", help="holdout json path")
     args = p.parse_args()
     if args.mode == "collect":
         collect(args)
+    elif args.mode == "holdout":
+        holdout(args)
     else:
         baseline(args)
 

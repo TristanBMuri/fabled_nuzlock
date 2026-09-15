@@ -21,6 +21,30 @@ N_ACTIONS = SinglesEnv.get_action_space_size(9)
 _SWITCH_ACTIONS = 6
 
 
+def action_mask(battle: AbstractBattle) -> np.ndarray:
+    """poke-env's mask with the switch slots decided by identity. poke-env marks
+    a slot legal when its *species* is among available switches, so with two of
+    a species (common in gauntlet parties) the active one is marked too and the
+    resulting order is rejected. Padded to N_ACTIONS (gen8 masks are 22-dim)."""
+    mask = np.array(SinglesEnv.get_action_mask(battle))
+    if len(mask) < N_ACTIONS:
+        mask = np.pad(mask, (0, N_ACTIONS - len(mask)))
+    if not battle.wait:
+        for i, p in enumerate(list(battle.team.values())[:_SWITCH_ACTIONS]):
+            mask[i] = int(not battle.trapped and any(p is s for s in battle.available_switches))
+    return mask
+
+
+def order_to_action(order: BattleOrder, battle: AbstractBattle) -> int:
+    """Inverse of SinglesEnv.action_to_order with switches resolved by identity
+    (poke-env maps a switch to the first slot of that species)."""
+    from poke_env.battle import Pokemon
+    from poke_env.player import SingleBattleOrder
+    if isinstance(order, SingleBattleOrder) and isinstance(order.order, Pokemon):
+        return next(i for i, p in enumerate(battle.team.values()) if p is order.order)
+    return int(SinglesEnv.order_to_action(order, battle, fake=True, strict=False))
+
+
 class MaskedActorCriticPolicy(ActorCriticPolicy):
     def __init__(self, *args: Any, **kwargs: Any):
         # default kept at [256, 256]: existing checkpoints (state-dict
@@ -89,9 +113,7 @@ class PolicyPlayer(Player):
         if battle.wait:
             return DefaultBattleOrder()
         obs = embed_battle(battle)
-        mask = np.array(SinglesEnv.get_action_mask(battle))
-        if len(mask) < N_ACTIONS:  # gen8 battles have a 22-dim action mask
-            mask = np.pad(mask, (0, N_ACTIONS - len(mask)))
+        mask = action_mask(battle)
         with torch.no_grad():
             obs_dict = {
                 "observation": torch.as_tensor(obs, device=self.policy.device).unsqueeze(0),

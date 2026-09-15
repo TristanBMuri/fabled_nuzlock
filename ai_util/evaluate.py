@@ -29,7 +29,7 @@ import numpy as np
 import torch
 
 from ai_util.battler_obs import embed_battle
-from ai_util.battler_policy import N_ACTIONS, PolicyPlayer, load_policy
+from ai_util.battler_policy import PolicyPlayer, action_mask, load_policy
 from ai_util.sim import Brain, SimBattle, SimBridge, order_to_choice, player_brain
 from poke_env.environment import SinglesEnv
 from poke_env.player import MaxBasePowerPlayer, RandomPlayer, SimpleHeuristicsPlayer
@@ -49,9 +49,7 @@ def prior_brain(policy) -> Brain:
 
 def prior_probs(policy, mirror) -> tuple[np.ndarray, np.ndarray]:
     obs = embed_battle(mirror)
-    mask = np.array(SinglesEnv.get_action_mask(mirror))
-    if len(mask) < N_ACTIONS:
-        mask = np.pad(mask, (0, N_ACTIONS - len(mask)))
+    mask = action_mask(mirror)
     with torch.no_grad():
         od = {"observation": torch.as_tensor(obs, device=policy.device).unsqueeze(0),
               "action_mask": torch.as_tensor(mask, device=policy.device).unsqueeze(0)}

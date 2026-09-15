@@ -15,13 +15,13 @@ from gymnasium.spaces import Box, Discrete
 from battle_env import SPECIES  # pool species (82) — union below with BDSP
 from gauntlet import (Mon, encounter_moves, load_encounters, load_trainers,
                       pack_team, record_battle, trainer_mons)
-from gauntlet import BattleRunner
+from gauntlet import BattleRunner, SimBattleRunner
 
 MAX_ROSTER = 12
 MAX_PARTY = 6
 N_META_ACTIONS = 1 + MAX_ROSTER
 BREAKPOINTS = ["none", "gym_leader", "elite_four", "champion"]
-SLICE_LEN = 50  # trainers per episode (through gym 1+ for v1)
+SLICE_LEN = 51  # trainers per episode: through Gym Leader Roark (order_index 50)
 STARTERS = {"chimchar", "piplup", "turtwig"}
 
 TRAINERS, ORDER = load_trainers()
@@ -42,15 +42,33 @@ SPECIES_V2 = build_vocab()
 V = len(SPECIES_V2)
 IDX = {s: i for i, s in enumerate(SPECIES_V2)}
 # obs: roster(12 x [V+3]) + trainer([4+6]) + per-opp-mon(6 x [V+1]) + phase(2) + 2
-OBS_DIM = 12 * (V + 3) + 10 + 6 * (V + 1) + 2 + 2
+#      + risk(7): P(win) + P(death) per party slot for the current party vs the
+#        next trainer, from the sim (zeros when no party / server backend)
+N_RISK = 1 + MAX_PARTY
+RISK_BATTLES = 8
+OBS_DIM = 12 * (V + 3) + 10 + 6 * (V + 1) + 2 + 2 + N_RISK
 
 
 class NuzlockeEnv(Env):
     def __init__(self, port: int = 8000, info_mode: str = "full",
-                 seed: int | None = None):
+                 seed: int | None = None, backend: str = "sim",
+                 policy: str | None = None, search: tuple[int, int] | None = None,
+                 level_margin: int = 0, level_rule: str = "cap",
+                 risk_features: bool = True):
+        """backend 'sim' (in-process, default) or 'server' (Showdown on `port`).
+        policy selects the sim battler (None = SimpleHeuristics); search=(k, r)
+        switches boss fights (breakpoint trainers) to rollout search.
+        level_rule 'match': player level = max enemy level seen (+margin);
+        'cap' (hardcore nuzlocke): player level = next boss's max level
+        (+margin) — route trainers are below you, the boss fight is at parity."""
         self.info_mode = info_mode
+        self.level_margin, self.level_rule = level_margin, level_rule
+        self.risk_features = risk_features  # off = no sim queries in _obs (harvesting)
         self.rng = random.Random(seed)
-        self.runner = BattleRunner(port=port, info_mode=info_mode)
+        if backend == "sim":
+            self.runner = SimBattleRunner(policy=policy, search=search, info_mode=info_mode)
+        else:
+            self.runner = BattleRunner(port=port, info_mode=info_mode)
         self.encounters = load_encounters()["routes"]
         self.observation_space = Box(-np.inf, np.inf, (OBS_DIM,), np.float32)
         self.action_space = Discrete(N_META_ACTIONS)
@@ -71,6 +89,7 @@ class NuzlockeEnv(Env):
         self.pending_encounter: Mon | None = None
         self._route_cursor = 0  # routes consumed
         self.done = False
+        self._risk_cache: dict = {}
 
     def reset(self, *, seed=None, options=None):
         if seed is not None:
@@ -100,22 +119,50 @@ class NuzlockeEnv(Env):
                 self.phase = "ENCOUNTER"
 
     # ---------------------------------------------------------------- battle
-    def _run_battle(self):
-        party = [self.roster[i] for i in self.party]
-        entry = ORDER[self.trainer_idx]
-        enemy = trainer_mons(TRAINERS[entry["trainer_id"]])
+    def _apply_level_rule(self, entry):
         self.max_enemy_level = max(self.max_enemy_level, entry["max_level"])
-        for m in self.roster:  # player level rule: match max, never decrease
-            if m.level < self.max_enemy_level:
-                m.level = self.max_enemy_level
+        cap = self.max_enemy_level
+        if self.level_rule == "cap":
+            boss = next((e for e in ORDER[self.trainer_idx:SLICE_LEN]
+                         if e["breakpoint"] != "none"), ORDER[SLICE_LEN - 1])
+            cap = max(cap, boss["max_level"])
+        target = min(cap + self.level_margin, 100)
+        for m in self.roster:  # player level rule: match max (+margin), never decrease
+            if m.level < target:
+                m.level = target
                 m.moves = encounter_moves(m.species, m.level) or m.moves
-        player_packed = pack_team(party)
-        enemy_packed = pack_team(enemy)
+
+    def _packed_matchup(self, party_idx):
+        """(player_packed, enemy_packed, entry) for a candidate party vs the
+        next trainer, with the level rule applied."""
+        entry = ORDER[self.trainer_idx]
+        self._apply_level_rule(entry)
+        party = [self.roster[i] for i in party_idx]
+        enemy = trainer_mons(TRAINERS[entry["trainer_id"]])
+        return pack_team(party), pack_team(enemy), entry
+
+    def risk(self, party_idx=None):
+        """P(win), [P(death_i)] for a party (default: current) vs the next
+        trainer. Cached per (party, trainer). Zeros if unavailable."""
+        party_idx = tuple(self.party if party_idx is None else party_idx)
+        key = (party_idx, self.trainer_idx)
+        if key not in self._risk_cache:
+            est = None
+            if party_idx and self.trainer_idx < SLICE_LEN and hasattr(self.runner, "estimate"):
+                pp, ep, _ = self._packed_matchup(party_idx)
+                if pp and ep:
+                    est = self.runner.estimate(pp, ep, n=RISK_BATTLES)
+            self._risk_cache[key] = est or (0.0, [0.0] * len(party_idx))
+        return self._risk_cache[key]
+
+    def _run_battle(self):
+        player_packed, enemy_packed, entry = self._packed_matchup(self.party)
         if not player_packed or not enemy_packed:
             return None
-        result = self.runner.run(player_packed, enemy_packed)
+        boss = entry["breakpoint"] != "none"
+        result = self.runner.run(player_packed, enemy_packed, boss=boss)
         if result is None:  # rebuild happened; retry once
-            result = self.runner.run(player_packed, enemy_packed)
+            result = self.runner.run(player_packed, enemy_packed, boss=boss)
         if result is None:
             return None
         won, alive = result
@@ -151,6 +198,12 @@ class NuzlockeEnv(Env):
         v[o + 1] = 1.0 if self.phase == "PRE_BATTLE" else 0.0
         v[o + 2] = self.trainer_idx / SLICE_LEN
         v[o + 3] = 1.0  # bias
+        o += 4
+        if self.risk_features and self.phase == "PRE_BATTLE" and self.party and not self.done:
+            p_win, p_death = self.risk()
+            v[o] = p_win
+            for j, p in enumerate(p_death[:MAX_PARTY]):
+                v[o + 1 + j] = p
         return v
 
     def _mask(self) -> np.ndarray:
