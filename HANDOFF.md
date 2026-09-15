@@ -42,12 +42,14 @@ ai_util/collect_game.py collect (sim, BC pairs from harvest matchups, + battle
 ai_util/pretrain_bc.py  masked-CE pretrain; multiple --data; sim-based eval;
                         --init/--value-only/--value-coef train the critic on `value`.
 ai_util/diff_sets.py    sim-vs-server team-setup diff (found the EV bug).
-scripts/gauntlet.py     BDSP data, Mon/pack_team, BattleRunner (server, legacy),
-                        SimBattleRunner (default): run(), estimate(), boss search.
-scripts/nuzlocke_env.py NuzlockeEnv: 51-trainer slice, encounters, roster ≤12,
-                        party ≤6, permadeath, level_rule cap, risk() query,
-                        7 risk features in PRE_BATTLE obs, search_all.
-scripts/plan_gauntlet.py Scripted planner + evaluation harness + death histogram.
+scripts/gauntlet.py     BDSP data, Mon/pack_team, evolve(), BattleRunner (server,
+                        legacy), SimBattleRunner (default): run(), estimate(),
+                        boss search. --build-moves writes moves + evolutions json.
+scripts/nuzlocke_env.py NuzlockeEnv: slice_len trainers (51 default), encounters,
+                        roster ≤12, party ≤6, permadeath, level_rule cap with
+                        evolution, risk() query, risk features in obs, search_all.
+scripts/plan_gauntlet.py Scripted planner + evaluation harness + death histogram;
+                        --slice N.
 scripts/train_nuzlocke.py PPO meta-policy trainer (sim backend; NOT retrained yet
                         on the new obs — old checkpoint is skipped on resume).
 tests/test_sim.py       bridge: play, mirror, fork. `uv run pytest -q`.
@@ -148,10 +150,25 @@ boss's max level (14 = Roark). ~85 s/episode.
    numbers are in; the learned leaf was null (finding 8). If the battler
    still needs to improve later, the remaining levers are deeper search
    (2-ply over the enemy's likely replies) or a candidate-conditioned value.
-2. **Evolution** is not modelled (Turtwig stays Turtwig at 14). Needed before
-   extending past Roark (starters evolve 16–18). Showdown species data has
-   `evos`/`evoLevel`; apply in `_apply_level_rule`. Move table stops at L20
-   (`gauntlet.py --build-moves --max-level N` to rebuild).
+2. **Evolution is in** (level-up only; `data/evolutions.json`, move table to
+   L50). **The slice now extends** (`plan_gauntlet.py --slice 186` =
+   through Gardenia, cap 22 after Roark). The L14 prior is OOD there: default
+   config cleared 146/186 in one episode with 12 deaths spread over route
+   trainers it outlevels by 3–7; heuristic fast 115 cleared / 0% clears.
+   **Pending pipeline, one job at a time (RAM!):**
+   ```bash
+   GAUNTLET_HARVEST=data/teams/gauntlet_harvest/battles_cap186.jsonl \
+     uv run python -u scripts/plan_gauntlet.py --episodes 300 --seed 1000 --fast --slice 186
+   uv run python -u ai_util/collect_game.py collect --jsonl data/teams/gauntlet_harvest/battles_cap186.jsonl --battles 20000 --workers 8
+   uv run python -u ai_util/pretrain_bc.py pretrain --data models/bc_game_<stamp>/data.npz --epochs 20 --out models/game_policy_cap186.pt
+   uv run python -u scripts/plan_gauntlet.py --episodes 10 --seed 300 --policy models/game_policy_cap186.pt --search 3,8 --search-all --slice 186
+   ```
+   Compare against the 1-episode number above and the heuristic; also
+   re-measure the 51-slice default with evolution (only 5/20 episodes done:
+   all clear, 2.2 deaths). Open defect: heuristic + risk parties on the 186
+   slice hit `estimate failed: AssertionError` (poke-env) — the runner now
+   prints the traceback tail; reproduce with
+   `plan_gauntlet.py --episodes 2 --seed 300 --slice 186`.
 3. **Learned run layer (2e)**: retrain `train_nuzlocke.py` on the sim backend
    with the risk features; it must beat the scripted table (100% / 2.65).
    If it can't, the scripted planner *is* the run layer.
@@ -171,3 +188,10 @@ boss's max level (14 = Roark). ~85 s/episode.
   `gen8customgamenogimmicks` format.
 - Runs are stochastic across invocations even with the same `--seed` (the
   sim seeds battles fresh); compare 40-episode tables, not single runs.
+- **RAM: one heavy job at a time.** Three 186-slice gauntlet runs plus a
+  harvest and collectors in parallel exhausted 60 GB and forced a reboot
+  (2026-09-15). A single default-config run is ~1 GB; check `free -g`
+  before and a few minutes after launching anything.
+- Harvest recording is opt-in: set `GAUNTLET_HARVEST=<fresh file>`; unset
+  means no writes. Evaluation runs used to append to `battles.jsonl`.
+- `--slice 186` episodes take ~260 s with search-all (vs ~85 s for 51).

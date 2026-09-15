@@ -13,8 +13,8 @@ from gymnasium import Env
 from gymnasium.spaces import Box, Discrete
 
 from battle_env import SPECIES  # pool species (82) — union below with BDSP
-from gauntlet import (Mon, encounter_moves, load_encounters, load_trainers,
-                      pack_team, record_battle, trainer_mons)
+from gauntlet import (Mon, encounter_moves, evolve, load_encounters, load_evolutions,
+                      load_trainers, pack_team, record_battle, trainer_mons)
 from gauntlet import BattleRunner, SimBattleRunner
 
 MAX_ROSTER = 12
@@ -22,7 +22,10 @@ MAX_PARTY = 6
 N_META_ACTIONS = 1 + MAX_ROSTER
 BREAKPOINTS = ["none", "gym_leader", "elite_four", "champion"]
 SLICE_LEN = 51  # trainers per episode: through Gym Leader Roark (order_index 50)
+EVOS = load_evolutions()
 STARTERS = {"chimchar", "piplup", "turtwig"}
+STARTERS |= {e for s in list(STARTERS) for e, _ in EVOS.get(s, [])}
+STARTERS |= {e for s in list(STARTERS) for e, _ in EVOS.get(s, [])}  # second stage
 
 TRAINERS, ORDER = load_trainers()
 
@@ -35,6 +38,7 @@ def build_vocab():
     enc = load_encounters()
     species |= {e["species"] for r in enc["routes"] for e in r["encounters"]}
     species |= set(enc["starter"])
+    species |= set(EVOS)  # evolved forms the roster can reach
     return sorted(species)
 
 
@@ -54,8 +58,10 @@ class NuzlockeEnv(Env):
                  seed: int | None = None, backend: str = "sim",
                  policy: str | None = None, search: tuple[int, int] | None = None,
                  level_margin: int = 0, level_rule: str = "cap",
-                 risk_features: bool = True, search_all: bool = False):
+                 risk_features: bool = True, search_all: bool = False,
+                 slice_len: int = SLICE_LEN):
         """backend 'sim' (in-process, default) or 'server' (Showdown on `port`).
+        slice_len: trainers per episode (51 = through Roark, 186 = through Gardenia).
         policy selects the sim battler (None = SimpleHeuristics); search=(k, r)
         switches boss fights (breakpoint trainers) to rollout search.
         level_rule 'match': player level = max enemy level seen (+margin);
@@ -65,6 +71,7 @@ class NuzlockeEnv(Env):
         self.level_margin, self.level_rule = level_margin, level_rule
         self.risk_features = risk_features  # off = no sim queries in _obs (harvesting)
         self.search_all = search_all  # search on every trainer, not just breakpoints
+        self.slice_len = slice_len
         self.rng = random.Random(seed)
         if backend == "sim":
             self.runner = SimBattleRunner(policy=policy, search=search, info_mode=info_mode)
@@ -124,13 +131,17 @@ class NuzlockeEnv(Env):
         self.max_enemy_level = max(self.max_enemy_level, entry["max_level"])
         cap = self.max_enemy_level
         if self.level_rule == "cap":
-            boss = next((e for e in ORDER[self.trainer_idx:SLICE_LEN]
-                         if e["breakpoint"] != "none"), ORDER[SLICE_LEN - 1])
+            boss = next((e for e in ORDER[self.trainer_idx:self.slice_len]
+                         if e["breakpoint"] != "none"), ORDER[self.slice_len - 1])
             cap = max(cap, boss["max_level"])
         target = min(cap + self.level_margin, 100)
+        abilities = load_encounters().get("abilities", {})
         for m in self.roster:  # player level rule: match max (+margin), never decrease
             if m.level < target:
                 m.level = target
+                evolved = evolve(m.species, m.level, self.rng)  # level-up evolutions
+                if evolved != m.species:
+                    m.species, m.ability = evolved, abilities.get(evolved)
                 m.moves = encounter_moves(m.species, m.level) or m.moves
 
     def _packed_matchup(self, party_idx):
@@ -149,7 +160,7 @@ class NuzlockeEnv(Env):
         key = (party_idx, self.trainer_idx)
         if key not in self._risk_cache:
             est = None
-            if party_idx and self.trainer_idx < SLICE_LEN and hasattr(self.runner, "estimate"):
+            if party_idx and self.trainer_idx < self.slice_len and hasattr(self.runner, "estimate"):
                 pp, ep, _ = self._packed_matchup(party_idx)
                 if pp and ep:
                     est = self.runner.estimate(pp, ep, n=RISK_BATTLES)
@@ -181,7 +192,7 @@ class NuzlockeEnv(Env):
             v[o + V + 1] = 1.0 if mon.alive else 0.0
             v[o + V + 2] = 1.0 if i in self.party else 0.0
             o += V + 3
-        entry = ORDER[self.trainer_idx] if self.trainer_idx < SLICE_LEN else None
+        entry = ORDER[self.trainer_idx] if self.trainer_idx < self.slice_len else None
         if entry is not None:
             v[o] = entry["max_level"] / 100.0
             v[o + 1] = entry["avg_level"] / 100.0
@@ -197,7 +208,7 @@ class NuzlockeEnv(Env):
             o += 6 * (V + 1)
         v[o] = 1.0 if self.phase == "ENCOUNTER" else 0.0
         v[o + 1] = 1.0 if self.phase == "PRE_BATTLE" else 0.0
-        v[o + 2] = self.trainer_idx / SLICE_LEN
+        v[o + 2] = self.trainer_idx / self.slice_len
         v[o + 3] = 1.0  # bias
         o += 4
         if self.risk_features and self.phase == "PRE_BATTLE" and self.party and not self.done:
@@ -262,7 +273,7 @@ class NuzlockeEnv(Env):
                         if won:
                             reward += 1.0
                             self.trainer_idx += 1
-                            if self.trainer_idx >= SLICE_LEN:
+                            if self.trainer_idx >= self.slice_len:
                                 reward += 10.0
                                 self.done = True
                             elif not any(m.alive for m in self.roster):
@@ -285,7 +296,7 @@ class NuzlockeEnv(Env):
                     # End-of-run shaping: deeper runs and living catches are
                     # worth something even on a loss — counters the learned
                     # "solo the starter, skip everything" degenerate policy.
-                    reward += 0.5 * self.trainer_idx / SLICE_LEN * 10
+                    reward += 0.5 * self.trainer_idx / self.slice_len * 10
                     reward += 0.5 * sum(m.alive for m in self.roster
                                         if m.species not in STARTERS)
             else:
@@ -300,6 +311,6 @@ class NuzlockeEnv(Env):
         roster = ", ".join(f"{m.species}@{m.level}{'†' if not m.alive else ''}"
                            for m in self.roster)
         entry = (ORDER[self.trainer_idx]["trainer_name"]
-                 if self.trainer_idx < SLICE_LEN else "CLEARED")
-        return (f"[{self.phase}] trainer {self.trainer_idx}/{SLICE_LEN} "
+                 if self.trainer_idx < self.slice_len else "CLEARED")
+        return (f"[{self.phase}] trainer {self.trainer_idx}/{self.slice_len} "
                 f"({entry}) | roster: {roster} | party: {self.party}")

@@ -1,0 +1,210 @@
+{
+ "abra": [
+  [
+   "kadabra",
+   16
+  ]
+ ],
+ "bibarel": [],
+ "bidoof": [
+  [
+   "bibarel",
+   15
+  ]
+ ],
+ "bronzor": [
+  [
+   "bronzong",
+   33
+  ]
+ ],
+ "budew": [],
+ "buizel": [
+  [
+   "floatzel",
+   26
+  ]
+ ],
+ "buneary": [],
+ "chansey": [],
+ "cherubi": [
+  [
+   "cherrim",
+   25
+  ]
+ ],
+ "chimchar": [
+  [
+   "monferno",
+   14
+  ]
+ ],
+ "chingling": [],
+ "duskull": [
+  [
+   "dusclops",
+   37
+  ]
+ ],
+ "geodude": [
+  [
+   "graveler",
+   25
+  ]
+ ],
+ "hoothoot": [
+  [
+   "noctowl",
+   20
+  ]
+ ],
+ "kricketot": [
+  [
+   "kricketune",
+   10
+  ]
+ ],
+ "kricketune": [],
+ "machop": [
+  [
+   "machoke",
+   28
+  ]
+ ],
+ "mimejr": [],
+ "pachirisu": [],
+ "piplup": [
+  [
+   "prinplup",
+   16
+  ]
+ ],
+ "ponyta": [
+  [
+   "rapidash",
+   40
+  ]
+ ],
+ "psyduck": [
+  [
+   "golduck",
+   33
+  ]
+ ],
+ "ralts": [
+  [
+   "kirlia",
+   20
+  ]
+ ],
+ "roselia": [],
+ "shinx": [
+  [
+   "luxio",
+   15
+  ]
+ ],
+ "staravia": [
+  [
+   "staraptor",
+   34
+  ]
+ ],
+ "starly": [
+  [
+   "staravia",
+   14
+  ]
+ ],
+ "stunky": [
+  [
+   "skuntank",
+   34
+  ]
+ ],
+ "turtwig": [
+  [
+   "grotle",
+   18
+  ]
+ ],
+ "wormadam": [],
+ "wurmple": [
+  [
+   "silcoon",
+   7
+  ],
+  [
+   "cascoon",
+   7
+  ]
+ ],
+ "zubat": [
+  [
+   "golbat",
+   22
+  ]
+ ],
+ "kadabra": [],
+ "bronzong": [],
+ "floatzel": [],
+ "cherrim": [],
+ "monferno": [
+  [
+   "infernape",
+   36
+  ]
+ ],
+ "dusclops": [],
+ "graveler": [],
+ "noctowl": [],
+ "machoke": [],
+ "prinplup": [
+  [
+   "empoleon",
+   36
+  ]
+ ],
+ "rapidash": [],
+ "golduck": [],
+ "kirlia": [
+  [
+   "gardevoir",
+   30
+  ]
+ ],
+ "luxio": [
+  [
+   "luxray",
+   30
+  ]
+ ],
+ "staraptor": [],
+ "skuntank": [],
+ "grotle": [
+  [
+   "torterra",
+   32
+  ]
+ ],
+ "silcoon": [
+  [
+   "beautifly",
+   10
+  ]
+ ],
+ "cascoon": [
+  [
+   "dustox",
+   10
+  ]
+ ],
+ "golbat": [],
+ "infernape": [],
+ "empoleon": [],
+ "gardevoir": [],
+ "luxray": [],
+ "torterra": [],
+ "beautifly": [],
+ "dustox": []
+}

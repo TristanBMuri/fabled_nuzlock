@@ -263,9 +263,12 @@ interface end to end, and it needs no training run to produce a number.
       41.2% — both below the prior alone). Rollouts over the engine remain
       the value estimate. Gauntlet default with CRN: 100% / 2.40 deaths /
       36.25 no-death (was 2.65 / 33.8). Details in README → Status 2l.
-- [ ] **2m. Evolution.** Not modelled; matters from gym 2 (starters evolve
-      at 16–18). Showdown species data has evos + evoLevel; apply on level-up
-      in `_apply_level_rule`. Do before extending the slice past Roark.
+- [x] **2m. Evolution.** Level-up evolutions from Showdown species data
+      (`data/evolutions.json`, applied in `_apply_level_rule`); move table
+      to L50. `--slice 186` reaches Gardenia. First look: heuristic fast
+      115/186 cleared, 0% clears; default config 146 cleared in 1 episode,
+      deaths spread over route trainers ⇒ the L14 prior is OOD at L22.
+      Pending: harvest at 186 → collect → retrain → re-measure (README 2m).
 - [ ] **2e. Learned run layer vs scripted.** Retrain `train_nuzlocke.py` on
       the sim backend with the 2b features. Success = beats the 2c table on
       trainers cleared without a death; otherwise the scripted planner *is*

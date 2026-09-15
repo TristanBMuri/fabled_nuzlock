@@ -22,11 +22,11 @@ from battle_env import BATTLE_FORMAT, server_config
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "data"
-# GAUNTLET_HARVEST=path overrides where battles are recorded (e.g. a fresh
-# file when the progression rule changes — the battler's data distribution
-# must follow the rule the run layer plays under).
-HARVEST = Path(os.environ.get("GAUNTLET_HARVEST",
-                              DATA / "teams" / "gauntlet_harvest" / "battles.jsonl"))
+# GAUNTLET_HARVEST=path records every (player party, enemy team, won) the env
+# plays, for BC collection. Unset = no recording: the battler's data must follow
+# the progression rule the run layer plays under, so a harvest is always an
+# explicit, fresh file (evaluation runs used to append to the old one silently).
+HARVEST = Path(os.environ["GAUNTLET_HARVEST"]) if os.environ.get("GAUNTLET_HARVEST") else None
 BATTLE_FORMAT = "gen8customgamenogimmicks"
 
 # ---------------------------------------------------------------- data loading
@@ -187,7 +187,9 @@ class SimBattleRunner:
             r = evaluate(self.bridge, player_packed, enemy_packed, self.player, self.enemy,
                          n=n, max_turns=self.max_turns)
         except Exception as e:
-            print(f"SimBattleRunner.estimate failed: {type(e).__name__}: {e}")
+            import traceback
+            print(f"SimBattleRunner.estimate failed: {type(e).__name__}: {e}\n"
+                  + "".join(traceback.format_exc().splitlines(True)[-4:]))
             return None
         return r["p_win"], r["p_death"]
 
@@ -222,6 +224,8 @@ _HARVEST_LOCK = None
 def record_battle(run_id: str, trainer_id: int | None, info_mode: str,
                   won: bool, player_packed: str, enemy_packed: str):
     global _HARVEST_LOCK
+    if HARVEST is None:
+        return
     if _HARVEST_LOCK is None:
         import threading
         _HARVEST_LOCK = threading.Lock()
@@ -239,10 +243,21 @@ def record_battle(run_id: str, trainer_id: int | None, info_mode: str,
 # --------------------------------------------------------------- moves builder
 
 LEARNSET_SCRIPT = """
-const {Learnsets} = require(require('path').join(process.argv[1], 'dist', 'data', 'learnsets.js'));
+const path = require('path');
+const {Learnsets} = require(path.join(process.argv[1], 'dist', 'data', 'learnsets.js'));
+const {Dex} = require(path.join(process.argv[1], 'dist', 'sim'));
 const maxLevel = Number(process.argv[2]);
+// closure over level-up evolutions: evolved forms need learnsets too
+const species = new Set(process.argv.slice(3));
+const evos = {};
+for (const sp of species) {
+  evos[sp] = Dex.species.get(sp).evos
+    .map(e => Dex.species.get(e)).filter(e => e.evoLevel && !e.evoType)
+    .map(e => [e.id, e.evoLevel]);
+  for (const [id] of evos[sp]) species.add(id);
+}
 const out = {};
-for (const sp of process.argv.slice(3)) {
+for (const sp of species) {
   const ls = Learnsets[sp];
   if (!ls) continue;
   const levelup = Object.entries(ls.learnset)
@@ -253,11 +268,14 @@ for (const sp of process.argv.slice(3)) {
     (out[sp] = out[sp] || {})[lvl] = levelup.filter(([, l]) => l <= lvl).slice(-4).map(([m]) => m);
   }
 }
-console.log(JSON.stringify(out));
+console.log(JSON.stringify({moves: out, evos}));
 """
 
 
 def build_moves(max_level: int = 20) -> None:
+    """data/encounter_moves.json (last 4 level-up moves per species and level) and
+    data/evolutions.json (species -> [[evolved id, level]]; level evolutions only —
+    item / friendship / trade evolutions are not modelled)."""
     enc = load_encounters()
     species = sorted({e["species"] for r in enc["routes"] for e in r["encounters"]}
                      | set(enc["starter"]))
@@ -266,13 +284,14 @@ def build_moves(max_level: int = 20) -> None:
          str(max_level), *species],
         capture_output=True, text=True, check=True,
     ).stdout
-    moves = json.loads(raw)
-    missing = [s for s in species if s not in moves]
+    data = json.loads(raw)
+    missing = [s for s in species if s not in data["moves"]]
     if missing:
         print(f"WARN: no learnset data for {missing}")
-    (DATA / "encounter_moves.json").write_text(json.dumps(moves, indent=1))
-    print(f"wrote encounter_moves.json for {len(moves)} species "
-          f"(max level {max_level})")
+    (DATA / "encounter_moves.json").write_text(json.dumps(data["moves"], indent=1))
+    (DATA / "evolutions.json").write_text(json.dumps(data["evos"], indent=1))
+    print(f"wrote encounter_moves.json for {len(data['moves'])} species (max level "
+          f"{max_level}) and evolutions.json for {len(data['evos'])} species")
 
 
 def encounter_moves(species: str, level: int) -> list[str]:
@@ -280,6 +299,21 @@ def encounter_moves(species: str, level: int) -> list[str]:
     by_level = moves.get(species, {})
     return by_level.get(str(min(level, max(int(k) for k in by_level))), []) \
         if by_level else []
+
+
+def load_evolutions() -> dict:
+    return json.load(open(DATA / "evolutions.json"))
+
+
+def evolve(species: str, level: int, rng=None) -> str:
+    """Species after every level evolution reachable at `level` (branching
+    evolutions such as Wurmple pick with rng, first branch without)."""
+    evos = load_evolutions()
+    while True:
+        due = [e for e, lvl in evos.get(species, []) if lvl <= level]
+        if not due:
+            return species
+        species = rng.choice(due) if rng else due[0]
 
 
 # --------------------------------------------------------------------- checks

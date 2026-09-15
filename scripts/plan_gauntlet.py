@@ -79,7 +79,7 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
         info = {"action_mask": env._mask()}
     return {"cleared": env.trainer_idx, "deaths": deaths,
             "cleared_no_death": env.trainer_idx if first_death_at is None else first_death_at,
-            "slice_clear": env.trainer_idx >= SLICE_LEN}
+            "slice_clear": env.trainer_idx >= env.slice_len}
 
 
 def main() -> None:
@@ -96,6 +96,8 @@ def main() -> None:
                     help="cap = next boss's max level (hardcore rule); match = max enemy seen")
     ap.add_argument("--fast", action="store_true",
                     help="no risk queries (highest-level party): bulk harvesting")
+    ap.add_argument("--slice", type=int, default=SLICE_LEN,
+                    help="trainers per episode (51 = through Roark, 186 = through Gardenia)")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
     search = tuple(int(x) for x in args.search.split(",")) if args.search else None
@@ -104,7 +106,7 @@ def main() -> None:
     # intermediate party while the team was being built (+50% cost).
     env = NuzlockeEnv(seed=args.seed, backend="sim", policy=args.policy, search=search,
                       level_margin=args.level_margin, level_rule=args.level_rule,
-                      risk_features=False, search_all=args.search_all)
+                      risk_features=False, search_all=args.search_all, slice_len=args.slice)
     t0, rows = time.time(), []
     for e in range(args.episodes):
         r = episode(env, args.seed + e, args.lam, args.verbose, args.fast)
@@ -113,7 +115,7 @@ def main() -> None:
               f"deaths {r['deaths']}  {'CLEAR' if r['slice_clear'] else ''}  "
               f"({(time.time() - t0) / (e + 1):.0f}s/ep)", flush=True)
     k = lambda f: np.mean([r[f] for r in rows])
-    print(f"\n{args.episodes} episodes | battler={args.policy or 'SimpleHeuristics'} "
+    print(f"\n{args.episodes} episodes | slice {args.slice} | battler={args.policy or 'SimpleHeuristics'} "
           f"search={search}{' (all)' if args.search_all else ''} lam={args.lam} "
           f"level_rule={args.level_rule} "
           f"margin={args.level_margin}\n"

@@ -545,6 +545,29 @@ project_overview.md # the plan / roadmap
   `logs/plan_cap_crn.log`): **51.0 cleared / 36.25 no-death / 2.40 deaths /
   100% clear**, 0 lost battles (was 33.8 / 2.65; Roark 20 deaths again,
   Hiker Daniel 13). Same direction as the holdout, within 20-episode noise.
+  **2m. Evolution + slice parameter (2026-09-15, night).** Level-up
+  evolutions from Showdown's species data (`gauntlet.py --build-moves
+  --max-level 50` now also writes `data/evolutions.json`; move table goes to
+  L50 and covers the evolved forms). `_apply_level_rule` evolves a mon when
+  the rule raises its level (Wurmple's branch picked with the env rng;
+  item/friendship/trade evolutions not modelled). On the 51-slice the
+  starters and Starly evolve at 14 (Monferno, Staravia), Kricketot at 10.
+  Default config with evolution, 5 of 20 episodes before the machine was
+  rebooted (parallel runs exhausted RAM — see HANDOFF gotchas): all 5
+  cleared, deaths 1/3/1/2/4. `--slice N` (NuzlockeEnv slice_len) extends
+  the episode; 186 = through Gym Leader Gardenia (cap 22 after Roark).
+  186-slice, 20 eps, heuristic `--fast`: 115.2 cleared / 33.9 no-death /
+  11.3 deaths / 0% clears (Roark 44 deaths 3 losses, Hiker Daniel 35,
+  Collector Edwin #139 3x Sudowoodo@19 19 deaths 4 losses). Default config,
+  1 episode (260 s, ~1 GB): 146 cleared, 12 deaths, lost at #146 — one
+  death per trainer against route trainers 3–7 levels below the party, i.e.
+  the cap-14 prior is OOD at L22 with evolved species. Next: harvest at
+  slice 186 (`GAUNTLET_HARVEST=... --fast --slice 186`), collect, retrain,
+  re-measure. Harvest recording is now opt-in (env var unset = no writes);
+  earlier evaluation runs had been appending to `battles.jsonl` silently
+  (483k → 515k lines). Open defect: the heuristic + risk-party run on the
+  186 slice logged `SimBattleRunner.estimate failed: AssertionError` (13x in
+  3 episodes, 2 runner rebuilds); the runner now prints the traceback tail.
   ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```
