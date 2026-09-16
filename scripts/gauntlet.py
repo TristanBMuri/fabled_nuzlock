@@ -127,10 +127,10 @@ class BattleRunner:
                                          **kw)
 
     def run(self, player_packed: str, enemy_packed: str, timeout: float = 60.0,
-            boss: bool = False):
+            boss: bool = False, search: tuple[int, int] | None = None):
         """One battle. Returns (won, alive_mask) aligned to player_packed
-        order, or None on failure (players rebuilt). `boss` is ignored here
-        (server backend has no search).
+        order, or None on failure (players rebuilt). `boss` / `search` are
+        ignored here (server backend has no search).
 
         Timeout matters: a rejected/empty team makes poke-env wait forever
         on the challenge. Combined with per-env rollouts (train_nuzlocke),
@@ -183,21 +183,30 @@ class SimBattleRunner:
                  max_turns: int = 100, info_mode: str = "full"):
         import sys
         sys.path.insert(0, str(ROOT))
-        from ai_util.evaluate import Searcher, heuristic_brain, prior_brain
+        from ai_util.evaluate import heuristic_brain, prior_brain
         from ai_util.sim import SimBridge
         self.info_mode, self.max_turns = info_mode, max_turns
         self.bridge = SimBridge()
         self.enemy = heuristic_brain()
-        self.searcher = None  # compute dial: used for boss fights when set
+        self.search = search  # default (k, rollouts) for boss fights; the compute dial
+        self.policy = None
+        self._searchers: dict[tuple[int, int], object] = {}  # one Searcher per width
         if policy:
             from ai_util.battler_policy import load_policy
-            pol = load_policy(policy, device="cpu")
-            self.player = prior_brain(pol)
-            if search:
-                self.searcher = Searcher(pol, self.enemy, k=search[0], rollouts=search[1],
-                                         max_turns=max_turns)
+            self.policy = load_policy(policy, device="cpu")
+            self.player = prior_brain(self.policy)
         else:
             self.player = heuristic_brain()
+
+    def searcher(self, width: tuple[int, int] | None):
+        """Search brain at `width` = (k, rollouts); None or no prior = the fast player."""
+        if width is None or self.policy is None:
+            return self.player
+        if width not in self._searchers:
+            from ai_util.evaluate import Searcher
+            self._searchers[width] = Searcher(self.policy, self.enemy, k=width[0],
+                                              rollouts=width[1], max_turns=self.max_turns)
+        return self._searchers[width]
 
     def estimate(self, player_packed: str, enemy_packed: str, n: int = 8):
         """Death-probability query: (P(win), [P(death_i)] in packed order, mean
@@ -215,14 +224,15 @@ class SimBattleRunner:
         return r["p_win"], r["p_death"], r["hp"]
 
     def run(self, player_packed: str, enemy_packed: str, timeout: float = 0.0,
-            boss: bool = False):
+            boss: bool = False, search: tuple[int, int] | None = None):
         """One battle. Returns (won, alive_mask) aligned to player_packed order,
-        or None on failure (bridge rebuilt). boss=True uses search if configured."""
+        or None on failure (bridge rebuilt). boss=True searches at the default
+        width; search=(k, r) sets the width for this fight (deeper at hard ones)."""
         from ai_util.sim import SimBattle, SimBridge
         if not player_packed or not enemy_packed:
             print("SimBattleRunner: empty packed team")
             return None
-        brain = self.searcher if (boss and self.searcher is not None) else self.player
+        brain = self.searcher(search or (self.search if boss else None))
         try:
             sb = SimBattle(self.bridge, BATTLE_FORMAT, player_packed, enemy_packed)
             sb.play({"p1": brain, "p2": self.enemy}, self.max_turns)

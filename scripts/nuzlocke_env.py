@@ -50,6 +50,9 @@ IDX = {s: i for i, s in enumerate(SPECIES_V2)}
 #        next trainer, from the sim (zeros when no party / server backend)
 N_RISK = 1 + MAX_PARTY
 RISK_BATTLES = 8
+# A fight is "hard" (deep search width) when the fielded party's risk query shows
+# a loss, a death, or less than this fraction of the party's HP left on average.
+DEEP_HP = 0.5
 OBS_DIM = 12 * (V + 3) + 10 + 6 * (V + 1) + 2 + 2 + N_RISK
 
 
@@ -59,11 +62,13 @@ class NuzlockeEnv(Env):
                  policy: str | None = None, search: tuple[int, int] | None = None,
                  level_margin: int = 0, level_rule: str = "cap",
                  risk_features: bool = True, search_all: bool = False,
-                 slice_len: int = SLICE_LEN):
+                 slice_len: int = SLICE_LEN, deep: tuple[int, int] | None = None):
         """backend 'sim' (in-process, default) or 'server' (Showdown on `port`).
         slice_len: trainers per episode (51 = through Roark, 186 = through Gardenia).
         policy selects the sim battler (None = SimpleHeuristics); search=(k, r)
-        switches boss fights (breakpoint trainers) to rollout search.
+        switches boss fights (breakpoint trainers) to rollout search, search_all
+        every fight. deep=(k, r): wider search at breakpoints and at any fight
+        the risk query flags as hard (see DEEP_HP) — the compute dial per trainer.
         level_rule 'match': player level = max enemy level seen (+margin);
         'cap' (hardcore nuzlocke): player level = next boss's max level
         (+margin) — route trainers are below you, the boss fight is at parity."""
@@ -71,6 +76,8 @@ class NuzlockeEnv(Env):
         self.level_margin, self.level_rule = level_margin, level_rule
         self.risk_features = risk_features  # off = no sim queries in _obs (harvesting)
         self.search_all = search_all  # search on every trainer, not just breakpoints
+        self.deep = deep
+        self.n_deep = 0  # fights played at the deep width (cost accounting)
         self.slice_len = slice_len
         self.rng = random.Random(seed)
         if backend == "sim":
@@ -154,29 +161,39 @@ class NuzlockeEnv(Env):
         enemy = trainer_mons(TRAINERS[entry["trainer_id"]])
         return pack_team(party), pack_team(enemy), entry
 
-    def risk(self, party_idx=None):
+    def risk(self, party_idx=None, n: int = RISK_BATTLES):
         """(P(win), [P(death_i)], mean HP fraction left) for a party (default:
-        current) vs the next trainer. Cached per (party, trainer). Zeros if
-        unavailable."""
+        current) vs the next trainer, from n battles under the fast brain.
+        Cached per (party, trainer, n). Zeros if unavailable."""
         party_idx = tuple(self.party if party_idx is None else party_idx)
-        key = (party_idx, self.trainer_idx)
+        key = (party_idx, self.trainer_idx, n)
         if key not in self._risk_cache:
             est = None
             if party_idx and self.trainer_idx < self.slice_len and hasattr(self.runner, "estimate"):
                 pp, ep, _ = self._packed_matchup(party_idx)
                 if pp and ep:
-                    est = self.runner.estimate(pp, ep, n=RISK_BATTLES)
+                    est = self.runner.estimate(pp, ep, n=n)
             self._risk_cache[key] = est or (0.0, [0.0] * len(party_idx), 0.0)
         return self._risk_cache[key]
+
+    def _hard(self) -> bool:
+        """Deep-search trigger: the fielded party's risk query (free when the
+        planner already scored this party) shows a loss, a death, or a close fight."""
+        p_win, p_death, hp = self.risk()
+        return p_win < 1.0 or max(p_death, default=0.0) > 0.0 or hp < DEEP_HP
 
     def _run_battle(self):
         player_packed, enemy_packed, entry = self._packed_matchup(self.party)
         if not player_packed or not enemy_packed:
             return None
         boss = self.search_all or entry["breakpoint"] != "none"
-        result = self.runner.run(player_packed, enemy_packed, boss=boss)
+        width = None
+        if self.deep and (entry["breakpoint"] != "none" or self._hard()):
+            width = self.deep
+            self.n_deep += 1
+        result = self.runner.run(player_packed, enemy_packed, boss=boss, search=width)
         if result is None:  # rebuild happened; retry once
-            result = self.runner.run(player_packed, enemy_packed, boss=boss)
+            result = self.runner.run(player_packed, enemy_packed, boss=boss, search=width)
         if result is None:
             return None
         won, alive = result

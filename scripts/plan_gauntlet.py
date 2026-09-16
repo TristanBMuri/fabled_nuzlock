@@ -12,6 +12,7 @@ without a death, deaths, and slice clears over N episodes.
 
 import argparse
 import itertools
+import multiprocessing as mp
 import sys
 import time
 from pathlib import Path
@@ -19,10 +20,20 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from nuzlocke_env import MAX_PARTY, SLICE_LEN, NuzlockeEnv  # noqa: E402
+from nuzlocke_env import DEEP_HP, MAX_PARTY, RISK_BATTLES, SLICE_LEN, NuzlockeEnv  # noqa: E402
+
+REFINE_TOP = 3  # candidates re-queried at the larger n when --refine is set
 
 
-def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False) -> list[int]:
+def swaps(base, alive):
+    """The party plus every single swap with a box mon."""
+    box = [i for i in alive if i not in base]
+    return [tuple(base)] + [tuple(sorted(set(base) - {o} | {b}))
+                            for o, b in itertools.product(base, box)]
+
+
+def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False,
+                 refine: int = 0, climb: bool = False) -> list[int]:
     alive = [i for i, m in enumerate(env.roster) if m.alive]
     if len(alive) <= MAX_PARTY:
         return alive  # nuzlocke rule: field everything you can
@@ -30,17 +41,26 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
     base = by_level[:MAX_PARTY]
     if fast:  # no risk queries: highest levels, for bulk harvesting
         return base
-    box = [i for i in alive if i not in base]
-    cands = [tuple(base)] + [tuple(sorted(set(base) - {o} | {b}))
-                             for o, b in itertools.product(base, box)]
 
-    def score(p):
+    def score(p, n=RISK_BATTLES):
         # P(win) − λ·mean P(death) + margin: at n=8 most candidates show zero
         # deaths, and HP left is what separates a safe party from a lucky one
-        p_win, p_death, hp = env.risk(p)
+        p_win, p_death, hp = env.risk(p, n)
         return p_win - lam * float(np.mean(p_death)) + HP_WEIGHT * hp if p_death else p_win
 
-    scored = sorted(((score(p), p) for p in cands), reverse=True)
+    def hard(p):  # same trigger as the env's deep search
+        p_win, p_death, hp = env.risk(p)
+        return p_win < 1.0 or max(p_death, default=0.0) > 0.0 or hp < DEEP_HP
+
+    scored = sorted(((score(p), p) for p in swaps(base, alive)), reverse=True)
+    if climb and hard(scored[0][1]):
+        # a second round of swaps from the best party: two changes from the
+        # base are out of reach otherwise, and a hard fight (Edwin's three
+        # Sudowoodo) may need two type answers that are both in the box
+        more = [p for p in swaps(scored[0][1], alive) if p not in dict((q, s) for s, q in scored)]
+        scored = sorted(scored + [(score(p), p) for p in more], reverse=True)
+    if refine:  # sample starvation: n=8 misses ~5% risks; re-query the finalists
+        scored = sorted(((score(p, refine), p) for _, p in scored[:REFINE_TOP]), reverse=True)
     if verbose:
         best, second = scored[0], scored[1] if len(scored) > 1 else None
         print(f"    {len(cands)} candidates: best {best[0]:+.2f} "
@@ -54,7 +74,8 @@ DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes)
 LOSSES_AT: dict[int, int] = {}  # trainer index -> lost battles
 
 
-def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool = False) -> dict:
+def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool = False,
+            refine: int = 0, climb: bool = False) -> dict:
     obs, info = env.reset(seed=seed)
     deaths, first_death_at = 0, None
     while not env.done:
@@ -62,7 +83,7 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
             env.step(1 if info["action_mask"][1] else 0)
             info = {"action_mask": env._mask()}
             continue
-        for i in choose_party(env, lam, verbose, fast):
+        for i in choose_party(env, lam, verbose, fast, refine, climb):
             if i not in env.party:
                 env.step(1 + i)
         alive_before = sum(m.alive for m in env.roster)
@@ -85,14 +106,48 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
             "slice_clear": env.trainer_idx >= env.slice_len}
 
 
-def main() -> None:
+def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict], dict, dict, int]:
+    """One env, the given episode seeds (a worker). Returns the per-episode rows,
+    the death / loss histograms and the number of deep-search fights."""
     global HP_WEIGHT
+    import torch
+    torch.set_num_threads(1)  # batch-1 MLP: the intra-op pool only adds overhead
+    HP_WEIGHT = args.hp_weight
+    if args.harvest:
+        import gauntlet
+        gauntlet.HARVEST = Path(args.harvest)
+    width = lambda s: tuple(int(x) for x in s.split(",")) if s else None
+    # risk_features off: the planner queries env.risk() for its candidates
+    # directly and never reads the obs; leaving them on re-queried every
+    # intermediate party while the team was being built (+50% cost).
+    env = NuzlockeEnv(seed=args.seed, backend="sim", policy=args.policy, search=width(args.search),
+                      level_margin=args.level_margin, level_rule=args.level_rule,
+                      risk_features=False, search_all=args.search_all, slice_len=args.slice,
+                      deep=width(args.deep))
+    t0, rows = time.time(), []
+    for n, s in enumerate(seeds):
+        r = episode(env, s, args.lam, args.verbose, args.fast, args.refine, args.climb)
+        rows.append(r)
+        print(f"ep seed {s:4d}: cleared {r['cleared']:3d}  no-death {r['cleared_no_death']:3d}  "
+              f"deaths {r['deaths']:2d}  {'CLEAR' if r['slice_clear'] else ''}  "
+              f"({(time.time() - t0) / (n + 1):.0f}s/ep)", flush=True)
+    return rows, DEATHS_AT, LOSSES_AT, env.n_deep
+
+
+def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--episodes", type=int, default=20)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--policy", help="BC prior for the battler (default SimpleHeuristics)")
     ap.add_argument("--search", help="k,rollouts for boss fights, e.g. 3,8")
     ap.add_argument("--search-all", action="store_true", help="search on every trainer")
+    ap.add_argument("--deep", help="k,rollouts at breakpoints and fights the risk query "
+                                   "flags as hard (a loss, a death or HP < DEEP_HP at n=8), e.g. 4,16")
+    ap.add_argument("--refine", type=int, default=0, metavar="N",
+                    help="re-query the top 3 candidate parties at N battles (default: off)")
+    ap.add_argument("--climb", action="store_true",
+                    help="when the best party is still flagged hard, score a second round of "
+                         "single swaps from it (two changes from the base party)")
     ap.add_argument("--lam", type=float, default=1.0, help="death penalty weight")
     ap.add_argument("--level-margin", type=int, default=0,
                     help="player level = rule level + this (XP proxy)")
@@ -106,42 +161,44 @@ def main() -> None:
                     help="weight of mean HP left in the party score (0 = old score)")
     ap.add_argument("--harvest", metavar="JSONL",
                     help="record every battle's (party, enemy, won) here (same as GAUNTLET_HARVEST)")
+    ap.add_argument("--workers", type=int, default=1,
+                    help="episodes run in this many processes (one env + one sim each, ~1 GB; "
+                         "check free -g first)")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
-    HP_WEIGHT = args.hp_weight
-    if args.harvest:
-        import gauntlet
-        gauntlet.HARVEST = Path(args.harvest)
-    search = tuple(int(x) for x in args.search.split(",")) if args.search else None
-    # risk_features off: the planner queries env.risk() for its candidates
-    # directly and never reads the obs; leaving them on re-queried every
-    # intermediate party while the team was being built (+50% cost).
-    env = NuzlockeEnv(seed=args.seed, backend="sim", policy=args.policy, search=search,
-                      level_margin=args.level_margin, level_rule=args.level_rule,
-                      risk_features=False, search_all=args.search_all, slice_len=args.slice)
-    t0, rows = time.time(), []
-    for e in range(args.episodes):
-        r = episode(env, args.seed + e, args.lam, args.verbose, args.fast)
-        rows.append(r)
-        print(f"ep {e:3d}: cleared {r['cleared']:2d}  no-death {r['cleared_no_death']:2d}  "
-              f"deaths {r['deaths']}  {'CLEAR' if r['slice_clear'] else ''}  "
-              f"({(time.time() - t0) / (e + 1):.0f}s/ep)", flush=True)
+    seeds = [args.seed + e for e in range(args.episodes)]
+    t0 = time.time()
+    if args.workers > 1:
+        with mp.get_context("spawn").Pool(args.workers) as pool:
+            parts = pool.starmap(run_episodes, [(args, seeds[i::args.workers])
+                                                for i in range(args.workers) if seeds[i::args.workers]])
+    else:
+        parts = [run_episodes(args, seeds)]
+    rows = [r for p in parts for r in p[0]]
+    n_deep = sum(p[3] for p in parts)
+    deaths_at, losses_at = {}, {}  # merged histograms (the globals belong to the workers)
+    for p in parts:
+        for t, d in p[1].items():
+            deaths_at[t] = deaths_at.get(t, 0) + d
+        for t, d in p[2].items():
+            losses_at[t] = losses_at.get(t, 0) + d
     k = lambda f: np.mean([r[f] for r in rows])
     print(f"\n{args.episodes} episodes | slice {args.slice} | battler={args.policy or 'SimpleHeuristics'} "
-          f"search={search}{' (all)' if args.search_all else ''} lam={args.lam} "
-          f"level_rule={args.level_rule} "
-          f"margin={args.level_margin}\n"
+          f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} "
+          f"refine={args.refine or 'off'} climb={args.climb} lam={args.lam} level_rule={args.level_rule} "
+          f"margin={args.level_margin} | {args.workers} workers, {(time.time() - t0) / 60:.0f} min\n"
           f"  trainers cleared        {k('cleared'):.2f}\n"
           f"  cleared without a death {k('cleared_no_death'):.2f}\n"
           f"  deaths per run          {k('deaths'):.2f}\n"
-          f"  slice clear rate        {k('slice_clear'):.0%}")
+          f"  slice clear rate        {k('slice_clear'):.0%}"
+          + (f"\n  deep-search fights      {n_deep / args.episodes:.1f} per run" if args.deep else ""))
     from nuzlocke_env import ORDER, TRAINERS
     print("  deadliest trainers (deaths / lost battles over all episodes):")
-    for t, d in sorted(DEATHS_AT.items(), key=lambda kv: -kv[1])[:8]:
+    for t, d in sorted(deaths_at.items(), key=lambda kv: -kv[1])[:8]:
         e = ORDER[t]
         team = ", ".join(f"{p['species']}@{p['level']}" for p in TRAINERS[e["trainer_id"]]["party"])
         print(f"    #{t:2d} {e['trainer_name']:<22} {e['breakpoint']:<10} "
-              f"deaths {d:3d}  lost {LOSSES_AT.get(t, 0):2d}  [{team}]")
+              f"deaths {d:3d}  lost {losses_at.get(t, 0):2d}  [{team}]")
 
 
 if __name__ == "__main__":

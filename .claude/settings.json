@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(uv run pytest *)",
+      "Bash(uv run python -m py_compile *)",
+      "mcp__terminal__read_terminal"
+    ]
+  }
+}

@@ -11,8 +11,8 @@ a behaviour-cloned prior plus rollout search over the real engine; the run
 layer is currently a *scripted* planner that picks parties by simulated death
 probability. Everything runs in-process (no Showdown servers). On the BDSP
 slice through Gym Leader Roark (51 trainers), the default config cleared
-**100% of runs with 2.40 deaths per run** (20 episodes, `logs/plan_cap_crn.log`;
-stale since encounters v2). The working slice is now **186 trainers through
+**100% of runs with 3.75 deaths per run** (20 episodes, `logs/plan_cap51_evo_v2.log`;
+was 2.40 before evolution + encounters v2 cut the pre-Roark catches to 10). The working slice is now **186 trainers through
 Gym Leader Gardenia**: evolution, roster graveyard, 22 encounter areas, and a
 prior retrained on that distribution plus targeted data on the deadliest
 fights give **168/186 cleared, 16 deaths, 10% clears** (10 episodes). The
@@ -41,20 +41,23 @@ ai_util/battler_obs.py  1014-dim observation encoder (unchanged).
 ai_util/collect_game.py collect (sim, BC pairs from harvest matchups, + battle
                         outcome per decision as `value`), collect_search
                         (search-labelled pairs + search-leaf outcomes `leaves.npz`),
-                        holdout, baseline.
+                        synth (late harvest parties x given trainers' teams ->
+                        harvest-shaped jsonl: the targeted-data step), holdout, baseline.
 ai_util/pretrain_bc.py  masked-CE pretrain; multiple --data; sim-based eval;
                         --init/--value-only/--value-coef train the critic on `value`.
 ai_util/diff_sets.py    sim-vs-server team-setup diff (found the EV bug).
 scripts/gauntlet.py     BDSP data, Mon/pack_team, evolve(), BattleRunner (server,
-                        legacy), SimBattleRunner (default): run(), estimate(),
-                        boss search. --build-moves writes moves + evolutions json.
+                        legacy), SimBattleRunner (default): run(boss=, search=(k,r)),
+                        estimate(), one Searcher per width. --build-moves writes
+                        moves + evolutions json.
 scripts/nuzlocke_env.py NuzlockeEnv: slice_len trainers (51 default), encounters
                         (data/encounters.json v2: 22 areas gated by level band
                         over the 186 order), roster ≤12 living + graveyard, party
-                        ≤6, permadeath, level_rule cap with evolution, risk()
-                        query, risk features in obs, search_all.
+                        ≤6, permadeath, level_rule cap with evolution, risk(n=)
+                        query, risk features in obs, search_all, deep=(k,r) width
+                        at breakpoints and risk-flagged hard fights (DEEP_HP).
 scripts/plan_gauntlet.py Scripted planner + evaluation harness + death histogram;
-                        --slice N.
+                        --slice N, --deep k,r, --refine N (re-query top-3 parties).
 scripts/train_nuzlocke.py PPO meta-policy trainer (sim backend; NOT retrained yet
                         on the new obs — old checkpoint is skipped on resume).
 tests/test_sim.py       bridge: play, mirror, fork. `uv run pytest -q`.
@@ -152,6 +155,8 @@ boss's max level (14 = Roark). ~85 s/episode.
   (96k, harvest v2 `battles_cap186v2.jsonl` 38k) + `bc_game_20260916_001825`
   (44k, `battles_hard_synth.jsonl`). `_cap186.pt` / `_cap186v2.pt` = earlier rounds.
 - `models/edwin_pairs.json` — 30 late parties vs Collector Edwin: the matchup probe.
+- `models/rival_pairs.json` — 10 hard-synth parties x each rival variant (351/352/353).
+- `logs/plan_cap186v3_deep.log` — the current run config (deep 4,16), 10 eps.
 - `models/game_policy_cap_value.pt` / `_value2.pt` — same actor + trained
   critic (teacher outcomes / search leaves). Null as a search leaf; reference only.
 - `models/bc_game_20260915_164023` (match, 178k) / `_164025` (cap, 127k) —
@@ -193,17 +198,42 @@ non-level evolutions missing). Added 2026-09-16 after a project review.
    What moved it: targeted teacher data on the deadly fights (Edwin alone:
    prior 71% → 87%, +search 92% vs teacher 89%). What did not: roster
    refills (more catches = more deaths), the HP-margin party score.
-   Killers now: rival #164–166 (4 mons at 19–21 incl. an evolved starter;
+   Killers at v3: rival #164–166 (4 mons at 19–21 incl. an evolved starter;
    47 deaths / 10 runs), Edwin #139 (16), Roark (12), Craig #163, Gyarados
-   #169. Levers left, in order: (a) boss-level search at the rival and
-   breakpoints (k=4 r=16 was +2 pts on Edwin at 3x cost; `search=(k, r)`
-   applies to breakpoints only when `search_all` is off — add the rival to
-   the breakpoints or make search width per-trainer), (b) another
-   targeted-data round on the rival (cheap, ~10 min), (c) a party layer
-   that keeps type answers alive (Fighting/Grass for Sudowoodo, Electric
-   for Gyarados) instead of top-6-by-level ∪ swaps. Still owed: 51-slice
-   default with evolution + encounters v2 (20 eps) — the old 2.40 table is
-   stale (10 pre-Roark encounters now, was 12).
+   #169.
+   **2026-09-16, compute dial (roadmap 1b) — done, positive.** The rival was
+   already in the hard-synth data; the rival probe (`models/rival_pairs.json`,
+   `logs/rival_*.log`) shows prior = teacher (96.7% win, 0.37 vs 0.29 deaths
+   per mon: the teacher itself loses ~1.7 mons per rival fight), search k3 r8
+   0.20, k4 r16 0.16. So: `--deep 4,16` (breakpoints + every fight the
+   fielded party's n=8 risk query flags as a loss / a death / HP < 0.5) on
+   the 186 slice, 20 eps (`logs/plan_cap186v3_deep20.log`): **178.6 cleared /
+   62.4 no-death / 13.4 deaths / 40% clears**, 25 deep fights per run
+   (10-ep table 175.4 / 63.7 / 15.7 / 20%, `plan_cap186v3_deep.log`; without
+   deep 168.2 / 44.8 / 16.2 / 10%). The wall is Edwin #139 (42 deaths / 20
+   runs, a third of all deaths), then Gyarados #169 (18) / #184 (14), the
+   rival trio (~15 each), Craig (15). This is the run config now:
+   ```bash
+   uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 186 \
+     --policy models/game_policy_cap186v3.pt --search 3,8 --search-all --deep 4,16 --workers 5
+   ```
+   **Noise floor:** the same config on the same 20 seeds, run twice, differed
+   by 2 cleared / 1.9 deaths / 15 points of clear rate (README → Status).
+   `--refine 32` (top-3 parties re-queried at n=32) landed inside that: null.
+   Levers left, in order: (a) `--climb` (a second round of single swaps from
+   the best party when it is still flagged hard; code in 2026-09-16, see
+   README for the number), (b) a party layer that keeps type answers alive
+   (Fighting/Grass/Water for Edwin's Sudowoodo, Electric/Rock for Gyarados)
+   — under the cap rule all roster mons are at the same level, so "top-6"
+   is catch order and the swap set does the choosing; Edwin alone is a
+   third of all deaths, (c) a deeper width still at the flagged fights (k4
+   r32, or 2-ply over the enemy's reply). `--workers 10` (1.1 GB and one
+   core each; 20 workers peaked at 32 GB used and was fine) makes a
+   20-episode 186 table ~40 min. Not a lever: more teacher
+   data on the rival (prior = teacher there). 51-slice default with
+   evolution + encounters v2 (20 eps, `logs/plan_cap51_evo_v2.log`): 51.0 /
+   36.75 / **3.75 deaths** / 100% — up from the stale 2.40; Roark 33 deaths
+   in 20 runs (10 pre-Roark encounters now, was 12).
    Pipeline commands (one job at a time — RAM):
    ```bash
    uv run python -u scripts/plan_gauntlet.py --episodes 300 --seed 1000 --fast --slice 186 \
@@ -240,4 +270,6 @@ non-level evolutions missing). Added 2026-09-16 after a project review.
 - Harvest recording is opt-in: `plan_gauntlet.py --harvest <fresh file>` (or
   `GAUNTLET_HARVEST=`); otherwise no writes. Evaluation runs used to append
   to `battles.jsonl`.
-- `--slice 186` episodes take ~260 s with search-all (vs ~85 s for 51).
+- `--slice 186` episodes take ~260 s with search-all (vs ~85 s for 51), ~440 s
+  with `--deep 4,16`. One planner process uses one core (Python + one Node
+  sim, sequential); `--workers N` runs N episodes at once (~1 GB each).

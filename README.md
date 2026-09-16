@@ -637,6 +637,67 @@ project_overview.md # the plan / roadmap
   fight. Boss-level search (k=4, r=16 = +2 pts on Edwin) at breakpoints and
   the rival, and a roster/party layer that keeps a Fighting/Grass answer
   alive for Sudowoodo/Gyarados, are the levers left before the run layer.
+  **Rival probe (2026-09-16).** The rival trio (trainer_ids 351/352/353, order
+  #164–166) was already in `battles_hard_synth.jsonl` (400 parties each), so a
+  second data round was pointless. `models/rival_pairs.json` = 10 hard-synth
+  parties x each variant, x3, seed 5 (`logs/rival_*.log`):
+    heuristic teacher          96.7% / 0.29 deaths per mon
+    prior v3                   96.7% / 0.37
+    prior v3 + search k3 r8    98.9% / 0.20   (11 s/pair)
+    prior v3 + search k4 r16   98.9% / 0.16   (34 s/pair)
+  The rival is not a win problem: the teacher itself loses ~1.7 mons per fight
+  (Starly's Endeavor + Quick Attack, 4 mons at 19–21 vs L22 route catches).
+  Prior = teacher; search halves the deaths and the wider width buys a bit more.
+  So the lever is the compute dial per trainer (roadmap 1b): `--deep k,r`
+  plays breakpoints and every fight the fielded party's n=8 risk query flags
+  (a loss, a death, or HP < 0.5) at the deep width; routes stay at k3 r8.
+  Also seen: 4/2908 choices rejected at k4 r16 ("can't switch to an active
+  Pokémon") — a stale-mask corner in the search, 0.14%, harmless (sim default).
+  **1b. Compute dial per trainer (2026-09-16).** v3 prior, search-all k3 r8,
+  `--deep 4,16`, 10 eps, seed 300 (`logs/plan_cap186v3_deep.log`):
+    **175.4 cleared / 63.7 no-death / 15.7 deaths / 20% clears**, 21 deep
+    fights per run, 440 s/ep (v3 without deep: 168.2 / 44.8 / 16.2 / 10%, 260 s/ep)
+  The rival trio dropped out of the killers (47 deaths → Cedric #166 10, the
+  other two below 7). Wall now: Edwin #139 24, Fisher Juan #169 (Gyarados) 18,
+  Craig #163 13, Roark 9, Jupiter 8, Fisher Kenneth #184 (Gyarados@22) 8 with 2
+  losses. Deaths per run barely moved (16.2 → 15.7): deep search converts
+  deaths at the rival into progress, and the runs then die later, at the
+  Gyarados fights. Same seeds, 10 episodes: treat the +7 cleared as a
+  direction, confirm on 20+. `plan_gauntlet.py --workers N` (2026-09-16) runs
+  episodes in parallel processes for that: one env + one sim each, ~1.1 GB
+  and one core per worker (Python and the Node sim alternate).
+  **2q. Owed 51-slice table** (cap_best prior, search-all k3 r8, evolution +
+  encounters v2, 20 eps, seed 300, 5 workers, 7 min; `logs/plan_cap51_evo_v2.log`):
+    **51.0 cleared / 36.75 no-death / 3.75 deaths / 100% clears**
+  (stale table: 51.0 / 36.25 / 2.40 / 100%). Deaths up by ~1.3 per run:
+  Roark 33 (was 20), Hiker Daniel 16 (13), Picnicker Siena #36 14 (new).
+  Two fewer pre-Roark encounters (10 vs 12) means fewer swap candidates at
+  Roark; evolution at 14 does not compensate. Still 0 lost battles.
+  **Deep search confirmed at 20 episodes** (v3, search-all k3 r8, deep 4,16,
+  seeds 300–319, 5 workers, 47 min; `logs/plan_cap186v3_deep20.log`):
+    **178.6 cleared / 62.4 no-death / 13.4 deaths / 40% clears**, 24.9 deep
+    fights per run (10-ep table: 175.4 / 63.7 / 15.7 / 20%; v3 without deep,
+    10 eps: 168.2 / 44.8 / 16.2 / 10%)
+  8 of 20 runs cleared Gardenia. Deaths per run down 16.2 → 13.4. The wall
+  is now one fight: Collector Edwin #139 (3x Sudowoodo@19) with 42 deaths and
+  1 loss in 20 runs — a third of all deaths — then Fisher Juan's Gyarados
+  #169 (18, 1 loss), the rival trio (16/13/15, 1 loss), Craig 15, Fisher
+  Kenneth #184 (14, 1 loss). Edwin is where the party layer matters: three
+  Rock/Rock-Head Sudowoodo at 19 vs a party that has no Fighting/Grass/Water
+  answer kept alive. Next lever: type-aware candidate parties (2o), then the
+  Gyarados fights.
+  **`--refine 32` is null, and the 20-episode noise floor is measured.** Same
+  seeds, deep 4,16 + top-3 parties re-queried at n=32, run twice by accident
+  (10 workers each, in parallel, 38 min; `logs/plan_cap186v3_deep20_refine.log`
+  holds replicate B, replicate A's summary is in the notebook only):
+    A: 175.85 cleared / 57.9 no-death / 15.8 deaths / 15% clears
+    B: 177.85 / 55.4 / 13.95 / 30%          (no refine: 178.6 / 62.4 / 13.4 / 40%)
+  Two identical configs on identical seeds differ by 2 trainers, 2.5 no-death,
+  1.9 deaths and 15 points of clear rate: **that is the error bar of a
+  20-episode table** (the sim reseeds every battle). Anything inside it is
+  noise; the deep-search gain (+10 cleared, −3 deaths vs no-deep) is outside.
+  Refine sits inside it, so re-querying the finalists at n=32 does not help:
+  the candidate set, not the estimate, is the limit.
   ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```

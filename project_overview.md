@@ -229,10 +229,15 @@ Keep as simple as possible. Add complexity only on concrete failure.
       effort goes to the run layer and data. Decision criterion: if (i)
       does not beat the search line on the Edwin/rival probes and the 186
       table within one round, take (ii) and delete the EI/value-head code.
-- [ ] **1b. Search width per trainer.** `search=(k, r)` is global; k=4 r=16
-      was +2 pts on Edwin at 3x cost. Make width a function of the trainer
-      (breakpoints + known killers deeper, routes shallow) so the compute
-      dial is actually a dial.
+- [x] **1b. Search width per trainer** (2026-09-16). `NuzlockeEnv(deep=(k, r))`
+      / `plan_gauntlet --deep 4,16` plays breakpoints and every fight the
+      fielded party's risk query flags (a loss, a death, or HP < `DEEP_HP` at
+      n=8) at the deep width; routes stay at `--search`. The trigger is the
+      sim, not a trainer list, so it carries no gauntlet facts. Rival probe:
+      prior = teacher (0.37 vs 0.29 deaths/mon), search k3 r8 0.20, k4 r16
+      0.16. 186 table, 20 eps: **178.6 cleared / 62.4 no-death / 13.4 deaths /
+      40% clears** (10 eps without deep: 168.2 / 44.8 / 16.2 / 10%), 25 deep
+      fights per run, +70% time. Edwin #139 is now a third of all deaths.
 
 ### 2. Run layer on the planner (plan written 2026-09-15)
 
@@ -300,19 +305,25 @@ interface end to end, and it needs no training run to produce a number.
 - [ ] **2o. Sample starvation.** The risk query sees 0 deaths in 8 battles
       for almost every candidate (`+1.00` everywhere in the verbose log),
       so ~5% per-fight risks are invisible and sum to a roster wipe over 186
-      trainers; 10-episode tables have ±5-trainer error bars. Fixes to
-      measure: adaptive n (re-query the top candidates at n=32), a
-      type-aware candidate set (keep a Fighting/Grass answer for
-      Sudowoodo, Electric for Gyarados, instead of top-6-by-level ∪ swaps),
-      and 20–40-episode tables for any claimed difference.
+      trainers. Measured noise floor (2026-09-16): two runs of the same
+      config on the same 20 seeds differ by 2 cleared / 1.9 deaths / 15
+      points of clear rate. Adaptive n (`--refine 32`, top 3 re-queried at
+      n=32) is null, inside that floor: the candidate set is the limit, not
+      the estimate. Next: `--climb` (second swap round from the best party
+      when still hard; code in), then a type-aware candidate set (keep a
+      Fighting/Grass/Water answer for Sudowoodo, Electric/Rock for
+      Gyarados). Under the cap rule every roster mon sits at the same
+      level, so "top-6-by-level" is catch order; the swap set does the
+      choosing.
 - [ ] **2p. Roster cap and obs layout.** MAX_ROSTER=12 exists only because
       the meta-policy obs is fixed-size; the graveyard hides it now but a
       real box is unbounded. When 2e rebuilds the obs, make the roster a
       set (per-mon features + attention or a pooled summary) and drop the
       12-slot action indexing.
-- [ ] **2q. Owed measurements.** 51-slice default with evolution and
-      encounters v2 (20 eps; the 2.40-deaths table is stale) and a 40-episode
-      186 table for the current default.
+- [x] **2q. Owed measurements** (2026-09-16). 51-slice default with evolution
+      and encounters v2, 20 eps: 51.0 / 36.75 / 3.75 deaths / 100% (was 2.40;
+      Roark 33 deaths in 20 runs, two fewer pre-Roark catches). 186 table at
+      20 eps: `logs/plan_cap186v3_deep20.log` (README → Status).
 
 Not in step 2: move events, builds, new gauntlets. Metric stays
 "trainers cleared without a death"; report on the training slice only

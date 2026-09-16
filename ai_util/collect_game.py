@@ -260,6 +260,31 @@ def collect_search(args: argparse.Namespace) -> None:
         print(f"collected {len(data['action'])} {name} -> {out_dir / name}.npz")
 
 
+def synth(args: argparse.Namespace) -> None:
+    """Synthetic matchups for targeted teacher data: late-game player parties
+    from the harvest (fought at gauntlet order >= --min-order) x the teams of
+    --trainers (the deadliest fights). Writes a harvest-shaped jsonl for
+    `collect --jsonl`. This is how battles_hard_synth.jsonl was made."""
+    sys.path.insert(0, str(_here.parent / "scripts"))
+    from gauntlet import load_trainers, pack_team, trainer_mons
+    trainers, order = load_trainers()
+    late = {e["trainer_id"] for e in order[args.min_order:]}
+    with open(args.jsonl) as f:
+        parties = sorted({r["player_team"] for r in map(json.loads, f)
+                          if r.get("trainer_id") in late})
+    rng = np.random.default_rng(args.seed)
+    parties = [parties[i] for i in rng.choice(len(parties), min(args.parties, len(parties)),
+                                              replace=False)]
+    ids = [int(t) for t in args.trainers.split(",")]
+    with open(args.out, "w") as f:
+        for tid in ids:
+            enemy = pack_team(trainer_mons(trainers[tid]))
+            for p in parties:
+                f.write(json.dumps({"run_id": "synth", "trainer_id": tid, "info": "full",
+                                    "won": None, "player_team": p, "enemy_team": enemy}) + "\n")
+    print(f"wrote {len(parties) * len(ids)} matchups ({len(parties)} parties x {len(ids)} trainers) -> {args.out}")
+
+
 def holdout(args: argparse.Namespace) -> None:
     """Held-out pairs (seed offset so they don't overlap a seed-0 collect sample)."""
     pairs = sample_pairs(args.jsonl, args.n, args.seed + 1)
@@ -328,9 +353,13 @@ def baseline(args: argparse.Namespace) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("mode", choices=["collect", "collect_search", "holdout", "baseline"])
+    p.add_argument("mode", choices=["collect", "collect_search", "synth", "holdout", "baseline"])
     p.add_argument("--policy", help="prior for collect_search")
-    p.add_argument("--trainers", help="comma-separated trainer_ids to restrict collect/collect_search to")
+    p.add_argument("--trainers", help="comma-separated trainer_ids to restrict collect/collect_search "
+                                      "to, or the enemy teams for synth")
+    p.add_argument("--parties", type=int, default=400, help="synth: player parties sampled")
+    p.add_argument("--min-order", type=int, default=120,
+                   help="synth: parties come from fights at this gauntlet order or later")
     p.add_argument("--k", type=int, default=3)
     p.add_argument("--rollouts", type=int, default=8)
     p.add_argument("--jsonl", default="data/teams/gauntlet_harvest/battles.jsonl")
@@ -346,6 +375,8 @@ def main() -> None:
         collect(args)
     elif args.mode == "collect_search":
         collect_search(args)
+    elif args.mode == "synth":
+        synth(args)
     elif args.mode == "holdout":
         holdout(args)
     else:
