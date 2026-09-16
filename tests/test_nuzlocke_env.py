@@ -102,7 +102,7 @@ def test_evolution_keeps_the_slot_in_the_env(env):
 
 
 def test_best4_moveset_rule():
-    assert encounter_moves("meditite", 22) == ["detect", "hiddenpower", "mindreader", "feint"]  # last4
+    assert encounter_moves("meditite", 22, "last4") == ["detect", "hiddenpower", "mindreader", "feint"]
     best = encounter_moves("meditite", 22, "best4")
     assert len(best) == 4 and best[0] == "confusion" and "hiddenpower" in best  # attacks at last
     assert encounter_moves("bonsly", 22, "best4")[:2] == ["rockthrow", "lowkick"]  # variable power counts

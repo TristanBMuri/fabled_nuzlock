@@ -149,7 +149,9 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--episodes", type=int, default=20)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--policy", help="BC prior for the battler (default SimpleHeuristics)")
+    ap.add_argument("--policy", help="BC prior for the battler (default SimpleHeuristics); "
+                                     "models/game_policy_best4.pt goes with --moveset best4, "
+                                     "game_policy_cap186v3.pt with last4")
     ap.add_argument("--search", help="k,rollouts for boss fights, e.g. 3,8")
     ap.add_argument("--search-all", action="store_true", help="search on every trainer")
     ap.add_argument("--deep", help="k,rollouts at breakpoints and fights the risk query "
@@ -171,7 +173,7 @@ def main() -> None:
                     help="box slots for living mons (default 30 = unbounded on the 186 slice, "
                          "starter + 21 areas; the old 12-slot box dropped 5-7 encounters per run)")
     ap.add_argument("--no-dupes", action="store_true", help="plain first encounter (default: dupes clause)")
-    ap.add_argument("--moveset", choices=["last4", "best4"], default="last4",
+    ap.add_argument("--moveset", choices=["last4", "best4"], default="best4",
                     help="last4 = the last four level-up moves; best4 = strongest STAB, strongest "
                          "other-type attack, next strongest, one status move (see gauntlet.encounter_moves)")
     ap.add_argument("--hp-weight", type=float, default=HP_WEIGHT,

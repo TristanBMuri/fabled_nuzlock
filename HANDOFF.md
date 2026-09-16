@@ -11,21 +11,22 @@ a behaviour-cloned prior plus rollout search over the real engine; the run
 layer is a *scripted* planner that picks parties by simulated death
 probability. Everything runs in-process (no Showdown servers). The working
 slice is **186 trainers through Gym Leader Gardenia**; the default config
-(`--search 3,8 --search-all --deep 4,16`, prior `game_policy_cap186v3.pt`)
-clears **183.15 trainers / 16.25 deaths / 60% of runs** with the box
-unbounded and the dupes clause on (20 episodes,
-`logs/plan_cap186v3_deep20_base2.log`; the 12-box config was 178.6 / 13.4
-/ 40%; noise floor between identical runs: ±2 cleared, ±1.9 deaths, ±15
-points of clear rate; deaths per run are not comparable across box sizes). On 2026-09-16 every
+(`--search 3,8 --search-all --deep 4,16`, prior `game_policy_best4.pt`)
+clears **185.95 trainers / 6.30 deaths / 95% of runs** with the box
+unbounded, the dupes clause on and `best4` movesets with the prior cloned
+under them (20 episodes, `logs/plan_cap186_best4prior.log`; before the env
+upgrade the same recipe gave 178.6 / 13.4 / 40%, and 183.15 / 16.25 / 60%
+with the box and clause alone; noise floor between identical runs: ±2
+cleared, ±1.9 deaths, ±15 points of clear rate). On 2026-09-16 every
 run-layer knob was measured null on that table (refine, climb, beam and
 exhaustive candidate parties, lead order), the Gyarados wall was shown to
 be the battler's at any search width, and the cause of the conserved
 deaths was found in the **environment**: the 12-slot box drops 5–7 of the
 21 encounters per run, movesets are level-up-only at the cap level. The
-plan is now the **environment upgrade (project_overview.md → 2¾)**: game
-folder, rules object, known defects (three of five done), `best4`
-movesets, readable trace. The game folder (E1) and ability slots
-(E3e) reproduce base2 (184.0 / 49.0 / 15.5 / 60%).
+**environment upgrade (project_overview.md → 2¾)** is where the gains
+came from: game folder (E1), known defects (E3), and above all `best4`
+movesets (E4: deaths per run 16.25 → 6.30, clears 60% → 95%). Left: E5
+trace, E2 rules object, E6 later.
 
 ## Architecture (what each file is)
 
@@ -81,8 +82,9 @@ tests/test_sim.py       bridge: play, mirror, fork. `uv run pytest -q`.
 ## The default run config (what "a run" is now)
 
 ```bash
-uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 \
-    --policy models/game_policy_cap_best.pt --search 3,8 --search-all
+uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 186 \
+    --policy models/game_policy_best4.pt --search 3,8 --search-all --deep 4,16 --workers 10
+# defaults: --roster 30 (unbounded box), dupes clause on, --moveset best4
 ```
 
 Per trainer: catch encounter if room → candidate parties = top-6-by-level ∪
@@ -214,13 +216,10 @@ boss's max level (14 = Roark). ~85 s/episode.
    rule checked equal on 3300 cells); acceptance table 184.0 / 49.0 / 15.5
    / 60% = base2 inside noise, so E1 preserved behaviour and E3e (ability
    slots) is neutral. E3 is complete.
-3. **E4 `best4` movesets** — rule is in (`--moveset best4`, README →
-   Status). Measure: (i) table with the current prior; (ii) the OOD loop
-   under best4 (harvest 300 fast eps with `--moveset best4 --harvest`,
-   collect, pretrain, synth on the deadliest teams as before) and the table
-   again. Every one of those runs must pass `--moveset best4`; the harvest
-   and collectors too (collect_game reads packed teams from the harvest,
-   so the harvest is what carries the rule).
+3. **E4 `best4` movesets: done and default** (185.95 / 101.8 / 6.30 /
+   95%). Any future moveset change repeats the loop: harvest 300 fast eps
+   with `--harvest`, collect base + synth on the deadliest teams, pretrain,
+   table. The harvest carries the rule (collectors read packed teams).
 4. **E5** `--trace` (the `--verbose` encounter lines are a start), then
    **E2** the rules object last.
 5. Deletion pass (2½) before step 3; `--parties beam|all` goes with it

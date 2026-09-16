@@ -407,7 +407,7 @@ def evolved_ability(species: str, ability: str | None, evolved: str) -> str | No
     return new.get(slot, new.get("0")) if new else None
 
 
-MOVESET_RULE = "last4"  # or "best4" (plan_gauntlet --moveset); a rule change is a progression change
+MOVESET_RULE = "best4"  # or "last4" (plan_gauntlet --moveset); a rule change is a progression change
 # status moves worth a slot under best4, in preference order
 SELF_KO_MOVES = {"selfdestruct", "explosion", "memento", "finalgambit", "healingwish",
                  "lunardance", "mistyexplosion"}  # never a slot under best4: the user faints
