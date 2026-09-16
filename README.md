@@ -783,6 +783,20 @@ project_overview.md # the plan / roadmap
   free body that costs a slot). The first table with both new defaults
   (unbounded box + dupes clause, `logs/plan_cap186v3_deep20_base2.log`) is
   the new baseline every later env change is measured against.
+  **New baseline, base2** (unbounded box + dupes clause, no ability slots
+  yet; otherwise the default config; 10 workers, 33 min;
+  `logs/plan_cap186v3_deep20_base2.log`):
+    **183.15 cleared / 60.95 no-death / 16.25 deaths / 60% clears**, 21.6 deep fights
+  (12-box baseline 178.6 / 62.4 / 13.4 / 40%; lifted box alone 180.15 / 45%;
+  dupes clause alone on the 12-box 176.25 / 25%). Cleared +4.5 and clear
+  rate +20 points are outside the noise floor (±2, ±15); together the two
+  rules do what neither did alone, which fits the mechanism (the clause
+  only pays when the freed slot is not a fifth Zubat). Deaths per run
+  (16.25) is not comparable with 12-box tables: 8 of 20 runs wipe all 22
+  mons. 12 of 20 runs clear Gardenia. Wall order now: Fisher Kenneth #184
+  (Gyarados@22) 33, Edwin 26, Fisher Juan 26, the rival 22/19, Cameraman
+  Darryl #179 19, Roark 16. **This is the table every later env change is
+  measured against.**
   **E3e ability slots (2026-09-16, after base2 was launched).** Catches roll
   ability slot 0 or 1 at even odds (a Shinx is Rivalry or Intimidate),
   starters get slot 0, evolution keeps the slot (Starly Keen Eye → Staravia

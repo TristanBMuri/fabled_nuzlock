@@ -12,9 +12,11 @@ layer is a *scripted* planner that picks parties by simulated death
 probability. Everything runs in-process (no Showdown servers). The working
 slice is **186 trainers through Gym Leader Gardenia**; the default config
 (`--search 3,8 --search-all --deep 4,16`, prior `game_policy_cap186v3.pt`)
-clears **178.6 trainers / 13.4 deaths / 40% of runs** (20 episodes,
-`logs/plan_cap186v3_deep20.log`; noise floor between identical runs: ±2
-cleared, ±1.9 deaths, ±15 points of clear rate). On 2026-09-16 every
+clears **183.15 trainers / 16.25 deaths / 60% of runs** with the box
+unbounded and the dupes clause on (20 episodes,
+`logs/plan_cap186v3_deep20_base2.log`; the 12-box config was 178.6 / 13.4
+/ 40%; noise floor between identical runs: ±2 cleared, ±1.9 deaths, ±15
+points of clear rate; deaths per run are not comparable across box sizes). On 2026-09-16 every
 run-layer knob was measured null on that table (refine, climb, beam and
 exhaustive candidate parties, lead order), the Gyarados wall was shown to
 be the battler's at any search width, and the cause of the conserved
@@ -22,9 +24,8 @@ deaths was found in the **environment**: the 12-slot box drops 5–7 of the
 21 encounters per run, movesets are level-up-only at the cap level. The
 plan is now the **environment upgrade (project_overview.md → 2¾)**: game
 folder, rules object, known defects (three of five done), `best4`
-movesets, readable trace. Tables pending at the time of writing: lifted
-box (`--roster 30`, `logs/plan_cap186v3_deep20_roster30.log`) and the
-dupes clause (`logs/plan_cap186v3_deep20_dupes.log`).
+movesets, readable trace. The ability-slot rule (E3e) landed after
+the base2 table and is not in it.
 
 ## Architecture (what each file is)
 
@@ -197,13 +198,10 @@ boss's max level (14 = Roark). ~85 s/episode.
 
 ## Next steps (2026-09-16 evening; the plan is project_overview.md → 2¾)
 
-1. **Box is unbounded by default now** (`--roster 30`, table in README →
-   Status: inside noise on cleared / clear rate; deaths per run not
-   comparable across box sizes). Dupes clause measured (12-box:
-   176.25 / 61.5 / 14.0 / 25%, edge of noise, kept as the standard rule).
-   **Read the new-defaults baseline** `logs/plan_cap186v3_deep20_base2.log`
-   (unbounded box + dupes clause): every later env change is measured
-   against it, not against the 12-box 178.6 / 13.4 / 40%.
+1. **Baseline is base2**: unbounded box + dupes clause, 183.15 / 60.95 /
+   16.25 / 60% (README → Status). Measure every later env change against
+   it. E3e (ability slots) is in the code but not in that table; it rides
+   with E4's table.
 2. **E1 game folder** (`data/bdsp/`, `load_game`), behaviour-preserving:
    the table must reproduce. `data/species.json` (`--build-species`) is
    already E1's species file; E3e ability slots are in (not in base2).

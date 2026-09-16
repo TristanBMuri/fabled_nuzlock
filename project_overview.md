@@ -403,8 +403,10 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       early). Changes the catch distribution; not in the base2 table, so
       it is measured together with E4.
       Dupes-clause table (12-box): 176.25 / 61.5 / 14.0 / 25%, edge of noise
-      in the wrong direction; kept as the standard rule. New baseline with
-      both defaults: `logs/plan_cap186v3_deep20_base2.log`.
+      in the wrong direction; kept as the standard rule. **New baseline
+      with both defaults (base2): 183.15 / 60.95 / 16.25 / 60%** — cleared
+      +4.5 and clear rate +20 points over the 12-box config, outside the
+      noise floor; `logs/plan_cap186v3_deep20_base2.log`.
 - [ ] **E4. Movesets: `best4`.** The largest expected gain at parity. Pool =
       every level-up move at or below the mon's level; keep the strongest
       STAB move, the strongest move of another type, the next strongest
