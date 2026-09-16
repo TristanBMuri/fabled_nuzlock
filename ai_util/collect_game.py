@@ -272,7 +272,8 @@ def collect(args: argparse.Namespace) -> None:
     stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
     out_dir = Path(f"models/bc_game_{stamp}")
     out_dir.mkdir(parents=True, exist_ok=True)
-    pairs = sample_pairs(args.jsonl, args.battles, args.seed)
+    ids = {int(t) for t in args.trainers.split(",")} if args.trainers else None
+    pairs = sample_pairs(args.jsonl, args.battles, args.seed, ids)
     chunks = [pairs[i::args.workers] for i in range(args.workers)]
     ctx = mp.get_context("spawn")
     if args.backend == "sim":
@@ -329,7 +330,7 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("mode", choices=["collect", "collect_search", "holdout", "baseline"])
     p.add_argument("--policy", help="prior for collect_search")
-    p.add_argument("--trainers", help="comma-separated trainer_ids to restrict collect_search to")
+    p.add_argument("--trainers", help="comma-separated trainer_ids to restrict collect/collect_search to")
     p.add_argument("--k", type=int, default=3)
     p.add_argument("--rollouts", type=int, default=8)
     p.add_argument("--jsonl", default="data/teams/gauntlet_harvest/battles.jsonl")

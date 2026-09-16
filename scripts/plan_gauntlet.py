@@ -35,8 +35,10 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
                              for o, b in itertools.product(base, box)]
 
     def score(p):
-        p_win, p_death = env.risk(p)
-        return p_win - lam * float(np.mean(p_death)) if p_death else p_win
+        # P(win) − λ·mean P(death) + margin: at n=8 most candidates show zero
+        # deaths, and HP left is what separates a safe party from a lucky one
+        p_win, p_death, hp = env.risk(p)
+        return p_win - lam * float(np.mean(p_death)) + HP_WEIGHT * hp if p_death else p_win
 
     scored = sorted(((score(p), p) for p in cands), reverse=True)
     if verbose:
@@ -47,6 +49,7 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
     return list(scored[0][1])
 
 
+HP_WEIGHT = 0.2  # margin tie-breaker weight in the party score (--hp-weight)
 DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes)
 LOSSES_AT: dict[int, int] = {}  # trainer index -> lost battles
 
@@ -83,6 +86,7 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
 
 
 def main() -> None:
+    global HP_WEIGHT
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--episodes", type=int, default=20)
     ap.add_argument("--seed", type=int, default=0)
@@ -98,8 +102,16 @@ def main() -> None:
                     help="no risk queries (highest-level party): bulk harvesting")
     ap.add_argument("--slice", type=int, default=SLICE_LEN,
                     help="trainers per episode (51 = through Roark, 186 = through Gardenia)")
+    ap.add_argument("--hp-weight", type=float, default=HP_WEIGHT,
+                    help="weight of mean HP left in the party score (0 = old score)")
+    ap.add_argument("--harvest", metavar="JSONL",
+                    help="record every battle's (party, enemy, won) here (same as GAUNTLET_HARVEST)")
     ap.add_argument("--verbose", action="store_true")
     args = ap.parse_args()
+    HP_WEIGHT = args.hp_weight
+    if args.harvest:
+        import gauntlet
+        gauntlet.HARVEST = Path(args.harvest)
     search = tuple(int(x) for x in args.search.split(",")) if args.search else None
     # risk_features off: the planner queries env.risk() for its candidates
     # directly and never reads the obs; leaving them on re-queried every

@@ -200,8 +200,9 @@ class SimBattleRunner:
             self.player = heuristic_brain()
 
     def estimate(self, player_packed: str, enemy_packed: str, n: int = 8):
-        """Death-probability query: (P(win), [P(death_i)] in packed order) under
-        the fast player brain, n fresh-seed battles. None on failure."""
+        """Death-probability query: (P(win), [P(death_i)] in packed order, mean
+        HP fraction left) under the fast player brain, n fresh-seed battles.
+        None on failure."""
         from ai_util.evaluate import evaluate
         try:
             r = evaluate(self.bridge, player_packed, enemy_packed, self.player, self.enemy,
@@ -211,7 +212,7 @@ class SimBattleRunner:
             print(f"SimBattleRunner.estimate failed: {type(e).__name__}: {e}\n"
                   + "".join(traceback.format_exc().splitlines(True)[-4:]))
             return None
-        return r["p_win"], r["p_death"]
+        return r["p_win"], r["p_death"], r["hp"]
 
     def run(self, player_packed: str, enemy_packed: str, timeout: float = 0.0,
             boss: bool = False):
@@ -359,7 +360,8 @@ def check(slice_len: int = 50) -> None:
         prev_level = max(prev_level, e["max_level"])
         t = trainers[e["trainer_id"]]
         for p in t["party"]:
-            if p["species"].lower() not in known:
+            from poke_env.data import to_id_str
+            if to_id_str(species_name(p["species"])) not in known:
                 print(f"BAD species {p['species']} ({e['trainer_name']})")
                 problems += 1
     enc_species = ({e["species"] for r in enc["routes"] for e in r["encounters"]}

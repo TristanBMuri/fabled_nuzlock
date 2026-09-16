@@ -711,6 +711,295 @@
    "curse"
   ]
  },
+ "bonsly": {
+  "1": [
+   "copycat",
+   "faketears"
+  ],
+  "2": [
+   "copycat",
+   "faketears"
+  ],
+  "3": [
+   "copycat",
+   "faketears"
+  ],
+  "4": [
+   "copycat",
+   "faketears"
+  ],
+  "5": [
+   "copycat",
+   "faketears"
+  ],
+  "6": [
+   "copycat",
+   "faketears",
+   "flail"
+  ],
+  "7": [
+   "copycat",
+   "faketears",
+   "flail"
+  ],
+  "8": [
+   "copycat",
+   "faketears",
+   "flail"
+  ],
+  "9": [
+   "copycat",
+   "faketears",
+   "flail",
+   "lowkick"
+  ],
+  "10": [
+   "copycat",
+   "faketears",
+   "flail",
+   "lowkick"
+  ],
+  "11": [
+   "copycat",
+   "faketears",
+   "flail",
+   "lowkick"
+  ],
+  "12": [
+   "copycat",
+   "faketears",
+   "flail",
+   "lowkick"
+  ],
+  "13": [
+   "copycat",
+   "faketears",
+   "flail",
+   "lowkick"
+  ],
+  "14": [
+   "faketears",
+   "flail",
+   "lowkick",
+   "rockthrow"
+  ],
+  "15": [
+   "faketears",
+   "flail",
+   "lowkick",
+   "rockthrow"
+  ],
+  "16": [
+   "faketears",
+   "flail",
+   "lowkick",
+   "rockthrow"
+  ],
+  "17": [
+   "flail",
+   "lowkick",
+   "rockthrow",
+   "mimic"
+  ],
+  "18": [
+   "flail",
+   "lowkick",
+   "rockthrow",
+   "mimic"
+  ],
+  "19": [
+   "flail",
+   "lowkick",
+   "rockthrow",
+   "mimic"
+  ],
+  "20": [
+   "flail",
+   "lowkick",
+   "rockthrow",
+   "mimic"
+  ],
+  "21": [
+   "flail",
+   "lowkick",
+   "rockthrow",
+   "mimic"
+  ],
+  "22": [
+   "lowkick",
+   "rockthrow",
+   "mimic",
+   "block"
+  ],
+  "23": [
+   "lowkick",
+   "rockthrow",
+   "mimic",
+   "block"
+  ],
+  "24": [
+   "lowkick",
+   "rockthrow",
+   "mimic",
+   "block"
+  ],
+  "25": [
+   "rockthrow",
+   "mimic",
+   "block",
+   "feintattack"
+  ],
+  "26": [
+   "rockthrow",
+   "mimic",
+   "block",
+   "feintattack"
+  ],
+  "27": [
+   "rockthrow",
+   "mimic",
+   "block",
+   "feintattack"
+  ],
+  "28": [
+   "rockthrow",
+   "mimic",
+   "block",
+   "feintattack"
+  ],
+  "29": [
+   "rockthrow",
+   "mimic",
+   "block",
+   "feintattack"
+  ],
+  "30": [
+   "mimic",
+   "block",
+   "feintattack",
+   "rocktomb"
+  ],
+  "31": [
+   "mimic",
+   "block",
+   "feintattack",
+   "rocktomb"
+  ],
+  "32": [
+   "mimic",
+   "block",
+   "feintattack",
+   "rocktomb"
+  ],
+  "33": [
+   "block",
+   "feintattack",
+   "rocktomb",
+   "rockslide"
+  ],
+  "34": [
+   "block",
+   "feintattack",
+   "rocktomb",
+   "rockslide"
+  ],
+  "35": [
+   "block",
+   "feintattack",
+   "rocktomb",
+   "rockslide"
+  ],
+  "36": [
+   "block",
+   "feintattack",
+   "rocktomb",
+   "rockslide"
+  ],
+  "37": [
+   "block",
+   "feintattack",
+   "rocktomb",
+   "rockslide"
+  ],
+  "38": [
+   "feintattack",
+   "rocktomb",
+   "rockslide",
+   "slam"
+  ],
+  "39": [
+   "feintattack",
+   "rocktomb",
+   "rockslide",
+   "slam"
+  ],
+  "40": [
+   "feintattack",
+   "rocktomb",
+   "rockslide",
+   "slam"
+  ],
+  "41": [
+   "rocktomb",
+   "rockslide",
+   "slam",
+   "suckerpunch"
+  ],
+  "42": [
+   "rocktomb",
+   "rockslide",
+   "slam",
+   "suckerpunch"
+  ],
+  "43": [
+   "rocktomb",
+   "rockslide",
+   "slam",
+   "suckerpunch"
+  ],
+  "44": [
+   "rocktomb",
+   "rockslide",
+   "slam",
+   "suckerpunch"
+  ],
+  "45": [
+   "rocktomb",
+   "rockslide",
+   "slam",
+   "suckerpunch"
+  ],
+  "46": [
+   "rockslide",
+   "slam",
+   "suckerpunch",
+   "doubleedge"
+  ],
+  "47": [
+   "rockslide",
+   "slam",
+   "suckerpunch",
+   "doubleedge"
+  ],
+  "48": [
+   "rockslide",
+   "slam",
+   "suckerpunch",
+   "doubleedge"
+  ],
+  "49": [
+   "rockslide",
+   "slam",
+   "suckerpunch",
+   "doubleedge"
+  ],
+  "50": [
+   "rockslide",
+   "slam",
+   "suckerpunch",
+   "doubleedge"
+  ]
+ },
  "bronzor": {
   "1": [
    "confusion",
@@ -1880,6 +2169,158 @@
    "dizzypunch",
    "charm",
    "bounce"
+  ]
+ },
+ "cascoon": {
+  "1": [
+   "harden"
+  ],
+  "2": [
+   "harden"
+  ],
+  "3": [
+   "harden"
+  ],
+  "4": [
+   "harden"
+  ],
+  "5": [
+   "harden"
+  ],
+  "6": [
+   "harden"
+  ],
+  "7": [
+   "harden"
+  ],
+  "8": [
+   "harden"
+  ],
+  "9": [
+   "harden"
+  ],
+  "10": [
+   "harden"
+  ],
+  "11": [
+   "harden"
+  ],
+  "12": [
+   "harden"
+  ],
+  "13": [
+   "harden"
+  ],
+  "14": [
+   "harden"
+  ],
+  "15": [
+   "harden"
+  ],
+  "16": [
+   "harden"
+  ],
+  "17": [
+   "harden"
+  ],
+  "18": [
+   "harden"
+  ],
+  "19": [
+   "harden"
+  ],
+  "20": [
+   "harden"
+  ],
+  "21": [
+   "harden"
+  ],
+  "22": [
+   "harden"
+  ],
+  "23": [
+   "harden"
+  ],
+  "24": [
+   "harden"
+  ],
+  "25": [
+   "harden"
+  ],
+  "26": [
+   "harden"
+  ],
+  "27": [
+   "harden"
+  ],
+  "28": [
+   "harden"
+  ],
+  "29": [
+   "harden"
+  ],
+  "30": [
+   "harden"
+  ],
+  "31": [
+   "harden"
+  ],
+  "32": [
+   "harden"
+  ],
+  "33": [
+   "harden"
+  ],
+  "34": [
+   "harden"
+  ],
+  "35": [
+   "harden"
+  ],
+  "36": [
+   "harden"
+  ],
+  "37": [
+   "harden"
+  ],
+  "38": [
+   "harden"
+  ],
+  "39": [
+   "harden"
+  ],
+  "40": [
+   "harden"
+  ],
+  "41": [
+   "harden"
+  ],
+  "42": [
+   "harden"
+  ],
+  "43": [
+   "harden"
+  ],
+  "44": [
+   "harden"
+  ],
+  "45": [
+   "harden"
+  ],
+  "46": [
+   "harden"
+  ],
+  "47": [
+   "harden"
+  ],
+  "48": [
+   "harden"
+  ],
+  "49": [
+   "harden"
+  ],
+  "50": [
+   "harden"
   ]
  },
  "chansey": {
@@ -3300,6 +3741,297 @@
    "futuresight"
   ]
  },
+ "gastly": {
+  "1": [
+   "hypnosis",
+   "lick"
+  ],
+  "2": [
+   "hypnosis",
+   "lick"
+  ],
+  "3": [
+   "hypnosis",
+   "lick"
+  ],
+  "4": [
+   "hypnosis",
+   "lick"
+  ],
+  "5": [
+   "hypnosis",
+   "lick",
+   "spite"
+  ],
+  "6": [
+   "hypnosis",
+   "lick",
+   "spite"
+  ],
+  "7": [
+   "hypnosis",
+   "lick",
+   "spite"
+  ],
+  "8": [
+   "hypnosis",
+   "lick",
+   "spite",
+   "meanlook"
+  ],
+  "9": [
+   "hypnosis",
+   "lick",
+   "spite",
+   "meanlook"
+  ],
+  "10": [
+   "hypnosis",
+   "lick",
+   "spite",
+   "meanlook"
+  ],
+  "11": [
+   "hypnosis",
+   "lick",
+   "spite",
+   "meanlook"
+  ],
+  "12": [
+   "lick",
+   "spite",
+   "meanlook",
+   "curse"
+  ],
+  "13": [
+   "lick",
+   "spite",
+   "meanlook",
+   "curse"
+  ],
+  "14": [
+   "lick",
+   "spite",
+   "meanlook",
+   "curse"
+  ],
+  "15": [
+   "spite",
+   "meanlook",
+   "curse",
+   "nightshade"
+  ],
+  "16": [
+   "spite",
+   "meanlook",
+   "curse",
+   "nightshade"
+  ],
+  "17": [
+   "spite",
+   "meanlook",
+   "curse",
+   "nightshade"
+  ],
+  "18": [
+   "spite",
+   "meanlook",
+   "curse",
+   "nightshade"
+  ],
+  "19": [
+   "meanlook",
+   "curse",
+   "nightshade",
+   "confuseray"
+  ],
+  "20": [
+   "meanlook",
+   "curse",
+   "nightshade",
+   "confuseray"
+  ],
+  "21": [
+   "meanlook",
+   "curse",
+   "nightshade",
+   "confuseray"
+  ],
+  "22": [
+   "curse",
+   "nightshade",
+   "confuseray",
+   "suckerpunch"
+  ],
+  "23": [
+   "curse",
+   "nightshade",
+   "confuseray",
+   "suckerpunch"
+  ],
+  "24": [
+   "curse",
+   "nightshade",
+   "confuseray",
+   "suckerpunch"
+  ],
+  "25": [
+   "curse",
+   "nightshade",
+   "confuseray",
+   "suckerpunch"
+  ],
+  "26": [
+   "nightshade",
+   "confuseray",
+   "suckerpunch",
+   "payback"
+  ],
+  "27": [
+   "nightshade",
+   "confuseray",
+   "suckerpunch",
+   "payback"
+  ],
+  "28": [
+   "nightshade",
+   "confuseray",
+   "suckerpunch",
+   "payback"
+  ],
+  "29": [
+   "confuseray",
+   "suckerpunch",
+   "payback",
+   "shadowball"
+  ],
+  "30": [
+   "confuseray",
+   "suckerpunch",
+   "payback",
+   "shadowball"
+  ],
+  "31": [
+   "confuseray",
+   "suckerpunch",
+   "payback",
+   "shadowball"
+  ],
+  "32": [
+   "confuseray",
+   "suckerpunch",
+   "payback",
+   "shadowball"
+  ],
+  "33": [
+   "suckerpunch",
+   "payback",
+   "shadowball",
+   "dreameater"
+  ],
+  "34": [
+   "suckerpunch",
+   "payback",
+   "shadowball",
+   "dreameater"
+  ],
+  "35": [
+   "suckerpunch",
+   "payback",
+   "shadowball",
+   "dreameater"
+  ],
+  "36": [
+   "payback",
+   "shadowball",
+   "dreameater",
+   "darkpulse"
+  ],
+  "37": [
+   "payback",
+   "shadowball",
+   "dreameater",
+   "darkpulse"
+  ],
+  "38": [
+   "payback",
+   "shadowball",
+   "dreameater",
+   "darkpulse"
+  ],
+  "39": [
+   "payback",
+   "shadowball",
+   "dreameater",
+   "darkpulse"
+  ],
+  "40": [
+   "shadowball",
+   "dreameater",
+   "darkpulse",
+   "destinybond"
+  ],
+  "41": [
+   "shadowball",
+   "dreameater",
+   "darkpulse",
+   "destinybond"
+  ],
+  "42": [
+   "shadowball",
+   "dreameater",
+   "darkpulse",
+   "destinybond"
+  ],
+  "43": [
+   "dreameater",
+   "darkpulse",
+   "destinybond",
+   "nightmare"
+  ],
+  "44": [
+   "dreameater",
+   "darkpulse",
+   "destinybond",
+   "nightmare"
+  ],
+  "45": [
+   "dreameater",
+   "darkpulse",
+   "destinybond",
+   "nightmare"
+  ],
+  "46": [
+   "dreameater",
+   "darkpulse",
+   "destinybond",
+   "nightmare"
+  ],
+  "47": [
+   "dreameater",
+   "darkpulse",
+   "destinybond",
+   "nightmare"
+  ],
+  "48": [
+   "dreameater",
+   "darkpulse",
+   "destinybond",
+   "nightmare"
+  ],
+  "49": [
+   "dreameater",
+   "darkpulse",
+   "destinybond",
+   "nightmare"
+  ],
+  "50": [
+   "dreameater",
+   "darkpulse",
+   "destinybond",
+   "nightmare"
+  ]
+ },
  "geodude": {
   "1": [
    "defensecurl",
@@ -3890,6 +4622,291 @@
    "dreameater"
   ]
  },
+ "kadabra": {
+  "1": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "2": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "3": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "4": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "5": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "6": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "7": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "8": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "9": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "10": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "11": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "12": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "13": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "14": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "15": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "16": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "17": [
+   "confusion",
+   "kinesis",
+   "teleport"
+  ],
+  "18": [
+   "confusion",
+   "kinesis",
+   "teleport",
+   "disable"
+  ],
+  "19": [
+   "confusion",
+   "kinesis",
+   "teleport",
+   "disable"
+  ],
+  "20": [
+   "confusion",
+   "kinesis",
+   "teleport",
+   "disable"
+  ],
+  "21": [
+   "confusion",
+   "kinesis",
+   "teleport",
+   "disable"
+  ],
+  "22": [
+   "kinesis",
+   "teleport",
+   "disable",
+   "miracleeye"
+  ],
+  "23": [
+   "kinesis",
+   "teleport",
+   "disable",
+   "miracleeye"
+  ],
+  "24": [
+   "teleport",
+   "disable",
+   "miracleeye",
+   "psybeam"
+  ],
+  "25": [
+   "teleport",
+   "disable",
+   "miracleeye",
+   "psybeam"
+  ],
+  "26": [
+   "teleport",
+   "disable",
+   "miracleeye",
+   "psybeam"
+  ],
+  "27": [
+   "teleport",
+   "disable",
+   "miracleeye",
+   "psybeam"
+  ],
+  "28": [
+   "disable",
+   "miracleeye",
+   "psybeam",
+   "reflect"
+  ],
+  "29": [
+   "disable",
+   "miracleeye",
+   "psybeam",
+   "reflect"
+  ],
+  "30": [
+   "miracleeye",
+   "psybeam",
+   "reflect",
+   "recover"
+  ],
+  "31": [
+   "miracleeye",
+   "psybeam",
+   "reflect",
+   "recover"
+  ],
+  "32": [
+   "miracleeye",
+   "psybeam",
+   "reflect",
+   "recover"
+  ],
+  "33": [
+   "miracleeye",
+   "psybeam",
+   "reflect",
+   "recover"
+  ],
+  "34": [
+   "psybeam",
+   "reflect",
+   "recover",
+   "psychocut"
+  ],
+  "35": [
+   "psybeam",
+   "reflect",
+   "recover",
+   "psychocut"
+  ],
+  "36": [
+   "reflect",
+   "recover",
+   "psychocut",
+   "roleplay"
+  ],
+  "37": [
+   "reflect",
+   "recover",
+   "psychocut",
+   "roleplay"
+  ],
+  "38": [
+   "reflect",
+   "recover",
+   "psychocut",
+   "roleplay"
+  ],
+  "39": [
+   "reflect",
+   "recover",
+   "psychocut",
+   "roleplay"
+  ],
+  "40": [
+   "recover",
+   "psychocut",
+   "roleplay",
+   "psychic"
+  ],
+  "41": [
+   "recover",
+   "psychocut",
+   "roleplay",
+   "psychic"
+  ],
+  "42": [
+   "psychocut",
+   "roleplay",
+   "psychic",
+   "futuresight"
+  ],
+  "43": [
+   "psychocut",
+   "roleplay",
+   "psychic",
+   "futuresight"
+  ],
+  "44": [
+   "psychocut",
+   "roleplay",
+   "psychic",
+   "futuresight"
+  ],
+  "45": [
+   "psychocut",
+   "roleplay",
+   "psychic",
+   "futuresight"
+  ],
+  "46": [
+   "roleplay",
+   "psychic",
+   "futuresight",
+   "trick"
+  ],
+  "47": [
+   "roleplay",
+   "psychic",
+   "futuresight",
+   "trick"
+  ],
+  "48": [
+   "roleplay",
+   "psychic",
+   "futuresight",
+   "trick"
+  ],
+  "49": [
+   "roleplay",
+   "psychic",
+   "futuresight",
+   "trick"
+  ],
+  "50": [
+   "roleplay",
+   "psychic",
+   "futuresight",
+   "trick"
+  ]
+ },
  "kricketot": {
   "1": [
    "bide",
@@ -4407,6 +5424,299 @@
    "nightslash"
   ]
  },
+ "machoke": {
+  "1": [
+   "focusenergy",
+   "leer",
+   "lowkick"
+  ],
+  "2": [
+   "focusenergy",
+   "leer",
+   "lowkick"
+  ],
+  "3": [
+   "focusenergy",
+   "leer",
+   "lowkick"
+  ],
+  "4": [
+   "focusenergy",
+   "leer",
+   "lowkick"
+  ],
+  "5": [
+   "focusenergy",
+   "leer",
+   "lowkick"
+  ],
+  "6": [
+   "focusenergy",
+   "leer",
+   "lowkick"
+  ],
+  "7": [
+   "focusenergy",
+   "leer",
+   "lowkick"
+  ],
+  "8": [
+   "focusenergy",
+   "leer",
+   "lowkick"
+  ],
+  "9": [
+   "focusenergy",
+   "leer",
+   "lowkick"
+  ],
+  "10": [
+   "focusenergy",
+   "leer",
+   "lowkick",
+   "karatechop"
+  ],
+  "11": [
+   "focusenergy",
+   "leer",
+   "lowkick",
+   "karatechop"
+  ],
+  "12": [
+   "focusenergy",
+   "leer",
+   "lowkick",
+   "karatechop"
+  ],
+  "13": [
+   "leer",
+   "lowkick",
+   "karatechop",
+   "foresight"
+  ],
+  "14": [
+   "leer",
+   "lowkick",
+   "karatechop",
+   "foresight"
+  ],
+  "15": [
+   "leer",
+   "lowkick",
+   "karatechop",
+   "foresight"
+  ],
+  "16": [
+   "leer",
+   "lowkick",
+   "karatechop",
+   "foresight"
+  ],
+  "17": [
+   "leer",
+   "lowkick",
+   "karatechop",
+   "foresight"
+  ],
+  "18": [
+   "leer",
+   "lowkick",
+   "karatechop",
+   "foresight"
+  ],
+  "19": [
+   "lowkick",
+   "karatechop",
+   "foresight",
+   "seismictoss"
+  ],
+  "20": [
+   "lowkick",
+   "karatechop",
+   "foresight",
+   "seismictoss"
+  ],
+  "21": [
+   "lowkick",
+   "karatechop",
+   "foresight",
+   "seismictoss"
+  ],
+  "22": [
+   "karatechop",
+   "foresight",
+   "seismictoss",
+   "revenge"
+  ],
+  "23": [
+   "karatechop",
+   "foresight",
+   "seismictoss",
+   "revenge"
+  ],
+  "24": [
+   "karatechop",
+   "foresight",
+   "seismictoss",
+   "revenge"
+  ],
+  "25": [
+   "foresight",
+   "seismictoss",
+   "revenge",
+   "vitalthrow"
+  ],
+  "26": [
+   "foresight",
+   "seismictoss",
+   "revenge",
+   "vitalthrow"
+  ],
+  "27": [
+   "foresight",
+   "seismictoss",
+   "revenge",
+   "vitalthrow"
+  ],
+  "28": [
+   "foresight",
+   "seismictoss",
+   "revenge",
+   "vitalthrow"
+  ],
+  "29": [
+   "foresight",
+   "seismictoss",
+   "revenge",
+   "vitalthrow"
+  ],
+  "30": [
+   "foresight",
+   "seismictoss",
+   "revenge",
+   "vitalthrow"
+  ],
+  "31": [
+   "foresight",
+   "seismictoss",
+   "revenge",
+   "vitalthrow"
+  ],
+  "32": [
+   "seismictoss",
+   "revenge",
+   "vitalthrow",
+   "submission"
+  ],
+  "33": [
+   "seismictoss",
+   "revenge",
+   "vitalthrow",
+   "submission"
+  ],
+  "34": [
+   "seismictoss",
+   "revenge",
+   "vitalthrow",
+   "submission"
+  ],
+  "35": [
+   "seismictoss",
+   "revenge",
+   "vitalthrow",
+   "submission"
+  ],
+  "36": [
+   "revenge",
+   "vitalthrow",
+   "submission",
+   "wakeupslap"
+  ],
+  "37": [
+   "revenge",
+   "vitalthrow",
+   "submission",
+   "wakeupslap"
+  ],
+  "38": [
+   "revenge",
+   "vitalthrow",
+   "submission",
+   "wakeupslap"
+  ],
+  "39": [
+   "revenge",
+   "vitalthrow",
+   "submission",
+   "wakeupslap"
+  ],
+  "40": [
+   "vitalthrow",
+   "submission",
+   "wakeupslap",
+   "crosschop"
+  ],
+  "41": [
+   "vitalthrow",
+   "submission",
+   "wakeupslap",
+   "crosschop"
+  ],
+  "42": [
+   "vitalthrow",
+   "submission",
+   "wakeupslap",
+   "crosschop"
+  ],
+  "43": [
+   "vitalthrow",
+   "submission",
+   "wakeupslap",
+   "crosschop"
+  ],
+  "44": [
+   "submission",
+   "wakeupslap",
+   "crosschop",
+   "scaryface"
+  ],
+  "45": [
+   "submission",
+   "wakeupslap",
+   "crosschop",
+   "scaryface"
+  ],
+  "46": [
+   "submission",
+   "wakeupslap",
+   "crosschop",
+   "scaryface"
+  ],
+  "47": [
+   "submission",
+   "wakeupslap",
+   "crosschop",
+   "scaryface"
+  ],
+  "48": [
+   "submission",
+   "wakeupslap",
+   "crosschop",
+   "scaryface"
+  ],
+  "49": [
+   "submission",
+   "wakeupslap",
+   "crosschop",
+   "scaryface"
+  ],
+  "50": [
+   "submission",
+   "wakeupslap",
+   "crosschop",
+   "scaryface"
+  ]
+ },
  "machop": {
   "1": [
    "leer",
@@ -4692,6 +6002,288 @@
    "crosschop",
    "scaryface",
    "dynamicpunch"
+  ]
+ },
+ "meditite": {
+  "1": [
+   "bide"
+  ],
+  "2": [
+   "bide"
+  ],
+  "3": [
+   "bide"
+  ],
+  "4": [
+   "bide",
+   "meditate"
+  ],
+  "5": [
+   "bide",
+   "meditate"
+  ],
+  "6": [
+   "bide",
+   "meditate"
+  ],
+  "7": [
+   "bide",
+   "meditate"
+  ],
+  "8": [
+   "bide",
+   "meditate",
+   "confusion"
+  ],
+  "9": [
+   "bide",
+   "meditate",
+   "confusion"
+  ],
+  "10": [
+   "bide",
+   "meditate",
+   "confusion"
+  ],
+  "11": [
+   "bide",
+   "meditate",
+   "confusion",
+   "detect"
+  ],
+  "12": [
+   "bide",
+   "meditate",
+   "confusion",
+   "detect"
+  ],
+  "13": [
+   "bide",
+   "meditate",
+   "confusion",
+   "detect"
+  ],
+  "14": [
+   "bide",
+   "meditate",
+   "confusion",
+   "detect"
+  ],
+  "15": [
+   "meditate",
+   "confusion",
+   "detect",
+   "hiddenpower"
+  ],
+  "16": [
+   "meditate",
+   "confusion",
+   "detect",
+   "hiddenpower"
+  ],
+  "17": [
+   "meditate",
+   "confusion",
+   "detect",
+   "hiddenpower"
+  ],
+  "18": [
+   "confusion",
+   "detect",
+   "hiddenpower",
+   "mindreader"
+  ],
+  "19": [
+   "confusion",
+   "detect",
+   "hiddenpower",
+   "mindreader"
+  ],
+  "20": [
+   "confusion",
+   "detect",
+   "hiddenpower",
+   "mindreader"
+  ],
+  "21": [
+   "confusion",
+   "detect",
+   "hiddenpower",
+   "mindreader"
+  ],
+  "22": [
+   "detect",
+   "hiddenpower",
+   "mindreader",
+   "feint"
+  ],
+  "23": [
+   "detect",
+   "hiddenpower",
+   "mindreader",
+   "feint"
+  ],
+  "24": [
+   "detect",
+   "hiddenpower",
+   "mindreader",
+   "feint"
+  ],
+  "25": [
+   "hiddenpower",
+   "mindreader",
+   "feint",
+   "calmmind"
+  ],
+  "26": [
+   "hiddenpower",
+   "mindreader",
+   "feint",
+   "calmmind"
+  ],
+  "27": [
+   "hiddenpower",
+   "mindreader",
+   "feint",
+   "calmmind"
+  ],
+  "28": [
+   "hiddenpower",
+   "mindreader",
+   "feint",
+   "calmmind"
+  ],
+  "29": [
+   "mindreader",
+   "feint",
+   "calmmind",
+   "forcepalm"
+  ],
+  "30": [
+   "mindreader",
+   "feint",
+   "calmmind",
+   "forcepalm"
+  ],
+  "31": [
+   "mindreader",
+   "feint",
+   "calmmind",
+   "forcepalm"
+  ],
+  "32": [
+   "feint",
+   "calmmind",
+   "forcepalm",
+   "highjumpkick"
+  ],
+  "33": [
+   "feint",
+   "calmmind",
+   "forcepalm",
+   "highjumpkick"
+  ],
+  "34": [
+   "feint",
+   "calmmind",
+   "forcepalm",
+   "highjumpkick"
+  ],
+  "35": [
+   "feint",
+   "calmmind",
+   "forcepalm",
+   "highjumpkick"
+  ],
+  "36": [
+   "calmmind",
+   "forcepalm",
+   "highjumpkick",
+   "psychup"
+  ],
+  "37": [
+   "calmmind",
+   "forcepalm",
+   "highjumpkick",
+   "psychup"
+  ],
+  "38": [
+   "calmmind",
+   "forcepalm",
+   "highjumpkick",
+   "psychup"
+  ],
+  "39": [
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
+  ],
+  "40": [
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
+  ],
+  "41": [
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
+  ],
+  "42": [
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
+  ],
+  "43": [
+   "highjumpkick",
+   "psychup",
+   "powertrick",
+   "reversal"
+  ],
+  "44": [
+   "highjumpkick",
+   "psychup",
+   "powertrick",
+   "reversal"
+  ],
+  "45": [
+   "highjumpkick",
+   "psychup",
+   "powertrick",
+   "reversal"
+  ],
+  "46": [
+   "psychup",
+   "powertrick",
+   "reversal",
+   "recover"
+  ],
+  "47": [
+   "psychup",
+   "powertrick",
+   "reversal",
+   "recover"
+  ],
+  "48": [
+   "psychup",
+   "powertrick",
+   "reversal",
+   "recover"
+  ],
+  "49": [
+   "psychup",
+   "powertrick",
+   "reversal",
+   "recover"
+  ],
+  "50": [
+   "psychup",
+   "powertrick",
+   "reversal",
+   "recover"
   ]
  },
  "mimejr": {
@@ -4991,6 +6583,308 @@
    "roleplay",
    "batonpass",
    "safeguard"
+  ]
+ },
+ "onix": {
+  "1": [
+   "bind",
+   "harden",
+   "mudsport",
+   "tackle"
+  ],
+  "2": [
+   "bind",
+   "harden",
+   "mudsport",
+   "tackle"
+  ],
+  "3": [
+   "bind",
+   "harden",
+   "mudsport",
+   "tackle"
+  ],
+  "4": [
+   "bind",
+   "harden",
+   "mudsport",
+   "tackle"
+  ],
+  "5": [
+   "bind",
+   "harden",
+   "mudsport",
+   "tackle"
+  ],
+  "6": [
+   "harden",
+   "mudsport",
+   "tackle",
+   "screech"
+  ],
+  "7": [
+   "harden",
+   "mudsport",
+   "tackle",
+   "screech"
+  ],
+  "8": [
+   "harden",
+   "mudsport",
+   "tackle",
+   "screech"
+  ],
+  "9": [
+   "mudsport",
+   "tackle",
+   "screech",
+   "rockthrow"
+  ],
+  "10": [
+   "mudsport",
+   "tackle",
+   "screech",
+   "rockthrow"
+  ],
+  "11": [
+   "mudsport",
+   "tackle",
+   "screech",
+   "rockthrow"
+  ],
+  "12": [
+   "mudsport",
+   "tackle",
+   "screech",
+   "rockthrow"
+  ],
+  "13": [
+   "mudsport",
+   "tackle",
+   "screech",
+   "rockthrow"
+  ],
+  "14": [
+   "tackle",
+   "screech",
+   "rockthrow",
+   "rage"
+  ],
+  "15": [
+   "tackle",
+   "screech",
+   "rockthrow",
+   "rage"
+  ],
+  "16": [
+   "tackle",
+   "screech",
+   "rockthrow",
+   "rage"
+  ],
+  "17": [
+   "screech",
+   "rockthrow",
+   "rage",
+   "rocktomb"
+  ],
+  "18": [
+   "screech",
+   "rockthrow",
+   "rage",
+   "rocktomb"
+  ],
+  "19": [
+   "screech",
+   "rockthrow",
+   "rage",
+   "rocktomb"
+  ],
+  "20": [
+   "screech",
+   "rockthrow",
+   "rage",
+   "rocktomb"
+  ],
+  "21": [
+   "screech",
+   "rockthrow",
+   "rage",
+   "rocktomb"
+  ],
+  "22": [
+   "rockthrow",
+   "rage",
+   "rocktomb",
+   "sandstorm"
+  ],
+  "23": [
+   "rockthrow",
+   "rage",
+   "rocktomb",
+   "sandstorm"
+  ],
+  "24": [
+   "rockthrow",
+   "rage",
+   "rocktomb",
+   "sandstorm"
+  ],
+  "25": [
+   "rage",
+   "rocktomb",
+   "sandstorm",
+   "slam"
+  ],
+  "26": [
+   "rage",
+   "rocktomb",
+   "sandstorm",
+   "slam"
+  ],
+  "27": [
+   "rage",
+   "rocktomb",
+   "sandstorm",
+   "slam"
+  ],
+  "28": [
+   "rage",
+   "rocktomb",
+   "sandstorm",
+   "slam"
+  ],
+  "29": [
+   "rage",
+   "rocktomb",
+   "sandstorm",
+   "slam"
+  ],
+  "30": [
+   "rocktomb",
+   "sandstorm",
+   "slam",
+   "rockpolish"
+  ],
+  "31": [
+   "rocktomb",
+   "sandstorm",
+   "slam",
+   "rockpolish"
+  ],
+  "32": [
+   "rocktomb",
+   "sandstorm",
+   "slam",
+   "rockpolish"
+  ],
+  "33": [
+   "sandstorm",
+   "slam",
+   "rockpolish",
+   "dragonbreath"
+  ],
+  "34": [
+   "sandstorm",
+   "slam",
+   "rockpolish",
+   "dragonbreath"
+  ],
+  "35": [
+   "sandstorm",
+   "slam",
+   "rockpolish",
+   "dragonbreath"
+  ],
+  "36": [
+   "sandstorm",
+   "slam",
+   "rockpolish",
+   "dragonbreath"
+  ],
+  "37": [
+   "sandstorm",
+   "slam",
+   "rockpolish",
+   "dragonbreath"
+  ],
+  "38": [
+   "rockpolish",
+   "dragonbreath",
+   "curse",
+   "irontail"
+  ],
+  "39": [
+   "rockpolish",
+   "dragonbreath",
+   "curse",
+   "irontail"
+  ],
+  "40": [
+   "rockpolish",
+   "dragonbreath",
+   "curse",
+   "irontail"
+  ],
+  "41": [
+   "dragonbreath",
+   "curse",
+   "irontail",
+   "sandtomb"
+  ],
+  "42": [
+   "dragonbreath",
+   "curse",
+   "irontail",
+   "sandtomb"
+  ],
+  "43": [
+   "dragonbreath",
+   "curse",
+   "irontail",
+   "sandtomb"
+  ],
+  "44": [
+   "dragonbreath",
+   "curse",
+   "irontail",
+   "sandtomb"
+  ],
+  "45": [
+   "dragonbreath",
+   "curse",
+   "irontail",
+   "sandtomb"
+  ],
+  "46": [
+   "curse",
+   "irontail",
+   "sandtomb",
+   "doubleedge"
+  ],
+  "47": [
+   "curse",
+   "irontail",
+   "sandtomb",
+   "doubleedge"
+  ],
+  "48": [
+   "curse",
+   "irontail",
+   "sandtomb",
+   "doubleedge"
+  ],
+  "49": [
+   "irontail",
+   "sandtomb",
+   "doubleedge",
+   "stoneedge"
+  ],
+  "50": [
+   "irontail",
+   "sandtomb",
+   "doubleedge",
+   "stoneedge"
   ]
  },
  "pachirisu": {
@@ -6704,6 +8598,298 @@
    "synthesis"
   ]
  },
+ "shellos": {
+  "1": [
+   "mudslap"
+  ],
+  "2": [
+   "mudslap",
+   "mudsport"
+  ],
+  "3": [
+   "mudslap",
+   "mudsport"
+  ],
+  "4": [
+   "mudslap",
+   "mudsport",
+   "harden"
+  ],
+  "5": [
+   "mudslap",
+   "mudsport",
+   "harden"
+  ],
+  "6": [
+   "mudslap",
+   "mudsport",
+   "harden"
+  ],
+  "7": [
+   "mudslap",
+   "mudsport",
+   "harden",
+   "waterpulse"
+  ],
+  "8": [
+   "mudslap",
+   "mudsport",
+   "harden",
+   "waterpulse"
+  ],
+  "9": [
+   "mudslap",
+   "mudsport",
+   "harden",
+   "waterpulse"
+  ],
+  "10": [
+   "mudslap",
+   "mudsport",
+   "harden",
+   "waterpulse"
+  ],
+  "11": [
+   "mudsport",
+   "harden",
+   "waterpulse",
+   "mudbomb"
+  ],
+  "12": [
+   "mudsport",
+   "harden",
+   "waterpulse",
+   "mudbomb"
+  ],
+  "13": [
+   "mudsport",
+   "harden",
+   "waterpulse",
+   "mudbomb"
+  ],
+  "14": [
+   "mudsport",
+   "harden",
+   "waterpulse",
+   "mudbomb"
+  ],
+  "15": [
+   "mudsport",
+   "harden",
+   "waterpulse",
+   "mudbomb"
+  ],
+  "16": [
+   "harden",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "17": [
+   "harden",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "18": [
+   "harden",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "19": [
+   "harden",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "20": [
+   "harden",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "21": [
+   "harden",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "22": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "23": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "24": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "25": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "26": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "27": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "28": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "29": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "30": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "31": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "32": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "33": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "34": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "35": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "36": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "37": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "38": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "39": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "40": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "41": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "42": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "43": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "44": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "45": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "46": [
+   "raindance",
+   "bodyslam",
+   "muddywater",
+   "recover"
+  ],
+  "47": [
+   "raindance",
+   "bodyslam",
+   "muddywater",
+   "recover"
+  ],
+  "48": [
+   "raindance",
+   "bodyslam",
+   "muddywater",
+   "recover"
+  ],
+  "49": [
+   "raindance",
+   "bodyslam",
+   "muddywater",
+   "recover"
+  ],
+  "50": [
+   "raindance",
+   "bodyslam",
+   "muddywater",
+   "recover"
+  ]
+ },
  "shinx": {
   "1": [
    "tackle"
@@ -6980,6 +9166,158 @@
    "thunderfang",
    "scaryface",
    "discharge"
+  ]
+ },
+ "silcoon": {
+  "1": [
+   "harden"
+  ],
+  "2": [
+   "harden"
+  ],
+  "3": [
+   "harden"
+  ],
+  "4": [
+   "harden"
+  ],
+  "5": [
+   "harden"
+  ],
+  "6": [
+   "harden"
+  ],
+  "7": [
+   "harden"
+  ],
+  "8": [
+   "harden"
+  ],
+  "9": [
+   "harden"
+  ],
+  "10": [
+   "harden"
+  ],
+  "11": [
+   "harden"
+  ],
+  "12": [
+   "harden"
+  ],
+  "13": [
+   "harden"
+  ],
+  "14": [
+   "harden"
+  ],
+  "15": [
+   "harden"
+  ],
+  "16": [
+   "harden"
+  ],
+  "17": [
+   "harden"
+  ],
+  "18": [
+   "harden"
+  ],
+  "19": [
+   "harden"
+  ],
+  "20": [
+   "harden"
+  ],
+  "21": [
+   "harden"
+  ],
+  "22": [
+   "harden"
+  ],
+  "23": [
+   "harden"
+  ],
+  "24": [
+   "harden"
+  ],
+  "25": [
+   "harden"
+  ],
+  "26": [
+   "harden"
+  ],
+  "27": [
+   "harden"
+  ],
+  "28": [
+   "harden"
+  ],
+  "29": [
+   "harden"
+  ],
+  "30": [
+   "harden"
+  ],
+  "31": [
+   "harden"
+  ],
+  "32": [
+   "harden"
+  ],
+  "33": [
+   "harden"
+  ],
+  "34": [
+   "harden"
+  ],
+  "35": [
+   "harden"
+  ],
+  "36": [
+   "harden"
+  ],
+  "37": [
+   "harden"
+  ],
+  "38": [
+   "harden"
+  ],
+  "39": [
+   "harden"
+  ],
+  "40": [
+   "harden"
+  ],
+  "41": [
+   "harden"
+  ],
+  "42": [
+   "harden"
+  ],
+  "43": [
+   "harden"
+  ],
+  "44": [
+   "harden"
+  ],
+  "45": [
+   "harden"
+  ],
+  "46": [
+   "harden"
+  ],
+  "47": [
+   "harden"
+  ],
+  "48": [
+   "harden"
+  ],
+  "49": [
+   "harden"
+  ],
+  "50": [
+   "harden"
   ]
  },
  "staravia": {
@@ -8137,266 +10475,6 @@
    "leafstorm"
   ]
  },
- "wormadam": {
-  "1": [
-   "tackle"
-  ],
-  "2": [
-   "tackle"
-  ],
-  "3": [
-   "tackle"
-  ],
-  "4": [
-   "tackle"
-  ],
-  "5": [
-   "tackle"
-  ],
-  "6": [
-   "tackle"
-  ],
-  "7": [
-   "tackle"
-  ],
-  "8": [
-   "tackle"
-  ],
-  "9": [
-   "tackle"
-  ],
-  "10": [
-   "tackle",
-   "protect"
-  ],
-  "11": [
-   "tackle",
-   "protect"
-  ],
-  "12": [
-   "tackle",
-   "protect"
-  ],
-  "13": [
-   "tackle",
-   "protect"
-  ],
-  "14": [
-   "tackle",
-   "protect"
-  ],
-  "15": [
-   "tackle",
-   "protect",
-   "bugbite"
-  ],
-  "16": [
-   "tackle",
-   "protect",
-   "bugbite"
-  ],
-  "17": [
-   "tackle",
-   "protect",
-   "bugbite"
-  ],
-  "18": [
-   "tackle",
-   "protect",
-   "bugbite"
-  ],
-  "19": [
-   "tackle",
-   "protect",
-   "bugbite"
-  ],
-  "20": [
-   "tackle",
-   "protect",
-   "bugbite",
-   "hiddenpower"
-  ],
-  "21": [
-   "tackle",
-   "protect",
-   "bugbite",
-   "hiddenpower"
-  ],
-  "22": [
-   "tackle",
-   "protect",
-   "bugbite",
-   "hiddenpower"
-  ],
-  "23": [
-   "protect",
-   "bugbite",
-   "hiddenpower",
-   "confusion"
-  ],
-  "24": [
-   "protect",
-   "bugbite",
-   "hiddenpower",
-   "confusion"
-  ],
-  "25": [
-   "protect",
-   "bugbite",
-   "hiddenpower",
-   "confusion"
-  ],
-  "26": [
-   "bugbite",
-   "hiddenpower",
-   "confusion",
-   "razorleaf"
-  ],
-  "27": [
-   "bugbite",
-   "hiddenpower",
-   "confusion",
-   "razorleaf"
-  ],
-  "28": [
-   "bugbite",
-   "hiddenpower",
-   "confusion",
-   "razorleaf"
-  ],
-  "29": [
-   "hiddenpower",
-   "confusion",
-   "razorleaf",
-   "growth"
-  ],
-  "30": [
-   "hiddenpower",
-   "confusion",
-   "razorleaf",
-   "growth"
-  ],
-  "31": [
-   "hiddenpower",
-   "confusion",
-   "razorleaf",
-   "growth"
-  ],
-  "32": [
-   "confusion",
-   "razorleaf",
-   "growth",
-   "psybeam"
-  ],
-  "33": [
-   "confusion",
-   "razorleaf",
-   "growth",
-   "psybeam"
-  ],
-  "34": [
-   "confusion",
-   "razorleaf",
-   "growth",
-   "psybeam"
-  ],
-  "35": [
-   "razorleaf",
-   "growth",
-   "psybeam",
-   "captivate"
-  ],
-  "36": [
-   "razorleaf",
-   "growth",
-   "psybeam",
-   "captivate"
-  ],
-  "37": [
-   "razorleaf",
-   "growth",
-   "psybeam",
-   "captivate"
-  ],
-  "38": [
-   "growth",
-   "psybeam",
-   "captivate",
-   "flail"
-  ],
-  "39": [
-   "growth",
-   "psybeam",
-   "captivate",
-   "flail"
-  ],
-  "40": [
-   "growth",
-   "psybeam",
-   "captivate",
-   "flail"
-  ],
-  "41": [
-   "psybeam",
-   "captivate",
-   "flail",
-   "attract"
-  ],
-  "42": [
-   "psybeam",
-   "captivate",
-   "flail",
-   "attract"
-  ],
-  "43": [
-   "psybeam",
-   "captivate",
-   "flail",
-   "attract"
-  ],
-  "44": [
-   "captivate",
-   "flail",
-   "attract",
-   "psychic"
-  ],
-  "45": [
-   "captivate",
-   "flail",
-   "attract",
-   "psychic"
-  ],
-  "46": [
-   "captivate",
-   "flail",
-   "attract",
-   "psychic"
-  ],
-  "47": [
-   "flail",
-   "attract",
-   "psychic",
-   "leafstorm"
-  ],
-  "48": [
-   "flail",
-   "attract",
-   "psychic",
-   "leafstorm"
-  ],
-  "49": [
-   "flail",
-   "attract",
-   "psychic",
-   "leafstorm"
-  ],
-  "50": [
-   "flail",
-   "attract",
-   "psychic",
-   "leafstorm"
-  ]
- },
  "wurmple": {
   "1": [
    "stringshot",
@@ -8957,291 +11035,6 @@
    "poisonfang",
    "haze",
    "airslash"
-  ]
- },
- "kadabra": {
-  "1": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "2": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "3": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "4": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "5": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "6": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "7": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "8": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "9": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "10": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "11": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "12": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "13": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "14": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "15": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "16": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "17": [
-   "confusion",
-   "kinesis",
-   "teleport"
-  ],
-  "18": [
-   "confusion",
-   "kinesis",
-   "teleport",
-   "disable"
-  ],
-  "19": [
-   "confusion",
-   "kinesis",
-   "teleport",
-   "disable"
-  ],
-  "20": [
-   "confusion",
-   "kinesis",
-   "teleport",
-   "disable"
-  ],
-  "21": [
-   "confusion",
-   "kinesis",
-   "teleport",
-   "disable"
-  ],
-  "22": [
-   "kinesis",
-   "teleport",
-   "disable",
-   "miracleeye"
-  ],
-  "23": [
-   "kinesis",
-   "teleport",
-   "disable",
-   "miracleeye"
-  ],
-  "24": [
-   "teleport",
-   "disable",
-   "miracleeye",
-   "psybeam"
-  ],
-  "25": [
-   "teleport",
-   "disable",
-   "miracleeye",
-   "psybeam"
-  ],
-  "26": [
-   "teleport",
-   "disable",
-   "miracleeye",
-   "psybeam"
-  ],
-  "27": [
-   "teleport",
-   "disable",
-   "miracleeye",
-   "psybeam"
-  ],
-  "28": [
-   "disable",
-   "miracleeye",
-   "psybeam",
-   "reflect"
-  ],
-  "29": [
-   "disable",
-   "miracleeye",
-   "psybeam",
-   "reflect"
-  ],
-  "30": [
-   "miracleeye",
-   "psybeam",
-   "reflect",
-   "recover"
-  ],
-  "31": [
-   "miracleeye",
-   "psybeam",
-   "reflect",
-   "recover"
-  ],
-  "32": [
-   "miracleeye",
-   "psybeam",
-   "reflect",
-   "recover"
-  ],
-  "33": [
-   "miracleeye",
-   "psybeam",
-   "reflect",
-   "recover"
-  ],
-  "34": [
-   "psybeam",
-   "reflect",
-   "recover",
-   "psychocut"
-  ],
-  "35": [
-   "psybeam",
-   "reflect",
-   "recover",
-   "psychocut"
-  ],
-  "36": [
-   "reflect",
-   "recover",
-   "psychocut",
-   "roleplay"
-  ],
-  "37": [
-   "reflect",
-   "recover",
-   "psychocut",
-   "roleplay"
-  ],
-  "38": [
-   "reflect",
-   "recover",
-   "psychocut",
-   "roleplay"
-  ],
-  "39": [
-   "reflect",
-   "recover",
-   "psychocut",
-   "roleplay"
-  ],
-  "40": [
-   "recover",
-   "psychocut",
-   "roleplay",
-   "psychic"
-  ],
-  "41": [
-   "recover",
-   "psychocut",
-   "roleplay",
-   "psychic"
-  ],
-  "42": [
-   "psychocut",
-   "roleplay",
-   "psychic",
-   "futuresight"
-  ],
-  "43": [
-   "psychocut",
-   "roleplay",
-   "psychic",
-   "futuresight"
-  ],
-  "44": [
-   "psychocut",
-   "roleplay",
-   "psychic",
-   "futuresight"
-  ],
-  "45": [
-   "psychocut",
-   "roleplay",
-   "psychic",
-   "futuresight"
-  ],
-  "46": [
-   "roleplay",
-   "psychic",
-   "futuresight",
-   "trick"
-  ],
-  "47": [
-   "roleplay",
-   "psychic",
-   "futuresight",
-   "trick"
-  ],
-  "48": [
-   "roleplay",
-   "psychic",
-   "futuresight",
-   "trick"
-  ],
-  "49": [
-   "roleplay",
-   "psychic",
-   "futuresight",
-   "trick"
-  ],
-  "50": [
-   "roleplay",
-   "psychic",
-   "futuresight",
-   "trick"
   ]
  },
  "bronzong": {
@@ -9846,6 +11639,261 @@
    "agility",
    "whirlpool",
    "razorwind"
+  ]
+ },
+ "dustox": {
+  "1": [
+   "confusion"
+  ],
+  "2": [
+   "confusion"
+  ],
+  "3": [
+   "confusion"
+  ],
+  "4": [
+   "confusion"
+  ],
+  "5": [
+   "confusion"
+  ],
+  "6": [
+   "confusion"
+  ],
+  "7": [
+   "confusion"
+  ],
+  "8": [
+   "confusion"
+  ],
+  "9": [
+   "confusion"
+  ],
+  "10": [
+   "confusion"
+  ],
+  "11": [
+   "confusion"
+  ],
+  "12": [
+   "confusion"
+  ],
+  "13": [
+   "confusion",
+   "gust"
+  ],
+  "14": [
+   "confusion",
+   "gust"
+  ],
+  "15": [
+   "confusion",
+   "gust"
+  ],
+  "16": [
+   "confusion",
+   "gust"
+  ],
+  "17": [
+   "confusion",
+   "gust",
+   "protect"
+  ],
+  "18": [
+   "confusion",
+   "gust",
+   "protect"
+  ],
+  "19": [
+   "confusion",
+   "gust",
+   "protect"
+  ],
+  "20": [
+   "confusion",
+   "gust",
+   "protect",
+   "moonlight"
+  ],
+  "21": [
+   "confusion",
+   "gust",
+   "protect",
+   "moonlight"
+  ],
+  "22": [
+   "confusion",
+   "gust",
+   "protect",
+   "moonlight"
+  ],
+  "23": [
+   "confusion",
+   "gust",
+   "protect",
+   "moonlight"
+  ],
+  "24": [
+   "gust",
+   "protect",
+   "moonlight",
+   "psybeam"
+  ],
+  "25": [
+   "gust",
+   "protect",
+   "moonlight",
+   "psybeam"
+  ],
+  "26": [
+   "gust",
+   "protect",
+   "moonlight",
+   "psybeam"
+  ],
+  "27": [
+   "protect",
+   "moonlight",
+   "psybeam",
+   "whirlwind"
+  ],
+  "28": [
+   "protect",
+   "moonlight",
+   "psybeam",
+   "whirlwind"
+  ],
+  "29": [
+   "protect",
+   "moonlight",
+   "psybeam",
+   "whirlwind"
+  ],
+  "30": [
+   "protect",
+   "moonlight",
+   "psybeam",
+   "whirlwind"
+  ],
+  "31": [
+   "moonlight",
+   "psybeam",
+   "whirlwind",
+   "lightscreen"
+  ],
+  "32": [
+   "moonlight",
+   "psybeam",
+   "whirlwind",
+   "lightscreen"
+  ],
+  "33": [
+   "moonlight",
+   "psybeam",
+   "whirlwind",
+   "lightscreen"
+  ],
+  "34": [
+   "psybeam",
+   "whirlwind",
+   "lightscreen",
+   "silverwind"
+  ],
+  "35": [
+   "psybeam",
+   "whirlwind",
+   "lightscreen",
+   "silverwind"
+  ],
+  "36": [
+   "psybeam",
+   "whirlwind",
+   "lightscreen",
+   "silverwind"
+  ],
+  "37": [
+   "psybeam",
+   "whirlwind",
+   "lightscreen",
+   "silverwind"
+  ],
+  "38": [
+   "whirlwind",
+   "lightscreen",
+   "silverwind",
+   "toxic"
+  ],
+  "39": [
+   "whirlwind",
+   "lightscreen",
+   "silverwind",
+   "toxic"
+  ],
+  "40": [
+   "whirlwind",
+   "lightscreen",
+   "silverwind",
+   "toxic"
+  ],
+  "41": [
+   "lightscreen",
+   "silverwind",
+   "toxic",
+   "bugbuzz"
+  ],
+  "42": [
+   "lightscreen",
+   "silverwind",
+   "toxic",
+   "bugbuzz"
+  ],
+  "43": [
+   "lightscreen",
+   "silverwind",
+   "toxic",
+   "bugbuzz"
+  ],
+  "44": [
+   "lightscreen",
+   "silverwind",
+   "toxic",
+   "bugbuzz"
+  ],
+  "45": [
+   "lightscreen",
+   "silverwind",
+   "toxic",
+   "bugbuzz"
+  ],
+  "46": [
+   "lightscreen",
+   "silverwind",
+   "toxic",
+   "bugbuzz"
+  ],
+  "47": [
+   "lightscreen",
+   "silverwind",
+   "toxic",
+   "bugbuzz"
+  ],
+  "48": [
+   "lightscreen",
+   "silverwind",
+   "toxic",
+   "bugbuzz"
+  ],
+  "49": [
+   "lightscreen",
+   "silverwind",
+   "toxic",
+   "bugbuzz"
+  ],
+  "50": [
+   "lightscreen",
+   "silverwind",
+   "toxic",
+   "bugbuzz"
   ]
  },
  "cherrim": {
@@ -10725,6 +12773,301 @@
    "meanlook"
   ]
  },
+ "haunter": {
+  "1": [
+   "hypnosis",
+   "lick",
+   "spite"
+  ],
+  "2": [
+   "hypnosis",
+   "lick",
+   "spite"
+  ],
+  "3": [
+   "hypnosis",
+   "lick",
+   "spite"
+  ],
+  "4": [
+   "hypnosis",
+   "lick",
+   "spite"
+  ],
+  "5": [
+   "hypnosis",
+   "lick",
+   "spite"
+  ],
+  "6": [
+   "hypnosis",
+   "lick",
+   "spite"
+  ],
+  "7": [
+   "hypnosis",
+   "lick",
+   "spite"
+  ],
+  "8": [
+   "hypnosis",
+   "lick",
+   "spite",
+   "meanlook"
+  ],
+  "9": [
+   "hypnosis",
+   "lick",
+   "spite",
+   "meanlook"
+  ],
+  "10": [
+   "hypnosis",
+   "lick",
+   "spite",
+   "meanlook"
+  ],
+  "11": [
+   "hypnosis",
+   "lick",
+   "spite",
+   "meanlook"
+  ],
+  "12": [
+   "lick",
+   "spite",
+   "meanlook",
+   "curse"
+  ],
+  "13": [
+   "lick",
+   "spite",
+   "meanlook",
+   "curse"
+  ],
+  "14": [
+   "lick",
+   "spite",
+   "meanlook",
+   "curse"
+  ],
+  "15": [
+   "spite",
+   "meanlook",
+   "curse",
+   "nightshade"
+  ],
+  "16": [
+   "spite",
+   "meanlook",
+   "curse",
+   "nightshade"
+  ],
+  "17": [
+   "spite",
+   "meanlook",
+   "curse",
+   "nightshade"
+  ],
+  "18": [
+   "spite",
+   "meanlook",
+   "curse",
+   "nightshade"
+  ],
+  "19": [
+   "meanlook",
+   "curse",
+   "nightshade",
+   "confuseray"
+  ],
+  "20": [
+   "meanlook",
+   "curse",
+   "nightshade",
+   "confuseray"
+  ],
+  "21": [
+   "meanlook",
+   "curse",
+   "nightshade",
+   "confuseray"
+  ],
+  "22": [
+   "curse",
+   "nightshade",
+   "confuseray",
+   "suckerpunch"
+  ],
+  "23": [
+   "curse",
+   "nightshade",
+   "confuseray",
+   "suckerpunch"
+  ],
+  "24": [
+   "curse",
+   "nightshade",
+   "confuseray",
+   "suckerpunch"
+  ],
+  "25": [
+   "nightshade",
+   "confuseray",
+   "suckerpunch",
+   "shadowpunch"
+  ],
+  "26": [
+   "nightshade",
+   "confuseray",
+   "suckerpunch",
+   "shadowpunch"
+  ],
+  "27": [
+   "nightshade",
+   "confuseray",
+   "suckerpunch",
+   "shadowpunch"
+  ],
+  "28": [
+   "confuseray",
+   "suckerpunch",
+   "shadowpunch",
+   "payback"
+  ],
+  "29": [
+   "confuseray",
+   "suckerpunch",
+   "shadowpunch",
+   "payback"
+  ],
+  "30": [
+   "confuseray",
+   "suckerpunch",
+   "shadowpunch",
+   "payback"
+  ],
+  "31": [
+   "confuseray",
+   "suckerpunch",
+   "shadowpunch",
+   "payback"
+  ],
+  "32": [
+   "confuseray",
+   "suckerpunch",
+   "shadowpunch",
+   "payback"
+  ],
+  "33": [
+   "suckerpunch",
+   "shadowpunch",
+   "payback",
+   "shadowball"
+  ],
+  "34": [
+   "suckerpunch",
+   "shadowpunch",
+   "payback",
+   "shadowball"
+  ],
+  "35": [
+   "suckerpunch",
+   "shadowpunch",
+   "payback",
+   "shadowball"
+  ],
+  "36": [
+   "suckerpunch",
+   "shadowpunch",
+   "payback",
+   "shadowball"
+  ],
+  "37": [
+   "suckerpunch",
+   "shadowpunch",
+   "payback",
+   "shadowball"
+  ],
+  "38": [
+   "suckerpunch",
+   "shadowpunch",
+   "payback",
+   "shadowball"
+  ],
+  "39": [
+   "shadowpunch",
+   "payback",
+   "shadowball",
+   "dreameater"
+  ],
+  "40": [
+   "shadowpunch",
+   "payback",
+   "shadowball",
+   "dreameater"
+  ],
+  "41": [
+   "shadowpunch",
+   "payback",
+   "shadowball",
+   "dreameater"
+  ],
+  "42": [
+   "shadowpunch",
+   "payback",
+   "shadowball",
+   "dreameater"
+  ],
+  "43": [
+   "shadowpunch",
+   "payback",
+   "shadowball",
+   "dreameater"
+  ],
+  "44": [
+   "payback",
+   "shadowball",
+   "dreameater",
+   "darkpulse"
+  ],
+  "45": [
+   "payback",
+   "shadowball",
+   "dreameater",
+   "darkpulse"
+  ],
+  "46": [
+   "payback",
+   "shadowball",
+   "dreameater",
+   "darkpulse"
+  ],
+  "47": [
+   "payback",
+   "shadowball",
+   "dreameater",
+   "darkpulse"
+  ],
+  "48": [
+   "payback",
+   "shadowball",
+   "dreameater",
+   "darkpulse"
+  ],
+  "49": [
+   "payback",
+   "shadowball",
+   "dreameater",
+   "darkpulse"
+  ],
+  "50": [
+   "shadowball",
+   "dreameater",
+   "darkpulse",
+   "destinybond"
+  ]
+ },
  "graveler": {
   "1": [
    "defensecurl",
@@ -11329,297 +13672,306 @@
    "psychoshift"
   ]
  },
- "machoke": {
+ "medicham": {
   "1": [
-   "focusenergy",
-   "leer",
-   "lowkick"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "2": [
-   "focusenergy",
-   "leer",
-   "lowkick"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "3": [
-   "focusenergy",
-   "leer",
-   "lowkick"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "4": [
-   "focusenergy",
-   "leer",
-   "lowkick"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "5": [
-   "focusenergy",
-   "leer",
-   "lowkick"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "6": [
-   "focusenergy",
-   "leer",
-   "lowkick"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "7": [
-   "focusenergy",
-   "leer",
-   "lowkick"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "8": [
-   "focusenergy",
-   "leer",
-   "lowkick"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "9": [
-   "focusenergy",
-   "leer",
-   "lowkick"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "10": [
-   "focusenergy",
-   "leer",
-   "lowkick",
-   "karatechop"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "11": [
-   "focusenergy",
-   "leer",
-   "lowkick",
-   "karatechop"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "12": [
-   "focusenergy",
-   "leer",
-   "lowkick",
-   "karatechop"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "13": [
-   "leer",
-   "lowkick",
-   "karatechop",
-   "foresight"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "14": [
-   "leer",
-   "lowkick",
-   "karatechop",
-   "foresight"
+   "firepunch",
+   "icepunch",
+   "meditate",
+   "thunderpunch"
   ],
   "15": [
-   "leer",
-   "lowkick",
-   "karatechop",
-   "foresight"
+   "icepunch",
+   "meditate",
+   "thunderpunch",
+   "hiddenpower"
   ],
   "16": [
-   "leer",
-   "lowkick",
-   "karatechop",
-   "foresight"
+   "icepunch",
+   "meditate",
+   "thunderpunch",
+   "hiddenpower"
   ],
   "17": [
-   "leer",
-   "lowkick",
-   "karatechop",
-   "foresight"
+   "icepunch",
+   "meditate",
+   "thunderpunch",
+   "hiddenpower"
   ],
   "18": [
-   "leer",
-   "lowkick",
-   "karatechop",
-   "foresight"
+   "meditate",
+   "thunderpunch",
+   "hiddenpower",
+   "mindreader"
   ],
   "19": [
-   "lowkick",
-   "karatechop",
-   "foresight",
-   "seismictoss"
+   "meditate",
+   "thunderpunch",
+   "hiddenpower",
+   "mindreader"
   ],
   "20": [
-   "lowkick",
-   "karatechop",
-   "foresight",
-   "seismictoss"
+   "meditate",
+   "thunderpunch",
+   "hiddenpower",
+   "mindreader"
   ],
   "21": [
-   "lowkick",
-   "karatechop",
-   "foresight",
-   "seismictoss"
+   "meditate",
+   "thunderpunch",
+   "hiddenpower",
+   "mindreader"
   ],
   "22": [
-   "karatechop",
-   "foresight",
-   "seismictoss",
-   "revenge"
+   "thunderpunch",
+   "hiddenpower",
+   "mindreader",
+   "feint"
   ],
   "23": [
-   "karatechop",
-   "foresight",
-   "seismictoss",
-   "revenge"
+   "thunderpunch",
+   "hiddenpower",
+   "mindreader",
+   "feint"
   ],
   "24": [
-   "karatechop",
-   "foresight",
-   "seismictoss",
-   "revenge"
+   "thunderpunch",
+   "hiddenpower",
+   "mindreader",
+   "feint"
   ],
   "25": [
-   "foresight",
-   "seismictoss",
-   "revenge",
-   "vitalthrow"
+   "hiddenpower",
+   "mindreader",
+   "feint",
+   "calmmind"
   ],
   "26": [
-   "foresight",
-   "seismictoss",
-   "revenge",
-   "vitalthrow"
+   "hiddenpower",
+   "mindreader",
+   "feint",
+   "calmmind"
   ],
   "27": [
-   "foresight",
-   "seismictoss",
-   "revenge",
-   "vitalthrow"
+   "hiddenpower",
+   "mindreader",
+   "feint",
+   "calmmind"
   ],
   "28": [
-   "foresight",
-   "seismictoss",
-   "revenge",
-   "vitalthrow"
+   "hiddenpower",
+   "mindreader",
+   "feint",
+   "calmmind"
   ],
   "29": [
-   "foresight",
-   "seismictoss",
-   "revenge",
-   "vitalthrow"
+   "mindreader",
+   "feint",
+   "calmmind",
+   "forcepalm"
   ],
   "30": [
-   "foresight",
-   "seismictoss",
-   "revenge",
-   "vitalthrow"
+   "mindreader",
+   "feint",
+   "calmmind",
+   "forcepalm"
   ],
   "31": [
-   "foresight",
-   "seismictoss",
-   "revenge",
-   "vitalthrow"
+   "mindreader",
+   "feint",
+   "calmmind",
+   "forcepalm"
   ],
   "32": [
-   "seismictoss",
-   "revenge",
-   "vitalthrow",
-   "submission"
+   "feint",
+   "calmmind",
+   "forcepalm",
+   "highjumpkick"
   ],
   "33": [
-   "seismictoss",
-   "revenge",
-   "vitalthrow",
-   "submission"
+   "feint",
+   "calmmind",
+   "forcepalm",
+   "highjumpkick"
   ],
   "34": [
-   "seismictoss",
-   "revenge",
-   "vitalthrow",
-   "submission"
+   "feint",
+   "calmmind",
+   "forcepalm",
+   "highjumpkick"
   ],
   "35": [
-   "seismictoss",
-   "revenge",
-   "vitalthrow",
-   "submission"
+   "feint",
+   "calmmind",
+   "forcepalm",
+   "highjumpkick"
   ],
   "36": [
-   "revenge",
-   "vitalthrow",
-   "submission",
-   "wakeupslap"
+   "calmmind",
+   "forcepalm",
+   "highjumpkick",
+   "psychup"
   ],
   "37": [
-   "revenge",
-   "vitalthrow",
-   "submission",
-   "wakeupslap"
+   "calmmind",
+   "forcepalm",
+   "highjumpkick",
+   "psychup"
   ],
   "38": [
-   "revenge",
-   "vitalthrow",
-   "submission",
-   "wakeupslap"
+   "calmmind",
+   "forcepalm",
+   "highjumpkick",
+   "psychup"
   ],
   "39": [
-   "revenge",
-   "vitalthrow",
-   "submission",
-   "wakeupslap"
+   "calmmind",
+   "forcepalm",
+   "highjumpkick",
+   "psychup"
   ],
   "40": [
-   "vitalthrow",
-   "submission",
-   "wakeupslap",
-   "crosschop"
+   "calmmind",
+   "forcepalm",
+   "highjumpkick",
+   "psychup"
   ],
   "41": [
-   "vitalthrow",
-   "submission",
-   "wakeupslap",
-   "crosschop"
+   "calmmind",
+   "forcepalm",
+   "highjumpkick",
+   "psychup"
   ],
   "42": [
-   "vitalthrow",
-   "submission",
-   "wakeupslap",
-   "crosschop"
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
   ],
   "43": [
-   "vitalthrow",
-   "submission",
-   "wakeupslap",
-   "crosschop"
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
   ],
   "44": [
-   "submission",
-   "wakeupslap",
-   "crosschop",
-   "scaryface"
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
   ],
   "45": [
-   "submission",
-   "wakeupslap",
-   "crosschop",
-   "scaryface"
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
   ],
   "46": [
-   "submission",
-   "wakeupslap",
-   "crosschop",
-   "scaryface"
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
   ],
   "47": [
-   "submission",
-   "wakeupslap",
-   "crosschop",
-   "scaryface"
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
   ],
   "48": [
-   "submission",
-   "wakeupslap",
-   "crosschop",
-   "scaryface"
+   "forcepalm",
+   "highjumpkick",
+   "psychup",
+   "powertrick"
   ],
   "49": [
-   "submission",
-   "wakeupslap",
-   "crosschop",
-   "scaryface"
+   "highjumpkick",
+   "psychup",
+   "powertrick",
+   "reversal"
   ],
   "50": [
-   "submission",
-   "wakeupslap",
-   "crosschop",
-   "scaryface"
+   "highjumpkick",
+   "psychup",
+   "powertrick",
+   "reversal"
   ]
  },
  "prinplup": {
@@ -12813,6 +15165,308 @@
    "hypnosis"
   ]
  },
+ "gastrodon": {
+  "1": [
+   "harden",
+   "mudslap",
+   "mudsport",
+   "waterpulse"
+  ],
+  "2": [
+   "harden",
+   "mudslap",
+   "mudsport",
+   "waterpulse"
+  ],
+  "3": [
+   "harden",
+   "mudslap",
+   "mudsport",
+   "waterpulse"
+  ],
+  "4": [
+   "harden",
+   "mudslap",
+   "mudsport",
+   "waterpulse"
+  ],
+  "5": [
+   "harden",
+   "mudslap",
+   "mudsport",
+   "waterpulse"
+  ],
+  "6": [
+   "harden",
+   "mudslap",
+   "mudsport",
+   "waterpulse"
+  ],
+  "7": [
+   "harden",
+   "mudslap",
+   "mudsport",
+   "waterpulse"
+  ],
+  "8": [
+   "harden",
+   "mudslap",
+   "mudsport",
+   "waterpulse"
+  ],
+  "9": [
+   "harden",
+   "mudslap",
+   "mudsport",
+   "waterpulse"
+  ],
+  "10": [
+   "harden",
+   "mudslap",
+   "mudsport",
+   "waterpulse"
+  ],
+  "11": [
+   "mudslap",
+   "mudsport",
+   "waterpulse",
+   "mudbomb"
+  ],
+  "12": [
+   "mudslap",
+   "mudsport",
+   "waterpulse",
+   "mudbomb"
+  ],
+  "13": [
+   "mudslap",
+   "mudsport",
+   "waterpulse",
+   "mudbomb"
+  ],
+  "14": [
+   "mudslap",
+   "mudsport",
+   "waterpulse",
+   "mudbomb"
+  ],
+  "15": [
+   "mudslap",
+   "mudsport",
+   "waterpulse",
+   "mudbomb"
+  ],
+  "16": [
+   "mudsport",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "17": [
+   "mudsport",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "18": [
+   "mudsport",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "19": [
+   "mudsport",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "20": [
+   "mudsport",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "21": [
+   "mudsport",
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower"
+  ],
+  "22": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "23": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "24": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "25": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "26": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "27": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "28": [
+   "waterpulse",
+   "mudbomb",
+   "hiddenpower",
+   "raindance"
+  ],
+  "29": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "30": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "31": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "32": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "33": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "34": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "35": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "36": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "37": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "38": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "39": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "40": [
+   "mudbomb",
+   "hiddenpower",
+   "raindance",
+   "bodyslam"
+  ],
+  "41": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "42": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "43": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "44": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "45": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "46": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "47": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "48": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "49": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ],
+  "50": [
+   "hiddenpower",
+   "raindance",
+   "bodyslam",
+   "muddywater"
+  ]
+ },
  "luxio": {
   "1": [
    "leer",
@@ -13093,6 +15747,261 @@
    "thunderfang",
    "scaryface",
    "discharge"
+  ]
+ },
+ "beautifly": {
+  "1": [
+   "absorb"
+  ],
+  "2": [
+   "absorb"
+  ],
+  "3": [
+   "absorb"
+  ],
+  "4": [
+   "absorb"
+  ],
+  "5": [
+   "absorb"
+  ],
+  "6": [
+   "absorb"
+  ],
+  "7": [
+   "absorb"
+  ],
+  "8": [
+   "absorb"
+  ],
+  "9": [
+   "absorb"
+  ],
+  "10": [
+   "absorb"
+  ],
+  "11": [
+   "absorb"
+  ],
+  "12": [
+   "absorb"
+  ],
+  "13": [
+   "absorb",
+   "gust"
+  ],
+  "14": [
+   "absorb",
+   "gust"
+  ],
+  "15": [
+   "absorb",
+   "gust"
+  ],
+  "16": [
+   "absorb",
+   "gust"
+  ],
+  "17": [
+   "absorb",
+   "gust",
+   "stunspore"
+  ],
+  "18": [
+   "absorb",
+   "gust",
+   "stunspore"
+  ],
+  "19": [
+   "absorb",
+   "gust",
+   "stunspore"
+  ],
+  "20": [
+   "absorb",
+   "gust",
+   "stunspore",
+   "morningsun"
+  ],
+  "21": [
+   "absorb",
+   "gust",
+   "stunspore",
+   "morningsun"
+  ],
+  "22": [
+   "absorb",
+   "gust",
+   "stunspore",
+   "morningsun"
+  ],
+  "23": [
+   "absorb",
+   "gust",
+   "stunspore",
+   "morningsun"
+  ],
+  "24": [
+   "gust",
+   "stunspore",
+   "morningsun",
+   "megadrain"
+  ],
+  "25": [
+   "gust",
+   "stunspore",
+   "morningsun",
+   "megadrain"
+  ],
+  "26": [
+   "gust",
+   "stunspore",
+   "morningsun",
+   "megadrain"
+  ],
+  "27": [
+   "stunspore",
+   "morningsun",
+   "megadrain",
+   "whirlwind"
+  ],
+  "28": [
+   "stunspore",
+   "morningsun",
+   "megadrain",
+   "whirlwind"
+  ],
+  "29": [
+   "stunspore",
+   "morningsun",
+   "megadrain",
+   "whirlwind"
+  ],
+  "30": [
+   "stunspore",
+   "morningsun",
+   "megadrain",
+   "whirlwind"
+  ],
+  "31": [
+   "morningsun",
+   "megadrain",
+   "whirlwind",
+   "attract"
+  ],
+  "32": [
+   "morningsun",
+   "megadrain",
+   "whirlwind",
+   "attract"
+  ],
+  "33": [
+   "morningsun",
+   "megadrain",
+   "whirlwind",
+   "attract"
+  ],
+  "34": [
+   "megadrain",
+   "whirlwind",
+   "attract",
+   "silverwind"
+  ],
+  "35": [
+   "megadrain",
+   "whirlwind",
+   "attract",
+   "silverwind"
+  ],
+  "36": [
+   "megadrain",
+   "whirlwind",
+   "attract",
+   "silverwind"
+  ],
+  "37": [
+   "megadrain",
+   "whirlwind",
+   "attract",
+   "silverwind"
+  ],
+  "38": [
+   "whirlwind",
+   "attract",
+   "silverwind",
+   "gigadrain"
+  ],
+  "39": [
+   "whirlwind",
+   "attract",
+   "silverwind",
+   "gigadrain"
+  ],
+  "40": [
+   "whirlwind",
+   "attract",
+   "silverwind",
+   "gigadrain"
+  ],
+  "41": [
+   "attract",
+   "silverwind",
+   "gigadrain",
+   "bugbuzz"
+  ],
+  "42": [
+   "attract",
+   "silverwind",
+   "gigadrain",
+   "bugbuzz"
+  ],
+  "43": [
+   "attract",
+   "silverwind",
+   "gigadrain",
+   "bugbuzz"
+  ],
+  "44": [
+   "attract",
+   "silverwind",
+   "gigadrain",
+   "bugbuzz"
+  ],
+  "45": [
+   "attract",
+   "silverwind",
+   "gigadrain",
+   "bugbuzz"
+  ],
+  "46": [
+   "attract",
+   "silverwind",
+   "gigadrain",
+   "bugbuzz"
+  ],
+  "47": [
+   "attract",
+   "silverwind",
+   "gigadrain",
+   "bugbuzz"
+  ],
+  "48": [
+   "attract",
+   "silverwind",
+   "gigadrain",
+   "bugbuzz"
+  ],
+  "49": [
+   "attract",
+   "silverwind",
+   "gigadrain",
+   "bugbuzz"
+  ],
+  "50": [
+   "attract",
+   "silverwind",
+   "gigadrain",
+   "bugbuzz"
   ]
  },
  "staraptor": {
@@ -13973,310 +16882,6 @@
    "synthesis",
    "crunch",
    "gigadrain"
-  ]
- },
- "silcoon": {
-  "1": [
-   "harden"
-  ],
-  "2": [
-   "harden"
-  ],
-  "3": [
-   "harden"
-  ],
-  "4": [
-   "harden"
-  ],
-  "5": [
-   "harden"
-  ],
-  "6": [
-   "harden"
-  ],
-  "7": [
-   "harden"
-  ],
-  "8": [
-   "harden"
-  ],
-  "9": [
-   "harden"
-  ],
-  "10": [
-   "harden"
-  ],
-  "11": [
-   "harden"
-  ],
-  "12": [
-   "harden"
-  ],
-  "13": [
-   "harden"
-  ],
-  "14": [
-   "harden"
-  ],
-  "15": [
-   "harden"
-  ],
-  "16": [
-   "harden"
-  ],
-  "17": [
-   "harden"
-  ],
-  "18": [
-   "harden"
-  ],
-  "19": [
-   "harden"
-  ],
-  "20": [
-   "harden"
-  ],
-  "21": [
-   "harden"
-  ],
-  "22": [
-   "harden"
-  ],
-  "23": [
-   "harden"
-  ],
-  "24": [
-   "harden"
-  ],
-  "25": [
-   "harden"
-  ],
-  "26": [
-   "harden"
-  ],
-  "27": [
-   "harden"
-  ],
-  "28": [
-   "harden"
-  ],
-  "29": [
-   "harden"
-  ],
-  "30": [
-   "harden"
-  ],
-  "31": [
-   "harden"
-  ],
-  "32": [
-   "harden"
-  ],
-  "33": [
-   "harden"
-  ],
-  "34": [
-   "harden"
-  ],
-  "35": [
-   "harden"
-  ],
-  "36": [
-   "harden"
-  ],
-  "37": [
-   "harden"
-  ],
-  "38": [
-   "harden"
-  ],
-  "39": [
-   "harden"
-  ],
-  "40": [
-   "harden"
-  ],
-  "41": [
-   "harden"
-  ],
-  "42": [
-   "harden"
-  ],
-  "43": [
-   "harden"
-  ],
-  "44": [
-   "harden"
-  ],
-  "45": [
-   "harden"
-  ],
-  "46": [
-   "harden"
-  ],
-  "47": [
-   "harden"
-  ],
-  "48": [
-   "harden"
-  ],
-  "49": [
-   "harden"
-  ],
-  "50": [
-   "harden"
-  ]
- },
- "cascoon": {
-  "1": [
-   "harden"
-  ],
-  "2": [
-   "harden"
-  ],
-  "3": [
-   "harden"
-  ],
-  "4": [
-   "harden"
-  ],
-  "5": [
-   "harden"
-  ],
-  "6": [
-   "harden"
-  ],
-  "7": [
-   "harden"
-  ],
-  "8": [
-   "harden"
-  ],
-  "9": [
-   "harden"
-  ],
-  "10": [
-   "harden"
-  ],
-  "11": [
-   "harden"
-  ],
-  "12": [
-   "harden"
-  ],
-  "13": [
-   "harden"
-  ],
-  "14": [
-   "harden"
-  ],
-  "15": [
-   "harden"
-  ],
-  "16": [
-   "harden"
-  ],
-  "17": [
-   "harden"
-  ],
-  "18": [
-   "harden"
-  ],
-  "19": [
-   "harden"
-  ],
-  "20": [
-   "harden"
-  ],
-  "21": [
-   "harden"
-  ],
-  "22": [
-   "harden"
-  ],
-  "23": [
-   "harden"
-  ],
-  "24": [
-   "harden"
-  ],
-  "25": [
-   "harden"
-  ],
-  "26": [
-   "harden"
-  ],
-  "27": [
-   "harden"
-  ],
-  "28": [
-   "harden"
-  ],
-  "29": [
-   "harden"
-  ],
-  "30": [
-   "harden"
-  ],
-  "31": [
-   "harden"
-  ],
-  "32": [
-   "harden"
-  ],
-  "33": [
-   "harden"
-  ],
-  "34": [
-   "harden"
-  ],
-  "35": [
-   "harden"
-  ],
-  "36": [
-   "harden"
-  ],
-  "37": [
-   "harden"
-  ],
-  "38": [
-   "harden"
-  ],
-  "39": [
-   "harden"
-  ],
-  "40": [
-   "harden"
-  ],
-  "41": [
-   "harden"
-  ],
-  "42": [
-   "harden"
-  ],
-  "43": [
-   "harden"
-  ],
-  "44": [
-   "harden"
-  ],
-  "45": [
-   "harden"
-  ],
-  "46": [
-   "harden"
-  ],
-  "47": [
-   "harden"
-  ],
-  "48": [
-   "harden"
-  ],
-  "49": [
-   "harden"
-  ],
-  "50": [
-   "harden"
   ]
  },
  "golbat": {
@@ -16067,516 +18672,6 @@
    "leechseed",
    "synthesis",
    "crunch"
-  ]
- },
- "beautifly": {
-  "1": [
-   "absorb"
-  ],
-  "2": [
-   "absorb"
-  ],
-  "3": [
-   "absorb"
-  ],
-  "4": [
-   "absorb"
-  ],
-  "5": [
-   "absorb"
-  ],
-  "6": [
-   "absorb"
-  ],
-  "7": [
-   "absorb"
-  ],
-  "8": [
-   "absorb"
-  ],
-  "9": [
-   "absorb"
-  ],
-  "10": [
-   "absorb"
-  ],
-  "11": [
-   "absorb"
-  ],
-  "12": [
-   "absorb"
-  ],
-  "13": [
-   "absorb",
-   "gust"
-  ],
-  "14": [
-   "absorb",
-   "gust"
-  ],
-  "15": [
-   "absorb",
-   "gust"
-  ],
-  "16": [
-   "absorb",
-   "gust"
-  ],
-  "17": [
-   "absorb",
-   "gust",
-   "stunspore"
-  ],
-  "18": [
-   "absorb",
-   "gust",
-   "stunspore"
-  ],
-  "19": [
-   "absorb",
-   "gust",
-   "stunspore"
-  ],
-  "20": [
-   "absorb",
-   "gust",
-   "stunspore",
-   "morningsun"
-  ],
-  "21": [
-   "absorb",
-   "gust",
-   "stunspore",
-   "morningsun"
-  ],
-  "22": [
-   "absorb",
-   "gust",
-   "stunspore",
-   "morningsun"
-  ],
-  "23": [
-   "absorb",
-   "gust",
-   "stunspore",
-   "morningsun"
-  ],
-  "24": [
-   "gust",
-   "stunspore",
-   "morningsun",
-   "megadrain"
-  ],
-  "25": [
-   "gust",
-   "stunspore",
-   "morningsun",
-   "megadrain"
-  ],
-  "26": [
-   "gust",
-   "stunspore",
-   "morningsun",
-   "megadrain"
-  ],
-  "27": [
-   "stunspore",
-   "morningsun",
-   "megadrain",
-   "whirlwind"
-  ],
-  "28": [
-   "stunspore",
-   "morningsun",
-   "megadrain",
-   "whirlwind"
-  ],
-  "29": [
-   "stunspore",
-   "morningsun",
-   "megadrain",
-   "whirlwind"
-  ],
-  "30": [
-   "stunspore",
-   "morningsun",
-   "megadrain",
-   "whirlwind"
-  ],
-  "31": [
-   "morningsun",
-   "megadrain",
-   "whirlwind",
-   "attract"
-  ],
-  "32": [
-   "morningsun",
-   "megadrain",
-   "whirlwind",
-   "attract"
-  ],
-  "33": [
-   "morningsun",
-   "megadrain",
-   "whirlwind",
-   "attract"
-  ],
-  "34": [
-   "megadrain",
-   "whirlwind",
-   "attract",
-   "silverwind"
-  ],
-  "35": [
-   "megadrain",
-   "whirlwind",
-   "attract",
-   "silverwind"
-  ],
-  "36": [
-   "megadrain",
-   "whirlwind",
-   "attract",
-   "silverwind"
-  ],
-  "37": [
-   "megadrain",
-   "whirlwind",
-   "attract",
-   "silverwind"
-  ],
-  "38": [
-   "whirlwind",
-   "attract",
-   "silverwind",
-   "gigadrain"
-  ],
-  "39": [
-   "whirlwind",
-   "attract",
-   "silverwind",
-   "gigadrain"
-  ],
-  "40": [
-   "whirlwind",
-   "attract",
-   "silverwind",
-   "gigadrain"
-  ],
-  "41": [
-   "attract",
-   "silverwind",
-   "gigadrain",
-   "bugbuzz"
-  ],
-  "42": [
-   "attract",
-   "silverwind",
-   "gigadrain",
-   "bugbuzz"
-  ],
-  "43": [
-   "attract",
-   "silverwind",
-   "gigadrain",
-   "bugbuzz"
-  ],
-  "44": [
-   "attract",
-   "silverwind",
-   "gigadrain",
-   "bugbuzz"
-  ],
-  "45": [
-   "attract",
-   "silverwind",
-   "gigadrain",
-   "bugbuzz"
-  ],
-  "46": [
-   "attract",
-   "silverwind",
-   "gigadrain",
-   "bugbuzz"
-  ],
-  "47": [
-   "attract",
-   "silverwind",
-   "gigadrain",
-   "bugbuzz"
-  ],
-  "48": [
-   "attract",
-   "silverwind",
-   "gigadrain",
-   "bugbuzz"
-  ],
-  "49": [
-   "attract",
-   "silverwind",
-   "gigadrain",
-   "bugbuzz"
-  ],
-  "50": [
-   "attract",
-   "silverwind",
-   "gigadrain",
-   "bugbuzz"
-  ]
- },
- "dustox": {
-  "1": [
-   "confusion"
-  ],
-  "2": [
-   "confusion"
-  ],
-  "3": [
-   "confusion"
-  ],
-  "4": [
-   "confusion"
-  ],
-  "5": [
-   "confusion"
-  ],
-  "6": [
-   "confusion"
-  ],
-  "7": [
-   "confusion"
-  ],
-  "8": [
-   "confusion"
-  ],
-  "9": [
-   "confusion"
-  ],
-  "10": [
-   "confusion"
-  ],
-  "11": [
-   "confusion"
-  ],
-  "12": [
-   "confusion"
-  ],
-  "13": [
-   "confusion",
-   "gust"
-  ],
-  "14": [
-   "confusion",
-   "gust"
-  ],
-  "15": [
-   "confusion",
-   "gust"
-  ],
-  "16": [
-   "confusion",
-   "gust"
-  ],
-  "17": [
-   "confusion",
-   "gust",
-   "protect"
-  ],
-  "18": [
-   "confusion",
-   "gust",
-   "protect"
-  ],
-  "19": [
-   "confusion",
-   "gust",
-   "protect"
-  ],
-  "20": [
-   "confusion",
-   "gust",
-   "protect",
-   "moonlight"
-  ],
-  "21": [
-   "confusion",
-   "gust",
-   "protect",
-   "moonlight"
-  ],
-  "22": [
-   "confusion",
-   "gust",
-   "protect",
-   "moonlight"
-  ],
-  "23": [
-   "confusion",
-   "gust",
-   "protect",
-   "moonlight"
-  ],
-  "24": [
-   "gust",
-   "protect",
-   "moonlight",
-   "psybeam"
-  ],
-  "25": [
-   "gust",
-   "protect",
-   "moonlight",
-   "psybeam"
-  ],
-  "26": [
-   "gust",
-   "protect",
-   "moonlight",
-   "psybeam"
-  ],
-  "27": [
-   "protect",
-   "moonlight",
-   "psybeam",
-   "whirlwind"
-  ],
-  "28": [
-   "protect",
-   "moonlight",
-   "psybeam",
-   "whirlwind"
-  ],
-  "29": [
-   "protect",
-   "moonlight",
-   "psybeam",
-   "whirlwind"
-  ],
-  "30": [
-   "protect",
-   "moonlight",
-   "psybeam",
-   "whirlwind"
-  ],
-  "31": [
-   "moonlight",
-   "psybeam",
-   "whirlwind",
-   "lightscreen"
-  ],
-  "32": [
-   "moonlight",
-   "psybeam",
-   "whirlwind",
-   "lightscreen"
-  ],
-  "33": [
-   "moonlight",
-   "psybeam",
-   "whirlwind",
-   "lightscreen"
-  ],
-  "34": [
-   "psybeam",
-   "whirlwind",
-   "lightscreen",
-   "silverwind"
-  ],
-  "35": [
-   "psybeam",
-   "whirlwind",
-   "lightscreen",
-   "silverwind"
-  ],
-  "36": [
-   "psybeam",
-   "whirlwind",
-   "lightscreen",
-   "silverwind"
-  ],
-  "37": [
-   "psybeam",
-   "whirlwind",
-   "lightscreen",
-   "silverwind"
-  ],
-  "38": [
-   "whirlwind",
-   "lightscreen",
-   "silverwind",
-   "toxic"
-  ],
-  "39": [
-   "whirlwind",
-   "lightscreen",
-   "silverwind",
-   "toxic"
-  ],
-  "40": [
-   "whirlwind",
-   "lightscreen",
-   "silverwind",
-   "toxic"
-  ],
-  "41": [
-   "lightscreen",
-   "silverwind",
-   "toxic",
-   "bugbuzz"
-  ],
-  "42": [
-   "lightscreen",
-   "silverwind",
-   "toxic",
-   "bugbuzz"
-  ],
-  "43": [
-   "lightscreen",
-   "silverwind",
-   "toxic",
-   "bugbuzz"
-  ],
-  "44": [
-   "lightscreen",
-   "silverwind",
-   "toxic",
-   "bugbuzz"
-  ],
-  "45": [
-   "lightscreen",
-   "silverwind",
-   "toxic",
-   "bugbuzz"
-  ],
-  "46": [
-   "lightscreen",
-   "silverwind",
-   "toxic",
-   "bugbuzz"
-  ],
-  "47": [
-   "lightscreen",
-   "silverwind",
-   "toxic",
-   "bugbuzz"
-  ],
-  "48": [
-   "lightscreen",
-   "silverwind",
-   "toxic",
-   "bugbuzz"
-  ],
-  "49": [
-   "lightscreen",
-   "silverwind",
-   "toxic",
-   "bugbuzz"
-  ],
-  "50": [
-   "lightscreen",
-   "silverwind",
-   "toxic",
-   "bugbuzz"
   ]
  }
 }

@@ -168,13 +168,17 @@ def evaluate(bridge: SimBridge, party: str | None, enemy: str | None, brain: Bra
              enemy_brain: Brain, n: int = 1, importance: list[float] | None = None,
              max_turns: int = 100, fmt: str = GAME_FORMAT, dedupe: bool = True) -> dict:
     """Run n fresh-seed battles of `party` (p1, driven by brain) vs `enemy`.
-    Returns P(win), P(death) per party mon (packed order), importance-weighted risk."""
-    wins, deaths, turns = 0, None, 0
+    Returns P(win), P(death) per party mon (packed order), importance-weighted
+    risk, and hp = mean fraction of the party's HP left at the end (margin:
+    separates parties that all show P(death)=0 at small n)."""
+    wins, deaths, turns, hp = 0, None, 0, 0.0
     stats = {}
     for _ in range(n):
         sb = SimBattle(bridge, fmt, party, enemy, dedupe=dedupe)
         sb.play({"p1": brain, "p2": enemy_brain}, max_turns)
-        won, dead = sb.outcome()
+        st = sb.state()
+        won, dead = st["winner"] == "p1", [m["fainted"] for m in st["p1"]]
+        hp += float(np.mean([m["hp"] / max(m["maxhp"], 1) for m in st["p1"]]))
         turns += sb.turn
         for k, v in sb.stats.items():
             stats[k] = stats.get(k, 0) + v
@@ -187,7 +191,7 @@ def evaluate(bridge: SimBridge, party: str | None, enemy: str | None, brain: Bra
     imp = importance or [1.0 / len(p_death)] * len(p_death)
     return {"p_win": wins / n, "p_death": p_death,
             "risk": float(sum(w * p for w, p in zip(imp, p_death))),
-            "turns": turns / n, "n": n, "stats": stats}
+            "hp": hp / n, "turns": turns / n, "n": n, "stats": stats}
 
 
 def main() -> None:

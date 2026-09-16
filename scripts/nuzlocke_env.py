@@ -90,6 +90,7 @@ class NuzlockeEnv(Env):
         ability = enc.get("abilities", {}).get(starter)
         self.roster = [Mon(starter, 5, encounter_moves(starter, 5),
                            ability=ability)]
+        self.graveyard: list[Mon] = []  # dead mons leave the roster (box slots free up)
         self.party = []  # indices into roster
         self.trainer_idx = 0
         self.max_enemy_level = 0
@@ -154,8 +155,9 @@ class NuzlockeEnv(Env):
         return pack_team(party), pack_team(enemy), entry
 
     def risk(self, party_idx=None):
-        """P(win), [P(death_i)] for a party (default: current) vs the next
-        trainer. Cached per (party, trainer). Zeros if unavailable."""
+        """(P(win), [P(death_i)], mean HP fraction left) for a party (default:
+        current) vs the next trainer. Cached per (party, trainer). Zeros if
+        unavailable."""
         party_idx = tuple(self.party if party_idx is None else party_idx)
         key = (party_idx, self.trainer_idx)
         if key not in self._risk_cache:
@@ -164,7 +166,7 @@ class NuzlockeEnv(Env):
                 pp, ep, _ = self._packed_matchup(party_idx)
                 if pp and ep:
                     est = self.runner.estimate(pp, ep, n=RISK_BATTLES)
-            self._risk_cache[key] = est or (0.0, [0.0] * len(party_idx))
+            self._risk_cache[key] = est or (0.0, [0.0] * len(party_idx), 0.0)
         return self._risk_cache[key]
 
     def _run_battle(self):
@@ -212,7 +214,7 @@ class NuzlockeEnv(Env):
         v[o + 3] = 1.0  # bias
         o += 4
         if self.risk_features and self.phase == "PRE_BATTLE" and self.party and not self.done:
-            p_win, p_death = self.risk()
+            p_win, p_death, _ = self.risk()
             v[o] = p_win
             for j, p in enumerate(p_death[:MAX_PARTY]):
                 v[o + 1 + j] = p
@@ -270,6 +272,9 @@ class NuzlockeEnv(Env):
                             if not a:
                                 mon.alive = False
                                 reward -= 1.0
+                        self.graveyard += [m for m in self.roster if not m.alive]
+                        self.roster = [m for m in self.roster if m.alive]
+                        self.party = [i for i, m in enumerate(self.roster) if m in party]
                         if won:
                             reward += 1.0
                             self.trainer_idx += 1
@@ -308,8 +313,9 @@ class NuzlockeEnv(Env):
                 {"action_mask": self._mask()})
 
     def render(self):
-        roster = ", ".join(f"{m.species}@{m.level}{'†' if not m.alive else ''}"
-                           for m in self.roster)
+        roster = ", ".join(f"{m.species}@{m.level}" for m in self.roster)
+        if self.graveyard:
+            roster += " | †" + ", ".join(m.species for m in self.graveyard)
         entry = (ORDER[self.trainer_idx]["trainer_name"]
                  if self.trainer_idx < self.slice_len else "CLEARED")
         return (f"[{self.phase}] trainer {self.trainer_idx}/{self.slice_len} "

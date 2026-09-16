@@ -10,12 +10,15 @@ The project is a general Nuzlocke solver on Pokémon Showdown. The battler is
 a behaviour-cloned prior plus rollout search over the real engine; the run
 layer is currently a *scripted* planner that picks parties by simulated death
 probability. Everything runs in-process (no Showdown servers). On the BDSP
-slice through Gym Leader Roark (51 trainers), the current default config
-clears **100% of runs with 2.40 deaths per run and zero lost battles**
-(20 episodes, `logs/plan_cap_crn.log`; 2.65 before common random numbers).
-The old ceiling of ~2 trainers was the environment's level rule, not the
-policy. Next: evolution, then a learned run layer that must beat the
-scripted one.
+slice through Gym Leader Roark (51 trainers), the default config cleared
+**100% of runs with 2.40 deaths per run** (20 episodes, `logs/plan_cap_crn.log`;
+stale since encounters v2). The working slice is now **186 trainers through
+Gym Leader Gardenia**: evolution, roster graveyard, 22 encounter areas, and a
+prior retrained on that distribution plus targeted data on the deadliest
+fights give **168/186 cleared, 16 deaths, 10% clears** (10 episodes). The
+old ceiling of ~2 trainers was the environment's level rule, not the policy.
+Next: the rival fights at #164–166, then a learned run layer that must beat
+the scripted one.
 
 ## Architecture (what each file is)
 
@@ -45,9 +48,11 @@ ai_util/diff_sets.py    sim-vs-server team-setup diff (found the EV bug).
 scripts/gauntlet.py     BDSP data, Mon/pack_team, evolve(), BattleRunner (server,
                         legacy), SimBattleRunner (default): run(), estimate(),
                         boss search. --build-moves writes moves + evolutions json.
-scripts/nuzlocke_env.py NuzlockeEnv: slice_len trainers (51 default), encounters,
-                        roster ≤12, party ≤6, permadeath, level_rule cap with
-                        evolution, risk() query, risk features in obs, search_all.
+scripts/nuzlocke_env.py NuzlockeEnv: slice_len trainers (51 default), encounters
+                        (data/encounters.json v2: 22 areas gated by level band
+                        over the 186 order), roster ≤12 living + graveyard, party
+                        ≤6, permadeath, level_rule cap with evolution, risk()
+                        query, risk features in obs, search_all.
 scripts/plan_gauntlet.py Scripted planner + evaluation harness + death histogram;
                         --slice N.
 scripts/train_nuzlocke.py PPO meta-policy trainer (sim backend; NOT retrained yet
@@ -95,6 +100,11 @@ boss's max level (14 = Roark). ~85 s/episode.
 7. **Where deaths happen:** Roark (#50) and Hiker Daniel (#32, 2× Geodude /
    Machop / Bidoof @11). Everything else is noise. `plan_gauntlet.py` prints
    the histogram.
+9. **Targeted teacher data beats everything else on a deadly fight** (186
+   slice): the prior had 156/38k matchups vs Collector Edwin and played it
+   at 71% vs the teacher's 89%; 3600 synthetic matchups (late parties x
+   deadliest teams) → 44k pairs → 87%, +search 92%. Gauntlet 0% → 10%
+   clears. Roster refills and HP-margin party scores did nothing.
 8. **Value estimate (2l):** common random numbers across candidates (same
    engine seed for rollout j of every candidate) 67.2% / 0.35 vs 63.7% /
    0.37 without, prior 59.2% / 0.44, on the match-rule holdout ×3. Free;
@@ -138,8 +148,10 @@ boss's max level (14 = Roark). ~85 s/episode.
 ## Artifacts
 
 - `models/game_policy_cap_best.pt` — 51-slice prior (cap-rule data, 104k pairs).
-- `models/game_policy_cap186.pt` — 186-slice prior (`models/bc_game_20260915_194709`,
-  91k pairs from `data/teams/gauntlet_harvest/battles_cap186.jsonl`, 35k matchups).
+- `models/game_policy_cap186v3.pt` — current 186-slice prior: `bc_game_20260915_220345`
+  (96k, harvest v2 `battles_cap186v2.jsonl` 38k) + `bc_game_20260916_001825`
+  (44k, `battles_hard_synth.jsonl`). `_cap186.pt` / `_cap186v2.pt` = earlier rounds.
+- `models/edwin_pairs.json` — 30 late parties vs Collector Edwin: the matchup probe.
 - `models/game_policy_cap_value.pt` / `_value2.pt` — same actor + trained
   critic (teacher outcomes / search leaves). Null as a search leaf; reference only.
 - `models/bc_game_20260915_164023` (match, 178k) / `_164025` (cap, 127k) —
@@ -162,29 +174,37 @@ boss's max level (14 = Roark). ~85 s/episode.
    numbers are in; the learned leaf was null (finding 8). If the battler
    still needs to improve later, the remaining levers are deeper search
    (2-ply over the enemy's likely replies) or a candidate-conditioned value.
-2. **Evolution is in** (level-up only; `data/evolutions.json`, move table to
-   L50) and **the slice extends**: `plan_gauntlet.py --slice 186` = through
-   Gardenia (cap 22 after Roark). The OOD loop was run there (harvest
-   `battles_cap186.jsonl` 35k → 91k BC pairs → `models/game_policy_cap186.pt`,
-   val CE 0.102). Table, 10 eps, search-all + risk parties:
-   **162.9 cleared / 63.5 no-death / 12.0 deaths / 0% clears** (heuristic
-   fast: 116.7 / 34.6 / 11.0 / 0%). Every run is a roster wipe between #154
-   and #170: Collector Edwin #139 (3x Sudowoodo@19), then the Eterna stretch
-   #158–166 (Jupiter, rival with 4 mons at 19–21) grinds the L22 roster of
-   route catches down. That stretch is the new frontier. Levers, in order:
-   (a) roster quality — encounters stop at trainer 44 (12 hand-written
-   routes; add Eterna Forest / Route 205 N / 211 tables with real levels),
-   (b) the run layer's party choice when candidates all score +1.00 at n=8
-   (raise RISK_BATTLES or score by expected HP loss), (c) battler at parity
-   (search depth). Also still owed: the 51-slice default with evolution
-   (5/20 episodes done: all clear, 2.2 deaths).
+2. **The 186 slice (through Gardenia, cap 22) is the working slice now.**
+   Evolution, graveyard (dead mons free roster slots), encounters v2 (22
+   areas gated by level band) and the OOD loop are in. Current prior:
+   `models/game_policy_cap186v3.pt` = 96k base pairs (harvest v2) + 44k pairs
+   on synthetic hard matchups (400 late-game parties x the 9 deadliest teams,
+   `battles_hard_synth.jsonl`). Table, 10 eps, search-all + risk parties:
+   **168.2 cleared / 44.8 no-death / 16.2 deaths / 10% clears** (v2 prior
+   160.2 / 48.7 / 18.8 / 0%; heuristic fast 127.2 / 33.3 / 17.7 / 0%).
+   What moved it: targeted teacher data on the deadly fights (Edwin alone:
+   prior 71% → 87%, +search 92% vs teacher 89%). What did not: roster
+   refills (more catches = more deaths), the HP-margin party score.
+   Killers now: rival #164–166 (4 mons at 19–21 incl. an evolved starter;
+   47 deaths / 10 runs), Edwin #139 (16), Roark (12), Craig #163, Gyarados
+   #169. Levers left, in order: (a) boss-level search at the rival and
+   breakpoints (k=4 r=16 was +2 pts on Edwin at 3x cost; `search=(k, r)`
+   applies to breakpoints only when `search_all` is off — add the rival to
+   the breakpoints or make search width per-trainer), (b) another
+   targeted-data round on the rival (cheap, ~10 min), (c) a party layer
+   that keeps type answers alive (Fighting/Grass for Sudowoodo, Electric
+   for Gyarados) instead of top-6-by-level ∪ swaps. Still owed: 51-slice
+   default with evolution + encounters v2 (20 eps) — the old 2.40 table is
+   stale (10 pre-Roark encounters now, was 12).
    Pipeline commands (one job at a time — RAM):
    ```bash
-   GAUNTLET_HARVEST=data/teams/gauntlet_harvest/battles_cap186.jsonl \
-     uv run python -u scripts/plan_gauntlet.py --episodes 300 --seed 1000 --fast --slice 186
-   uv run python -u ai_util/collect_game.py collect --jsonl data/teams/gauntlet_harvest/battles_cap186.jsonl --battles 20000 --workers 8
-   uv run python -u ai_util/pretrain_bc.py pretrain --data models/bc_game_<stamp>/data.npz --epochs 20 --out models/game_policy_cap186.pt
-   uv run python -u scripts/plan_gauntlet.py --episodes 10 --seed 300 --policy models/game_policy_cap186.pt --search 3,8 --search-all --slice 186
+   uv run python -u scripts/plan_gauntlet.py --episodes 300 --seed 1000 --fast --slice 186 \
+     --harvest data/teams/gauntlet_harvest/battles_cap186v2.jsonl
+   uv run python -u ai_util/collect_game.py collect --jsonl data/teams/gauntlet_harvest/battles_cap186v2.jsonl --battles 20000 --workers 8
+   uv run python -u ai_util/collect_game.py collect --jsonl data/teams/gauntlet_harvest/battles_hard_synth.jsonl --battles 3600 --workers 8
+   uv run python -u ai_util/pretrain_bc.py pretrain --data models/bc_game_<base>/data.npz models/bc_game_<hard>/data.npz --epochs 20 --out models/game_policy_cap186v3.pt
+   uv run python -u scripts/plan_gauntlet.py --episodes 10 --seed 300 --policy models/game_policy_cap186v3.pt --search 3,8 --search-all --slice 186
+   uv run python -u ai_util/evaluate.py --pairs models/edwin_pairs.json --n-pairs 30 --n 3 --seed 5 --policy models/game_policy_cap186v3.pt --search   # matchup probe
    ```
 3. **Learned run layer (2e)**: retrain `train_nuzlocke.py` on the sim backend
    with the risk features; it must beat the scripted table (100% / 2.65).
@@ -209,6 +229,7 @@ boss's max level (14 = Roark). ~85 s/episode.
   harvest and collectors in parallel exhausted 60 GB and forced a reboot
   (2026-09-15). A single default-config run is ~1 GB; check `free -g`
   before and a few minutes after launching anything.
-- Harvest recording is opt-in: set `GAUNTLET_HARVEST=<fresh file>`; unset
-  means no writes. Evaluation runs used to append to `battles.jsonl`.
+- Harvest recording is opt-in: `plan_gauntlet.py --harvest <fresh file>` (or
+  `GAUNTLET_HARVEST=`); otherwise no writes. Evaluation runs used to append
+  to `battles.jsonl`.
 - `--slice 186` episodes take ~260 s with search-all (vs ~85 s for 51).

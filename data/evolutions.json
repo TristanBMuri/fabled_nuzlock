@@ -12,6 +12,7 @@
    15
   ]
  ],
+ "bonsly": [],
  "bronzor": [
   [
    "bronzong",
@@ -26,6 +27,12 @@
   ]
  ],
  "buneary": [],
+ "cascoon": [
+  [
+   "dustox",
+   10
+  ]
+ ],
  "chansey": [],
  "cherubi": [
   [
@@ -46,6 +53,12 @@
    37
   ]
  ],
+ "gastly": [
+  [
+   "haunter",
+   25
+  ]
+ ],
  "geodude": [
   [
    "graveler",
@@ -58,6 +71,7 @@
    20
   ]
  ],
+ "kadabra": [],
  "kricketot": [
   [
    "kricketune",
@@ -65,13 +79,21 @@
   ]
  ],
  "kricketune": [],
+ "machoke": [],
  "machop": [
   [
    "machoke",
    28
   ]
  ],
+ "meditite": [
+  [
+   "medicham",
+   37
+  ]
+ ],
  "mimejr": [],
+ "onix": [],
  "pachirisu": [],
  "piplup": [
   [
@@ -98,10 +120,22 @@
   ]
  ],
  "roselia": [],
+ "shellos": [
+  [
+   "gastrodon",
+   30
+  ]
+ ],
  "shinx": [
   [
    "luxio",
    15
+  ]
+ ],
+ "silcoon": [
+  [
+   "beautifly",
+   10
   ]
  ],
  "staravia": [
@@ -128,7 +162,6 @@
    18
   ]
  ],
- "wormadam": [],
  "wurmple": [
   [
    "silcoon",
@@ -145,9 +178,9 @@
    22
   ]
  ],
- "kadabra": [],
  "bronzong": [],
  "floatzel": [],
+ "dustox": [],
  "cherrim": [],
  "monferno": [
   [
@@ -156,9 +189,10 @@
   ]
  ],
  "dusclops": [],
+ "haunter": [],
  "graveler": [],
  "noctowl": [],
- "machoke": [],
+ "medicham": [],
  "prinplup": [
   [
    "empoleon",
@@ -173,12 +207,14 @@
    30
   ]
  ],
+ "gastrodon": [],
  "luxio": [
   [
    "luxray",
    30
   ]
  ],
+ "beautifly": [],
  "staraptor": [],
  "skuntank": [],
  "grotle": [
@@ -187,24 +223,10 @@
    32
   ]
  ],
- "silcoon": [
-  [
-   "beautifly",
-   10
-  ]
- ],
- "cascoon": [
-  [
-   "dustox",
-   10
-  ]
- ],
  "golbat": [],
  "infernape": [],
  "empoleon": [],
  "gardevoir": [],
  "luxray": [],
- "torterra": [],
- "beautifly": [],
- "dustox": []
+ "torterra": []
 }

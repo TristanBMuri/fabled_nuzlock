@@ -591,6 +591,52 @@ project_overview.md # the plan / roadmap
   at L19–21 vs our L22 roster of route catches is the new frontier — parity
   again, now with a weak roster instead of a level rule. Encounters stop at
   trainer 44 (12 hand-written routes), so no new catches arrive there.
+  **Roster levers (2026-09-15, late):** (1) dead mons now leave the roster
+  (`env.graveyard`), so box slots free up; (2) `data/encounters.json` v2: 22
+  BDSP areas gated by level band over the 186 order (the order is
+  level-sorted, not route-sorted), 10 encounters before Roark (was 12) and
+  12 after (was 0); new species Onix, Gastly, Meditite, Shellos, Bonsly,
+  Kadabra, Machoke. Harvest v2 (38k; heuristic fast 127.2 cleared / 33.3 /
+  17.7 deaths) → 96k pairs → `game_policy_cap186v2.pt` (val CE 0.137).
+  186-slice, 10 eps: **160.2 cleared / 48.7 no-death / 18.8 deaths / 0%**
+  (v1 roster: 162.9 / 63.5 / 12.0). Refills add catches and deaths, not
+  progress: runs still die at Edwin #139 (26), rival #164–166 (44), Gyarados
+  #169 (9 deaths, 3 losses); Roark up to 18 (fewer pre-Roark catches).
+  (3) Party score: the planner's candidates read +1.00 almost everywhere at
+  n=8 (`logs/mem_probe_186.log`), so ~5% death risks are invisible and add
+  up over 186 trainers. Added `hp` (mean party HP left) to `evaluate()` /
+  `risk()` and `+0.2·hp` to the score (`--hp-weight`, 0 = old score).
+  Result, 10 eps: 165.9 / 48.3 / 18.3 — same as without (160.2 / 48.7 /
+  18.8), within noise. Kept (harmless), not a lever. The frontier is a few
+  specific fights: Collector Edwin #139 (3x Sudowoodo@19, Rock Head +
+  Stone Edge / Hammer Arm / Wood Hammer: 28 deaths in 10 runs, ~3 per
+  fight against a L22 party), then Jupiter #159, Jared #162, Craig #163,
+  the rival #164–166 (Monferno/Prinplup/Grotle@21 + 3 mons), Gyarados #169.
+  **Edwin in isolation** (`models/edwin_pairs.json`: 30 harvest parties vs
+  his team, x3, seed 5):
+    heuristic teacher          88.9% / 0.39 deaths per mon
+    prior v2                   71.1% / 0.61
+    prior v2 + search k3 r8    86.7% / 0.44
+    prior v2 + search k4 r16   88.9% / 0.41   (3x cost)
+  The prior is far below its teacher here: 156 of 38k harvest matchups face
+  Edwin, and the late fights have 7–110 each. **Targeted data**: 400
+  late-game harvest parties x each of the 9 deadliest teams
+  (`battles_hard_synth.jsonl`, 3600 matchups; `collect --trainers`) → 44k
+  teacher pairs, trained with the 96k base → `game_policy_cap186v3.pt`
+  (val CE 0.149, switch acc 61%):
+    prior v3                   86.7% / 0.51
+    prior v3 + search k3 r8    **92.2% / 0.39**  (above the teacher)
+  Same lesson as attempt #3: "the prior can't do X" was undertraining on X.
+  **186-slice with v3** (10 eps, seed 300, `logs/plan_cap186v3_search.log`):
+    **168.2 cleared / 44.8 no-death / 16.2 deaths / 10% clears** — first
+    run through Gardenia. (v2: 160.2 / 48.7 / 18.8 / 0%.) Edwin 28 → 16
+    deaths; the rival trio #164–166 is now the top killer (47 deaths, 3
+    losses), then Roark 12, Craig #163 11, Gyarados #169 9 (2 losses).
+  Next: the same targeted-data step on the rival fights is cheap, but the
+  rival has 4 mons at 19–21 including an evolved starter — a real boss
+  fight. Boss-level search (k=4, r=16 = +2 pts on Edwin) at breakpoints and
+  the rival, and a roster/party layer that keeps a Fighting/Grass answer
+  alive for Sudowoodo/Gyarados, are the levers left before the run layer.
   ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```

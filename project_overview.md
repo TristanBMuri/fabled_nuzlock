@@ -270,7 +270,13 @@ interface end to end, and it needs no training run to produce a number.
       12.0 deaths / 0% clears (heuristic fast 116.7 / 34.6 / 11.0). Runs end
       by roster wipe in the Eterna stretch (#139, #158–166, L19–21 vs our
       L22 route catches). Two packing defects fixed on the way (species
-      display names, formes). Next levers in HANDOFF next-steps 2.
+      display names, formes).
+- [x] **2n. Roster + targeted data on the 186 slice.** Graveyard (dead mons
+      free slots), encounters v2 (22 areas by level band): no gain by
+      themselves (160.2 / 18.8 deaths). HP-margin party score: null.
+      Targeted teacher data on the 9 deadliest teams (44k pairs) →
+      `game_policy_cap186v3.pt`: **168.2 cleared / 16.2 deaths / 10% clears**;
+      Edwin probe 71% → 92% with search. Next levers in HANDOFF next-steps 2.
 - [ ] **2e. Learned run layer vs scripted.** Retrain `train_nuzlocke.py` on
       the sim backend with the 2b features. Success = beats the 2c table on
       trainers cleared without a death; otherwise the scripted planner *is*
