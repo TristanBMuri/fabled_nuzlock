@@ -14,7 +14,8 @@ slice is **186 trainers through Gym Leader Gardenia**; the default config
 (`--search 3,8 --search-all --deep 4,16`, prior `game_policy_best4.pt`)
 clears **185.95 trainers / 6.30 deaths / 95% of runs** with the box
 unbounded, the dupes clause on and `best4` movesets with the prior cloned
-under them (20 episodes, `logs/plan_cap186_best4prior.log`; before the env
+under them (20 episodes, `logs/plan_cap186_best4prior.log`; replicate on the
+final code `logs/plan_cap186_final.log`: 184.6 / 7.05 / 85%; before the env
 upgrade the same recipe gave 178.6 / 13.4 / 40%, and 183.15 / 16.25 / 60%
 with the box and clause alone; noise floor between identical runs: ±2
 cleared, ±1.9 deaths, ±15 points of clear rate). On 2026-09-16 every

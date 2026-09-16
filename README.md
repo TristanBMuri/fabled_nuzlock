@@ -863,6 +863,12 @@ project_overview.md # the plan / roadmap
   table header. `env.tracker()` prints party / box / graveyard with level,
   ability and moves at the end of a `--verbose` episode. The env plan (2¾)
   is complete except E6 (variable-roster obs, only for a learned run layer).
+  Acceptance table on the finished code, all defaults (10 workers, 29 min;
+  `logs/plan_cap186_final.log`):
+    184.6 cleared / 97.95 no-death / 7.05 deaths / 85% clears (E4 table: 185.95 / 101.8 / 6.30 / 95%)
+  Inside the floor: the refactor preserved behaviour. Treat the pair as the
+  reference (≈185 cleared, ≈6.7 deaths, ≈90% clears). Walls: Fisher
+  Kenneth #184 27, Edwin 16, Fisher Juan 11, Tuber Jared #162 11, Roark 8.
   **E3e ability slots (2026-09-16, after base2 was launched).** Catches roll
   ability slot 0 or 1 at even odds (a Shinx is Rivalry or Intimidate),
   starters get slot 0, evolution keeps the slot (Starly Keen Eye → Staravia
