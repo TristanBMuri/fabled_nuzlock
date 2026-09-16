@@ -302,19 +302,28 @@ interface end to end, and it needs no training run to produce a number.
       the run layer and effort goes to the battler. The 186 slice has the
       headroom (10% clears); the PPO obs/action layout must be rebuilt for
       it (see 2p) before training.
-- [ ] **2o. Sample starvation.** The risk query sees 0 deaths in 8 battles
-      for almost every candidate (`+1.00` everywhere in the verbose log),
-      so ~5% per-fight risks are invisible and sum to a roster wipe over 186
-      trainers. Measured noise floor (2026-09-16): two runs of the same
-      config on the same 20 seeds differ by 2 cleared / 1.9 deaths / 15
-      points of clear rate. Adaptive n (`--refine 32`, top 3 re-queried at
-      n=32) is null, inside that floor: the candidate set is the limit, not
-      the estimate. Next: `--climb` (second swap round from the best party
-      when still hard; code in), then a type-aware candidate set (keep a
-      Fighting/Grass/Water answer for Sudowoodo, Electric/Rock for
-      Gyarados). Under the cap rule every roster mon sits at the same
-      level, so "top-6-by-level" is catch order; the swap set does the
-      choosing.
+- [ ] **2o. Candidate parties.** The risk query sees 0 deaths in 8 battles
+      for almost every candidate, but the estimate is not the limit: adaptive
+      n (`--refine 32`) and one extra swap round (`--climb`) are null on the
+      20-episode table (noise floor: 2 cleared / 1.9 deaths / 15 points of
+      clear rate between identical runs). What is the limit at a wall is the
+      candidate *set*: at Edwin #139 an exhaustive search over every 6-of-
+      roster party cuts real deaths from 2.0 to 0.76 per fight (probe,
+      2026-09-16, README → Status), with parties three changes from the base.
+      `plan_gauntlet.py --parties beam|all` widens the set only when the best
+      swap is still flagged hard (beam ~10 s, all ~2 min at 12 mons). Both
+      are **null on the 20-episode table** (beam 178.15 / 13.75 / 35%, all
+      178.95 / 13.05 / 30%, baseline 178.6 / 13.4 / 40%): a better party at
+      Edwin saves mons that die one wall later, because the box holds no
+      answer to the next wall. Deaths are conserved across walls until the
+      box does — which is the env's box cap and encounter data (2¾), not
+      the candidate search. Default stays `swap`; delete `beam|all` in the
+      deletion pass unless the lifted box changes the picture. At Fisher Juan
+      #169 (Gyarados) the roster is thin and every search agrees: that wall
+      is the battler's (see 1a). Under the cap rule every roster mon sits at
+      the same level, so "top-6-by-level" is catch order; the candidate
+      search does the choosing. Lead order (packed order = party order) is a
+      free variable the planner never sets; probe pending.
 - [ ] **2p. Roster cap and obs layout.** MAX_ROSTER=12 exists only because
       the meta-policy obs is fixed-size; the graveyard hides it now but a
       real box is unbounded. When 2e rebuilds the obs, make the roster a
@@ -346,6 +355,76 @@ until step 3 adds held-out gauntlets.
       promote what docs reference, drop the `checkpoints/`, `runs/`,
       `test.py`, `no_AI_code_here` leftovers if unused.
 
+### 2¾. Environment upgrade (plan written 2026-09-16; do before step 3)
+
+The env is the one piece every approach reuses, so it gets the next effort.
+Target shape: **one game folder + one rules object + one state machine**,
+readable by someone who knows Pokémon, and no bigger than today's
+`gauntlet.py` + `nuzlocke_env.py` (~750 lines). Budget: net ≤ +200 lines,
+paid for by the deletion pass (2½) first. Not in scope: XP curves and
+money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
+
+- [ ] **E1. Game folder.** `data/bdsp/` holds everything the env knows
+      about the game: `trainers.json` (route order, parties with levels,
+      moves, abilities, items), `encounters.json` (areas in route order:
+      gate, species/level/weight table), `learnsets.json` (all level-up
+      moves per species, not the last four), `evolutions.json` (species →
+      [to, method, arg] for level / item / friendship / trade),
+      `species.json` (types, ability slots, base stats; from the Showdown
+      dex by one build script). `gauntlet.load_game("bdsp")` returns them
+      and nothing else in code names BDSP. Acceptance: the 20-episode table
+      reproduces, and a second folder loads with zero code changes (3a's
+      real-source import lands here).
+- [ ] **E2. Rules object.** A ~25-line dataclass a nuzlocker recognises:
+      `level_rule` (cap | match), `level_margin`, `box` (None = unbounded),
+      `dupes_clause`, `first_encounter_only`, `moveset` (last4 | best4),
+      `wipe_ends_run`. Printed in every table header so each notebook entry
+      states its rules. Falls out of E1–E4; do not write it first.
+- [ ] **E3. Known defects, each a few lines and a test** (a, b, d done
+      2026-09-16, `tests/test_nuzlocke_env.py`): (a) [x] hand-made ability
+      table deleted — "first ability slot" is the rule, and the validator
+      already applies it (41/41 equal); (b) [x] every area whose gate has
+      arrived queues an offer (`env.pending`), answered one at a time,
+      instead of the later overwriting the earlier; offers with no box room
+      land in `env.dropped` and `--verbose` prints them; (c) [x] the box is
+      unbounded by default (`--roster 30` ≥ starter + 21 areas; table
+      2026-09-16: 180.15 / 58.0 / 16.35 / 45%, inside noise on cleared and
+      clear rate; deaths per run is not comparable across box sizes because
+      half the runs now wipe all 22 mons instead of 12);
+      (d) [x] dupes clause on by default (`--no-dupes` to compare): an
+      area's table is rerolled among families never owned, alive or dead.
+      (e) [x] **ability slots** (raised and done 2026-09-16): a wild catch
+      rolls slot 0 or 1 (Shinx: Rivalry / Intimidate; Geodude: Rock Head /
+      Sturdy; Machop: Guts / No Guard), starters get slot 0, and evolution
+      keeps the *slot*, not the name (Starly Keen Eye → Staravia
+      Intimidate). `gauntlet.roll_ability` / `evolved_ability` over
+      `data/species.json` (`gauntlet.py --build-species`: name, types,
+      ability slots, base stats for 275 species — E1's species file, built
+      early). Changes the catch distribution; not in the base2 table, so
+      it is measured together with E4.
+      Dupes-clause table (12-box): 176.25 / 61.5 / 14.0 / 25%, edge of noise
+      in the wrong direction; kept as the standard rule. New baseline with
+      both defaults: `logs/plan_cap186v3_deep20_base2.log`.
+- [ ] **E4. Movesets: `best4`.** The largest expected gain at parity. Pool =
+      every level-up move at or below the mon's level; keep the strongest
+      STAB move, the strongest move of another type, the next strongest
+      move, and one status move from a short list (recovery, sleep,
+      paralysis, stat drops). Deterministic, ~30 lines, needs move type /
+      power / category from the dex (`moves.json`, same build script).
+      Meditite@22 then attacks. A moveset change is a progression change:
+      regenerate the harvest and retrain the prior (~15 min + collect),
+      then the table.
+- [ ] **E5. Readable state.** `render()` as a tracker view (box with
+      levels and moves, party, graveyard) and `plan_gauntlet.py --trace`
+      printing encounter offers / catches / drops and the party per
+      trainer — what today's scratch `replay_log.py` did, so it is deleted.
+- [ ] **E6. Variable-roster obs/action (2p).** Only when 2e is attempted;
+      the scripted planner never reads the obs. Do not build now.
+
+Order: E3 (an afternoon, one table) → E1 (a day, behaviour-preserving) →
+E4 (one OOD loop + table) → E5 alongside → E2 last. The `--roster 30`
+table (2026-09-16, pending) is E3c's measurement.
+
 ### 3. Distribution and generality
 - [ ] **3a. Real BDSP data first.** What exists is thin and hand-made:
       `bdsp_gauntlet_order.json` is sorted by trainer level, not by route,
@@ -355,6 +434,24 @@ until step 3 adds held-out gauntlets.
       Chingling, Roselia never evolve); formes only partly resolved. Find a
       real source (route order, encounter tables with rates and levels,
       evolution methods) and load it — a scripted import, not hand edits.
+      Known forme gap past the 186 slice: the trainer file's 'heatrotom' /
+      'mowrotom' / 'washrotom' are Showdown's 'rotomheat' etc.;
+      `species_name` does not resolve them (`--build-species` reports 3
+      unknown). Fix when the slice reaches them.
+      Added 2026-09-16 from a roster dump at the Gyarados wall (README →
+      Status): **(i) abilities:** the hand-made `abilities` table in
+      `encounters.json` equals the dex's first ability slot for all 41
+      species, and the validator fills evolved forms with their first slot
+      too, so the rule is "first ability slot" everywhere — delete the
+      table (E3a). **(ii) Movesets are the last four level-up moves
+      at the cap level, nothing else** — Meditite@22 has no attack (Detect,
+      Hidden Power, Mind Reader, Feint), Cherubi/Budew one weak Grass move;
+      this is stage 0 of section 7 and is now a visible part of why fights
+      at parity cost mons. Decide stage 1 (a few builds per species) before
+      spending more on the battler. **(iii) The 12-slot box drops
+      encounters silently** once full (seed 300 was 12/12 at Edwin); and
+      when two routes unlock at one trainer the later offer overwrites the
+      earlier (never fires on the current order file). Both go away with 2p.
 - [ ] Second source game or hack; segment slicing; augmentation from seeds.
 - [ ] Held-out eval; memorisation probe. Report train vs held-out always.
 

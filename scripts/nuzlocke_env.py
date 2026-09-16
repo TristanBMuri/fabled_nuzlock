@@ -13,11 +13,12 @@ from gymnasium import Env
 from gymnasium.spaces import Box, Discrete
 
 from battle_env import SPECIES  # pool species (82) — union below with BDSP
-from gauntlet import (Mon, encounter_moves, evolve, load_encounters, load_evolutions,
-                      load_trainers, pack_team, record_battle, trainer_mons)
+from gauntlet import (Mon, ability_slots, encounter_moves, evolve, evolved_ability,
+                      load_encounters, load_evolutions, load_trainers, pack_team,
+                      record_battle, roll_ability, trainer_mons)
 from gauntlet import BattleRunner, SimBattleRunner
 
-MAX_ROSTER = 12
+MAX_ROSTER = 12  # default box size; NuzlockeEnv(max_roster=) lifts it (a real box is unbounded)
 MAX_PARTY = 6
 N_META_ACTIONS = 1 + MAX_ROSTER
 BREAKPOINTS = ["none", "gym_leader", "elite_four", "champion"]
@@ -53,7 +54,8 @@ RISK_BATTLES = 8
 # A fight is "hard" (deep search width) when the fielded party's risk query shows
 # a loss, a death, or less than this fraction of the party's HP left on average.
 DEEP_HP = 0.5
-OBS_DIM = 12 * (V + 3) + 10 + 6 * (V + 1) + 2 + 2 + N_RISK
+obs_dim = lambda max_roster: max_roster * (V + 3) + 10 + 6 * (V + 1) + 2 + 2 + N_RISK
+OBS_DIM = obs_dim(MAX_ROSTER)
 
 
 class NuzlockeEnv(Env):
@@ -62,7 +64,8 @@ class NuzlockeEnv(Env):
                  policy: str | None = None, search: tuple[int, int] | None = None,
                  level_margin: int = 0, level_rule: str = "cap",
                  risk_features: bool = True, search_all: bool = False,
-                 slice_len: int = SLICE_LEN, deep: tuple[int, int] | None = None):
+                 slice_len: int = SLICE_LEN, deep: tuple[int, int] | None = None,
+                 max_roster: int = MAX_ROSTER, dupes_clause: bool = True):
         """backend 'sim' (in-process, default) or 'server' (Showdown on `port`).
         slice_len: trainers per episode (51 = through Roark, 186 = through Gardenia).
         policy selects the sim battler (None = SimpleHeuristics); search=(k, r)
@@ -71,7 +74,9 @@ class NuzlockeEnv(Env):
         the risk query flags as hard (see DEEP_HP) — the compute dial per trainer.
         level_rule 'match': player level = max enemy level seen (+margin);
         'cap' (hardcore nuzlocke): player level = next boss's max level
-        (+margin) — route trainers are below you, the boss fight is at parity."""
+        (+margin) — route trainers are below you, the boss fight is at parity.
+        dupes_clause: an area's encounter is rerolled among species whose family
+        you have not owned yet (alive or dead); off = plain first encounter."""
         self.info_mode = info_mode
         self.level_margin, self.level_rule = level_margin, level_rule
         self.risk_features = risk_features  # off = no sim queries in _obs (harvesting)
@@ -79,30 +84,33 @@ class NuzlockeEnv(Env):
         self.deep = deep
         self.n_deep = 0  # fights played at the deep width (cost accounting)
         self.slice_len = slice_len
+        self.max_roster = max_roster  # box slots (living mons); the obs and mask are sized by it
+        self.dupes_clause = dupes_clause
         self.rng = random.Random(seed)
         if backend == "sim":
             self.runner = SimBattleRunner(policy=policy, search=search, info_mode=info_mode)
         else:
             self.runner = BattleRunner(port=port, info_mode=info_mode)
         self.encounters = load_encounters()["routes"]
-        self.observation_space = Box(-np.inf, np.inf, (OBS_DIM,), np.float32)
-        self.action_space = Discrete(N_META_ACTIONS)
+        self.observation_space = Box(-np.inf, np.inf, (obs_dim(max_roster),), np.float32)
+        self.action_space = Discrete(1 + max_roster)
         self._reset_state()
 
     # ------------------------------------------------------------- lifecycle
     def _reset_state(self):
         self.run_id = uuid.uuid4().hex[:8]
-        enc = load_encounters()
-        starter = self.rng.choice(enc["starter"])
-        ability = enc.get("abilities", {}).get(starter)
+        starter = self.rng.choice(load_encounters()["starter"])
+        # starters come with ability slot 0; wild catches roll slot 0 or 1
+        # (roll_ability) and evolution keeps the slot (evolved_ability)
         self.roster = [Mon(starter, 5, encounter_moves(starter, 5),
-                           ability=ability)]
+                           ability=ability_slots(starter).get("0"))]
         self.graveyard: list[Mon] = []  # dead mons leave the roster (box slots free up)
         self.party = []  # indices into roster
         self.trainer_idx = 0
         self.max_enemy_level = 0
         self.phase = "ENCOUNTER"  # first route unlocks before trainer 0
-        self.pending_encounter: Mon | None = None
+        self.pending: list[Mon] = []  # encounter offers not yet answered (one per area)
+        self.dropped: list[str] = []  # offers that found no box slot (species), this run
         self._route_cursor = 0  # routes consumed
         self.done = False
         self._risk_cache: dict = {}
@@ -115,24 +123,41 @@ class NuzlockeEnv(Env):
         return self._obs(), {"action_mask": self._mask()}
 
     # ------------------------------------------------------------ encounters
+    def _owned_families(self) -> set[str]:
+        """Species families ever owned (alive or dead), for the dupes clause."""
+        fam = set()
+        stack = [m.species for m in self.roster + self.graveyard]
+        while stack:
+            sp = stack.pop()
+            if sp not in fam:
+                fam.add(sp)
+                stack += [e for e, _ in EVOS.get(sp, [])]
+        # an evolved catch also claims its pre-evolutions
+        return fam | {pre for pre, evs in EVOS.items() if any(e in fam for e, _ in evs)}
+
     def _maybe_sample_encounter(self):
-        """Fire the next route's encounter if its trainer gate has arrived."""
-        self.pending_encounter = None
-        abilities = load_encounters().get("abilities", {})
+        """Queue one first encounter for every area whose trainer gate has
+        arrived; the ENCOUNTER phase answers them one at a time."""
         while (self._route_cursor < len(self.encounters)
                and self.encounters[self._route_cursor]["before_trainer"]
                <= self.trainer_idx):
             route = self.encounters[self._route_cursor]
             self._route_cursor += 1
             table = route["encounters"]
+            if self.dupes_clause:
+                owned = self._owned_families()
+                table = [e for e in table if e["species"] not in owned] or table
             pick = self.rng.choices(
                 table, weights=[e["weight"] for e in table])[0]
             lvl = self.rng.randint(*pick["level"])
             mon = Mon(pick["species"], lvl, encounter_moves(pick["species"], lvl),
-                      ability=abilities.get(pick["species"]))
-            if len(self.roster) < MAX_ROSTER:
-                self.pending_encounter = mon  # offer it (last one wins)
-                self.phase = "ENCOUNTER"
+                      ability=roll_ability(pick["species"], self.rng))
+            if len(self.roster) + len(self.pending) < self.max_roster:
+                self.pending.append(mon)
+            else:
+                self.dropped.append(mon.species)
+        if self.pending:
+            self.phase = "ENCOUNTER"
 
     # ---------------------------------------------------------------- battle
     def _apply_level_rule(self, entry):
@@ -143,13 +168,13 @@ class NuzlockeEnv(Env):
                          if e["breakpoint"] != "none"), ORDER[self.slice_len - 1])
             cap = max(cap, boss["max_level"])
         target = min(cap + self.level_margin, 100)
-        abilities = load_encounters().get("abilities", {})
         for m in self.roster:  # player level rule: match max (+margin), never decrease
             if m.level < target:
                 m.level = target
                 evolved = evolve(m.species, m.level, self.rng)  # level-up evolutions
                 if evolved != m.species:
-                    m.species, m.ability = evolved, abilities.get(evolved)
+                    m.ability = evolved_ability(m.species, m.ability, evolved)
+                    m.species = evolved
                 m.moves = encounter_moves(m.species, m.level) or m.moves
 
     def _packed_matchup(self, party_idx):
@@ -203,9 +228,9 @@ class NuzlockeEnv(Env):
 
     # ------------------------------------------------------------------- obs
     def _obs(self) -> np.ndarray:
-        v = np.zeros(OBS_DIM, dtype=np.float32)
+        v = np.zeros(obs_dim(self.max_roster), dtype=np.float32)
         o = 0
-        for i, mon in enumerate(self.roster[:MAX_ROSTER]):
+        for i, mon in enumerate(self.roster[:self.max_roster]):
             v[o + IDX.get(mon.species, 0)] = 1.0
             v[o + V] = min(mon.level, 100) / 100.0
             v[o + V + 1] = 1.0 if mon.alive else 0.0
@@ -238,14 +263,13 @@ class NuzlockeEnv(Env):
         return v
 
     def _mask(self) -> np.ndarray:
-        m = np.zeros(N_META_ACTIONS, dtype=np.int64)
+        m = np.zeros(1 + self.max_roster, dtype=np.int64)
         if self.phase == "ENCOUNTER":
             m[0] = 1  # skip
-            if (self.pending_encounter is not None
-                    and len(self.roster) < MAX_ROSTER):
+            if self.pending and len(self.roster) < self.max_roster:
                 m[1] = 1  # catch
         else:  # PRE_BATTLE — nuzlocke rule: field everything you can.
-            alive_idx = [i for i, mon in enumerate(self.roster[:MAX_ROSTER])
+            alive_idx = [i for i, mon in enumerate(self.roster[:self.max_roster])
                          if mon.alive]
             if not alive_idx:
                 # No mons left — only "confirm", which ends the run (no battle).
@@ -266,10 +290,10 @@ class NuzlockeEnv(Env):
     def step(self, action):
         reward = 0.0
         if self.phase == "ENCOUNTER":
-            if action == 1 and self.pending_encounter is not None:
-                self.roster.append(self.pending_encounter)
-                self.pending_encounter = None
-            self.phase = "PRE_BATTLE"
+            mon = self.pending.pop(0) if self.pending else None
+            if action == 1 and mon is not None:
+                self.roster.append(mon)
+            self.phase = "ENCOUNTER" if self.pending else "PRE_BATTLE"
         else:  # PRE_BATTLE
             if action == 0:  # confirm -> battle (or end if no alive mons)
                 alive_left = any(m.alive for m in self.roster)
@@ -305,7 +329,7 @@ class NuzlockeEnv(Env):
                             else:
                                 self.party = []
                                 self._maybe_sample_encounter()
-                                if self.pending_encounter is None:
+                                if not self.pending:
                                     self.phase = "PRE_BATTLE"
                         else:
                             # A lost battle ends the run (nuzlocke: you'd reload a

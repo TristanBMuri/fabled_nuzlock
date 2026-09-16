@@ -1,237 +1,848 @@
 {
-  "_comment": "BDSP encounter tables through Eterna, v2 hand-written (2026-09-15). level range is [min,max] sampled uniformly; weights are relative. 'before_trainer' = the encounter fires before this index of the level-sorted gauntlet order (bdsp_gauntlet_order.json is sorted by trainer level, not by route, so areas are gated by the level band they belong to: Roark is #50 at L14, Gardenia #185 at L22). Version-exclusive species are left out.",
-  "starter": ["chimchar", "piplup", "turtwig"],
-  "abilities": {
-    "chimchar": "Blaze", "piplup": "Torrent", "turtwig": "Overgrow",
-    "starly": "Keen Eye", "bidoof": "Simple", "kricketot": "Shed Skin",
-    "shinx": "Rivalry", "abra": "Synchronize", "zubat": "Inner Focus",
-    "budew": "Natural Cure", "wurmple": "Shield Dust", "psyduck": "Damp",
-    "pachirisu": "Run Away", "buneary": "Run Away", "hoothoot": "Insomnia",
-    "cherubi": "Chlorophyll", "ponyta": "Run Away", "geodude": "Rock Head",
-    "kricketune": "Swarm", "stunky": "Stench", "bronzor": "Levitate",
-    "machop": "Guts", "chingling": "Levitate", "ralts": "Synchronize",
-    "bibarel": "Simple", "roselia": "Natural Cure", "buizel": "Swift Swim",
-    "chansey": "Natural Cure", "staravia": "Intimidate", "mimejr": "Soundproof",
-    "duskull": "Levitate", "wormadam": "Anticipation",
-    "onix": "Rock Head", "gastly": "Levitate", "meditite": "Pure Power",
-    "shellos": "Sticky Hold", "bonsly": "Sturdy", "kadabra": "Synchronize",
-    "machoke": "Guts", "silcoon": "Shed Skin", "cascoon": "Shed Skin"
-  },
-  "routes": [
+ "_comment": "BDSP encounter tables through Eterna, v2 hand-written (2026-09-15). level range is [min,max] sampled uniformly; weights are relative. 'before_trainer' = the encounter fires before this index of the level-sorted gauntlet order (bdsp_gauntlet_order.json is sorted by trainer level, not by route, so areas are gated by the level band they belong to: Roark is #50 at L14, Gardenia #185 at L22). Version-exclusive species are left out. Abilities: none listed; every mon gets its species' first ability slot (the validator's default; checked equal to the old hand table for all 41 species, 2026-09-16).",
+ "starter": [
+  "chimchar",
+  "piplup",
+  "turtwig"
+ ],
+ "routes": [
+  {
+   "name": "Route 201",
+   "before_trainer": 0,
+   "encounters": [
     {
-      "name": "Route 201",
-      "before_trainer": 0,
-      "encounters": [
-        {"species": "starly", "level": [2, 4], "weight": 0.55},
-        {"species": "bidoof", "level": [2, 4], "weight": 0.35},
-        {"species": "kricketot", "level": [3, 4], "weight": 0.10}
-      ]
+     "species": "starly",
+     "level": [
+      2,
+      4
+     ],
+     "weight": 0.55
     },
     {
-      "name": "Route 202",
-      "before_trainer": 4,
-      "encounters": [
-        {"species": "shinx", "level": [4, 6], "weight": 0.40},
-        {"species": "starly", "level": [4, 6], "weight": 0.35},
-        {"species": "bidoof", "level": [4, 6], "weight": 0.25}
-      ]
+     "species": "bidoof",
+     "level": [
+      2,
+      4
+     ],
+     "weight": 0.35
     },
     {
-      "name": "Route 203",
-      "before_trainer": 8,
-      "encounters": [
-        {"species": "shinx", "level": [6, 8], "weight": 0.25},
-        {"species": "abra", "level": [6, 8], "weight": 0.15},
-        {"species": "kricketot", "level": [6, 8], "weight": 0.20},
-        {"species": "zubat", "level": [6, 8], "weight": 0.25},
-        {"species": "budew", "level": [6, 8], "weight": 0.15}
-      ]
-    },
-    {
-      "name": "Oreburgh Gate",
-      "before_trainer": 12,
-      "encounters": [
-        {"species": "zubat", "level": [6, 8], "weight": 0.50},
-        {"species": "geodude", "level": [6, 8], "weight": 0.40},
-        {"species": "psyduck", "level": [6, 8], "weight": 0.10}
-      ]
-    },
-    {
-      "name": "Route 204 South",
-      "before_trainer": 16,
-      "encounters": [
-        {"species": "budew", "level": [7, 9], "weight": 0.20},
-        {"species": "wurmple", "level": [7, 9], "weight": 0.25},
-        {"species": "starly", "level": [7, 9], "weight": 0.30},
-        {"species": "shinx", "level": [7, 9], "weight": 0.25}
-      ]
-    },
-    {
-      "name": "Ravaged Path",
-      "before_trainer": 20,
-      "encounters": [
-        {"species": "zubat", "level": [8, 10], "weight": 0.70},
-        {"species": "psyduck", "level": [8, 10], "weight": 0.30}
-      ]
-    },
-    {
-      "name": "Oreburgh Mine",
-      "before_trainer": 26,
-      "encounters": [
-        {"species": "geodude", "level": [9, 11], "weight": 0.60},
-        {"species": "zubat", "level": [9, 11], "weight": 0.30},
-        {"species": "onix", "level": [9, 11], "weight": 0.10}
-      ]
-    },
-    {
-      "name": "Route 204 North",
-      "before_trainer": 32,
-      "encounters": [
-        {"species": "budew", "level": [10, 13], "weight": 0.20},
-        {"species": "wurmple", "level": [10, 13], "weight": 0.15},
-        {"species": "starly", "level": [10, 13], "weight": 0.25},
-        {"species": "shinx", "level": [10, 13], "weight": 0.20},
-        {"species": "kricketune", "level": [10, 13], "weight": 0.20}
-      ]
-    },
-    {
-      "name": "Floaroma Meadow",
-      "before_trainer": 38,
-      "encounters": [
-        {"species": "budew", "level": [10, 12], "weight": 0.60},
-        {"species": "cherubi", "level": [10, 12], "weight": 0.40}
-      ]
-    },
-    {
-      "name": "Valley Windworks",
-      "before_trainer": 44,
-      "encounters": [
-        {"species": "shellos", "level": [11, 13], "weight": 0.35},
-        {"species": "buizel", "level": [11, 13], "weight": 0.35},
-        {"species": "pachirisu", "level": [11, 13], "weight": 0.20},
-        {"species": "bidoof", "level": [11, 13], "weight": 0.10}
-      ]
-    },
-    {
-      "name": "Route 205 South",
-      "before_trainer": 51,
-      "encounters": [
-        {"species": "pachirisu", "level": [9, 12], "weight": 0.20},
-        {"species": "buneary", "level": [9, 12], "weight": 0.20},
-        {"species": "budew", "level": [9, 12], "weight": 0.20},
-        {"species": "shinx", "level": [9, 12], "weight": 0.20},
-        {"species": "hoothoot", "level": [9, 12], "weight": 0.20}
-      ]
-    },
-    {
-      "name": "Eterna Forest",
-      "before_trainer": 59,
-      "encounters": [
-        {"species": "budew", "level": [10, 14], "weight": 0.20},
-        {"species": "buneary", "level": [10, 14], "weight": 0.20},
-        {"species": "silcoon", "level": [10, 14], "weight": 0.10},
-        {"species": "cascoon", "level": [10, 14], "weight": 0.10},
-        {"species": "gastly", "level": [10, 14], "weight": 0.20},
-        {"species": "hoothoot", "level": [10, 14], "weight": 0.10},
-        {"species": "cherubi", "level": [10, 14], "weight": 0.10}
-      ]
-    },
-    {
-      "name": "Route 211 West",
-      "before_trainer": 70,
-      "encounters": [
-        {"species": "machop", "level": [12, 14], "weight": 0.30},
-        {"species": "chingling", "level": [12, 14], "weight": 0.20},
-        {"species": "meditite", "level": [12, 14], "weight": 0.20},
-        {"species": "ponyta", "level": [12, 14], "weight": 0.20},
-        {"species": "bidoof", "level": [12, 14], "weight": 0.10}
-      ]
-    },
-    {
-      "name": "Route 206",
-      "before_trainer": 81,
-      "encounters": [
-        {"species": "ponyta", "level": [14, 16], "weight": 0.20},
-        {"species": "geodude", "level": [14, 16], "weight": 0.30},
-        {"species": "kricketune", "level": [14, 16], "weight": 0.15},
-        {"species": "stunky", "level": [14, 16], "weight": 0.20},
-        {"species": "bronzor", "level": [14, 16], "weight": 0.15}
-      ]
-    },
-    {
-      "name": "Route 207",
-      "before_trainer": 90,
-      "encounters": [
-        {"species": "geodude", "level": [13, 15], "weight": 0.35},
-        {"species": "ponyta", "level": [13, 15], "weight": 0.20},
-        {"species": "kricketot", "level": [13, 15], "weight": 0.15},
-        {"species": "machop", "level": [13, 15], "weight": 0.30}
-      ]
-    },
-    {
-      "name": "Mt. Coronet South",
-      "before_trainer": 100,
-      "encounters": [
-        {"species": "geodude", "level": [14, 16], "weight": 0.30},
-        {"species": "zubat", "level": [14, 16], "weight": 0.30},
-        {"species": "chingling", "level": [14, 16], "weight": 0.10},
-        {"species": "bronzor", "level": [14, 16], "weight": 0.15},
-        {"species": "meditite", "level": [14, 16], "weight": 0.15}
-      ]
-    },
-    {
-      "name": "Old Chateau",
-      "before_trainer": 110,
-      "encounters": [
-        {"species": "gastly", "level": [14, 17], "weight": 1.0}
-      ]
-    },
-    {
-      "name": "Route 208",
-      "before_trainer": 120,
-      "encounters": [
-        {"species": "ralts", "level": [15, 17], "weight": 0.10},
-        {"species": "bibarel", "level": [15, 17], "weight": 0.15},
-        {"species": "roselia", "level": [15, 17], "weight": 0.15},
-        {"species": "buizel", "level": [15, 17], "weight": 0.30},
-        {"species": "machop", "level": [15, 17], "weight": 0.30}
-      ]
-    },
-    {
-      "name": "Route 209",
-      "before_trainer": 135,
-      "encounters": [
-        {"species": "chansey", "level": [16, 18], "weight": 0.05},
-        {"species": "bibarel", "level": [16, 18], "weight": 0.25},
-        {"species": "roselia", "level": [16, 18], "weight": 0.20},
-        {"species": "staravia", "level": [16, 18], "weight": 0.25},
-        {"species": "mimejr", "level": [16, 18], "weight": 0.10},
-        {"species": "duskull", "level": [16, 18], "weight": 0.15}
-      ]
-    },
-    {
-      "name": "Route 210 South",
-      "before_trainer": 150,
-      "encounters": [
-        {"species": "ponyta", "level": [18, 20], "weight": 0.25},
-        {"species": "machoke", "level": [18, 20], "weight": 0.15},
-        {"species": "chansey", "level": [18, 20], "weight": 0.05},
-        {"species": "geodude", "level": [18, 20], "weight": 0.20},
-        {"species": "kricketune", "level": [18, 20], "weight": 0.15},
-        {"species": "bonsly", "level": [18, 20], "weight": 0.10},
-        {"species": "hoothoot", "level": [18, 20], "weight": 0.10}
-      ]
-    },
-    {
-      "name": "Route 215",
-      "before_trainer": 162,
-      "encounters": [
-        {"species": "kadabra", "level": [19, 22], "weight": 0.20},
-        {"species": "geodude", "level": [19, 22], "weight": 0.20},
-        {"species": "ponyta", "level": [19, 22], "weight": 0.20},
-        {"species": "machoke", "level": [19, 22], "weight": 0.15},
-        {"species": "staravia", "level": [19, 22], "weight": 0.25}
-      ]
+     "species": "kricketot",
+     "level": [
+      3,
+      4
+     ],
+     "weight": 0.1
     }
-  ]
+   ]
+  },
+  {
+   "name": "Route 202",
+   "before_trainer": 4,
+   "encounters": [
+    {
+     "species": "shinx",
+     "level": [
+      4,
+      6
+     ],
+     "weight": 0.4
+    },
+    {
+     "species": "starly",
+     "level": [
+      4,
+      6
+     ],
+     "weight": 0.35
+    },
+    {
+     "species": "bidoof",
+     "level": [
+      4,
+      6
+     ],
+     "weight": 0.25
+    }
+   ]
+  },
+  {
+   "name": "Route 203",
+   "before_trainer": 8,
+   "encounters": [
+    {
+     "species": "shinx",
+     "level": [
+      6,
+      8
+     ],
+     "weight": 0.25
+    },
+    {
+     "species": "abra",
+     "level": [
+      6,
+      8
+     ],
+     "weight": 0.15
+    },
+    {
+     "species": "kricketot",
+     "level": [
+      6,
+      8
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "zubat",
+     "level": [
+      6,
+      8
+     ],
+     "weight": 0.25
+    },
+    {
+     "species": "budew",
+     "level": [
+      6,
+      8
+     ],
+     "weight": 0.15
+    }
+   ]
+  },
+  {
+   "name": "Oreburgh Gate",
+   "before_trainer": 12,
+   "encounters": [
+    {
+     "species": "zubat",
+     "level": [
+      6,
+      8
+     ],
+     "weight": 0.5
+    },
+    {
+     "species": "geodude",
+     "level": [
+      6,
+      8
+     ],
+     "weight": 0.4
+    },
+    {
+     "species": "psyduck",
+     "level": [
+      6,
+      8
+     ],
+     "weight": 0.1
+    }
+   ]
+  },
+  {
+   "name": "Route 204 South",
+   "before_trainer": 16,
+   "encounters": [
+    {
+     "species": "budew",
+     "level": [
+      7,
+      9
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "wurmple",
+     "level": [
+      7,
+      9
+     ],
+     "weight": 0.25
+    },
+    {
+     "species": "starly",
+     "level": [
+      7,
+      9
+     ],
+     "weight": 0.3
+    },
+    {
+     "species": "shinx",
+     "level": [
+      7,
+      9
+     ],
+     "weight": 0.25
+    }
+   ]
+  },
+  {
+   "name": "Ravaged Path",
+   "before_trainer": 20,
+   "encounters": [
+    {
+     "species": "zubat",
+     "level": [
+      8,
+      10
+     ],
+     "weight": 0.7
+    },
+    {
+     "species": "psyduck",
+     "level": [
+      8,
+      10
+     ],
+     "weight": 0.3
+    }
+   ]
+  },
+  {
+   "name": "Oreburgh Mine",
+   "before_trainer": 26,
+   "encounters": [
+    {
+     "species": "geodude",
+     "level": [
+      9,
+      11
+     ],
+     "weight": 0.6
+    },
+    {
+     "species": "zubat",
+     "level": [
+      9,
+      11
+     ],
+     "weight": 0.3
+    },
+    {
+     "species": "onix",
+     "level": [
+      9,
+      11
+     ],
+     "weight": 0.1
+    }
+   ]
+  },
+  {
+   "name": "Route 204 North",
+   "before_trainer": 32,
+   "encounters": [
+    {
+     "species": "budew",
+     "level": [
+      10,
+      13
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "wurmple",
+     "level": [
+      10,
+      13
+     ],
+     "weight": 0.15
+    },
+    {
+     "species": "starly",
+     "level": [
+      10,
+      13
+     ],
+     "weight": 0.25
+    },
+    {
+     "species": "shinx",
+     "level": [
+      10,
+      13
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "kricketune",
+     "level": [
+      10,
+      13
+     ],
+     "weight": 0.2
+    }
+   ]
+  },
+  {
+   "name": "Floaroma Meadow",
+   "before_trainer": 38,
+   "encounters": [
+    {
+     "species": "budew",
+     "level": [
+      10,
+      12
+     ],
+     "weight": 0.6
+    },
+    {
+     "species": "cherubi",
+     "level": [
+      10,
+      12
+     ],
+     "weight": 0.4
+    }
+   ]
+  },
+  {
+   "name": "Valley Windworks",
+   "before_trainer": 44,
+   "encounters": [
+    {
+     "species": "shellos",
+     "level": [
+      11,
+      13
+     ],
+     "weight": 0.35
+    },
+    {
+     "species": "buizel",
+     "level": [
+      11,
+      13
+     ],
+     "weight": 0.35
+    },
+    {
+     "species": "pachirisu",
+     "level": [
+      11,
+      13
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "bidoof",
+     "level": [
+      11,
+      13
+     ],
+     "weight": 0.1
+    }
+   ]
+  },
+  {
+   "name": "Route 205 South",
+   "before_trainer": 51,
+   "encounters": [
+    {
+     "species": "pachirisu",
+     "level": [
+      9,
+      12
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "buneary",
+     "level": [
+      9,
+      12
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "budew",
+     "level": [
+      9,
+      12
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "shinx",
+     "level": [
+      9,
+      12
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "hoothoot",
+     "level": [
+      9,
+      12
+     ],
+     "weight": 0.2
+    }
+   ]
+  },
+  {
+   "name": "Eterna Forest",
+   "before_trainer": 59,
+   "encounters": [
+    {
+     "species": "budew",
+     "level": [
+      10,
+      14
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "buneary",
+     "level": [
+      10,
+      14
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "silcoon",
+     "level": [
+      10,
+      14
+     ],
+     "weight": 0.1
+    },
+    {
+     "species": "cascoon",
+     "level": [
+      10,
+      14
+     ],
+     "weight": 0.1
+    },
+    {
+     "species": "gastly",
+     "level": [
+      10,
+      14
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "hoothoot",
+     "level": [
+      10,
+      14
+     ],
+     "weight": 0.1
+    },
+    {
+     "species": "cherubi",
+     "level": [
+      10,
+      14
+     ],
+     "weight": 0.1
+    }
+   ]
+  },
+  {
+   "name": "Route 211 West",
+   "before_trainer": 70,
+   "encounters": [
+    {
+     "species": "machop",
+     "level": [
+      12,
+      14
+     ],
+     "weight": 0.3
+    },
+    {
+     "species": "chingling",
+     "level": [
+      12,
+      14
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "meditite",
+     "level": [
+      12,
+      14
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "ponyta",
+     "level": [
+      12,
+      14
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "bidoof",
+     "level": [
+      12,
+      14
+     ],
+     "weight": 0.1
+    }
+   ]
+  },
+  {
+   "name": "Route 206",
+   "before_trainer": 81,
+   "encounters": [
+    {
+     "species": "ponyta",
+     "level": [
+      14,
+      16
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "geodude",
+     "level": [
+      14,
+      16
+     ],
+     "weight": 0.3
+    },
+    {
+     "species": "kricketune",
+     "level": [
+      14,
+      16
+     ],
+     "weight": 0.15
+    },
+    {
+     "species": "stunky",
+     "level": [
+      14,
+      16
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "bronzor",
+     "level": [
+      14,
+      16
+     ],
+     "weight": 0.15
+    }
+   ]
+  },
+  {
+   "name": "Route 207",
+   "before_trainer": 90,
+   "encounters": [
+    {
+     "species": "geodude",
+     "level": [
+      13,
+      15
+     ],
+     "weight": 0.35
+    },
+    {
+     "species": "ponyta",
+     "level": [
+      13,
+      15
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "kricketot",
+     "level": [
+      13,
+      15
+     ],
+     "weight": 0.15
+    },
+    {
+     "species": "machop",
+     "level": [
+      13,
+      15
+     ],
+     "weight": 0.3
+    }
+   ]
+  },
+  {
+   "name": "Mt. Coronet South",
+   "before_trainer": 100,
+   "encounters": [
+    {
+     "species": "geodude",
+     "level": [
+      14,
+      16
+     ],
+     "weight": 0.3
+    },
+    {
+     "species": "zubat",
+     "level": [
+      14,
+      16
+     ],
+     "weight": 0.3
+    },
+    {
+     "species": "chingling",
+     "level": [
+      14,
+      16
+     ],
+     "weight": 0.1
+    },
+    {
+     "species": "bronzor",
+     "level": [
+      14,
+      16
+     ],
+     "weight": 0.15
+    },
+    {
+     "species": "meditite",
+     "level": [
+      14,
+      16
+     ],
+     "weight": 0.15
+    }
+   ]
+  },
+  {
+   "name": "Old Chateau",
+   "before_trainer": 110,
+   "encounters": [
+    {
+     "species": "gastly",
+     "level": [
+      14,
+      17
+     ],
+     "weight": 1.0
+    }
+   ]
+  },
+  {
+   "name": "Route 208",
+   "before_trainer": 120,
+   "encounters": [
+    {
+     "species": "ralts",
+     "level": [
+      15,
+      17
+     ],
+     "weight": 0.1
+    },
+    {
+     "species": "bibarel",
+     "level": [
+      15,
+      17
+     ],
+     "weight": 0.15
+    },
+    {
+     "species": "roselia",
+     "level": [
+      15,
+      17
+     ],
+     "weight": 0.15
+    },
+    {
+     "species": "buizel",
+     "level": [
+      15,
+      17
+     ],
+     "weight": 0.3
+    },
+    {
+     "species": "machop",
+     "level": [
+      15,
+      17
+     ],
+     "weight": 0.3
+    }
+   ]
+  },
+  {
+   "name": "Route 209",
+   "before_trainer": 135,
+   "encounters": [
+    {
+     "species": "chansey",
+     "level": [
+      16,
+      18
+     ],
+     "weight": 0.05
+    },
+    {
+     "species": "bibarel",
+     "level": [
+      16,
+      18
+     ],
+     "weight": 0.25
+    },
+    {
+     "species": "roselia",
+     "level": [
+      16,
+      18
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "staravia",
+     "level": [
+      16,
+      18
+     ],
+     "weight": 0.25
+    },
+    {
+     "species": "mimejr",
+     "level": [
+      16,
+      18
+     ],
+     "weight": 0.1
+    },
+    {
+     "species": "duskull",
+     "level": [
+      16,
+      18
+     ],
+     "weight": 0.15
+    }
+   ]
+  },
+  {
+   "name": "Route 210 South",
+   "before_trainer": 150,
+   "encounters": [
+    {
+     "species": "ponyta",
+     "level": [
+      18,
+      20
+     ],
+     "weight": 0.25
+    },
+    {
+     "species": "machoke",
+     "level": [
+      18,
+      20
+     ],
+     "weight": 0.15
+    },
+    {
+     "species": "chansey",
+     "level": [
+      18,
+      20
+     ],
+     "weight": 0.05
+    },
+    {
+     "species": "geodude",
+     "level": [
+      18,
+      20
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "kricketune",
+     "level": [
+      18,
+      20
+     ],
+     "weight": 0.15
+    },
+    {
+     "species": "bonsly",
+     "level": [
+      18,
+      20
+     ],
+     "weight": 0.1
+    },
+    {
+     "species": "hoothoot",
+     "level": [
+      18,
+      20
+     ],
+     "weight": 0.1
+    }
+   ]
+  },
+  {
+   "name": "Route 215",
+   "before_trainer": 162,
+   "encounters": [
+    {
+     "species": "kadabra",
+     "level": [
+      19,
+      22
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "geodude",
+     "level": [
+      19,
+      22
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "ponyta",
+     "level": [
+      19,
+      22
+     ],
+     "weight": 0.2
+    },
+    {
+     "species": "machoke",
+     "level": [
+      19,
+      22
+     ],
+     "weight": 0.15
+    },
+    {
+     "species": "staravia",
+     "level": [
+      19,
+      22
+     ],
+     "weight": 0.25
+    }
+   ]
+  }
+ ]
 }

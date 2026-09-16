@@ -1,4 +1,4 @@
-# HANDOFF — state of the project as of 2026-09-15
+# HANDOFF — state of the project as of 2026-09-16 (evening)
 
 Read this first. `project_overview.md` is the plan, `README.md` → Status is the
 full lab notebook (chronological, with every number). This file is the
@@ -8,17 +8,23 @@ compressed version: what exists, what was learned, what to do next.
 
 The project is a general Nuzlocke solver on Pokémon Showdown. The battler is
 a behaviour-cloned prior plus rollout search over the real engine; the run
-layer is currently a *scripted* planner that picks parties by simulated death
-probability. Everything runs in-process (no Showdown servers). On the BDSP
-slice through Gym Leader Roark (51 trainers), the default config cleared
-**100% of runs with 3.75 deaths per run** (20 episodes, `logs/plan_cap51_evo_v2.log`;
-was 2.40 before evolution + encounters v2 cut the pre-Roark catches to 10). The working slice is now **186 trainers through
-Gym Leader Gardenia**: evolution, roster graveyard, 22 encounter areas, and a
-prior retrained on that distribution plus targeted data on the deadliest
-fights give **168/186 cleared, 16 deaths, 10% clears** (10 episodes). The
-old ceiling of ~2 trainers was the environment's level rule, not the policy.
-Next: the rival fights at #164–166, then a learned run layer that must beat
-the scripted one.
+layer is a *scripted* planner that picks parties by simulated death
+probability. Everything runs in-process (no Showdown servers). The working
+slice is **186 trainers through Gym Leader Gardenia**; the default config
+(`--search 3,8 --search-all --deep 4,16`, prior `game_policy_cap186v3.pt`)
+clears **178.6 trainers / 13.4 deaths / 40% of runs** (20 episodes,
+`logs/plan_cap186v3_deep20.log`; noise floor between identical runs: ±2
+cleared, ±1.9 deaths, ±15 points of clear rate). On 2026-09-16 every
+run-layer knob was measured null on that table (refine, climb, beam and
+exhaustive candidate parties, lead order), the Gyarados wall was shown to
+be the battler's at any search width, and the cause of the conserved
+deaths was found in the **environment**: the 12-slot box drops 5–7 of the
+21 encounters per run, movesets are level-up-only at the cap level. The
+plan is now the **environment upgrade (project_overview.md → 2¾)**: game
+folder, rules object, known defects (three of five done), `best4`
+movesets, readable trace. Tables pending at the time of writing: lifted
+box (`--roster 30`, `logs/plan_cap186v3_deep20_roster30.log`) and the
+dupes clause (`logs/plan_cap186v3_deep20_dupes.log`).
 
 ## Architecture (what each file is)
 
@@ -46,6 +52,7 @@ ai_util/collect_game.py collect (sim, BC pairs from harvest matchups, + battle
 ai_util/pretrain_bc.py  masked-CE pretrain; multiple --data; sim-based eval;
                         --init/--value-only/--value-coef train the critic on `value`.
 ai_util/diff_sets.py    sim-vs-server team-setup diff (found the EV bug).
+data/species.json       dex export: name, types, ability slots, base stats (--build-species).
 scripts/gauntlet.py     BDSP data, Mon/pack_team, evolve(), BattleRunner (server,
                         legacy), SimBattleRunner (default): run(boss=, search=(k,r)),
                         estimate(), one Searcher per width. --build-moves writes
@@ -55,9 +62,12 @@ scripts/nuzlocke_env.py NuzlockeEnv: slice_len trainers (51 default), encounters
                         over the 186 order), roster ≤12 living + graveyard, party
                         ≤6, permadeath, level_rule cap with evolution, risk(n=)
                         query, risk features in obs, search_all, deep=(k,r) width
-                        at breakpoints and risk-flagged hard fights (DEEP_HP).
+                        at breakpoints and risk-flagged hard fights (DEEP_HP),
+                        max_roster=, dupes_clause=, pending offers queue, dropped list.
 scripts/plan_gauntlet.py Scripted planner + evaluation harness + death histogram;
-                        --slice N, --deep k,r, --refine N (re-query top-3 parties).
+                        --slice N, --deep k,r, --parties swap|beam|all, --roster N,
+                        --no-dupes, --workers N, --verbose (encounter trace).
+tests/test_nuzlocke_env.py  env rules: queued offers, dupes clause, box cap.
 scripts/train_nuzlocke.py PPO meta-policy trainer (sim backend; NOT retrained yet
                         on the new obs — old checkpoint is skipped on resume).
 tests/test_sim.py       bridge: play, mirror, fork. `uv run pytest -q`.
@@ -117,6 +127,13 @@ boss's max level (14 = Roark). ~85 s/episode.
    retry without a different idea (bigger critic, far more leaf data, or a
    value that conditions on the candidate). Rollouts stay the value.
 
+10. **Deaths are conserved across walls (2026-09-16).** Every party-side
+    knob (climb, beam, exhaustive parties) halves Edwin's deaths and the
+    saved mons die at the next wall (Gyarados #169), where no party in the
+    box helps and no search width helps. What the box lacks is what the
+    env dropped: 5–7 of 21 encounters per run at the 12-slot cap, and the
+    level-up-only movesets. The env sets the ceiling, again (finding 1).
+
 ## Defects found and fixed (do not re-find these)
 
 - **Server fills 252 EVs per stat** (Custom Game has no EV limit); raw sim
@@ -137,6 +154,11 @@ boss's max level (14 = Roark). ~85 s/episode.
   full epochs or build a boss-only holdout.
 - **Obs risk queries in the planner** cost +50%; planner runs with
   `risk_features=False` and queries candidates directly.
+- **Two areas opening at one trainer lost an encounter** (the later offer
+  overwrote the earlier; never fired on the current order file) and **a
+  full box dropped offers silently**: offers are queued (`env.pending`),
+  drops are counted (`env.dropped`). The hand-made ability table was a
+  no-op (equal to the dex's first slot for all 41 species): deleted.
 - **Species names in packed teams** (found on the 186 slice): `Mon.pack`
   used `capitalize()`, so 'Mr. mime' ≠ Showdown's 'Mr. Mime'; Showdown
   renames a nickname equal to the species, poke-env keys the team by our
@@ -173,83 +195,32 @@ boss's max level (14 = Roark). ~85 s/episode.
   same without CRN). `logs/search_{prior,crn,nocrn,h0,h3,h0_k6r16,h0_v2}.log`
   — the 2l holdout table. `models/` and `logs/` are gitignored.
 
-## Next steps (roadmap step 2m onward, in order)
+## Next steps (2026-09-16 evening; the plan is project_overview.md → 2¾)
 
-The roadmap in `project_overview.md` now also carries: **1a** (decide the
-teacher ceiling: one new beyond-teacher attempt or accept it), **1b** (search
-width per trainer), **2o** (sample-starved risk query and party choice),
-**2p** (roster cap is an obs artefact), **2q** (owed measurements), a
-**deletion pass (2½)** for the off-path and null-result code, and **3a**
-(real BDSP data: the order file is level-sorted, encounters are hand-made,
-non-level evolutions missing). Added 2026-09-16 after a project review.
+1. **Box is unbounded by default now** (`--roster 30`, table in README →
+   Status: inside noise on cleared / clear rate; deaths per run not
+   comparable across box sizes). Dupes clause measured (12-box:
+   176.25 / 61.5 / 14.0 / 25%, edge of noise, kept as the standard rule).
+   **Read the new-defaults baseline** `logs/plan_cap186v3_deep20_base2.log`
+   (unbounded box + dupes clause): every later env change is measured
+   against it, not against the 12-box 178.6 / 13.4 / 40%.
+2. **E1 game folder** (`data/bdsp/`, `load_game`), behaviour-preserving:
+   the table must reproduce. `data/species.json` (`--build-species`) is
+   already E1's species file; E3e ability slots are in (not in base2).
+3. **E4 `best4` movesets** — the largest expected gain at parity. It is a
+   progression change: regenerate the harvest, retrain the prior, table.
+4. **E5** `--trace` (the `--verbose` encounter lines are a start), then
+   **E2** the rules object last.
+5. Deletion pass (2½) before step 3; `--parties beam|all` goes with it
+   unless the lifted box changes the picture.
+6. Then 1a (teacher ceiling decision), 2e (learned run layer, needs 2p),
+   step 3 (generality).
 
-1. **Value estimate (2l) is done as far as cheap ideas go**: common random
-   numbers are in; the learned leaf was null (finding 8). If the battler
-   still needs to improve later, the remaining levers are deeper search
-   (2-ply over the enemy's likely replies) or a candidate-conditioned value.
-2. **The 186 slice (through Gardenia, cap 22) is the working slice now.**
-   Evolution, graveyard (dead mons free roster slots), encounters v2 (22
-   areas gated by level band) and the OOD loop are in. Current prior:
-   `models/game_policy_cap186v3.pt` = 96k base pairs (harvest v2) + 44k pairs
-   on synthetic hard matchups (400 late-game parties x the 9 deadliest teams,
-   `battles_hard_synth.jsonl`). Table, 10 eps, search-all + risk parties:
-   **168.2 cleared / 44.8 no-death / 16.2 deaths / 10% clears** (v2 prior
-   160.2 / 48.7 / 18.8 / 0%; heuristic fast 127.2 / 33.3 / 17.7 / 0%).
-   What moved it: targeted teacher data on the deadly fights (Edwin alone:
-   prior 71% → 87%, +search 92% vs teacher 89%). What did not: roster
-   refills (more catches = more deaths), the HP-margin party score.
-   Killers at v3: rival #164–166 (4 mons at 19–21 incl. an evolved starter;
-   47 deaths / 10 runs), Edwin #139 (16), Roark (12), Craig #163, Gyarados
-   #169.
-   **2026-09-16, compute dial (roadmap 1b) — done, positive.** The rival was
-   already in the hard-synth data; the rival probe (`models/rival_pairs.json`,
-   `logs/rival_*.log`) shows prior = teacher (96.7% win, 0.37 vs 0.29 deaths
-   per mon: the teacher itself loses ~1.7 mons per rival fight), search k3 r8
-   0.20, k4 r16 0.16. So: `--deep 4,16` (breakpoints + every fight the
-   fielded party's n=8 risk query flags as a loss / a death / HP < 0.5) on
-   the 186 slice, 20 eps (`logs/plan_cap186v3_deep20.log`): **178.6 cleared /
-   62.4 no-death / 13.4 deaths / 40% clears**, 25 deep fights per run
-   (10-ep table 175.4 / 63.7 / 15.7 / 20%, `plan_cap186v3_deep.log`; without
-   deep 168.2 / 44.8 / 16.2 / 10%). The wall is Edwin #139 (42 deaths / 20
-   runs, a third of all deaths), then Gyarados #169 (18) / #184 (14), the
-   rival trio (~15 each), Craig (15). This is the run config now:
-   ```bash
-   uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 186 \
-     --policy models/game_policy_cap186v3.pt --search 3,8 --search-all --deep 4,16 --workers 5
-   ```
-   **Noise floor:** the same config on the same 20 seeds, run twice, differed
-   by 2 cleared / 1.9 deaths / 15 points of clear rate (README → Status).
-   `--refine 32` (top-3 parties re-queried at n=32) landed inside that: null.
-   Levers left, in order: (a) `--climb` (a second round of single swaps from
-   the best party when it is still flagged hard; code in 2026-09-16, see
-   README for the number), (b) a party layer that keeps type answers alive
-   (Fighting/Grass/Water for Edwin's Sudowoodo, Electric/Rock for Gyarados)
-   — under the cap rule all roster mons are at the same level, so "top-6"
-   is catch order and the swap set does the choosing; Edwin alone is a
-   third of all deaths, (c) a deeper width still at the flagged fights (k4
-   r32, or 2-ply over the enemy's reply). `--workers 10` (1.1 GB and one
-   core each; 20 workers peaked at 32 GB used and was fine) makes a
-   20-episode 186 table ~40 min. Not a lever: more teacher
-   data on the rival (prior = teacher there). 51-slice default with
-   evolution + encounters v2 (20 eps, `logs/plan_cap51_evo_v2.log`): 51.0 /
-   36.75 / **3.75 deaths** / 100% — up from the stale 2.40; Roark 33 deaths
-   in 20 runs (10 pre-Roark encounters now, was 12).
-   Pipeline commands (one job at a time — RAM):
-   ```bash
-   uv run python -u scripts/plan_gauntlet.py --episodes 300 --seed 1000 --fast --slice 186 \
-     --harvest data/teams/gauntlet_harvest/battles_cap186v2.jsonl
-   uv run python -u ai_util/collect_game.py collect --jsonl data/teams/gauntlet_harvest/battles_cap186v2.jsonl --battles 20000 --workers 8
-   uv run python -u ai_util/collect_game.py collect --jsonl data/teams/gauntlet_harvest/battles_hard_synth.jsonl --battles 3600 --workers 8
-   uv run python -u ai_util/pretrain_bc.py pretrain --data models/bc_game_<base>/data.npz models/bc_game_<hard>/data.npz --epochs 20 --out models/game_policy_cap186v3.pt
-   uv run python -u scripts/plan_gauntlet.py --episodes 10 --seed 300 --policy models/game_policy_cap186v3.pt --search 3,8 --search-all --slice 186
-   uv run python -u ai_util/evaluate.py --pairs models/edwin_pairs.json --n-pairs 30 --n 3 --seed 5 --policy models/game_policy_cap186v3.pt --search   # matchup probe
-   ```
-3. **Learned run layer (2e)**: retrain `train_nuzlocke.py` on the sim backend
-   with the risk features; it must beat the scripted table (100% / 2.65).
-   If it can't, the scripted planner *is* the run layer.
-4. **Generality (step 3)**: second source game/hack, segment slicing, held-out
-   gauntlets, memorisation probe. Nothing has been done here yet.
-5. Later: move events/builds, blind regime (belief over sets), hack mods.
+Not to retry (all measured, 2026-09-16, README → Status): `--refine`,
+`--climb` (deleted), `--parties beam|all` (null), lead order, a
+switch-out-after-a-hit wrapper, wider search at the Gyarados fight, a
+learned value head as the rollout leaf (null twice, 2026-09-15), more
+rival teacher data.
 
 ## Environment gotchas
 

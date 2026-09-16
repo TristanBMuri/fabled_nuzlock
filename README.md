@@ -698,6 +698,125 @@ project_overview.md # the plan / roadmap
   noise; the deep-search gain (+10 cleared, −3 deaths vs no-deep) is outside.
   Refine sits inside it, so re-querying the finalists at n=32 does not help:
   the candidate set, not the estimate, is the limit.
+  **`--climb` (one extra round of single swaps from the best party when it is
+  still hard) is null on the headline** (same seeds, 10 workers, 28 min;
+  `logs/plan_cap186v3_deep20_climb.log`):
+    178.55 cleared / 70.7 no-death / 13.4 deaths / 40% clears (no climb: 178.6 / 62.4 / 13.4 / 40%)
+  Edwin's deaths halved (42 → 24) and reappeared one wall later: Fisher Juan's
+  Gyarados #169 went 18 → 45 deaths with 4 losses. Deaths move, they do not
+  vanish, until every wall is handled.
+  **Is the candidate set the limit? Yes, at Edwin (probe, 2026-09-16).** Four
+  runs played to #139 with the default config, then at Edwin every C(alive, 6)
+  party scored with the planner's n=8 score against the swap set's pick; both
+  played out 16 times with the deep (4,16) search brain (scratch script, not
+  kept). Deaths per battle, planner → exhaustive: 0.94 → 0.62, 2.69 → 1.31,
+  1.81 → 0.50, 2.56 → 0.62 (mean 2.0 → 0.76). The exhaustive parties drop the
+  Flying/Bug/Electric mons and keep two or three Grass/Fighting/Water answers
+  — three changes from the base, out of the swap set's reach. Cost: 210–924
+  candidates, 30–135 s per fight. Second probe, four cheaper searches on
+  fresh rosters at Edwin (mean deaths per battle under the deep brain):
+    swap set 1.60 | hill-climb until no gain 1.30 (4–9 s) | beam 3x3 1.25 (9–11 s) | exhaustive 1.08 (56–135 s)
+  Hill-climb and beam get stuck where the swap set's best is a local optimum
+  (seed 301: all three identical, exhaustive 1.69 → 1.19). At Fisher Juan the
+  roster is 2–10 mons by then, every search picks the same party, and the
+  Gyarados deaths (0.5–1.4 per battle) are the battler's: Gyarados@21
+  (Intimidate; Twister, Ice Fang, Scary Face, Waterfall) vs a party at 22
+  costs a mon unless an Electric lead one-shots it. Battler probe on that
+  roster's party (Luxio lead, n=16 battles each, deaths per battle): teacher
+  1.00, prior 1.12, search 3,8 1.00, search 4,16 0.75, search 6,32 0.94; a
+  scripted "switch out after taking a hit" wrapper is worse (1.75 on the
+  prior, 1.12 on search 4,16: the switch-in just eats a Waterfall). Width
+  does not buy a second mon here: this wall is one death per run at parity
+  unless the roster carries a specific answer, which the run layer would
+  have to plan for from the catch phase, not at the fight.
+  **Roster dump at the walls (seed 300, asked for on 2026-09-16).** Everything
+  sits at L22 (the cap); at Edwin the box was 12/12. Party at Gyarados:
+  Luxio (Spark is the only super-effective move in the box), Golbat,
+  Beautifly, Kricketune, Cherubi, Budew; bench Staravia, Shellos, Noctowl,
+  Bonsly. Two data defects surfaced: movesets are the last four
+  level-up moves only (Meditite@22 has no attacking move), and a full box
+  drops encounters silently. (A third, "evolved forms lose their ability",
+  was a false alarm: the hand-made ability table equals the dex's first
+  ability slot for all 41 species, and the validator gives evolved forms
+  that same first slot — Luxio's Rivalry is the rule, not a loss. The table
+  can go.) 20 heuristic replays: 10 of 351 offers dropped
+  (those runs die too often to fill the box); default-config replays with
+  encounter logging (default config, 2 seeds): **7 of 21 and 5 of 21 offers
+  dropped.** The box is full from Eterna Forest (#59, seed 300) or Route 206
+  (#81, seed 301) until deaths free slots, and what it drops is the
+  mid-game: Bronzor, Machop (twice), Gastly, Buizel, Duskull, Meditite,
+  Geodude — the Rock resist and the Fighting/Ghost answers to Edwin, the
+  Mr. Mimes and the rival — while three Kricketune and two Budew keep their
+  slots. Under the cap rule a catch at #120 is at the same level as one at
+  #4, so the 12-slot box (an artefact of the old fixed-size PPO obs, roadmap
+  2p) is a real ceiling on the run layer. Seed 300 finished Gardenia with
+  two mons left; seed 301 wiped at Gyarados with a 2-mon party. Next
+  measurement: the same table with the cap lifted (`--roster`).
+  Roadmap 3a carries the data fixes.
+  **Env upgrade E3 (2026-09-16, roadmap 2¾).** Encounter offers are queued
+  per area and answered one at a time (no more overwriting when two areas
+  open at one trainer); a dupes clause (default, `--no-dupes` to compare)
+  rerolls an area's table among families never owned; the hand-made
+  ability table is gone (first ability slot everywhere, which is what the
+  validator did anyway); `--roster N` lifts the box; `--verbose` traces
+  offers, catches and drops. `tests/test_nuzlocke_env.py`.
+  **Lifted box** (`--roster 30` ≥ starter + 21 areas = unbounded on this
+  slice; 12-box code otherwise identical, no dupes clause; 5 workers, 59 min;
+  `logs/plan_cap186v3_deep20_roster30.log`):
+    180.15 cleared / 58.0 no-death / 16.35 deaths / 45% clears (12-box: 178.6 / 62.4 / 13.4 / 40%)
+  Cleared, no-death and clear rate are inside the noise floor. Deaths per
+  run is **not comparable across box sizes**: 10 of the 20 runs end with
+  exactly 22 deaths, i.e. the whole box wiped at the Eterna walls, where a
+  12-box run would have wiped earlier with fewer bodies. The lever the
+  dropped encounters were supposed to be (a Bronzor or Machop for Edwin)
+  does not show: every catch is at the cap with level-up-only moves, so
+  the extra mons are more of the same. So E3c is decided by principle, not
+  gain: the box is unbounded by default from here (`--roster 30`), and
+  every table from now on says so in its header. Expect E4 (movesets) to
+  be where the extra catches start to matter.
+  **Dupes clause** (12-box, otherwise the baseline config; 10 workers, 28 min;
+  `logs/plan_cap186v3_deep20_dupes.log`):
+    176.25 cleared / 61.5 no-death / 14.0 deaths / 25% clears (no clause: 178.6 / 62.4 / 13.4 / 40%)
+  At the edge of the noise floor in the wrong direction (−2.3 cleared, −15
+  points, +0.6 deaths). Kept on anyway: it is the standard rule, and with
+  the box unbounded it is purely a variety rule (a dupe is no longer a
+  free body that costs a slot). The first table with both new defaults
+  (unbounded box + dupes clause, `logs/plan_cap186v3_deep20_base2.log`) is
+  the new baseline every later env change is measured against.
+  **E3e ability slots (2026-09-16, after base2 was launched).** Catches roll
+  ability slot 0 or 1 at even odds (a Shinx is Rivalry or Intimidate),
+  starters get slot 0, evolution keeps the slot (Starly Keen Eye → Staravia
+  Intimidate; Shinx Intimidate → Luxio Intimidate). Data: `data/species.json`
+  from the dex (`gauntlet.py --build-species`; 275 species, also E1's
+  species file). Not in base2; measured with E4.
+  **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
+  is the party's roster order, so the lead is whichever mon was caught
+  first. Rotating each of the six into the lead: under the fast prior the
+  n=32 estimate swings from 0.6 to 4.4 deaths per battle (Beautifly lead vs
+  Grotle lead), but the deep search brain plays every lead to 1.1–1.9
+  deaths, inside the 16-play-out noise, because it switches on turn one
+  when it has to. Consequence: nothing to gain in the fight; but the party
+  *score* the planner ranks by is the fast prior's, and it depends on the
+  accidental lead. A cheap cleanup for later: score a candidate with its
+  best-by-prior lead, or make the query lead-invariant. Note the mismatch: the risk query is the fast
+  prior, the fight is played by search; n=32 estimates and deep play-outs
+  disagree by up to 0.5 deaths. `plan_gauntlet.py --parties beam|all` (replaces
+  `--climb`/`--refine`, both null) widens the candidate set only when the best
+  swap is still flagged hard. Tables:
+    beam (5 workers, 68 min, `logs/plan_cap186v3_deep20_beam.log`):
+      178.15 cleared / 58.9 no-death / 13.75 deaths / 35% clears, 17.1 deep fights
+      (baseline 178.6 / 62.4 / 13.4 / 40%; climb 178.55 / 70.7 / 13.4 / 40%)
+    all (10 workers, 106 min, `logs/plan_cap186v3_deep20_all.log`):
+      178.95 cleared / 79.8 no-death / 13.05 deaths / 30% clears, 16.4 deep fights
+  Both are null on cleared, deaths and clear rate. `all`'s no-death mean is
+  +17, but that metric is the first-death trainer and jumps between a few
+  values (32 Hiker Daniel, 50 Roark, 84, 134, 139), so three runs surviving
+  Daniel move it by 15 on their own; not evidence at 20 episodes. Beam is
+  null, and both fail the same way climb did: Edwin 42 → 22 deaths,
+  Fisher Juan 18 → 36 with 6 losses. A better party at Edwin keeps mons
+  alive that then die to the Gyarados, where no party in the box helps
+  (probe above). Deaths are conserved across the walls until the box holds
+  an answer to each — which the 12-slot box drops (next entry).
   ```
 - [x] **Self-play PPO (no_AI, 2026-08-27)**: gen9randombattle, 20M steps / 12
   ```

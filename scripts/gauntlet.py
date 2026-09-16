@@ -7,6 +7,7 @@ Modes:
 """
 
 import argparse
+import functools
 import json
 import logging
 import os
@@ -327,6 +328,58 @@ def build_moves(max_level: int = 20) -> None:
           f"{max_level}) and evolutions.json for {len(data['evos'])} species")
 
 
+SPECIES_SCRIPT = """
+const path = require('path');
+const {Dex} = require(path.join(process.argv[1], 'dist', 'sim'));
+const out = {};
+for (const sp of process.argv.slice(2)) {
+  const s = Dex.species.get(sp);
+  if (!s.exists) continue;
+  out[s.id] = {name: s.name, types: s.types, abilities: s.abilities, baseStats: s.baseStats};
+}
+console.log(JSON.stringify(out));
+"""
+
+
+def build_species() -> None:
+    """data/species.json: name, types, ability slots ({0, 1, H}) and base stats
+    for every species a run can hold or face (encounters, their evolutions,
+    trainer parties). The env rolls a catch's ability slot from it."""
+    from poke_env.data import to_id_str
+    ids = set(json.load(open(DATA / "encounter_moves.json")))
+    trainers, _ = load_trainers()
+    ids |= {to_id_str(species_name(p["species"])) for t in trainers.values() for p in t["party"]}
+    raw = subprocess.run(["node", "-e", SPECIES_SCRIPT, str(ROOT / "pokemon-showdown"), *sorted(ids)],
+                         capture_output=True, text=True, check=True).stdout
+    data = json.loads(raw)
+    (DATA / "species.json").write_text(json.dumps(data, indent=1))
+    print(f"wrote species.json for {len(data)} species ({len(ids) - len(data)} unknown)")
+
+
+@functools.lru_cache(maxsize=None)
+def load_species() -> dict:
+    return json.load(open(DATA / "species.json"))
+
+
+def ability_slots(species: str) -> dict:
+    """{'0': ..., '1': ..., 'H': ...} for a species id ('' if unknown)."""
+    return load_species().get(species, {}).get("abilities", {})
+
+
+def roll_ability(species: str, rng) -> str | None:
+    """A wild catch has ability slot 0 or 1 (even odds), never the hidden one."""
+    slots = ability_slots(species)
+    return rng.choice([slots[k] for k in ("0", "1") if k in slots]) if slots else None
+
+
+def evolved_ability(species: str, ability: str | None, evolved: str) -> str | None:
+    """Evolution keeps the ability *slot*: Starly Keen Eye (0) -> Staravia
+    Intimidate (0); Shinx Intimidate (1) -> Luxio Intimidate (1)."""
+    slot = next((k for k, v in ability_slots(species).items() if v == ability), "0")
+    new = ability_slots(evolved)
+    return new.get(slot, new.get("0")) if new else None
+
+
 def encounter_moves(species: str, level: int) -> list[str]:
     moves = json.load(open(DATA / "encounter_moves.json"))
     by_level = moves.get(species, {})
@@ -393,6 +446,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--build-moves", action="store_true")
+    ap.add_argument("--build-species", action="store_true", help="data/species.json from the dex")
     ap.add_argument("--slice", type=int, default=50)
     ap.add_argument("--max-level", type=int, default=20)
     args = ap.parse_args()
@@ -400,3 +454,5 @@ if __name__ == "__main__":
         check(args.slice)
     if args.build_moves:
         build_moves(args.max_level)
+    if args.build_species:
+        build_species()

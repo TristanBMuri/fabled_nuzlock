@@ -1,8 +1,9 @@
 """Scripted run-level planner: the baseline any learned run policy must beat.
 
-Per trainer: candidate parties = best-known party plus every single swap with
-a box mon; each is scored by the sim's death-probability query
-(P(win) − λ·mean P(death)); the best is fielded. Encounters are always
+Per trainer: candidate parties = the base party (top-6 by level) plus every
+single swap with a box mon; each is scored by the sim's death-probability
+query (P(win) − λ·mean P(death) + HP margin); the best is fielded. At a fight
+the best swap still finds hard, `--parties beam|all` widens the candidate set. Encounters are always
 caught while there is room. Reports trainers cleared, trainers cleared
 without a death, deaths, and slice clears over N episodes.
 
@@ -20,10 +21,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from nuzlocke_env import DEEP_HP, MAX_PARTY, RISK_BATTLES, SLICE_LEN, NuzlockeEnv  # noqa: E402
-
-REFINE_TOP = 3  # candidates re-queried at the larger n when --refine is set
-
+from nuzlocke_env import DEEP_HP, MAX_PARTY, MAX_ROSTER, SLICE_LEN, NuzlockeEnv  # noqa: E402
 
 def swaps(base, alive):
     """The party plus every single swap with a box mon."""
@@ -33,7 +31,7 @@ def swaps(base, alive):
 
 
 def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False,
-                 refine: int = 0, climb: bool = False) -> list[int]:
+                 parties: str = "swap") -> list[int]:
     alive = [i for i, m in enumerate(env.roster) if m.alive]
     if len(alive) <= MAX_PARTY:
         return alive  # nuzlocke rule: field everything you can
@@ -41,49 +39,58 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
     base = by_level[:MAX_PARTY]
     if fast:  # no risk queries: highest levels, for bulk harvesting
         return base
+    memo = {}
 
-    def score(p, n=RISK_BATTLES):
+    def score(p):
         # P(win) − λ·mean P(death) + margin: at n=8 most candidates show zero
         # deaths, and HP left is what separates a safe party from a lucky one
-        p_win, p_death, hp = env.risk(p, n)
-        return p_win - lam * float(np.mean(p_death)) + HP_WEIGHT * hp if p_death else p_win
+        if p not in memo:
+            p_win, p_death, hp = env.risk(p)
+            memo[p] = p_win - lam * float(np.mean(p_death)) + HP_WEIGHT * hp if p_death else p_win
+        return memo[p]
 
-    def hard(p):  # same trigger as the env's deep search
+    def hard(p):  # same trigger as the env's deep search (cached: free)
         p_win, p_death, hp = env.risk(p)
         return p_win < 1.0 or max(p_death, default=0.0) > 0.0 or hp < DEEP_HP
 
-    scored = sorted(((score(p), p) for p in swaps(base, alive)), reverse=True)
-    if climb and hard(scored[0][1]):
-        # a second round of swaps from the best party: two changes from the
-        # base are out of reach otherwise, and a hard fight (Edwin's three
-        # Sudowoodo) may need two type answers that are both in the box
-        more = [p for p in swaps(scored[0][1], alive) if p not in dict((q, s) for s, q in scored)]
-        scored = sorted(scored + [(score(p), p) for p in more], reverse=True)
-    if refine:  # sample starvation: n=8 misses ~5% risks; re-query the finalists
-        scored = sorted(((score(p, refine), p) for _, p in scored[:REFINE_TOP]), reverse=True)
+    front = sorted(swaps(base, alive), key=score, reverse=True)
+    if parties != "swap" and hard(front[0]):
+        # The swap set is the limit at a wall (README 2o): a hard fight may need
+        # several changes from the base party. Widen only there (cost).
+        if parties == "all":
+            front = sorted((tuple(c) for c in itertools.combinations(alive, MAX_PARTY)),
+                           key=score, reverse=True)
+        else:  # beam: expand the single swaps of the top BEAM parties, BEAM_ROUNDS times
+            for _ in range(BEAM_ROUNDS - 1):
+                pool = set(front[:BEAM]) | {q for p in front[:BEAM] for q in swaps(p, alive)}
+                front = sorted(pool, key=score, reverse=True)
     if verbose:
-        best, second = scored[0], scored[1] if len(scored) > 1 else None
-        print(f"    {len(cands)} candidates: best {best[0]:+.2f} "
-              f"{[env.roster[i].species for i in best[1]]}"
-              + (f", next {second[0]:+.2f}" if second else ""))
-    return list(scored[0][1])
+        print(f"    {len(memo)} candidates: best {score(front[0]):+.2f} "
+              f"{[env.roster[i].species for i in front[0]]}"
+              + (f", next {score(front[1]):+.2f}" if len(front) > 1 else ""))
+    return list(front[0])
 
 
+BEAM, BEAM_ROUNDS = 3, 3  # --parties beam: top-3 parties expanded three times
 HP_WEIGHT = 0.2  # margin tie-breaker weight in the party score (--hp-weight)
 DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes)
 LOSSES_AT: dict[int, int] = {}  # trainer index -> lost battles
 
 
 def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool = False,
-            refine: int = 0, climb: bool = False) -> dict:
+            parties: str = "swap") -> dict:
     obs, info = env.reset(seed=seed)
     deaths, first_death_at = 0, None
     while not env.done:
         if env.phase == "ENCOUNTER":
-            env.step(1 if info["action_mask"][1] else 0)
+            offer, catch = env.pending[0], bool(info["action_mask"][1])
+            if verbose:
+                print(f"  offer {offer.species}@{offer.level}: {'caught' if catch else 'no room'}"
+                      f"  box {len(env.roster)}/{env.max_roster}")
+            env.step(1 if catch else 0)
             info = {"action_mask": env._mask()}
             continue
-        for i in choose_party(env, lam, verbose, fast, refine, climb):
+        for i in choose_party(env, lam, verbose, fast, parties):
             if i not in env.party:
                 env.step(1 + i)
         alive_before = sum(m.alive for m in env.roster)
@@ -100,6 +107,8 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
         if verbose:
             print(f"  trainer {t:2d} -> {'won' if env.trainer_idx > t else 'LOST'}, "
                   f"deaths {died} | {env.render()}")
+    if verbose and env.dropped:
+        print(f"  dropped for lack of box room: {', '.join(env.dropped)}")
         info = {"action_mask": env._mask()}
     return {"cleared": env.trainer_idx, "deaths": deaths,
             "cleared_no_death": env.trainer_idx if first_death_at is None else first_death_at,
@@ -123,10 +132,11 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict]
     env = NuzlockeEnv(seed=args.seed, backend="sim", policy=args.policy, search=width(args.search),
                       level_margin=args.level_margin, level_rule=args.level_rule,
                       risk_features=False, search_all=args.search_all, slice_len=args.slice,
-                      deep=width(args.deep))
+                      deep=width(args.deep), max_roster=args.roster,
+                      dupes_clause=not args.no_dupes)
     t0, rows = time.time(), []
     for n, s in enumerate(seeds):
-        r = episode(env, s, args.lam, args.verbose, args.fast, args.refine, args.climb)
+        r = episode(env, s, args.lam, args.verbose, args.fast, args.parties)
         rows.append(r)
         print(f"ep seed {s:4d}: cleared {r['cleared']:3d}  no-death {r['cleared_no_death']:3d}  "
               f"deaths {r['deaths']:2d}  {'CLEAR' if r['slice_clear'] else ''}  "
@@ -143,11 +153,10 @@ def main() -> None:
     ap.add_argument("--search-all", action="store_true", help="search on every trainer")
     ap.add_argument("--deep", help="k,rollouts at breakpoints and fights the risk query "
                                    "flags as hard (a loss, a death or HP < DEEP_HP at n=8), e.g. 4,16")
-    ap.add_argument("--refine", type=int, default=0, metavar="N",
-                    help="re-query the top 3 candidate parties at N battles (default: off)")
-    ap.add_argument("--climb", action="store_true",
-                    help="when the best party is still flagged hard, score a second round of "
-                         "single swaps from it (two changes from the base party)")
+    ap.add_argument("--parties", choices=["swap", "beam", "all"], default="swap",
+                    help="candidate parties when the best single swap is still flagged hard: "
+                         "beam = top-3 parties' swaps expanded 3 rounds (~10 s), "
+                         "all = every 6-of-roster party (~2 min at 12 mons)")
     ap.add_argument("--lam", type=float, default=1.0, help="death penalty weight")
     ap.add_argument("--level-margin", type=int, default=0,
                     help="player level = rule level + this (XP proxy)")
@@ -157,6 +166,10 @@ def main() -> None:
                     help="no risk queries (highest-level party): bulk harvesting")
     ap.add_argument("--slice", type=int, default=SLICE_LEN,
                     help="trainers per episode (51 = through Roark, 186 = through Gardenia)")
+    ap.add_argument("--roster", type=int, default=30,
+                    help="box slots for living mons (default 30 = unbounded on the 186 slice, "
+                         "starter + 21 areas; the old 12-slot box dropped 5-7 encounters per run)")
+    ap.add_argument("--no-dupes", action="store_true", help="plain first encounter (default: dupes clause)")
     ap.add_argument("--hp-weight", type=float, default=HP_WEIGHT,
                     help="weight of mean HP left in the party score (0 = old score)")
     ap.add_argument("--harvest", metavar="JSONL",
@@ -185,7 +198,7 @@ def main() -> None:
     k = lambda f: np.mean([r[f] for r in rows])
     print(f"\n{args.episodes} episodes | slice {args.slice} | battler={args.policy or 'SimpleHeuristics'} "
           f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} "
-          f"refine={args.refine or 'off'} climb={args.climb} lam={args.lam} level_rule={args.level_rule} "
+          f"parties={args.parties} roster={args.roster} dupes={not args.no_dupes} lam={args.lam} level_rule={args.level_rule} "
           f"margin={args.level_margin} | {args.workers} workers, {(time.time() - t0) / 60:.0f} min\n"
           f"  trainers cleared        {k('cleared'):.2f}\n"
           f"  cleared without a death {k('cleared_no_death'):.2f}\n"
