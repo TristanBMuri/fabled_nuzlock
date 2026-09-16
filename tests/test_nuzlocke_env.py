@@ -106,6 +106,7 @@ def test_best4_moveset_rule():
     best = encounter_moves("meditite", 22, "best4")
     assert len(best) == 4 and best[0] == "confusion" and "hiddenpower" in best  # attacks at last
     assert encounter_moves("bonsly", 22, "best4")[:2] == ["rockthrow", "lowkick"]  # variable power counts
+    assert "selfdestruct" not in encounter_moves("geodude", 22, "best4")  # self-KO never
     lux = encounter_moves("luxio", 22, "best4")
     assert lux[0] == "spark"  # strongest STAB first
     assert len(set(lux)) == len(lux)

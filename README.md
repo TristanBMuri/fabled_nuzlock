@@ -830,6 +830,18 @@ project_overview.md # the plan / roadmap
   table there is 134.5 cleared / 33.8 no-death / 19.2 deaths / 0% (last4
   harvest, 12-box: 127.2 / 33.3 / 17.7 / 0%) — confounded by the box and
   the clause, so only a sanity number.
+  **best4 on the current (last4-trained) prior** (10 workers, 39 min;
+  `logs/plan_cap186v3_deep20_best4.log`):
+    180.2 cleared / 60.8 no-death / 19.2 deaths / 25% clears (base2: 183.15 / 60.95 / 16.25 / 60%)
+  Worse, outside the floor on clear rate and deaths. Two causes, one fixed:
+  (1) the rule handed Geodude Selfdestruct as its strongest attack (200
+  power) — a guaranteed death; self-KO moves are now excluded
+  (`SELF_KO_MOVES`), harvest and synth regenerated (40.9k + 3600
+  matchups); (2) the prior is out of distribution (its obs encodes the
+  moves it was cloned on). The rival trio went 22/19/15 → 37/29/23 deaths.
+  Next: the OOD loop under best4 (collect → pretrain →
+  `models/game_policy_best4.pt`) and the table with that prior; that is
+  the number E4 is judged on.
   **E3e ability slots (2026-09-16, after base2 was launched).** Catches roll
   ability slot 0 or 1 at even odds (a Shinx is Rivalry or Intimidate),
   starters get slot 0, evolution keeps the slot (Starly Keen Eye → Staravia

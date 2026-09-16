@@ -409,6 +409,8 @@ def evolved_ability(species: str, ability: str | None, evolved: str) -> str | No
 
 MOVESET_RULE = "last4"  # or "best4" (plan_gauntlet --moveset); a rule change is a progression change
 # status moves worth a slot under best4, in preference order
+SELF_KO_MOVES = {"selfdestruct", "explosion", "memento", "finalgambit", "healingwish",
+                 "lunardance", "mistyexplosion"}  # never a slot under best4: the user faints
 STATUS_MOVES = ["swordsdance", "dragondance", "nastyplot", "calmmind", "bulkup", "growth",
                 "agility", "recover", "roost", "morningsun", "synthesis", "moonlight",
                 "softboiled", "milkdrink", "slackoff", "rest", "spore", "sleeppowder",
@@ -424,13 +426,14 @@ def encounter_moves(species: str, level: int, rule: str | None = None) -> list[s
             attack, the strongest attack of another type, the next strongest
             attack, one status move from STATUS_MOVES; slots left are filled
             with the next attacks, then the latest moves. Variable-damage
-            attacks (Seismic Toss, Low Kick) count as 50 power."""
+            attacks (Seismic Toss, Low Kick) count as 50 power; self-KO
+            moves (Selfdestruct, Explosion, Memento) never get a slot."""
     pool = list(dict.fromkeys(m for m, lvl in load_game()["learnsets"].get(species, []) if lvl <= level))
     if (rule or MOVESET_RULE) == "last4" or not pool:
         return pool[-4:]
     md, stab = load_game()["moves"], set(load_game()["species"].get(species, {}).get("types", []))
     power = lambda m: md[m]["power"] or 50
-    attacks = sorted((m for m in pool if md[m]["category"] != "Status"),
+    attacks = sorted((m for m in pool if md[m]["category"] != "Status" and m not in SELF_KO_MOVES),
                      key=lambda m: (-power(m), -pool.index(m)))
     picks = []
     for cond in (lambda m: md[m]["type"] in stab,
@@ -441,7 +444,7 @@ def encounter_moves(species: str, level: int, rule: str | None = None) -> list[s
             picks.append(nxt)
     picks += [m for m in STATUS_MOVES if m in pool][:1]
     picks += [m for m in attacks if m not in picks]
-    picks += [m for m in reversed(pool) if m not in picks]
+    picks += [m for m in reversed(pool) if m not in picks and m not in SELF_KO_MOVES]
     return picks[:4]
 
 
