@@ -50,7 +50,8 @@ def load_game(name: str = GAME) -> dict:
             "encounters": j("encounters.json"),
             "learnsets": j("learnsets.json"),
             "evolutions": j("evolutions.json"),
-            "species": j("species.json")}
+            "species": j("species.json"),
+            "moves": j("moves.json")}
 
 
 def load_trainers():
@@ -319,7 +320,12 @@ for (const sp of species) {
   levelup.sort((a, b) => a[1] - b[1]);
   out[sp] = levelup.filter(([, l]) => l <= maxLevel);
 }
-console.log(JSON.stringify({moves: out, evos}));
+const moves = {};
+for (const ls of Object.values(out)) for (const [m] of ls) {
+  const mv = Dex.moves.get(m);
+  moves[mv.id] = {type: mv.type, power: mv.basePower, category: mv.category, accuracy: mv.accuracy};
+}
+console.log(JSON.stringify({moves: out, evos, movedata: moves}));
 """
 
 
@@ -343,8 +349,10 @@ def build_moves(max_level: int = 100) -> None:
         print(f"WARN: no learnset data for {missing}")
     (DATA / GAME / "learnsets.json").write_text(json.dumps(data["moves"]))
     (DATA / GAME / "evolutions.json").write_text(json.dumps(data["evos"], indent=1))
+    (DATA / GAME / "moves.json").write_text(json.dumps(data["movedata"], indent=1))
     print(f"wrote {GAME}/learnsets.json for {len(data['moves'])} species (max level "
-          f"{max_level}) and evolutions.json for {len(data['evos'])} species")
+          f"{max_level}), evolutions.json for {len(data['evos'])} species, "
+          f"moves.json for {len(data['movedata'])} moves")
 
 
 SPECIES_SCRIPT = """
@@ -399,10 +407,42 @@ def evolved_ability(species: str, ability: str | None, evolved: str) -> str | No
     return new.get(slot, new.get("0")) if new else None
 
 
-def encounter_moves(species: str, level: int) -> list[str]:
-    """Moveset rule `last4`: the last four level-up moves learned by `level`
-    (what a mon has when every new move replaced the oldest)."""
-    return [m for m, lvl in load_game()["learnsets"].get(species, []) if lvl <= level][-4:]
+MOVESET_RULE = "last4"  # or "best4" (plan_gauntlet --moveset); a rule change is a progression change
+# status moves worth a slot under best4, in preference order
+STATUS_MOVES = ["swordsdance", "dragondance", "nastyplot", "calmmind", "bulkup", "growth",
+                "agility", "recover", "roost", "morningsun", "synthesis", "moonlight",
+                "softboiled", "milkdrink", "slackoff", "rest", "spore", "sleeppowder",
+                "hypnosis", "sing", "thunderwave", "stunspore", "willowisp", "toxic",
+                "leechseed", "reflect", "lightscreen", "substitute", "protect"]
+
+
+def encounter_moves(species: str, level: int, rule: str | None = None) -> list[str]:
+    """A mon's moves at `level` under the moveset rule:
+    last4 — the last four level-up moves learned (every new move replaced the
+            oldest: what a player gets by never declining a move);
+    best4 — from every level-up move learned so far: the strongest STAB
+            attack, the strongest attack of another type, the next strongest
+            attack, one status move from STATUS_MOVES; slots left are filled
+            with the next attacks, then the latest moves. Variable-damage
+            attacks (Seismic Toss, Low Kick) count as 50 power."""
+    pool = list(dict.fromkeys(m for m, lvl in load_game()["learnsets"].get(species, []) if lvl <= level))
+    if (rule or MOVESET_RULE) == "last4" or not pool:
+        return pool[-4:]
+    md, stab = load_game()["moves"], set(load_game()["species"].get(species, {}).get("types", []))
+    power = lambda m: md[m]["power"] or 50
+    attacks = sorted((m for m in pool if md[m]["category"] != "Status"),
+                     key=lambda m: (-power(m), -pool.index(m)))
+    picks = []
+    for cond in (lambda m: md[m]["type"] in stab,
+                 lambda m: not picks or md[m]["type"] != md[picks[0]]["type"],
+                 lambda m: True):
+        nxt = next((m for m in attacks if m not in picks and cond(m)), None)
+        if nxt:
+            picks.append(nxt)
+    picks += [m for m in STATUS_MOVES if m in pool][:1]
+    picks += [m for m in attacks if m not in picks]
+    picks += [m for m in reversed(pool) if m not in picks]
+    return picks[:4]
 
 
 def load_evolutions() -> dict:

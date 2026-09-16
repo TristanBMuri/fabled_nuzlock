@@ -13,7 +13,7 @@ _DIST = ROOT / "pokemon-showdown" / "dist" / "sim" / "index.js"
 pytestmark = pytest.mark.skipif(not (shutil.which("node") and _DIST.exists()),
                                 reason="node + built Showdown required")
 
-from gauntlet import Mon, evolved_ability, roll_ability  # noqa: E402
+from gauntlet import Mon, encounter_moves, evolved_ability, roll_ability  # noqa: E402
 from nuzlocke_env import NuzlockeEnv  # noqa: E402
 
 
@@ -99,3 +99,13 @@ def test_evolution_keeps_the_slot_in_the_env(env):
     env.trainer_idx = 139  # Gardenia's cap (22): Shinx evolves at 15, Starly at 14
     env._apply_level_rule({"max_level": 19})
     assert [(m.species, m.ability) for m in env.roster] == [("luxio", "Intimidate"), ("staravia", "Intimidate")]
+
+
+def test_best4_moveset_rule():
+    assert encounter_moves("meditite", 22) == ["detect", "hiddenpower", "mindreader", "feint"]  # last4
+    best = encounter_moves("meditite", 22, "best4")
+    assert len(best) == 4 and best[0] == "confusion" and "hiddenpower" in best  # attacks at last
+    assert encounter_moves("bonsly", 22, "best4")[:2] == ["rockthrow", "lowkick"]  # variable power counts
+    lux = encounter_moves("luxio", 22, "best4")
+    assert lux[0] == "spark"  # strongest STAB first
+    assert len(set(lux)) == len(lux)

@@ -210,8 +210,13 @@ boss's max level (14 = Roark). ~85 s/episode.
    rule checked equal on 3300 cells). Read its acceptance table
    `logs/plan_cap186v3_deep20_e3e.log` (= base2 config + E3e ability slots):
    inside noise of base2 means E1 preserved behaviour and E3e is neutral.
-3. **E4 `best4` movesets** — the largest expected gain at parity. It is a
-   progression change: regenerate the harvest, retrain the prior, table.
+3. **E4 `best4` movesets** — rule is in (`--moveset best4`, README →
+   Status). Measure: (i) table with the current prior; (ii) the OOD loop
+   under best4 (harvest 300 fast eps with `--moveset best4 --harvest`,
+   collect, pretrain, synth on the deadliest teams as before) and the table
+   again. Every one of those runs must pass `--moveset best4`; the harvest
+   and collectors too (collect_game reads packed teams from the harvest,
+   so the harvest is what carries the rule).
 4. **E5** `--trace` (the `--verbose` encounter lines are a start), then
    **E2** the rules object last.
 5. Deletion pass (2½) before step 3; `--parties beam|all` goes with it

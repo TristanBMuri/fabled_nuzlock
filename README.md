@@ -807,6 +807,19 @@ project_overview.md # the plan / roadmap
   per-level table on all 3300 (species, level) cells. A second game is a
   second folder. Acceptance table (also carries E3e):
   `logs/plan_cap186v3_deep20_e3e.log`, below when done.
+  **E4 `best4` movesets implemented (2026-09-16, not yet measured).**
+  `gauntlet.encounter_moves(species, level, rule)`; `plan_gauntlet --moveset
+  best4`. From every level-up move learned so far: strongest STAB attack,
+  strongest attack of another type, next strongest, one status move from a
+  short preference list, slots filled with the next attacks. Variable-
+  damage attacks count as 50. Data: `data/bdsp/moves.json` (type, power,
+  category, accuracy; 246 moves, from `--build-moves`). At 22: Meditite
+  Confusion / Hidden Power / Bide / Feint (was Detect / Hidden Power / Mind
+  Reader / Feint), Luxio Spark / Bite / Tackle / Charge, Machop Revenge /
+  Seismic Toss / Karate Chop / Low Kick, Bronzor Extrasensory / Tackle /
+  Confusion / Hypnosis. It is a progression change: the plan is a table with
+  the current prior first (search adapts partly), then the OOD loop
+  (harvest → collect → pretrain) and the table again.
   **E3e ability slots (2026-09-16, after base2 was launched).** Catches roll
   ability slot 0 or 1 at even odds (a Shinx is Rivalry or Intimidate),
   starters get slot 0, evolution keeps the slot (Starly Keen Eye → Staravia

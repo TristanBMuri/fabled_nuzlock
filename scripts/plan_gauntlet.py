@@ -122,8 +122,9 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict]
     import torch
     torch.set_num_threads(1)  # batch-1 MLP: the intra-op pool only adds overhead
     HP_WEIGHT = args.hp_weight
+    import gauntlet
+    gauntlet.MOVESET_RULE = args.moveset
     if args.harvest:
-        import gauntlet
         gauntlet.HARVEST = Path(args.harvest)
     width = lambda s: tuple(int(x) for x in s.split(",")) if s else None
     # risk_features off: the planner queries env.risk() for its candidates
@@ -170,6 +171,9 @@ def main() -> None:
                     help="box slots for living mons (default 30 = unbounded on the 186 slice, "
                          "starter + 21 areas; the old 12-slot box dropped 5-7 encounters per run)")
     ap.add_argument("--no-dupes", action="store_true", help="plain first encounter (default: dupes clause)")
+    ap.add_argument("--moveset", choices=["last4", "best4"], default="last4",
+                    help="last4 = the last four level-up moves; best4 = strongest STAB, strongest "
+                         "other-type attack, next strongest, one status move (see gauntlet.encounter_moves)")
     ap.add_argument("--hp-weight", type=float, default=HP_WEIGHT,
                     help="weight of mean HP left in the party score (0 = old score)")
     ap.add_argument("--harvest", metavar="JSONL",
@@ -198,7 +202,7 @@ def main() -> None:
     k = lambda f: np.mean([r[f] for r in rows])
     print(f"\n{args.episodes} episodes | slice {args.slice} | battler={args.policy or 'SimpleHeuristics'} "
           f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} "
-          f"parties={args.parties} roster={args.roster} dupes={not args.no_dupes} lam={args.lam} level_rule={args.level_rule} "
+          f"parties={args.parties} roster={args.roster} dupes={not args.no_dupes} moveset={args.moveset} lam={args.lam} level_rule={args.level_rule} "
           f"margin={args.level_margin} | {args.workers} workers, {(time.time() - t0) / 60:.0f} min\n"
           f"  trainers cleared        {k('cleared'):.2f}\n"
           f"  cleared without a death {k('cleared_no_death'):.2f}\n"
