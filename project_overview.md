@@ -215,10 +215,24 @@ Keep as simple as possible. Add complexity only on concrete failure.
 - [x] Benchmark on holdout[:100]×3: search 70.3% / 0.33 deaths per mon vs
       prior 68.3% / 0.40. Consistent direction across all runs, win gain
       within noise, death reduction clear. Go (modest).
-- [ ] Next levers, in order: (a) run-layer integration first (step 2) —
-      the death-probability interface is what it needs and it exists now;
-      (b) expert iteration: collect search choices on gauntlet matchups,
-      retrain the prior, re-search; (c) deeper search reusing forks.
+- [x] Run-layer integration (step 2), expert iteration v1 (null, 2i),
+      common random numbers (2l), learned value leaf (null twice, 2l).
+- [ ] **1a. The teacher ceiling — decide.** The prior is a clone of
+      SimpleHeuristics; search recovers the teacher and adds a few points,
+      but nothing learned has exceeded the teacher (RL finetune, expert
+      iteration, value head all null). Two paths, pick one by measurement:
+      (i) one more beyond-teacher attempt with a *new* idea — 2-ply search
+      over the enemy AI's actual reply (it is deterministic given the state)
+      as the label source, or search labels only on decisions where search
+      and prior disagree, trained at higher weight; (ii) accept the ceiling:
+      the battler is "teacher + search + targeted data", and all further
+      effort goes to the run layer and data. Decision criterion: if (i)
+      does not beat the search line on the Edwin/rival probes and the 186
+      table within one round, take (ii) and delete the EI/value-head code.
+- [ ] **1b. Search width per trainer.** `search=(k, r)` is global; k=4 r=16
+      was +2 pts on Edwin at 3x cost. Make width a function of the trainer
+      (breakpoints + known killers deeper, routes shallow) so the compute
+      dial is actually a dial.
 
 ### 2. Run layer on the planner (plan written 2026-09-15)
 
@@ -280,23 +294,56 @@ interface end to end, and it needs no training run to produce a number.
 - [ ] **2e. Learned run layer vs scripted.** Retrain `train_nuzlocke.py` on
       the sim backend with the 2b features. Success = beats the 2c table on
       trainers cleared without a death; otherwise the scripted planner *is*
-      the run layer and effort goes to the battler. Note the slice may need
-      to extend past gym 1 for the heuristic baseline to leave headroom.
+      the run layer and effort goes to the battler. The 186 slice has the
+      headroom (10% clears); the PPO obs/action layout must be rebuilt for
+      it (see 2p) before training.
+- [ ] **2o. Sample starvation.** The risk query sees 0 deaths in 8 battles
+      for almost every candidate (`+1.00` everywhere in the verbose log),
+      so ~5% per-fight risks are invisible and sum to a roster wipe over 186
+      trainers; 10-episode tables have ±5-trainer error bars. Fixes to
+      measure: adaptive n (re-query the top candidates at n=32), a
+      type-aware candidate set (keep a Fighting/Grass answer for
+      Sudowoodo, Electric for Gyarados, instead of top-6-by-level ∪ swaps),
+      and 20–40-episode tables for any claimed difference.
+- [ ] **2p. Roster cap and obs layout.** MAX_ROSTER=12 exists only because
+      the meta-policy obs is fixed-size; the graveyard hides it now but a
+      real box is unbounded. When 2e rebuilds the obs, make the roster a
+      set (per-mon features + attention or a pooled summary) and drop the
+      12-slot action indexing.
+- [ ] **2q. Owed measurements.** 51-slice default with evolution and
+      encounters v2 (20 eps; the 2.40-deaths table is stale) and a 40-episode
+      186 table for the current default.
 
 Not in step 2: move events, builds, new gauntlets. Metric stays
 "trainers cleared without a death"; report on the training slice only
 until step 3 adds held-out gauntlets.
 
-Battler follow-up, interleaved once 2c has a baseline:
-- [ ] **Expert iteration v1.** Play 20k gauntlet matchups with
-      `Searcher(k=3, r=8)`, record (obs, mask, chosen action), retrain the
-      prior with `pretrain_bc.py pretrain` on search labels, then re-run
-      the step-1 table. Target: prior alone ≥ 70.3% (the search number),
-      search on the new prior above that. If the second round is flat,
-      the value estimate (rollouts under the prior) is the limit and a
-      learned value head is next.
+### 2½. Deletion pass (do before step 3; CLAUDE.md says prefer deleting code)
+- [ ] Off-path code, about a third of the Python: `ai_util/battler_env.py`,
+      `ai_util/self_play.py`, `ai_util/train_battler.py`, `ai_util/battler_eval.py`,
+      `scripts/train.py`, `scripts/battle_env.py` (keep `SPECIES` if the
+      vocab still needs it), `scripts/ppo.py` if 2e does not reuse it, the
+      server-backed `BattleRunner` and `collect_worker` (server) paths,
+      `collect_game.py baseline`, `diff_sets.py`. Each was a stage that is
+      done; the notebook keeps the results.
+- [ ] Null-result paths, per 1a: `Searcher.horizon`/`leaf_record`,
+      `prior_value`, `pretrain_bc --value-only/--value-coef`, the `value`
+      column, `temp/diag_value.py`. Delete unless 1a(i) reuses them.
+- [ ] Housekeeping: cache `encounter_moves`/`evolve` tables (re-read from
+      disk per call), move the README Status notebook out of a code fence
+      into a `NOTEBOOK.md` with headings per finding, delete `temp/` or
+      promote what docs reference, drop the `checkpoints/`, `runs/`,
+      `test.py`, `no_AI_code_here` leftovers if unused.
 
 ### 3. Distribution and generality
+- [ ] **3a. Real BDSP data first.** What exists is thin and hand-made:
+      `bdsp_gauntlet_order.json` is sorted by trainer level, not by route,
+      so "before trainer N" gates are level-band approximations; the
+      encounter tables are recollection, version exclusives omitted;
+      friendship/item/trade evolutions are not modelled (Budew, Buneary,
+      Chingling, Roselia never evolve); formes only partly resolved. Find a
+      real source (route order, encounter tables with rates and levels,
+      evolution methods) and load it — a scripted import, not hand edits.
 - [ ] Second source game or hack; segment slicing; augmentation from seeds.
 - [ ] Held-out eval; memorisation probe. Report train vs held-out always.
 

@@ -170,6 +170,14 @@ boss's max level (14 = Roark). ~85 s/episode.
 
 ## Next steps (roadmap step 2m onward, in order)
 
+The roadmap in `project_overview.md` now also carries: **1a** (decide the
+teacher ceiling: one new beyond-teacher attempt or accept it), **1b** (search
+width per trainer), **2o** (sample-starved risk query and party choice),
+**2p** (roster cap is an obs artefact), **2q** (owed measurements), a
+**deletion pass (2½)** for the off-path and null-result code, and **3a**
+(real BDSP data: the order file is level-sorted, encounters are hand-made,
+non-level evolutions missing). Added 2026-09-16 after a project review.
+
 1. **Value estimate (2l) is done as far as cheap ideas go**: common random
    numbers are in; the learned leaf was null (finding 8). If the battler
    still needs to improve later, the remaining levers are deeper search
