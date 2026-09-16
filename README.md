@@ -841,7 +841,10 @@ project_overview.md # the plan / roadmap
   moves it was cloned on). The rival trio went 22/19/15 → 37/29/23 deaths.
   Next: the OOD loop under best4 (collect → pretrain →
   `models/game_policy_best4.pt`) and the table with that prior; that is
-  the number E4 is judged on.
+  the number E4 is judged on. Loop done (one job at a time, ~25 min):
+  collect 20k base matchups → 97k pairs + 3600 synth → 56k pairs
+  (`bc_game_20260916_205924`, `_205946`), 20 epochs → `models/game_policy_best4.pt`, val CE 0.146, acc
+  95%, switch acc 69% (v3: 0.149 / 61%). Table: `logs/plan_cap186_best4prior.log`.
   **E3e ability slots (2026-09-16, after base2 was launched).** Catches roll
   ability slot 0 or 1 at even odds (a Shinx is Rivalry or Intimidate),
   starters get slot 0, evolution keeps the slot (Starly Keen Eye → Staravia

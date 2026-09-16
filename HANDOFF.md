@@ -181,6 +181,10 @@ boss's max level (14 = Roark). ~85 s/episode.
 - `models/game_policy_cap186v3.pt` — current 186-slice prior: `bc_game_20260915_220345`
   (96k, harvest v2 `battles_cap186v2.jsonl` 38k) + `bc_game_20260916_001825`
   (44k, `battles_hard_synth.jsonl`). `_cap186.pt` / `_cap186v2.pt` = earlier rounds.
+- `models/game_policy_best4.pt` — prior cloned under the best4 moveset rule
+  (`bc_game_20260916_205924` base 20k matchups + `_205946` synth 3600 from
+  `battles_best4.jsonl` / `battles_best4_synth.jsonl`); val CE 0.146, switch 69%.
+  Only valid with `--moveset best4`; v3 only with last4 (the obs encodes moves).
 - `models/edwin_pairs.json` — 30 late parties vs Collector Edwin: the matchup probe.
 - `models/rival_pairs.json` — 10 hard-synth parties x each rival variant (351/352/353).
 - `logs/plan_cap186v3_deep.log` — the current run config (deep 4,16), 10 eps.
