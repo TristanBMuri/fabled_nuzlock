@@ -844,7 +844,19 @@ project_overview.md # the plan / roadmap
   the number E4 is judged on. Loop done (one job at a time, ~25 min):
   collect 20k base matchups → 97k pairs + 3600 synth → 56k pairs
   (`bc_game_20260916_205924`, `_205946`), 20 epochs → `models/game_policy_best4.pt`, val CE 0.146, acc
-  95%, switch acc 69% (v3: 0.149 / 61%). Table: `logs/plan_cap186_best4prior.log`.
+  95%, switch acc 69% (v3: 0.149 / 61%).
+  **E4 verdict: best4 movesets + the best4 prior** (10 workers, 29 min;
+  `logs/plan_cap186_best4prior.log`):
+    **185.95 cleared / 101.8 no-death / 6.30 deaths / 95% clears**, 20.9 deep fights
+    (base2, last4 + v3 prior: 183.15 / 60.95 / 16.25 / 60%)
+  Deaths per run 16.25 → 6.30, clear rate 60% → 95% (19 of 20 runs), no
+  lost battles, first death pushed from ~61 to ~102. Ten times the noise
+  floor. The whole gain is the environment: the same battler recipe, the
+  same planner, the same search; the mons just have attacking moves. Wall
+  order now: Fisher Kenneth's Gyarados@22 (#184) 24, Edwin 16, then the
+  rival at 8 and Roark 7. Runs are faster too (29 min vs 34: fewer deaths,
+  fewer deep fights). `--moveset best4` and `models/game_policy_best4.pt`
+  are the defaults from here; the v3 prior only works under last4.
   **E3e ability slots (2026-09-16, after base2 was launched).** Catches roll
   ability slot 0 or 1 at even odds (a Shinx is Rivalry or Intimidate),
   starters get slot 0, evolution keeps the slot (Starly Keen Eye → Staravia

@@ -411,9 +411,12 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       with both defaults (base2): 183.15 / 60.95 / 16.25 / 60%** — cleared
       +4.5 and clear rate +20 points over the 12-box config, outside the
       noise floor; `logs/plan_cap186v3_deep20_base2.log`.
-- [ ] **E4. Movesets: `best4`** (rule implemented 2026-09-16,
-      `--moveset best4`, `data/bdsp/moves.json`; measurement owed: table with
-      the current prior, then the OOD loop). The largest expected gain at parity. Pool =
+- [x] **E4. Movesets: `best4`** (2026-09-16). Rule + OOD loop (harvest
+      → 153k pairs → `game_policy_best4.pt`) → **185.95 cleared / 101.8
+      no-death / 6.30 deaths / 95% clears** vs base2 183.15 / 60.95 / 16.25
+      / 60%: the largest gain in the project, all of it from the env. Self-KO
+      moves excluded after a first table handed Geodude Selfdestruct. best4
+      is the default rule. Was: the largest expected gain at parity. Pool =
       every level-up move at or below the mon's level; keep the strongest
       STAB move, the strongest move of another type, the next strongest
       move, and one status move from a short list (recovery, sleep,
