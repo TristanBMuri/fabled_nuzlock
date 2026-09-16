@@ -805,8 +805,13 @@ project_overview.md # the plan / roadmap
   nothing else in code names the game. The last-four moveset rule is now
   derived at load (`encounter_moves`) and checked equal to the old
   per-level table on all 3300 (species, level) cells. A second game is a
-  second folder. Acceptance table (also carries E3e):
-  `logs/plan_cap186v3_deep20_e3e.log`, below when done.
+  second folder. Acceptance table (game folder + E3e ability slots,
+  otherwise the base2 config; 10 workers, 34 min; `logs/plan_cap186v3_deep20_e3e.log`):
+    184.0 cleared / 49.0 no-death / 15.5 deaths / 60% clears (base2: 183.15 / 60.95 / 16.25 / 60%)
+  Inside the noise floor on every headline: E1 preserved behaviour, and the
+  ability-slot roll is neutral at this slice (no-death 49 vs 61 is the
+  heavy-tailed first-death metric again). Fisher Kenneth's Gyarados@22
+  (#184) is now the top killer with 47 deaths in 20 runs.
   **E4 `best4` movesets implemented (2026-09-16, not yet measured).**
   `gauntlet.encounter_moves(species, level, rule)`; `plan_gauntlet --moveset
   best4`. From every level-up move learned so far: strongest STAB attack,
@@ -819,7 +824,12 @@ project_overview.md # the plan / roadmap
   Seismic Toss / Karate Chop / Low Kick, Bronzor Extrasensory / Tackle /
   Confusion / Hypnosis. It is a progression change: the plan is a table with
   the current prior first (search adapts partly), then the OOD loop
-  (harvest → collect → pretrain) and the table again.
+  (harvest → collect → pretrain) and the table again. Harvest done: 300
+  fast episodes under best4 + the new defaults, 40.6k matchups
+  (`battles_best4.jsonl`, `logs/harvest_best4.log`); the heuristic-fast
+  table there is 134.5 cleared / 33.8 no-death / 19.2 deaths / 0% (last4
+  harvest, 12-box: 127.2 / 33.3 / 17.7 / 0%) — confounded by the box and
+  the clause, so only a sanity number.
   **E3e ability slots (2026-09-16, after base2 was launched).** Catches roll
   ability slot 0 or 1 at even odds (a Shinx is Rivalry or Intimidate),
   starters get slot 0, evolution keeps the slot (Starly Keen Eye → Staravia

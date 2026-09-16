@@ -24,8 +24,8 @@ deaths was found in the **environment**: the 12-slot box drops 5–7 of the
 21 encounters per run, movesets are level-up-only at the cap level. The
 plan is now the **environment upgrade (project_overview.md → 2¾)**: game
 folder, rules object, known defects (three of five done), `best4`
-movesets, readable trace. The ability-slot rule (E3e) landed after
-the base2 table and is not in it.
+movesets, readable trace. The game folder (E1) and ability slots
+(E3e) reproduce base2 (184.0 / 49.0 / 15.5 / 60%).
 
 ## Architecture (what each file is)
 
@@ -207,9 +207,9 @@ boss's max level (14 = Roark). ~85 s/episode.
    it. E3e (ability slots) is in the code but not in that table; it rides
    with E4's table.
 2. **E1 game folder is in** (`data/bdsp/`, `gauntlet.load_game`; moveset
-   rule checked equal on 3300 cells). Read its acceptance table
-   `logs/plan_cap186v3_deep20_e3e.log` (= base2 config + E3e ability slots):
-   inside noise of base2 means E1 preserved behaviour and E3e is neutral.
+   rule checked equal on 3300 cells); acceptance table 184.0 / 49.0 / 15.5
+   / 60% = base2 inside noise, so E1 preserved behaviour and E3e (ability
+   slots) is neutral. E3 is complete.
 3. **E4 `best4` movesets** — rule is in (`--moveset best4`, README →
    Status). Measure: (i) table with the current prior; (ii) the OOD loop
    under best4 (harvest 300 fast eps with `--moveset best4 --harvest`,

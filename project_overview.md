@@ -367,7 +367,7 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
 - [x] **E1. Game folder** (2026-09-16; `learnsets.json` holds full
       level-up lists, the last-four rule is derived at load and was checked
       equal to the old table on all 3300 cells; acceptance table
-      `logs/plan_cap186v3_deep20_e3e.log`). `data/bdsp/` holds everything the env knows
+      `logs/plan_cap186v3_deep20_e3e.log` = base2 inside noise). `data/bdsp/` holds everything the env knows
       about the game: `trainers.json` (route order, parties with levels,
       moves, abilities, items), `encounters.json` (areas in route order:
       gate, species/level/weight table), `learnsets.json` (all level-up
@@ -404,7 +404,8 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       `data/species.json` (`gauntlet.py --build-species`: name, types,
       ability slots, base stats for 275 species — E1's species file, built
       early). Changes the catch distribution; not in the base2 table, so
-      it is measured together with E4.
+      measured 2026-09-16 with E1: 184.0 / 49.0 / 15.5 / 60% = base2 inside
+      noise (neutral).
       Dupes-clause table (12-box): 176.25 / 61.5 / 14.0 / 25%, edge of noise
       in the wrong direction; kept as the standard rule. **New baseline
       with both defaults (base2): 183.15 / 60.95 / 16.25 / 60%** — cleared
