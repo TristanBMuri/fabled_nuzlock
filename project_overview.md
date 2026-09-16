@@ -364,7 +364,10 @@ readable by someone who knows Pokémon, and no bigger than today's
 paid for by the deletion pass (2½) first. Not in scope: XP curves and
 money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
 
-- [ ] **E1. Game folder.** `data/bdsp/` holds everything the env knows
+- [x] **E1. Game folder** (2026-09-16; `learnsets.json` holds full
+      level-up lists, the last-four rule is derived at load and was checked
+      equal to the old table on all 3300 cells; acceptance table
+      `logs/plan_cap186v3_deep20_e3e.log`). `data/bdsp/` holds everything the env knows
       about the game: `trainers.json` (route order, parties with levels,
       moves, abilities, items), `encounters.json` (areas in route order:
       gate, species/level/weight table), `learnsets.json` (all level-up

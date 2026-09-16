@@ -3,7 +3,7 @@
 Pure logic (offline-testable) + BattleRunner (needs a Showdown server).
 Modes:
   --check        validate BDSP slice + encounters against Showdown learnsets
-  --build-moves  generate data/encounter_moves.json from learnsets (node, once)
+  --build-moves  generate data/<game>/learnsets.json + evolutions.json from the dex (node, once)
 """
 
 import argparse
@@ -33,15 +33,34 @@ BATTLE_FORMAT = "gen8customgamenogimmicks"
 
 # ---------------------------------------------------------------- data loading
 
+GAME = "bdsp"  # the game folder under data/: everything the env knows about a game
+
+
+@functools.lru_cache(maxsize=None)
+def load_game(name: str = GAME) -> dict:
+    """The game folder as one dict: trainers (id -> record), order (gauntlet
+    entries), encounters (starter + areas), learnsets (species -> [[move,
+    level], ...] sorted by level), evolutions (species -> [[to, level], ...]),
+    species (id -> name, types, ability slots, base stats). A second game is
+    a second folder with the same five files and no code change."""
+    d = DATA / name
+    j = lambda f: json.load(open(d / f))
+    return {"trainers": {t["trainer_id"]: t for t in j("trainers.json")["trainers"]},
+            "order": j("order.json")["entries"],
+            "encounters": j("encounters.json"),
+            "learnsets": j("learnsets.json"),
+            "evolutions": j("evolutions.json"),
+            "species": j("species.json")}
+
+
 def load_trainers():
-    """Return {trainer_id: trainer_dict} and the ordered gauntlet entries."""
-    trainers = json.load(open(DATA / "bdsp_trainers.json"))["trainers"]
-    order = json.load(open(DATA / "bdsp_gauntlet_order.json"))["entries"]
-    return {t["trainer_id"]: t for t in trainers}, order
+    """{trainer_id: trainer_dict} and the ordered gauntlet entries."""
+    g = load_game()
+    return g["trainers"], g["order"]
 
 
 def load_encounters():
-    return json.load(open(DATA / "encounters.json"))
+    return load_game()["encounters"]
 
 
 def species_name(species: str) -> str:
@@ -298,19 +317,19 @@ for (const sp of species) {
     .filter(([m, gens]) => gens.some(g => /^4L\\d+$/.test(g)))
     .map(([m, gens]) => [m, Math.max(...gens.filter(g => /^4L\\d+$/.test(g)).map(g => parseInt(g.slice(2))))]);
   levelup.sort((a, b) => a[1] - b[1]);
-  for (let lvl = 1; lvl <= maxLevel; lvl++) {
-    (out[sp] = out[sp] || {})[lvl] = levelup.filter(([, l]) => l <= lvl).slice(-4).map(([m]) => m);
-  }
+  out[sp] = levelup.filter(([, l]) => l <= maxLevel);
 }
 console.log(JSON.stringify({moves: out, evos}));
 """
 
 
-def build_moves(max_level: int = 20) -> None:
-    """data/encounter_moves.json (last 4 level-up moves per species and level) and
-    data/evolutions.json (species -> [[evolved id, level]]; level evolutions only —
-    item / friendship / trade evolutions are not modelled)."""
-    enc = load_encounters()
+def build_moves(max_level: int = 100) -> None:
+    """learnsets.json (species -> [[move, level], ...], every level-up move up to
+    max_level, sorted by level) and evolutions.json (species -> [[evolved id,
+    level]]; level evolutions only — item / friendship / trade evolutions are
+    not modelled) in the game folder, for the encounter species and their
+    evolutions."""
+    enc = json.load(open(DATA / GAME / "encounters.json"))
     species = sorted({e["species"] for r in enc["routes"] for e in r["encounters"]}
                      | set(enc["starter"]))
     raw = subprocess.run(
@@ -322,9 +341,9 @@ def build_moves(max_level: int = 20) -> None:
     missing = [s for s in species if s not in data["moves"]]
     if missing:
         print(f"WARN: no learnset data for {missing}")
-    (DATA / "encounter_moves.json").write_text(json.dumps(data["moves"], indent=1))
-    (DATA / "evolutions.json").write_text(json.dumps(data["evos"], indent=1))
-    print(f"wrote encounter_moves.json for {len(data['moves'])} species (max level "
+    (DATA / GAME / "learnsets.json").write_text(json.dumps(data["moves"]))
+    (DATA / GAME / "evolutions.json").write_text(json.dumps(data["evos"], indent=1))
+    print(f"wrote {GAME}/learnsets.json for {len(data['moves'])} species (max level "
           f"{max_level}) and evolutions.json for {len(data['evos'])} species")
 
 
@@ -342,23 +361,23 @@ console.log(JSON.stringify(out));
 
 
 def build_species() -> None:
-    """data/species.json: name, types, ability slots ({0, 1, H}) and base stats
-    for every species a run can hold or face (encounters, their evolutions,
-    trainer parties). The env rolls a catch's ability slot from it."""
+    """species.json in the game folder: name, types, ability slots ({0, 1, H})
+    and base stats for every species a run can hold or face (encounters,
+    their evolutions, trainer parties). The env rolls a catch's ability slot
+    from it."""
     from poke_env.data import to_id_str
-    ids = set(json.load(open(DATA / "encounter_moves.json")))
+    ids = set(json.load(open(DATA / GAME / "learnsets.json")))
     trainers, _ = load_trainers()
     ids |= {to_id_str(species_name(p["species"])) for t in trainers.values() for p in t["party"]}
     raw = subprocess.run(["node", "-e", SPECIES_SCRIPT, str(ROOT / "pokemon-showdown"), *sorted(ids)],
                          capture_output=True, text=True, check=True).stdout
     data = json.loads(raw)
-    (DATA / "species.json").write_text(json.dumps(data, indent=1))
+    (DATA / GAME / "species.json").write_text(json.dumps(data, indent=1))
     print(f"wrote species.json for {len(data)} species ({len(ids) - len(data)} unknown)")
 
 
-@functools.lru_cache(maxsize=None)
 def load_species() -> dict:
-    return json.load(open(DATA / "species.json"))
+    return load_game()["species"]
 
 
 def ability_slots(species: str) -> dict:
@@ -381,14 +400,13 @@ def evolved_ability(species: str, ability: str | None, evolved: str) -> str | No
 
 
 def encounter_moves(species: str, level: int) -> list[str]:
-    moves = json.load(open(DATA / "encounter_moves.json"))
-    by_level = moves.get(species, {})
-    return by_level.get(str(min(level, max(int(k) for k in by_level))), []) \
-        if by_level else []
+    """Moveset rule `last4`: the last four level-up moves learned by `level`
+    (what a mon has when every new move replaced the oldest)."""
+    return [m for m, lvl in load_game()["learnsets"].get(species, []) if lvl <= level][-4:]
 
 
 def load_evolutions() -> dict:
-    return json.load(open(DATA / "evolutions.json"))
+    return load_game()["evolutions"]
 
 
 def evolve(species: str, level: int, rng=None) -> str:
@@ -448,7 +466,7 @@ if __name__ == "__main__":
     ap.add_argument("--build-moves", action="store_true")
     ap.add_argument("--build-species", action="store_true", help="data/species.json from the dex")
     ap.add_argument("--slice", type=int, default=50)
-    ap.add_argument("--max-level", type=int, default=20)
+    ap.add_argument("--max-level", type=int, default=100)
     args = ap.parse_args()
     if args.check:
         check(args.slice)

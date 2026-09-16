@@ -53,13 +53,17 @@ ai_util/collect_game.py collect (sim, BC pairs from harvest matchups, + battle
 ai_util/pretrain_bc.py  masked-CE pretrain; multiple --data; sim-based eval;
                         --init/--value-only/--value-coef train the critic on `value`.
 ai_util/diff_sets.py    sim-vs-server team-setup diff (found the EV bug).
-data/species.json       dex export: name, types, ability slots, base stats (--build-species).
-scripts/gauntlet.py     BDSP data, Mon/pack_team, evolve(), BattleRunner (server,
-                        legacy), SimBattleRunner (default): run(boss=, search=(k,r)),
-                        estimate(), one Searcher per width. --build-moves writes
-                        moves + evolutions json.
+data/bdsp/              the game folder: trainers.json, order.json, encounters.json,
+                        learnsets.json, evolutions.json, species.json. A second game
+                        is a second folder (gauntlet.GAME names the default).
+scripts/gauntlet.py     load_game() (cached, the only reader of the folder), Mon/
+                        pack_team, encounter_moves (last4 rule), evolve(), ability
+                        slots, BattleRunner (server, legacy), SimBattleRunner
+                        (default): run(boss=, search=(k,r)), estimate(), one Searcher
+                        per width. --build-moves / --build-species regenerate the
+                        folder's dex-derived files.
 scripts/nuzlocke_env.py NuzlockeEnv: slice_len trainers (51 default), encounters
-                        (data/encounters.json v2: 22 areas gated by level band
+                        (data/bdsp/encounters.json v2: 22 areas gated by level band
                         over the 186 order), roster ≤12 living + graveyard, party
                         ≤6, permadeath, level_rule cap with evolution, risk(n=)
                         query, risk features in obs, search_all, deep=(k,r) width
@@ -202,9 +206,10 @@ boss's max level (14 = Roark). ~85 s/episode.
    16.25 / 60% (README → Status). Measure every later env change against
    it. E3e (ability slots) is in the code but not in that table; it rides
    with E4's table.
-2. **E1 game folder** (`data/bdsp/`, `load_game`), behaviour-preserving:
-   the table must reproduce. `data/species.json` (`--build-species`) is
-   already E1's species file; E3e ability slots are in (not in base2).
+2. **E1 game folder is in** (`data/bdsp/`, `gauntlet.load_game`; moveset
+   rule checked equal on 3300 cells). Read its acceptance table
+   `logs/plan_cap186v3_deep20_e3e.log` (= base2 config + E3e ability slots):
+   inside noise of base2 means E1 preserved behaviour and E3e is neutral.
 3. **E4 `best4` movesets** — the largest expected gain at parity. It is a
    progression change: regenerate the harvest, retrain the prior, table.
 4. **E5** `--trace` (the `--verbose` encounter lines are a start), then

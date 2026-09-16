@@ -123,7 +123,8 @@ ai_util/            # battler (AI-side track; no_AI_code_here is user-written)
   battler_env.py    #   env stack (rotating fixed opponents) + server helpers
   battler_eval.py   #   win-rate/behavior diagnostics + training EvalCallback
   self_play.py      #   the 33% baseline experiment (kept for reference)
-data/               # teams, pool, BDSP trainers, encounters, gauntlet_harvest/
+data/bdsp/          # the game folder: trainers, order, encounters, learnsets, evolutions, species
+data/teams/         # fixed teams, pool, gauntlet_harvest/
 checkpoints/        # saved models
 models/             # battler / self_play / BC checkpoints
 runs/               # TensorBoard event files (one dir per run)
@@ -797,6 +798,15 @@ project_overview.md # the plan / roadmap
   (Gyarados@22) 33, Edwin 26, Fisher Juan 26, the rival 22/19, Cameraman
   Darryl #179 19, Roark 16. **This is the table every later env change is
   measured against.**
+  **E1 game folder (2026-09-16).** Everything the env knows about BDSP is
+  `data/bdsp/`: `trainers.json`, `order.json`, `encounters.json`,
+  `learnsets.json` (every level-up move with its level, from the dex),
+  `evolutions.json`, `species.json`; one cached `gauntlet.load_game()` and
+  nothing else in code names the game. The last-four moveset rule is now
+  derived at load (`encounter_moves`) and checked equal to the old
+  per-level table on all 3300 (species, level) cells. A second game is a
+  second folder. Acceptance table (also carries E3e):
+  `logs/plan_cap186v3_deep20_e3e.log`, below when done.
   **E3e ability slots (2026-09-16, after base2 was launched).** Catches roll
   ability slot 0 or 1 at even odds (a Shinx is Rivalry or Intimidate),
   starters get slot 0, evolution keeps the slot (Starly Keen Eye → Staravia
