@@ -857,6 +857,12 @@ project_overview.md # the plan / roadmap
   rival at 8 and Roark 7. Runs are faster too (29 min vs 34: fewer deaths,
   fewer deep fights). `--moveset best4` and `models/game_policy_best4.pt`
   are the defaults from here; the v3 prior only works under last4.
+  **E2 + E5 (2026-09-16).** `nuzlocke_env.Rules` (level rule, margin, box,
+  dupes clause, moveset) is the one place the ruleset lives: the env takes
+  `rules=`, the planner builds it from its flags and prints it in every
+  table header. `env.tracker()` prints party / box / graveyard with level,
+  ability and moves at the end of a `--verbose` episode. The env plan (2¾)
+  is complete except E6 (variable-roster obs, only for a learned run layer).
   **E3e ability slots (2026-09-16, after base2 was launched).** Catches roll
   ability slot 0 or 1 at even odds (a Shinx is Rivalry or Intimidate),
   starters get slot 0, evolution keeps the slot (Starly Keen Eye → Staravia

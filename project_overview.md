@@ -378,7 +378,10 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       and nothing else in code names BDSP. Acceptance: the 20-episode table
       reproduces, and a second folder loads with zero code changes (3a's
       real-source import lands here).
-- [ ] **E2. Rules object.** A ~25-line dataclass a nuzlocker recognises:
+- [x] **E2. Rules object** (2026-09-16: `nuzlocke_env.Rules`, frozen
+      dataclass, `NuzlockeEnv(rules=)`, `plan_gauntlet.rules(args)`, printed
+      in every table header; replaced the loose level/box/dupes/moveset
+      parameters and the `MOVESET_RULE` global in the env path). Was: a ~25-line dataclass a nuzlocker recognises:
       `level_rule` (cap | match), `level_margin`, `box` (None = unbounded),
       `dupes_clause`, `first_encounter_only`, `moveset` (last4 | best4),
       `wipe_ends_run`. Printed in every table header so each notebook entry
@@ -425,10 +428,10 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       Meditite@22 then attacks. A moveset change is a progression change:
       regenerate the harvest and retrain the prior (~15 min + collect),
       then the table.
-- [ ] **E5. Readable state.** `render()` as a tracker view (box with
-      levels and moves, party, graveyard) and `plan_gauntlet.py --trace`
-      printing encounter offers / catches / drops and the party per
-      trainer — what today's scratch `replay_log.py` did, so it is deleted.
+- [x] **E5. Readable state** (2026-09-16): `env.tracker()` (party, box,
+      graveyard with level, ability, moves, dropped offers) printed at the
+      end of every `--verbose` episode, which also traces offers / catches /
+      drops and the party per trainer. The scratch replay script is gone.
 - [ ] **E6. Variable-roster obs/action (2p).** Only when 2e is attempted;
       the scripted planner never reads the obs. Do not build now.
 

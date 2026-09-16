@@ -7,6 +7,7 @@ to completion inside the PRE_BATTLE confirm step. Gymnasium API.
 
 import random
 import uuid
+from dataclasses import dataclass
 
 import numpy as np
 from gymnasium import Env
@@ -18,9 +19,25 @@ from gauntlet import (Mon, ability_slots, encounter_moves, evolve, evolved_abili
                       record_battle, roll_ability, trainer_mons)
 from gauntlet import BattleRunner, SimBattleRunner
 
-MAX_ROSTER = 12  # default box size; NuzlockeEnv(max_roster=) lifts it (a real box is unbounded)
+MAX_ROSTER = 12  # obs/mask slots for the legacy PPO layout; Rules.box sets the real box
 MAX_PARTY = 6
 N_META_ACTIONS = 1 + MAX_ROSTER
+
+
+@dataclass(frozen=True)
+class Rules:
+    """The Nuzlocke ruleset, as a player would state it. Printed in every table
+    header; a change to any field is a progression change (regenerate the
+    harvest and re-clone the prior)."""
+    level_rule: str = "cap"      # cap: every mon at the next boss's max level (hardcore); match: max enemy seen
+    level_margin: int = 0        # levels above the rule (XP proxy)
+    box: int = 30                # living mons the box holds (30 >= starter + 21 areas = unbounded here)
+    dupes_clause: bool = True    # an area's encounter is rerolled among families never owned
+    moveset: str = "best4"       # best4: strongest STAB / other-type / next attack + a status move; last4: last learned
+
+    def __str__(self):
+        return (f"level_rule={self.level_rule} margin={self.level_margin} box={self.box} "
+                f"dupes={self.dupes_clause} moveset={self.moveset}")
 BREAKPOINTS = ["none", "gym_leader", "elite_four", "champion"]
 SLICE_LEN = 51  # trainers per episode: through Gym Leader Roark (order_index 50)
 EVOS = load_evolutions()
@@ -62,38 +79,32 @@ class NuzlockeEnv(Env):
     def __init__(self, port: int = 8000, info_mode: str = "full",
                  seed: int | None = None, backend: str = "sim",
                  policy: str | None = None, search: tuple[int, int] | None = None,
-                 level_margin: int = 0, level_rule: str = "cap",
+                 rules: Rules = Rules(),
                  risk_features: bool = True, search_all: bool = False,
-                 slice_len: int = SLICE_LEN, deep: tuple[int, int] | None = None,
-                 max_roster: int = MAX_ROSTER, dupes_clause: bool = True):
+                 slice_len: int = SLICE_LEN, deep: tuple[int, int] | None = None):
         """backend 'sim' (in-process, default) or 'server' (Showdown on `port`).
         slice_len: trainers per episode (51 = through Roark, 186 = through Gardenia).
         policy selects the sim battler (None = SimpleHeuristics); search=(k, r)
         switches boss fights (breakpoint trainers) to rollout search, search_all
         every fight. deep=(k, r): wider search at breakpoints and at any fight
         the risk query flags as hard (see DEEP_HP) — the compute dial per trainer.
-        level_rule 'match': player level = max enemy level seen (+margin);
-        'cap' (hardcore nuzlocke): player level = next boss's max level
-        (+margin) — route trainers are below you, the boss fight is at parity.
-        dupes_clause: an area's encounter is rerolled among species whose family
-        you have not owned yet (alive or dead); off = plain first encounter."""
+        rules: the Nuzlocke ruleset (see Rules)."""
         self.info_mode = info_mode
-        self.level_margin, self.level_rule = level_margin, level_rule
         self.risk_features = risk_features  # off = no sim queries in _obs (harvesting)
         self.search_all = search_all  # search on every trainer, not just breakpoints
         self.deep = deep
         self.n_deep = 0  # fights played at the deep width (cost accounting)
         self.slice_len = slice_len
-        self.max_roster = max_roster  # box slots (living mons); the obs and mask are sized by it
-        self.dupes_clause = dupes_clause
+        self.rules = rules
+        self.max_roster = rules.box  # living mons the box holds; the obs and mask are sized by it
         self.rng = random.Random(seed)
         if backend == "sim":
             self.runner = SimBattleRunner(policy=policy, search=search, info_mode=info_mode)
         else:
             self.runner = BattleRunner(port=port, info_mode=info_mode)
         self.encounters = load_encounters()["routes"]
-        self.observation_space = Box(-np.inf, np.inf, (obs_dim(max_roster),), np.float32)
-        self.action_space = Discrete(1 + max_roster)
+        self.observation_space = Box(-np.inf, np.inf, (obs_dim(self.max_roster),), np.float32)
+        self.action_space = Discrete(1 + self.max_roster)
         self._reset_state()
 
     # ------------------------------------------------------------- lifecycle
@@ -102,7 +113,7 @@ class NuzlockeEnv(Env):
         starter = self.rng.choice(load_encounters()["starter"])
         # starters come with ability slot 0; wild catches roll slot 0 or 1
         # (roll_ability) and evolution keeps the slot (evolved_ability)
-        self.roster = [Mon(starter, 5, encounter_moves(starter, 5),
+        self.roster = [Mon(starter, 5, encounter_moves(starter, 5, self.rules.moveset),
                            ability=ability_slots(starter).get("0"))]
         self.graveyard: list[Mon] = []  # dead mons leave the roster (box slots free up)
         self.party = []  # indices into roster
@@ -144,13 +155,13 @@ class NuzlockeEnv(Env):
             route = self.encounters[self._route_cursor]
             self._route_cursor += 1
             table = route["encounters"]
-            if self.dupes_clause:
+            if self.rules.dupes_clause:
                 owned = self._owned_families()
                 table = [e for e in table if e["species"] not in owned] or table
             pick = self.rng.choices(
                 table, weights=[e["weight"] for e in table])[0]
             lvl = self.rng.randint(*pick["level"])
-            mon = Mon(pick["species"], lvl, encounter_moves(pick["species"], lvl),
+            mon = Mon(pick["species"], lvl, encounter_moves(pick["species"], lvl, self.rules.moveset),
                       ability=roll_ability(pick["species"], self.rng))
             if len(self.roster) + len(self.pending) < self.max_roster:
                 self.pending.append(mon)
@@ -163,11 +174,11 @@ class NuzlockeEnv(Env):
     def _apply_level_rule(self, entry):
         self.max_enemy_level = max(self.max_enemy_level, entry["max_level"])
         cap = self.max_enemy_level
-        if self.level_rule == "cap":
+        if self.rules.level_rule == "cap":
             boss = next((e for e in ORDER[self.trainer_idx:self.slice_len]
                          if e["breakpoint"] != "none"), ORDER[self.slice_len - 1])
             cap = max(cap, boss["max_level"])
-        target = min(cap + self.level_margin, 100)
+        target = min(cap + self.rules.level_margin, 100)
         for m in self.roster:  # player level rule: match max (+margin), never decrease
             if m.level < target:
                 m.level = target
@@ -175,7 +186,7 @@ class NuzlockeEnv(Env):
                 if evolved != m.species:
                     m.ability = evolved_ability(m.species, m.ability, evolved)
                     m.species = evolved
-                m.moves = encounter_moves(m.species, m.level) or m.moves
+                m.moves = encounter_moves(m.species, m.level, self.rules.moveset) or m.moves
 
     def _packed_matchup(self, party_idx):
         """(player_packed, enemy_packed, entry) for a candidate party vs the
@@ -361,3 +372,15 @@ class NuzlockeEnv(Env):
                  if self.trainer_idx < self.slice_len else "CLEARED")
         return (f"[{self.phase}] trainer {self.trainer_idx}/{self.slice_len} "
                 f"({entry}) | roster: {roster} | party: {self.party}")
+
+    def tracker(self) -> str:
+        """The box as a Nuzlocke tracker would show it: party first, then the
+        bench, then the graveyard, with level, ability and moves."""
+        party = [self.roster[i] for i in self.party]
+        rows = [("party", m) for m in party] + [("box", m) for m in self.roster if m not in party]
+        rows += [("dead", m) for m in self.graveyard]
+        lines = [f"    {tag:<5} {m.species:<11} L{m.level:<3} {m.ability or '-':<12} {', '.join(m.moves)}"
+                 for tag, m in rows]
+        if self.dropped:
+            lines.append(f"    dropped (no room): {', '.join(self.dropped)}")
+        return "\n".join(lines)

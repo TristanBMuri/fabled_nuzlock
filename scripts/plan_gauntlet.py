@@ -21,7 +21,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from nuzlocke_env import DEEP_HP, MAX_PARTY, MAX_ROSTER, SLICE_LEN, NuzlockeEnv  # noqa: E402
+from nuzlocke_env import DEEP_HP, MAX_PARTY, SLICE_LEN, NuzlockeEnv, Rules  # noqa: E402
 
 def swaps(base, alive):
     """The party plus every single swap with a box mon."""
@@ -107,12 +107,17 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
         if verbose:
             print(f"  trainer {t:2d} -> {'won' if env.trainer_idx > t else 'LOST'}, "
                   f"deaths {died} | {env.render()}")
-    if verbose and env.dropped:
-        print(f"  dropped for lack of box room: {', '.join(env.dropped)}")
+    if verbose:
+        print(f"  end of run at trainer {env.trainer_idx}:\n{env.tracker()}")
         info = {"action_mask": env._mask()}
     return {"cleared": env.trainer_idx, "deaths": deaths,
             "cleared_no_death": env.trainer_idx if first_death_at is None else first_death_at,
             "slice_clear": env.trainer_idx >= env.slice_len}
+
+
+def rules(args: argparse.Namespace) -> Rules:
+    return Rules(level_rule=args.level_rule, level_margin=args.level_margin, box=args.roster,
+                 dupes_clause=not args.no_dupes, moveset=args.moveset)
 
 
 def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict], dict, dict, int]:
@@ -122,19 +127,16 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict]
     import torch
     torch.set_num_threads(1)  # batch-1 MLP: the intra-op pool only adds overhead
     HP_WEIGHT = args.hp_weight
-    import gauntlet
-    gauntlet.MOVESET_RULE = args.moveset
     if args.harvest:
+        import gauntlet
         gauntlet.HARVEST = Path(args.harvest)
     width = lambda s: tuple(int(x) for x in s.split(",")) if s else None
     # risk_features off: the planner queries env.risk() for its candidates
     # directly and never reads the obs; leaving them on re-queried every
     # intermediate party while the team was being built (+50% cost).
     env = NuzlockeEnv(seed=args.seed, backend="sim", policy=args.policy, search=width(args.search),
-                      level_margin=args.level_margin, level_rule=args.level_rule,
-                      risk_features=False, search_all=args.search_all, slice_len=args.slice,
-                      deep=width(args.deep), max_roster=args.roster,
-                      dupes_clause=not args.no_dupes)
+                      rules=rules(args), risk_features=False, search_all=args.search_all,
+                      slice_len=args.slice, deep=width(args.deep))
     t0, rows = time.time(), []
     for n, s in enumerate(seeds):
         r = episode(env, s, args.lam, args.verbose, args.fast, args.parties)
@@ -169,11 +171,11 @@ def main() -> None:
                     help="no risk queries (highest-level party): bulk harvesting")
     ap.add_argument("--slice", type=int, default=SLICE_LEN,
                     help="trainers per episode (51 = through Roark, 186 = through Gardenia)")
-    ap.add_argument("--roster", type=int, default=30,
+    ap.add_argument("--roster", type=int, default=Rules.box,
                     help="box slots for living mons (default 30 = unbounded on the 186 slice, "
                          "starter + 21 areas; the old 12-slot box dropped 5-7 encounters per run)")
     ap.add_argument("--no-dupes", action="store_true", help="plain first encounter (default: dupes clause)")
-    ap.add_argument("--moveset", choices=["last4", "best4"], default="best4",
+    ap.add_argument("--moveset", choices=["last4", "best4"], default=Rules.moveset,
                     help="last4 = the last four level-up moves; best4 = strongest STAB, strongest "
                          "other-type attack, next strongest, one status move (see gauntlet.encounter_moves)")
     ap.add_argument("--hp-weight", type=float, default=HP_WEIGHT,
@@ -204,8 +206,8 @@ def main() -> None:
     k = lambda f: np.mean([r[f] for r in rows])
     print(f"\n{args.episodes} episodes | slice {args.slice} | battler={args.policy or 'SimpleHeuristics'} "
           f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} "
-          f"parties={args.parties} roster={args.roster} dupes={not args.no_dupes} moveset={args.moveset} lam={args.lam} level_rule={args.level_rule} "
-          f"margin={args.level_margin} | {args.workers} workers, {(time.time() - t0) / 60:.0f} min\n"
+          f"parties={args.parties} lam={args.lam} | rules: {rules(args)} "
+          f"| {args.workers} workers, {(time.time() - t0) / 60:.0f} min\n"
           f"  trainers cleared        {k('cleared'):.2f}\n"
           f"  cleared without a death {k('cleared_no_death'):.2f}\n"
           f"  deaths per run          {k('deaths'):.2f}\n"

@@ -14,7 +14,7 @@ pytestmark = pytest.mark.skipif(not (shutil.which("node") and _DIST.exists()),
                                 reason="node + built Showdown required")
 
 from gauntlet import Mon, encounter_moves, evolved_ability, roll_ability  # noqa: E402
-from nuzlocke_env import NuzlockeEnv  # noqa: E402
+from nuzlocke_env import NuzlockeEnv, Rules  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -61,14 +61,14 @@ def test_dupes_clause_rerolls_owned_families(env):
         env.pending, env._route_cursor = [], 0
         env._maybe_sample_encounter()
         assert [m.species for m in env.pending] == ["shinx"]  # starly rerolled away
-        env.dupes_clause = False
+        env.rules = Rules(dupes_clause=False)
         env.pending, env._route_cursor = [], 0
         for _ in range(20):
             env._maybe_sample_encounter()
             env._route_cursor = 0
         assert "starly" in {m.species for m in env.pending}
     finally:
-        env.encounters, env.dupes_clause = real, True
+        env.encounters, env.rules = real, Rules()
 
 
 def test_box_cap_counts_pending_offers(env):
@@ -110,3 +110,17 @@ def test_best4_moveset_rule():
     lux = encounter_moves("luxio", 22, "best4")
     assert lux[0] == "spark"  # strongest STAB first
     assert len(set(lux)) == len(lux)
+
+
+def test_rules_reach_the_env(env):
+    assert str(env.rules) == "level_rule=cap margin=0 box=30 dupes=True moveset=best4"
+    last4 = NuzlockeEnv(seed=0, risk_features=False, slice_len=186, rules=Rules(moveset="last4", box=12))
+    try:
+        last4.reset(seed=4)
+        last4.roster = [Mon("meditite", 5, ["bide"])]
+        last4.trainer_idx = 139
+        last4._apply_level_rule({"max_level": 19})
+        assert last4.roster[0].moves == ["detect", "hiddenpower", "mindreader", "feint"]
+        assert last4.max_roster == 12
+    finally:
+        last4.runner.bridge.close()

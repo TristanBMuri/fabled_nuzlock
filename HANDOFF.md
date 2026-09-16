@@ -69,7 +69,8 @@ scripts/nuzlocke_env.py NuzlockeEnv: slice_len trainers (51 default), encounters
                         ≤6, permadeath, level_rule cap with evolution, risk(n=)
                         query, risk features in obs, search_all, deep=(k,r) width
                         at breakpoints and risk-flagged hard fights (DEEP_HP),
-                        max_roster=, dupes_clause=, pending offers queue, dropped list.
+                        rules=Rules(level_rule, margin, box, dupes_clause, moveset),
+                        pending offers queue, dropped list, tracker().
 scripts/plan_gauntlet.py Scripted planner + evaluation harness + death histogram;
                         --slice N, --deep k,r, --parties swap|beam|all, --roster N,
                         --no-dupes, --workers N, --verbose (encounter trace).
@@ -220,8 +221,8 @@ boss's max level (14 = Roark). ~85 s/episode.
    95%). Any future moveset change repeats the loop: harvest 300 fast eps
    with `--harvest`, collect base + synth on the deadliest teams, pretrain,
    table. The harvest carries the rule (collectors read packed teams).
-4. **E5** `--trace` (the `--verbose` encounter lines are a start), then
-   **E2** the rules object last.
+4. **E5 and E2 are in** (`env.tracker()` under `--verbose`;
+   `nuzlocke_env.Rules`). The env plan is complete except E6.
 5. Deletion pass (2½) before step 3; `--parties beam|all` goes with it
    unless the lifted box changes the picture.
 6. Then 1a (teacher ceiling decision), 2e (learned run layer, needs 2p),
