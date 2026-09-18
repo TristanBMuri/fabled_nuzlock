@@ -434,6 +434,19 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       drops and the party per trainer. The scratch replay script is gone.
 - [ ] **E6. Variable-roster obs/action (2p).** Only when 2e is attempted;
       the scripted planner never reads the obs. Do not build now.
+- [ ] **E7. A real moveset system (later; added 2026-09-18).** `best4` is a
+      stopgap: base power only, level-up pool only, one hand-ordered status
+      list. It decides which mons are usable (E4 was the largest gain in
+      the project), so it deserves a proper version once the run layer and
+      step 3 are in. Candidates, cheapest first: (a) widen the pool with
+      TM / tutor / egg moves the game actually makes available by that
+      point in the order (data question, 3a); (b) choose the four by the
+      sim instead of by base power — score each candidate set with the
+      risk query against the next few trainers, the same way parties are
+      chosen; (c) section 7 stage 2: a `MOVE_SELECTION` phase where the
+      run layer decides moves as it decides parties. Every version is a
+      progression change: harvest → collect → pretrain → table, and the
+      prior only works under the rule it was cloned on.
 
 Order: E3 (an afternoon, one table) → E1 (a day, behaviour-preserving) →
 E4 (one OOD loop + table) → E5 alongside → E2 last. The `--roster 30`
@@ -475,7 +488,7 @@ table (2026-09-16, pending) is E3c's measurement.
 - [ ] Value-of-information behaviour: does it scout?
 
 ### 5. Later
-- [ ] Move events / builds (stage 1–2 above)
+- [ ] Move events / builds (stage 1–2 above; see 2¾ → E7)
 - [ ] Showdown mods approximating specific hacks
 - [ ] Opponent AI tiers by trainer class (random < gym < E4/champion)
 
