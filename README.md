@@ -1142,8 +1142,9 @@ project_overview.md # the plan / roadmap
   from the whole box (both need the run layer to plan for #404 from far out).
   Calc + search 9,8 on the first 50 of those parties (n=2,
   `logs/probe_cynthia66_calcsearch.log`): **18.0% wins / 0.94 deaths per
-  mon** (calc alone on the same 150: 2.7% / 0.99). Play at this depth does
-  not change the verdict; the box and the movesets do. Roadmap: E8 League
+  mon** (calc alone on the same 150: 2.7% / 0.99). Search lifts the win
+  rate sixfold but a win still costs ~5 of 6 mons: no deathless line exists
+  for these parties. The box and the movesets are the lever, not the play. Roadmap: E8 League
   party building, E7 TM movesets (reusable TMs, decided 2026-09-19), E9 items.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
