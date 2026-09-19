@@ -1042,6 +1042,29 @@ project_overview.md # the plan / roadmap
   choices under all-legal candidates; the prior seldom proposed it, the
   notebook's 0.14% rejections at k4 r16 were this). Every duplicate now
   gets a suffix (Staravia1, Staravia2); rejections 0.00%.
+  **Calc bot alone, full game (20 eps, 5 workers, 109 min,
+  `logs/plan_route405b_calcbot.log`):** 404 / 222.65 / 15.9 deaths / 15%
+  clears. Every run reaches the League; Cynthia 95 deaths + 15 wipes / 20,
+  Lucian 38, Bertha 37, Flint 29, Candice 16, Aaron 13, Byron 10, Volkner
+  9. Fewer deaths than any prior line (heur+search 27.6, calc prior+search
+  17.9) at zero search cost; the clone + search wins on clears (30% vs 15%)
+  by trading route deaths for League deaths.
+  **Search over the calc bot, candidate order.** With no prior, switch
+  actions came first among candidates and won every tie in the noisy
+  rollout values: battles stalled (42 turns vs 13) and Edwin went to 0.45
+  deaths/mon (calc alone 0.33). The rollout brain's own choice is now the
+  first candidate; 6-pair smoke back to 0.31 / 23 turns. Probes re-running.
+  **The League block (2026-09-19).** Bertha, Flint, Lucian and Cynthia
+  carry `no_heal` in `order.json` (Aaron is entered fresh). Inside the
+  block the party is locked (no swaps, no box) and every fight starts from
+  the last one's HP / status / PP: `sim_bridge.js new` takes `carry` per
+  p1 mon (the battle is built with p1 only, edited, then p2 is added, so
+  the first request already shows it), `SimBattleRunner.run` returns the
+  per-mon state, `NuzlockeEnv.carry` holds it, the risk query and the
+  fight use it, the planner steps through with `env.party_locked`. A fast
+  calc-bot episode: Aaron costs 2, the four survivors enter Bertha at
+  58 / 147 / 119 / 204 HP and wipe — every earlier League number was on
+  full heals. Tables under the rule: `logs/plan_league_*.log`.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the

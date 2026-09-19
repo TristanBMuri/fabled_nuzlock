@@ -70,6 +70,7 @@ function teamState(side) {
     return {
       species: p.species.name, hp: p.hp, maxhp: p.maxhp, fainted: p.fainted, level: p.level,
       stats: p.storedStats, moves: p.moveSlots.map(m => m.id), ability: p.ability, item: p.item,
+      status: p.status, pp: p.moveSlots.map(m => m.pp),
     };
   });
 }
@@ -80,10 +81,24 @@ function handle(msg) {
   switch (msg.op) {
     case 'new': {
       const e = { battle: null, out: { p1: [], p2: [] } };
-      e.battle = new Battle({
-        formatid: msg.format, seed: msg.seed,
-        p1: prepPlayer(msg.format, msg.p1), p2: prepPlayer(msg.format, msg.p2),
-      });
+      // carry: per p1 mon in team order {hp, status, pp} from a previous battle
+      // (the League: no heal between fights). The battle starts only once both
+      // players are set, so p1's state is edited before p2 is added.
+      e.battle = new Battle({ formatid: msg.format, seed: msg.seed, p1: prepPlayer(msg.format, msg.p1) });
+      if (msg.carry) {
+        const side = e.battle.sides[0];
+        msg.carry.forEach((c, i) => {
+          const p = side.pokemon.find(q => q.set === side.team[i]) || side.pokemon[i];
+          if (!c || !p) return;
+          if (c.hp != null) { p.hp = Math.max(0, Math.min(p.maxhp, c.hp)); if (p.hp === 0) p.fainted = true; }
+          if (c.status && !p.setStatus(c.status, null, null, true)) {  // before start: set directly
+            p.status = c.status;
+            p.statusState = { id: c.status, target: p, startTime: 3, time: 3 };
+          }
+          if (c.pp) c.pp.forEach((pp, j) => { if (p.moveSlots[j]) p.moveSlots[j].pp = pp; });
+        });
+      }
+      e.battle.setPlayer('p2', prepPlayer(msg.format, msg.p2));
       attach(e);
       battles.set(msg.id, e);
       return flush(e);

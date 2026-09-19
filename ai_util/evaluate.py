@@ -162,7 +162,12 @@ class Searcher:
         if self.policy is None:
             mask = action_mask(m)
             probs = mask.astype(float) / max(mask.sum(), 1)
-            cands = [int(a) for a in range(len(mask)) if mask[a]][:self.k]
+            cands = [int(a) for a in range(len(mask)) if mask[a]]
+            # the rollout brain's own choice first: ties in the noisy rollout values
+            # go to it, not to whichever switch happens to come first (which stalled)
+            own = self.prior(sb, side)
+            cands.sort(key=lambda a: order_to_choice(SinglesEnv.action_to_order(np.int64(a), m)) != own)
+            cands = cands[:self.k]
         else:
             probs, mask = prior_probs(self.policy, m)
             cands = [int(a) for a in np.argsort(-probs) if mask[a]][:self.k]
@@ -211,7 +216,8 @@ class Searcher:
 
 def evaluate(bridge: SimBridge, party: str | None, enemy: str | None, brain: Brain,
              enemy_brain: Brain, n: int = 1, importance: list[float] | None = None,
-             max_turns: int = 100, fmt: str = GAME_FORMAT, dedupe: bool = True) -> dict:
+             max_turns: int = 100, fmt: str = GAME_FORMAT, dedupe: bool = True,
+             carry: list | None = None) -> dict:
     """Run n fresh-seed battles of `party` (p1, driven by brain) vs `enemy`.
     Returns P(win), P(death) per party mon (packed order), importance-weighted
     risk, and hp = mean fraction of the party's HP left at the end (margin:
@@ -219,7 +225,7 @@ def evaluate(bridge: SimBridge, party: str | None, enemy: str | None, brain: Bra
     wins, deaths, turns, hp = 0, None, 0, 0.0
     stats = {}
     for _ in range(n):
-        sb = SimBattle(bridge, fmt, party, enemy, dedupe=dedupe)
+        sb = SimBattle(bridge, fmt, party, enemy, dedupe=dedupe, carry=carry)
         sb.play({"p1": brain, "p2": enemy_brain}, max_turns)
         st = sb.state()
         won, dead = st["winner"] == "p1", [m["fainted"] for m in st["p1"]]

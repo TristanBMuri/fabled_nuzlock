@@ -22,7 +22,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from nuzlocke_env import DEEP_HP, EVOS, MAX_PARTY, SLICE_LEN, NuzlockeEnv, Rules  # noqa: E402
+from nuzlocke_env import DEEP_HP, EVOS, MAX_PARTY, ORDER, SLICE_LEN, NuzlockeEnv, Rules  # noqa: E402
 from gauntlet import load_species  # noqa: E402
 
 def swaps(base, alive):
@@ -105,6 +105,13 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
                 print(f"  offer {' | '.join(f'{m.species}@{m.level}' for m in alts)}: "
                       f"{'caught ' + alts[pick].species if catch else 'no room'}  box {len(env.roster)}/{env.max_roster}")
             env.step(1 + pick if catch else 0)
+            info = {"action_mask": env._mask()}
+            continue
+        if env.party_locked:  # the League: no heal, no swaps
+            if verbose:
+                print(f"  [locked] {ORDER[env.trainer_idx]['trainer_name']}: party fights on, "
+                      f"HP {[env.carry[i]['hp'] for i in env.party if i in env.carry]}")
+            env.step(0)
             info = {"action_mask": env._mask()}
             continue
         for i in choose_party(env, lam, verbose, fast, parties):

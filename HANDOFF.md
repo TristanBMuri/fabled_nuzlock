@@ -53,6 +53,10 @@ box 50. Full-game tables on this env (`logs/plan_route405b_*.log`):
 heuristic + risk parties 403.05 / 139.2 / 31.95 deaths / 10% clears (20 eps);
 prior + search 403.4 / 184.8 / 27.6 / 0% (10 eps). Cynthia wipes most runs;
 the E4 costs ~5 deaths each. That table is the benchmark now.
+2026-09-19: the calc bot is the battler (alone: 404 / 222.7 / 15.9 deaths / 15%
+clears; its clone + search 385.5 / 196.1 / 17.9 / 30%). **The League is a
+no-heal block now** (`no_heal` entries; party locked; HP / status / PP
+carried through the sim bridge) — tables before this are on full heals.
 
 ## Architecture (what each file is)
 

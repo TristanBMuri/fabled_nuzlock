@@ -4424,7 +4424,8 @@
    "team_size": 5,
    "breakpoint": "elite_four",
    "location": "Pokemon League",
-   "mandatory": true
+   "mandatory": true,
+   "no_heal": true
   },
   {
    "order_index": 402,
@@ -4435,7 +4436,8 @@
    "team_size": 5,
    "breakpoint": "elite_four",
    "location": "Pokemon League",
-   "mandatory": true
+   "mandatory": true,
+   "no_heal": true
   },
   {
    "order_index": 403,
@@ -4446,7 +4448,8 @@
    "team_size": 5,
    "breakpoint": "elite_four",
    "location": "Pokemon League",
-   "mandatory": true
+   "mandatory": true,
+   "no_heal": true
   },
   {
    "order_index": 404,
@@ -4457,7 +4460,8 @@
    "team_size": 6,
    "breakpoint": "champion",
    "location": "Pokemon League",
-   "mandatory": true
+   "mandatory": true,
+   "no_heal": true
   }
  ]
 }

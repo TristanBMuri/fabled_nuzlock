@@ -246,14 +246,14 @@ class SimBattleRunner:
                                               rollout=self.player if self.calc else None)
         return self._searchers[width]
 
-    def estimate(self, player_packed: str, enemy_packed: str, n: int = 8):
+    def estimate(self, player_packed: str, enemy_packed: str, n: int = 8, carry: list | None = None):
         """Death-probability query: (P(win), [P(death_i)] in packed order, mean
         HP fraction left) under the fast player brain, n fresh-seed battles.
         None on failure."""
         from ai_util.evaluate import evaluate
         try:
             r = evaluate(self.bridge, player_packed, enemy_packed, self.player, self.enemy,
-                         n=n, max_turns=self.max_turns)
+                         n=n, max_turns=self.max_turns, carry=carry)
         except Exception as e:
             import traceback
             print(f"SimBattleRunner.estimate failed: {type(e).__name__}: {e}\n"
@@ -262,19 +262,23 @@ class SimBattleRunner:
         return r["p_win"], r["p_death"], r["hp"]
 
     def run(self, player_packed: str, enemy_packed: str, timeout: float = 0.0,
-            boss: bool = False, search: tuple[int, int] | None = None):
-        """One battle. Returns (won, alive_mask) aligned to player_packed order,
-        or None on failure (bridge rebuilt). boss=True searches at the default
-        width; search=(k, r) sets the width for this fight (deeper at hard ones)."""
+            boss: bool = False, search: tuple[int, int] | None = None, carry: list | None = None):
+        """One battle. Returns (won, alive_mask, state) aligned to player_packed
+        order — state = per-mon {hp, status, pp} after the fight, what the next
+        no-heal fight starts from — or None on failure (bridge rebuilt).
+        boss=True searches at the default width; search=(k, r) sets the width
+        for this fight (deeper at hard ones); carry = state to start from."""
         from ai_util.sim import SimBattle, SimBridge
         if not player_packed or not enemy_packed:
             print("SimBattleRunner: empty packed team")
             return None
         brain = self.searcher(search or (self.search if boss else None))
         try:
-            sb = SimBattle(self.bridge, BATTLE_FORMAT, player_packed, enemy_packed)
+            sb = SimBattle(self.bridge, BATTLE_FORMAT, player_packed, enemy_packed, carry=carry)
             sb.play({"p1": brain, "p2": self.enemy}, self.max_turns)
-            won, dead = sb.outcome()
+            st = sb.state()
+            won, dead = st["winner"] == "p1", [m["fainted"] for m in st["p1"]]
+            state = [{"hp": m["hp"], "status": m.get("status", ""), "pp": m.get("pp")} for m in st["p1"]]
             sb.close()
         except Exception as e:
             import traceback
@@ -286,7 +290,7 @@ class SimBattleRunner:
                 pass
             self.bridge = SimBridge()
             return None
-        return won, [not d for d in dead]
+        return won, [not d for d in dead], state
 
 
 _HARVEST_LOCK = None

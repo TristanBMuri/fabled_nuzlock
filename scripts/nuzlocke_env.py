@@ -125,6 +125,7 @@ class NuzlockeEnv(Env):
         self.max_enemy_level = 0
         self.phase = "ENCOUNTER"  # first route unlocks before trainer 0
         self.pending: list[list[Mon]] = []  # offers not yet answered: per area, one pick per method
+        self.carry: dict[int, dict] | None = None  # roster index -> {hp, status, pp}: no heal since the last fight
         self.dropped: list[str] = []  # offers that found no box slot (species), this run
         self._route_cursor = 0  # routes consumed
         self.done = False
@@ -209,6 +210,15 @@ class NuzlockeEnv(Env):
                     m.species = evolved
                 m.moves = encounter_moves(m.species, m.level, self.rules.moveset) or m.moves
 
+    @property
+    def party_locked(self) -> bool:
+        """Inside a no-heal block (the League after Aaron): the party stays as
+        fielded and starts each fight where the last one left it."""
+        return self.carry is not None
+
+    def _carry_list(self, party_idx):
+        return [self.carry.get(i) for i in party_idx] if self.carry else None
+
     def _packed_matchup(self, party_idx):
         """(player_packed, enemy_packed, entry) for a candidate party vs the
         next trainer, with the level rule applied."""
@@ -229,7 +239,7 @@ class NuzlockeEnv(Env):
             if party_idx and self.trainer_idx < self.slice_len and hasattr(self.runner, "estimate"):
                 pp, ep, _ = self._packed_matchup(party_idx)
                 if pp and ep:
-                    est = self.runner.estimate(pp, ep, n=n)
+                    est = self.runner.estimate(pp, ep, n=n, carry=self._carry_list(party_idx))
             self._risk_cache[key] = est or (0.0, [0.0] * len(party_idx), 0.0)
         return self._risk_cache[key]
 
@@ -248,15 +258,16 @@ class NuzlockeEnv(Env):
         if self.deep and (entry["breakpoint"] != "none" or self._hard()):
             width = self.deep
             self.n_deep += 1
-        result = self.runner.run(player_packed, enemy_packed, boss=boss, search=width)
+        carry = self._carry_list(self.party)
+        result = self.runner.run(player_packed, enemy_packed, boss=boss, search=width, carry=carry)
         if result is None:  # rebuild happened; retry once
-            result = self.runner.run(player_packed, enemy_packed, boss=boss, search=width)
+            result = self.runner.run(player_packed, enemy_packed, boss=boss, search=width, carry=carry)
         if result is None:
             return None
-        won, alive = result
+        won, alive, state = result
         record_battle(self.run_id, entry["trainer_id"], self.info_mode,
                       won, player_packed, enemy_packed)
-        return won, alive
+        return won, alive, state
 
     # ------------------------------------------------------------------- obs
     def _obs(self) -> np.ndarray:
@@ -308,6 +319,8 @@ class NuzlockeEnv(Env):
                 # Without this, min(0, 6)==0 made empty-party confirm legal and
                 # crashed workers on pack_team([]) (seen run5 update ~330).
                 m[0] = 1
+            elif self.party_locked:
+                m[0] = 1  # the League block: the fielded party fights on as it stands
             else:
                 need = min(len(alive_idx), MAX_PARTY)
                 if len(self.party) >= need and len(self.party) > 0:
@@ -339,7 +352,7 @@ class NuzlockeEnv(Env):
                         reward -= 5.0
                         self.done = True
                     else:
-                        won, alive = result
+                        won, alive, state = result
                         party = [self.roster[i] for i in self.party]
                         for mon, a in zip(party, alive):
                             if not a:
@@ -352,6 +365,10 @@ class NuzlockeEnv(Env):
                             reward += 1.0
                             self.trainer_idx += 1
                             self._skip_other_rivals()
+                            nxt = ORDER[self.trainer_idx] if self.trainer_idx < self.slice_len else {}
+                            # no heal before the next fight: keep the party, carry its state
+                            self.carry = ({self.roster.index(m): st for m, st in zip(party, state) if m.alive}
+                                          if nxt.get("no_heal") else None)
                             if self.trainer_idx >= self.slice_len:
                                 reward += 10.0
                                 self.done = True
@@ -360,7 +377,8 @@ class NuzlockeEnv(Env):
                                 reward -= 5.0
                                 self.done = True
                             else:
-                                self.party = []
+                                if not self.party_locked:
+                                    self.party = []
                                 self._maybe_sample_encounter()
                                 if not self.pending:
                                     self.phase = "PRE_BATTLE"

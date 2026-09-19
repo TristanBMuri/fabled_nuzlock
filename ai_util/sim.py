@@ -78,8 +78,9 @@ class SimBridge:
 
 class SimBattle:
     def __init__(self, bridge: SimBridge, fmt: str, p1_team: str | None, p2_team: str | None,
-                 seed: list[int] | None = None, dedupe: bool = True):
-        """Packed teams; None lets the format's generator build one (randombattle)."""
+                 seed: list[int] | None = None, dedupe: bool = True, carry: list | None = None):
+        """Packed teams; None lets the format's generator build one (randombattle).
+        carry: per p1 mon {hp, status, pp} to start from (no heal since the last fight)."""
         self.bridge, self.fmt = bridge, fmt
         self.gen = GenData.from_format(fmt).gen
         self.id = f"b{next(_IDS)}"
@@ -96,7 +97,7 @@ class SimBattle:
         self.mirrors = {s: self._mirror(s) for s in SIDES}
         if bridge is not None and fmt is not None:
             self._absorb(bridge.call(
-                op="new", id=self.id, format=fmt, seed=seed,
+                op="new", id=self.id, format=fmt, seed=seed, carry=carry,
                 p1={"name": "p1", "team": p1_team}, p2={"name": "p2", "team": p2_team}))
 
     # ------------------------------------------------------------ mirroring
