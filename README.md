@@ -1009,6 +1009,39 @@ project_overview.md # the plan / roadmap
   `logs/plan_route405b_heuristic.log`): **403.05 / 139.2 / 31.95 / 10%**
   (2 of 20 runs beat Cynthia). Search buys ~45 trainers of first death and
   ~4 deaths per run; neither line beats the League reliably.
+  **Calc-bot teacher (2026-09-19, roadmap 1a).** `ai_util/calc_bot.py`
+  (the probe promoted; enemy stats estimated at 31 IV / 85 EV, boss-safe,
+  since route trainers are 0/0 and bosses 31/510). `collect_game.py
+  --teacher calc` labels with it (switch 12% of decisions vs 1-3% for the
+  heuristic); `plan_gauntlet.py --policy calc` plays it without search. The
+  encoder gains level + real stats per mon (own from the request, theirs
+  estimated the same way; N_FEATURES 1014 -> 1098), so every earlier prior
+  is incompatible and `game_policy_heur.pt` is re-cloned from the heuristic
+  on the same matchups as the control. Chain: collect 30k battles x 2
+  teachers -> `game_policy_calc.pt` / `game_policy_heur.pt` -> tables on the
+  full game: calc bot alone (20 eps), calc prior + search, heur prior +
+  search (10 eps each).
+  Pretrain: calc clone val CE 0.455 / acc 84% / switch 18% (the damage
+  arithmetic does not clone into a 256x256 MLP from 94k pairs); heuristic
+  clone on the new encoder 0.213 / 93% / 37% (= yesterday's 0.219: the new
+  features are neutral for it). **Calc prior + search 3,8 all, deep 4,16
+  (10 eps, 10 workers, 62 min, `logs/plan_route405b_calcprior_search.log`):**
+    385.5 cleared / 196.1 no-death / 17.9 deaths / **30% clears** (3 of 10 beat Cynthia)
+  vs the heuristic prior + search 403.4 / 184.8 / 27.6 / 0%. Cynthia 47
+  deaths + 6 wipes (was 48 + 8), Flint 18 (38), Lucian 16 (21), Aaron 14
+  (19), Bertha 11 (22), the League rival 10 (18): the E4 cost halves. The
+  clone's weakness shows once: a Fantina wipe at #216 (12 deaths there),
+  which the heuristic prior never had. First full-game clears with search.
+  **Search over the calc bot, no network (2026-09-19).** `Searcher(policy=None,
+  rollout=calc_brain())`: every legal action is a candidate (up to k) and the
+  calc bot plays the rollouts; `evaluate.py --policy calc --search --k 9`,
+  `plan_gauntlet.py --policy calc --search 9,8`. Found a **latent defect**
+  with it: `dedupe_nicknames` left the first of two same-species mons with
+  its bare name, and Showdown resolves 'switch Staravia' to the *active*
+  Staravia2 by species -> "can't switch to an active Pokémon" (2.4% of
+  choices under all-legal candidates; the prior seldom proposed it, the
+  notebook's 0.14% rejections at k4 r16 were this). Every duplicate now
+  gets a suffix (Staravia1, Staravia2); rejections 0.00%.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the

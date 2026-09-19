@@ -1,0 +1,124 @@
+"""A scripted battler that runs the real damage formula (roadmap 1a, 2026-09-18).
+
+Own stats come from the request; enemy stats are estimated from base stats
+at the enemy's level with ENEMY_IV / ENEMY_EV (a boss-safe guess: route
+trainers in BDSP have 0/0, bosses 31/510). Decisions, in order: forced
+switch -> best bench mon; a KO in hand -> the most accurate KO move (priority
+first if slower) unless we are slower and die first; the next hit kills us
+and a bench mon survives it -> switch; safe -> set up; else the strongest
+expected hit. Beats SimpleHeuristics and the search line on the Edwin /
+rival probes (README -> Status); the teacher for the next prior.
+"""
+
+from poke_env.battle import MoveCategory, Status
+from poke_env.data import GenData
+from poke_env.player import Player
+
+GAME_FORMAT = "gen8customgamenogimmicks"
+_CHART = GenData.from_format(GAME_FORMAT).type_chart
+ROLL = 0.925          # mean damage roll
+ENEMY_IV, ENEMY_EV = 31, 85
+
+
+def stat(mon, key: str, own: bool) -> float:
+    """Real stat for our mons, estimated for theirs, then boost stages and paralysis."""
+    v = mon.stats.get(key) if own and mon.stats else None
+    if not v:
+        v = ((2 * mon.base_stats[key] + ENEMY_IV + ENEMY_EV // 4) * mon.level) // 100 + 5
+    b = mon.boosts.get(key, 0)
+    v *= (2 + b) / 2 if b >= 0 else 2 / (2 - b)
+    if key == "spe" and mon.status == Status.PAR:
+        v *= 0.5
+    return v
+
+
+def max_hp(mon, own: bool) -> int:
+    if own and mon.max_hp and mon.stats:
+        return mon.max_hp
+    return ((2 * mon.base_stats["hp"] + ENEMY_IV + ENEMY_EV // 4) * mon.level) // 100 + mon.level + 10
+
+
+def dmg_frac(att, dfn, move, att_own: bool) -> float:
+    """Expected fraction of dfn's max HP one use of move removes (accuracy included)."""
+    if move.category == MoveCategory.STATUS:
+        return 0.0
+    hp = max_hp(dfn, not att_own)
+    if move.damage:  # Seismic Toss / Night Shade / fixed damage
+        d = att.level if move.damage == "level" else float(move.damage)
+        return min(d, hp) / hp * (move.accuracy or 1)
+    if not move.base_power:
+        return 0.0
+    phys = move.category == MoveCategory.PHYSICAL
+    a = stat(att, "atk" if phys else "spa", att_own)
+    d = stat(dfn, "def" if phys else "spd", not att_own)
+    base = ((2 * att.level / 5 + 2) * move.base_power * a / d) / 50 + 2
+    mod = ROLL * (1.5 if move.type in att.types else 1.0) * dfn.damage_multiplier(move)
+    mod *= getattr(move, "expected_hits", 1) or 1
+    if att.status == Status.BRN and phys:
+        mod *= 0.5
+    return base * mod / hp * (move.accuracy or 1)
+
+
+def threat(opp, mon) -> float:
+    """Best expected fraction the enemy's active takes off `mon` this turn. Unknown
+    moves: a 60-power STAB of each of its types in its better category."""
+    moves = list(opp.moves.values())
+    if moves:
+        return max(dmg_frac(opp, mon, m, False) for m in moves)
+    phys = opp.base_stats["atk"] >= opp.base_stats["spa"]
+    a = stat(opp, "atk" if phys else "spa", False)
+    d = stat(mon, "def" if phys else "spd", True)
+    best = 0.0
+    for t in opp.types:
+        if t is None:
+            continue
+        base = ((2 * opp.level / 5 + 2) * 60 * a / d) / 50 + 2
+        eff = t.damage_multiplier(mon.type_1, mon.type_2, type_chart=_CHART)
+        best = max(best, base * ROLL * 1.5 * eff / max_hp(mon, True))
+    return best
+
+
+class CalcPlayer(Player):
+    def choose_move(self, battle):
+        me, opp = battle.active_pokemon, battle.opponent_active_pokemon
+        if me is None or opp is None:
+            return self.choose_random_move(battle)
+        thr = threat(opp, me) if not me.fainted else 0.0
+        opp_prio = max((m.priority for m in opp.moves.values()), default=0)
+        faster = stat(me, "spe", True) > stat(opp, "spe", False)
+
+        def switch_score(m):
+            t = threat(opp, m)
+            hit = max((dmg_frac(m, opp, mv, True) for mv in m.moves.values()), default=0)
+            survive = 2.0 if t < m.current_hp_fraction / 2 else (1.0 if t < m.current_hp_fraction else 0.0)
+            return survive + hit - t
+
+        if battle.force_switch or not battle.available_moves:
+            if battle.available_switches:
+                return self.create_order(max(battle.available_switches, key=switch_score))
+            return self.choose_random_move(battle)
+
+        scored = [(dmg_frac(me, opp, mv, True), mv) for mv in battle.available_moves]
+        best_frac, best_mv = max(scored, key=lambda x: x[0])
+        # a KO in hand: the mean roll covers the HP left; P(KO) ~ accuracy
+        kos = [(mv.accuracy or 1, mv) for f, mv in scored if f / (mv.accuracy or 1) >= opp.current_hp_fraction]
+        we_die = thr >= me.current_hp_fraction * ROLL  # a near-max roll kills us
+        if kos:
+            acc, mv = max(kos, key=lambda x: (x[1].priority > opp_prio, x[0]))
+            if faster or mv.priority > opp_prio or not we_die:
+                return self.create_order(mv)
+        if we_die and not (kos and faster) and battle.available_switches:
+            cand = max(battle.available_switches, key=switch_score)
+            if switch_score(cand) >= 1.0:  # someone survives the hit
+                return self.create_order(cand)
+        if thr < 0.2 and me.current_hp_fraction > 0.6:  # safe: set up
+            for mv in battle.available_moves:
+                if mv.boosts and mv.target == "self" and sum(mv.boosts.values()) >= 2 \
+                        and max(me.boosts.get(s, 0) for s in mv.boosts) < 2:
+                    return self.create_order(mv)
+        return self.create_order(best_mv)
+
+
+def calc_brain():
+    from ai_util.sim import player_brain
+    return player_brain(CalcPlayer(battle_format=GAME_FORMAT, start_listening=False, log_level=50))

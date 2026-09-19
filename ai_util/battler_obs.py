@@ -34,7 +34,8 @@ _HAZARDS = (
     (SideCondition.STICKY_WEB, 1),
 )
 _FLAGS, _N_STATUS, _N_BOOST, _N_MOVES, _N_STATS, _N_SPEED = 4, len(_STATUSES), len(_BOOST_KEYS), 40, len(_STAT_KEYS), 1
-_PER_MON = _FLAGS + _N_STATUS + _N_BOOST + N_TYPES + _N_MOVES + _N_STATS + _N_SPEED
+_N_REAL = 1 + len(_STAT_KEYS)  # level and the actual stats (own from the request, theirs estimated)
+_PER_MON = _FLAGS + _N_STATUS + _N_BOOST + N_TYPES + _N_MOVES + _N_STATS + _N_SPEED + _N_REAL
 _TYPES_OFF = _FLAGS + _N_STATUS + _N_BOOST
 _MOVES_OFF = _TYPES_OFF + N_TYPES
 _STATS_OFF = _MOVES_OFF + _N_MOVES
@@ -97,9 +98,27 @@ def _mon_block(mon: Pokemon | None, *, target_types, active, cmp_speed: float) -
     for i, key in enumerate(_STAT_KEYS):
         block[_STATS_OFF + i] = _base_stats(mon).get(key, 0) / 255.0
     if cmp_speed > 0:
-        block[_PER_MON - 1] = float(_speed_factor(_base_stats(mon).get("spe", 0),
-                                                  mon.boosts.get("spe", 0)) > cmp_speed)
+        block[_PER_MON - _N_REAL - 1] = float(_speed_factor(_base_stats(mon).get("spe", 0),
+                                                            mon.boosts.get("spe", 0)) > cmp_speed)
+    # level and real stats: what the damage formula needs and base stats cannot say
+    off = _PER_MON - _N_REAL
+    block[off] = mon.level / 100.0
+    for i, key in enumerate(_STAT_KEYS):
+        block[off + 1 + i] = min(_real_stat(mon, key), 999) / 500.0
     return block
+
+
+def _real_stat(mon: Pokemon, key: str) -> float:
+    """Own mons: the stat from the request (HP = max HP); others: estimated from
+    base stats at the mon's level with the calc bot's enemy IV/EV guess."""
+    if key == "hp":
+        if mon.stats and mon.max_hp and mon.max_hp > 100:
+            return mon.max_hp
+    elif mon.stats and mon.stats.get(key):
+        return mon.stats[key]
+    base = _base_stats(mon).get(key, 0)
+    v = ((2 * base + 31 + 85 // 4) * mon.level) // 100
+    return v + mon.level + 10 if key == "hp" else v + 5
 
 
 def _field_block(battle: AbstractBattle) -> np.ndarray:

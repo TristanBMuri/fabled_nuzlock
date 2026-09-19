@@ -71,7 +71,9 @@ ai_util/evaluate.py     evaluate(): P(win), P(death_i), risk for one matchup.
 ai_util/battler_policy.py  MaskedActorCriticPolicy, PolicyPlayer, load_policy,
                         action_mask / order_to_action (identity-based; poke-env's
                         are species-based and wrong with duplicate species).
-ai_util/battler_obs.py  1014-dim observation encoder (unchanged).
+ai_util/battler_obs.py  1098-dim observation encoder (2026-09-19: + level and real stats per mon).
+ai_util/calc_bot.py     CalcPlayer: the damage-formula battler (KO check, switch out of a
+                        lethal hit, set up when safe); collect --teacher calc, plan --policy calc.
 ai_util/collect_game.py collect (sim, BC pairs from harvest matchups, + battle
                         outcome per decision as `value`), collect_search
                         (search-labelled pairs + search-leaf outcomes `leaves.npz`),
@@ -189,7 +191,10 @@ boss's max level (14 = Roark). ~85 s/episode.
   duplicate as switchable, labels switches as the first slot. Fix:
   identity-based `action_mask` / `order_to_action`. Rejections now 0.00%.
   This also silently threw inside the runner and counted runs as lost.
-- **Slice had no boss**: Roark is order_index 50; SLICE_LEN was 50.
+- **A bare nickname next to a suffixed duplicate** ('Staravia' + 'Staravia2'):
+  Showdown resolved 'switch Staravia' to the active Staravia2 by species and
+  rejected it. `dedupe_nicknames` now suffixes every member (2026-09-19).
+- **Slice had no boss** (old order): Roark was order_index 50; SLICE_LEN was 50.
 - **Searcher confidence gate** (0.9) skipped every decision — the converged
   BC prior is >0.9 almost always. Off by default now.
 - **Early stop on the route holdout is useless** (saturates at 99%); train

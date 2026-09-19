@@ -118,10 +118,15 @@ def collect_worker(worker: int, pairs: list, port: int, out_dir: Path) -> None:
           f"{failures} failed battles", flush=True)
 
 
-def recording_brain(record: list, ctx: dict):
-    """SimpleHeuristics as a sim Brain that records (obs, mask, action) per decision."""
+def recording_brain(record: list, ctx: dict, teacher: str = "heuristic"):
+    """The teacher (SimpleHeuristics or the calc bot) as a sim Brain that records
+    (obs, mask, action) per decision."""
     from ai_util.sim import order_to_choice
-    teacher = SimpleHeuristicsPlayer(battle_format=GAME_FORMAT, start_listening=False, log_level=50)
+    if teacher == "calc":
+        from ai_util.calc_bot import CalcPlayer
+        teacher = CalcPlayer(battle_format=GAME_FORMAT, start_listening=False, log_level=50)
+    else:
+        teacher = SimpleHeuristicsPlayer(battle_format=GAME_FORMAT, start_listening=False, log_level=50)
 
     def brain(sb, side):
         battle = sb.mirrors[side]
@@ -156,13 +161,13 @@ def _save_shard(path: Path, record: list, values: list) -> None:
                         value=np.asarray(values, dtype=np.float16))
 
 
-def collect_worker_sim(worker: int, pairs: list, out_dir: Path) -> None:
+def collect_worker_sim(worker: int, pairs: list, out_dir: Path, teacher: str = "heuristic") -> None:
     from ai_util.evaluate import heuristic_brain, outcome_value
     from ai_util.sim import SimBattle, SimBridge
 
     record, values, ctx, failures = [], [], {"n": 0, "switch": 0}, 0
     bridge, me, foe = SimBridge(), None, heuristic_brain()
-    me = recording_brain(record, ctx)
+    me = recording_brain(record, ctx, teacher)
     for i, (p_team, e_team) in enumerate(pairs):
         start = len(record)
         try:
@@ -302,7 +307,7 @@ def collect(args: argparse.Namespace) -> None:
     chunks = [pairs[i::args.workers] for i in range(args.workers)]
     ctx = mp.get_context("spawn")
     if args.backend == "sim":
-        procs = [ctx.Process(target=collect_worker_sim, args=(w, chunks[w], out_dir))
+        procs = [ctx.Process(target=collect_worker_sim, args=(w, chunks[w], out_dir, args.teacher))
                  for w in range(args.workers)]
     else:
         procs = [ctx.Process(target=collect_worker, args=(w, chunks[w], args.port, out_dir))
@@ -355,6 +360,8 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("mode", choices=["collect", "collect_search", "synth", "holdout", "baseline"])
     p.add_argument("--policy", help="prior for collect_search")
+    p.add_argument("--teacher", choices=["heuristic", "calc"], default="heuristic",
+                   help="collect: who labels the decisions (SimpleHeuristics or ai_util.calc_bot)")
     p.add_argument("--trainers", help="comma-separated trainer_ids to restrict collect/collect_search "
                                       "to, or the enemy teams for synth")
     p.add_argument("--parties", type=int, default=400, help="synth: player parties sampled")

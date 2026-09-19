@@ -223,9 +223,12 @@ class SimBattleRunner:
         self.bridge = SimBridge()
         self.enemy = heuristic_brain()
         self.search = search  # default (k, rollouts) for boss fights; the compute dial
-        self.policy = None
+        self.policy, self.calc = None, policy == "calc"
         self._searchers: dict[tuple[int, int], object] = {}  # one Searcher per width
-        if policy:
+        if self.calc:  # the scripted damage-calc bot; search=(k, r) = all legal actions (up to k) as candidates
+            from ai_util.calc_bot import calc_brain
+            self.player = calc_brain()
+        elif policy:
             from ai_util.battler_policy import load_policy
             self.policy = load_policy(policy, device="cpu")
             self.player = prior_brain(self.policy)
@@ -234,12 +237,13 @@ class SimBattleRunner:
 
     def searcher(self, width: tuple[int, int] | None):
         """Search brain at `width` = (k, rollouts); None or no prior = the fast player."""
-        if width is None or self.policy is None:
+        if width is None or (self.policy is None and not self.calc):
             return self.player
         if width not in self._searchers:
             from ai_util.evaluate import Searcher
-            self._searchers[width] = Searcher(self.policy, self.enemy, k=width[0],
-                                              rollouts=width[1], max_turns=self.max_turns)
+            self._searchers[width] = Searcher(self.policy, self.enemy, k=width[0], rollouts=width[1],
+                                              max_turns=self.max_turns,
+                                              rollout=self.player if self.calc else None)
         return self._searchers[width]
 
     def estimate(self, player_packed: str, enemy_packed: str, n: int = 8):

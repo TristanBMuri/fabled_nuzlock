@@ -32,21 +32,24 @@ Brain = Callable[["SimBattle", str], str]
 
 
 def dedupe_nicknames(packed: str) -> str:
-    """Give repeated species distinct nicknames (Bidoof, Bidoof2, ...).
+    """Give repeated species distinct nicknames (Bidoof1, Bidoof2, ...).
 
     poke-env keys a team by nickname, so two same-species mons collapse into one
     entry: no active mon, no switches, 'switch Bidoof' resolving to the active one.
-    Harvest parties have duplicates often; the server path has the same defect."""
+    Harvest parties have duplicates often; the server path has the same defect.
+    Every member of a duplicated species gets a suffix: a bare 'Bidoof' next
+    to a 'Bidoof2' made Showdown resolve 'switch Bidoof' to the *active*
+    Bidoof2 by species and reject the choice (found 2026-09-19 with all-legal
+    search candidates; rare under the prior, which seldom proposed it)."""
+    parts = [mon.split("|") for mon in packed.split("]")]
+    species_of = lambda f: (f[1] or f[0]) if len(f) >= 2 else None
+    count = Counter(species_of(f) for f in parts if len(f) >= 2)
     seen: dict[str, int] = {}
     mons = []
-    for mon in packed.split("]"):
-        f = mon.split("|")
-        if len(f) < 2:
-            mons.append(mon)
-            continue
-        species = f[1] or f[0]
-        n = seen[species] = seen.get(species, 0) + 1
-        if n > 1:
+    for f in parts:
+        species = species_of(f)
+        if species is not None and count[species] > 1:  # every member: Bidoof1, Bidoof2
+            n = seen[species] = seen.get(species, 0) + 1
             f[0], f[1] = f"{species}{n}", species
         mons.append("|".join(f))
     return "]".join(mons)

@@ -168,9 +168,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--episodes", type=int, default=20)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--policy", help="BC prior for the battler (default SimpleHeuristics); "
-                                     "models/game_policy_best4.pt goes with --moveset best4, "
-                                     "game_policy_cap186v3.pt with last4")
+    ap.add_argument("--policy", help="BC prior for the battler (default SimpleHeuristics), or "
+                                     "'calc' for the scripted damage-calc bot (ai_util/calc_bot.py)")
     ap.add_argument("--search", help="k,rollouts for boss fights, e.g. 3,8")
     ap.add_argument("--search-all", action="store_true", help="search on every trainer")
     ap.add_argument("--deep", help="k,rollouts at breakpoints and fights the risk query "

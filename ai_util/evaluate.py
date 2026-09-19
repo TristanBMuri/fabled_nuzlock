@@ -83,19 +83,21 @@ def outcome_value(state: dict, side: str, death_weight: float = 0.5,
 
 
 class Searcher:
-    """Top-k rollout search for one side; the enemy plays its fixed AI."""
+    """Top-k rollout search for one side; the enemy plays its fixed AI.
+    policy=None: every legal action is a candidate (up to k) and `rollout`
+    (a scripted brain such as the calc bot) plays the rollouts — no network."""
 
     def __init__(self, policy, enemy: Brain, k: int = 3, rollouts: int = 8,
                  max_turns: int = 100, importance: list[float] | None = None,
                  death_weight: float = 0.5, confident: float | None = None,
                  crn: bool = True, seed: int | None = None, horizon: int | None = None,
-                 depth: int = 1, r2: int = 4):
+                 depth: int = 1, r2: int = 4, rollout: Brain | None = None):
         self.policy, self.enemy = policy, enemy
         # depth=2: at our next decision inside each rollout expand the prior's
         # top-k again (r2 rollouts each, common seeds) and take the best, so the
         # value is a max over our reply too, not what the prior would have done.
         self.depth, self.r2 = depth, r2
-        self.prior = prior_brain(policy)
+        self.prior = rollout or prior_brain(policy)
         self.k, self.rollouts, self.max_turns = k, rollouts, max_turns
         self.importance, self.death_weight, self.confident = importance, death_weight, confident
         # Common random numbers: rollout j uses the same engine seed for every
@@ -157,8 +159,13 @@ class Searcher:
         if m.wait:
             return "default"
         self.n_decisions += 1
-        probs, mask = prior_probs(self.policy, m)
-        cands = [int(a) for a in np.argsort(-probs) if mask[a]][:self.k]
+        if self.policy is None:
+            mask = action_mask(m)
+            probs = mask.astype(float) / max(mask.sum(), 1)
+            cands = [int(a) for a in range(len(mask)) if mask[a]][:self.k]
+        else:
+            probs, mask = prior_probs(self.policy, m)
+            cands = [int(a) for a in np.argsort(-probs) if mask[a]][:self.k]
         if not cands:
             return "default"
         self.last_action = cands[0]
@@ -242,7 +249,7 @@ def main() -> None:
     p.add_argument("--n-pairs", type=int, default=100)
     p.add_argument("--offset", type=int, default=0)
     p.add_argument("--n", type=int, default=1, help="battles per pair")
-    p.add_argument("--policy", help="state_dict of the prior; omit for --check")
+    p.add_argument("--policy", help="state_dict of the prior, or 'calc' for the damage-calc bot; omit for --check")
     p.add_argument("--net-arch", default="256,256")
     p.add_argument("--check", action="store_true", help="SimpleHeuristics on both sides")
     p.add_argument("--check-vs", choices=["maxbp", "random"],
@@ -285,18 +292,24 @@ def main() -> None:
     elif args.check:
         brain, tag = heuristic_brain(), "heuristic"
     else:
-        policy = load_policy(args.policy, [int(a) for a in args.net_arch.split(",")], device="cpu")
+        if args.policy == "calc":
+            from ai_util.calc_bot import calc_brain
+            policy, fast, tag = None, calc_brain(), "calc"
+        else:
+            policy = load_policy(args.policy, [int(a) for a in args.net_arch.split(",")], device="cpu")
+            fast, tag = prior_brain(policy), "prior"
         if args.search:
             searcher = Searcher(policy, enemy, k=args.k, rollouts=args.rollouts,
                                 max_turns=args.max_turns, death_weight=args.death_weight,
                                 confident=args.confident, crn=not args.no_crn, seed=args.seed,
-                                horizon=args.horizon, depth=args.depth, r2=args.r2)
-            tag = (f"search k={args.k} r={args.rollouts}{' nocrn' if args.no_crn else ''}"
+                                horizon=args.horizon, depth=args.depth, r2=args.r2,
+                                rollout=fast if policy is None else None)
+            tag = (f"{tag}+search k={args.k} r={args.rollouts}{' nocrn' if args.no_crn else ''}"
                    f"{'' if args.depth == 1 else f' d={args.depth} r2={args.r2}'}"
                    f"{'' if args.horizon is None else f' h={args.horizon}'}")
             brain = searcher
         else:
-            brain, tag = prior_brain(policy), "prior"
+            brain = fast
 
     t0, wins, deaths, mons, turns, stats = time.time(), 0.0, 0.0, 0, 0.0, {}
     for i, (party, enemy_team) in enumerate(pairs):
