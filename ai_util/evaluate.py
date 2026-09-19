@@ -88,8 +88,13 @@ class Searcher:
     def __init__(self, policy, enemy: Brain, k: int = 3, rollouts: int = 8,
                  max_turns: int = 100, importance: list[float] | None = None,
                  death_weight: float = 0.5, confident: float | None = None,
-                 crn: bool = True, seed: int | None = None, horizon: int | None = None):
+                 crn: bool = True, seed: int | None = None, horizon: int | None = None,
+                 depth: int = 1, r2: int = 4):
         self.policy, self.enemy = policy, enemy
+        # depth=2: at our next decision inside each rollout expand the prior's
+        # top-k again (r2 rollouts each, common seeds) and take the best, so the
+        # value is a max over our reply too, not what the prior would have done.
+        self.depth, self.r2 = depth, r2
         self.prior = prior_brain(policy)
         self.k, self.rollouts, self.max_turns = k, rollouts, max_turns
         self.importance, self.death_weight, self.confident = importance, death_weight, confident
@@ -116,6 +121,35 @@ class Searcher:
         enemy's forced switch (we just KO'd), let it happen first."""
         while not f.ended and f.mirrors[side].wait and f.pending[opp]:
             f.step({opp: f.choice(opp, self.enemy)})
+
+    def _play_out(self, f: SimBattle, side: str, opp: str, depth: int) -> float:
+        """Value of fork f: play out with the prior, or (depth > 1) max over
+        our top-k at the next decision, each scored by r2 play-outs."""
+        if depth > 1:
+            self._settle(f, side, opp)
+            m = f.mirrors[side]
+            if not f.ended and f.pending[side] and not m.wait:
+                probs, mask = prior_probs(self.policy, m)
+                cands = [int(a) for a in np.argsort(-probs) if mask[a]][:self.k]
+                if len(cands) > 1:
+                    seeds = [self.rng.integers(1, 2 ** 16, 4).tolist() for _ in range(self.r2)]
+                    best = -np.inf
+                    for b in cands:
+                        msg = order_to_choice(SinglesEnv.action_to_order(np.int64(b), m))
+                        vals = []
+                        for seed in seeds:
+                            g = f.fork(seed=seed)
+                            first = {side: msg}
+                            if g.pending[opp]:
+                                first[opp] = self.enemy(g, opp)
+                            g.step(first)
+                            vals.append(self._play_out(g, side, opp, depth - 1))
+                            g.close()
+                        best = max(best, float(np.mean(vals)))
+                    return best
+        f.play({side: self.prior, opp: self.enemy}, self.max_turns)
+        self._settle(f, side, opp)
+        return self.value(f, side)
 
     def __call__(self, sb: SimBattle, side: str) -> str:
         m = sb.mirrors[side]
@@ -145,6 +179,10 @@ class Searcher:
                 if f.pending[opp]:
                     first[opp] = self.enemy(f, opp)
                 f.step(first)
+                if self.depth > 1 and self.horizon is None:
+                    vals.append(self._play_out(f, side, opp, self.depth))
+                    f.close()
+                    continue
                 leaf = None
                 if self.leaf_record is not None and self.horizon is None:
                     self._settle(f, side, opp)
@@ -222,6 +260,8 @@ def main() -> None:
     p.add_argument("--horizon", type=int,
                    help="truncate rollouts after this many turns and score the leaf with the "
                         "policy's value head (needs a --value-trained checkpoint); default: play out")
+    p.add_argument("--depth", type=int, default=1, help="2 = max over our reply inside rollouts")
+    p.add_argument("--r2", type=int, default=4, help="play-outs per second-ply candidate")
     p.add_argument("--max-turns", type=int, default=100)
     p.add_argument("--raw-names", action="store_true",
                    help="keep duplicate-species nicknames (reproduces the server/poke-env "
@@ -250,8 +290,9 @@ def main() -> None:
             searcher = Searcher(policy, enemy, k=args.k, rollouts=args.rollouts,
                                 max_turns=args.max_turns, death_weight=args.death_weight,
                                 confident=args.confident, crn=not args.no_crn, seed=args.seed,
-                                horizon=args.horizon)
+                                horizon=args.horizon, depth=args.depth, r2=args.r2)
             tag = (f"search k={args.k} r={args.rollouts}{' nocrn' if args.no_crn else ''}"
+                   f"{'' if args.depth == 1 else f' d={args.depth} r2={args.r2}'}"
                    f"{'' if args.horizon is None else f' h={args.horizon}'}")
             brain = searcher
         else:
@@ -281,6 +322,7 @@ def main() -> None:
         print(f"  {v:6d}  {k}")
     if searcher:
         print(f"searched {searcher.n_searched}/{searcher.n_decisions} decisions")
+    print(f"totals: pairs {len(pairs)} n {args.n} wins {wins:g} deaths {deaths:g} mons {mons}")
     bridge.close()
 
 
