@@ -229,6 +229,13 @@ Keep as simple as possible. Add complexity only on concrete failure.
       effort goes to the run layer and data. Decision criterion: if (i)
       does not beat the search line on the Edwin/rival probes and the 186
       table within one round, take (ii) and delete the EI/value-head code.
+      **Measured 2026-09-18 (README → Status):** depth-2 search null at 6x
+      compute; a scripted damage-calc bot (real damage formula, KO check,
+      switch out of a lethal hit) beats the teacher and every search line
+      on the rival probe (0.08 vs 0.20 deaths/mon) with no search. The
+      ceiling was the teacher's rules. Decision: clone the calc bot as the
+      next prior (encoder needs level + real stats), after the data fixes
+      (route order done, EVs/IVs next); then (ii) for everything else.
 - [x] **1b. Search width per trainer** (2026-09-16). `NuzlockeEnv(deep=(k, r))`
       / `plan_gauntlet --deep 4,16` plays breakpoints and every fight the
       fielded party's risk query flags (a loss, a death, or HP < `DEEP_HP` at
@@ -453,7 +460,43 @@ E4 (one OOD loop + table) → E5 alongside → E2 last. The `--roster 30`
 table (2026-09-16, pending) is E3c's measurement.
 
 ### 3. Distribution and generality
-- [ ] **3a. Real BDSP data first.** What exists is thin and hand-made:
+- [ ] **3z. Identity in the battler obs (revisit when gauntlets are generated,
+      2026-09-18).** The encoder has types, base stats and move terms only —
+      exactly the teacher's inputs, so species / move / ability identity buys
+      nothing while the prior is a clone. Once gauntlets are sampled from a
+      distribution (3b+) and the label side uses hidden info (calc bot with
+      a threat model, or anything beyond the teacher), add learned
+      embeddings (8–16 dims per species and move slot), not one-hots: 275
+      species x 12 slots one-hot memorizes the harvest at this data scale.
+- [ ] **3a. Real BDSP data first.** **Route order done 2026-09-18:**
+      `scripts/build_order.py` builds `order.json` (405 trainers in story
+      order from Bulbapedia's BDSP tables, `location` + `mandatory`) and the
+      encounter gates; the level-sorted file is `order_bylevel.json` until
+      the harvest is regenerated. **Same day:** trainer EVs/IVs/natures in
+      the packed teams, encounter tables for the whole game (Bulbapedia
+      Generation VIII catch tables, walking only), evolution methods with
+      progression gates (friendship = catch level + 10, stones after Eterna,
+      trade never); water / fishing / surf / gift encounters as per-method
+      alternatives; the rival fought once per battle. **Still missing, with
+      a verdict each (2026-09-18):** (a) *League healing* — E4 + Champion
+      are five fights on one heal; model as a "no heal between" flag on the
+      order entries (do, cheap, changes the League table); (b) *BDSP mod* —
+      battles run on gen 8 mechanics with gen 4 learnsets; Showdown ships
+      `gen8bdsp` (learnsets, moves, items, dex): switch the format and the
+      learnset source (do, one harvest); (c) *trade evolutions* — never;
+      revisit as a rules flag if a table shows the box starved of Gengar /
+      Alakazam / Machamp lines; (d) *TMs / tutors* — E7; (e) *player IVs /
+      natures / EVs* — flat 31 / neutral / 85, calibrate with the level
+      rule; (f) *held items, in-battle items* — none for the player, keep;
+      (g) *double battles as two singles* — keep until the sim supports
+      doubles; (h) *opponent AI* — SimpleHeuristics; the calc bot as enemy
+      AI for gym leaders / E4 is a one-line tier (do after the calc-bot
+      teacher); (i) *route-trainer mandatory flags* — unknown from the
+      tables, keep all fought; (j) *version exclusives* — BD column;
+      (k) *Eevee branch and encounter method* — planner rules now (final
+      BST), run-layer decisions later; (l) *friendship = catch + 10* —
+      uncalibrated; (m) *money, Poké Balls, egg moves* — out of scope.
+      Was:
       `bdsp_gauntlet_order.json` is sorted by trainer level, not by route,
       so "before trainer N" gates are level-band approximations; the
       encounter tables are recollection, version exclusives omitted;

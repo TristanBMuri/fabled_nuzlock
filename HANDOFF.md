@@ -1,4 +1,4 @@
-# HANDOFF — state of the project as of 2026-09-16 (evening)
+# HANDOFF — state of the project as of 2026-09-18
 
 Read this first. `project_overview.md` is the plan, `README.md` → Status is the
 full lab notebook (chronological, with every number). This file is the
@@ -29,6 +29,31 @@ came from: game folder (E1), known defects (E3), and above all `best4`
 movesets (E4: deaths per run 16.25 → 6.30, clears 60% → 95%). Left: E5
 trace, E2 rules object, E6 later.
 
+**2026-09-18:** the three walls (Edwin, the 19–21 rival, Kenneth's Gyarados)
+were level-sort artefacts — all sit after Gardenia in the real game. The
+order file is now **route-ordered** (`scripts/build_order.py` from
+Bulbapedia; 405 trainers to Cynthia; Roark #20, Gardenia #58, Maylene #166,
+Cynthia #404; `SLICE_LEN` 21). **Every table above is on the old order and
+must be regenerated** (harvest → collect → pretrain → table). Also found:
+trainer EVs/IVs/natures exist in the sheet and are dropped by `Mon.pack`
+(the sim plays every enemy at 252 EVs / 31 IVs); fix before regenerating.
+The teacher-ceiling round (1a) is decided: depth-2 search is null, a
+scripted **damage-calc bot** beats the teacher and search on the probes;
+the next prior is a clone of it. Details in README → Status (2026-09-18).
+Later the same day: trainer EVs/IVs/natures are in (`Mon.pack` writes packed
+strings directly), the encounter tables cover the whole game from
+Bulbapedia (43 areas), evolutions carry every method behind progression
+gates (friendship = catch level + 10, stones after Eterna, trade never), and
+the first route-order tables exist: through Maylene the prior+search line is
+167 / 157.7 / 1.25 deaths / 100% — solved. **The benchmark is the full game
+(`--slice 405`) from here.** A fast episode over 405 wipes at the League rival.
+Then: water / fishing / gift encounters as per-method alternatives the run
+layer chooses between, the rival fought once per battle (was three times),
+box 50. Full-game tables on this env (`logs/plan_route405b_*.log`):
+heuristic + risk parties 403.05 / 139.2 / 31.95 deaths / 10% clears (20 eps);
+prior + search 403.4 / 184.8 / 27.6 / 0% (10 eps). Cynthia wipes most runs;
+the E4 costs ~5 deaths each. That table is the benchmark now.
+
 ## Architecture (what each file is)
 
 ```
@@ -55,9 +80,15 @@ ai_util/collect_game.py collect (sim, BC pairs from harvest matchups, + battle
 ai_util/pretrain_bc.py  masked-CE pretrain; multiple --data; sim-based eval;
                         --init/--value-only/--value-coef train the critic on `value`.
 ai_util/diff_sets.py    sim-vs-server team-setup diff (found the EV bug).
-data/bdsp/              the game folder: trainers.json, order.json, encounters.json,
-                        learnsets.json, evolutions.json, species.json. A second game
-                        is a second folder (gauntlet.GAME names the default).
+data/bdsp/              the game folder: trainers.json, order.json (route order,
+                        location + mandatory per entry; order_bylevel.json = the old
+                        level-sorted file, delete after the harvest is regenerated),
+                        encounters.json (gates = first trainer of the location,
+                        tables end at Route 215), learnsets/evolutions/species/moves.
+scripts/build_order.py  rebuilds order.json + encounters.json from Bulbapedia (trainer
+                        tables and Generation VIII catch tables per story visit; level
+                        bands for twice-visited locations, story battles by trainer_id).
+                        Then `gauntlet.py --build-moves` and `--build-species`.
 scripts/gauntlet.py     load_game() (cached, the only reader of the folder), Mon/
                         pack_team, encounter_moves (last4 rule), evolve(), ability
                         slots, BattleRunner (server, legacy), SimBattleRunner
@@ -84,9 +115,11 @@ tests/test_sim.py       bridge: play, mirror, fork. `uv run pytest -q`.
 ## The default run config (what "a run" is now)
 
 ```bash
-uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 186 \
+uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 59 \
     --policy models/game_policy_best4.pt --search 3,8 --search-all --deep 4,16 --workers 10
 # defaults: --roster 30 (unbounded box), dupes clause on, --moveset best4
+# --slice 59 = through Gardenia on the route order (was 186 on the level order);
+# the best4 prior was cloned on the old order's harvest — regenerate before trusting a table.
 ```
 
 Per trainer: catch encounter if room → candidate parties = top-6-by-level ∪
@@ -208,32 +241,27 @@ boss's max level (14 = Roark). ~85 s/episode.
   same without CRN). `logs/search_{prior,crn,nocrn,h0,h3,h0_k6r16,h0_v2}.log`
   — the 2l holdout table. `models/` and `logs/` are gitignored.
 
-## Next steps (2026-09-16 evening; the plan is project_overview.md → 2¾)
+## Next steps (2026-09-18)
 
-1. **Baseline is base2**: unbounded box + dupes clause, 183.15 / 60.95 /
-   16.25 / 60% (README → Status). Measure every later env change against
-   it. E3e (ability slots) is in the code but not in that table; it rides
-   with E4's table.
-2. **E1 game folder is in** (`data/bdsp/`, `gauntlet.load_game`; moveset
-   rule checked equal on 3300 cells); acceptance table 184.0 / 49.0 / 15.5
-   / 60% = base2 inside noise, so E1 preserved behaviour and E3e (ability
-   slots) is neutral. E3 is complete.
-3. **E4 `best4` movesets: done and default** (185.95 / 101.8 / 6.30 /
-   95%). Any future moveset change repeats the loop: harvest 300 fast eps
-   with `--harvest`, collect base + synth on the deadliest teams, pretrain,
-   table. The harvest carries the rule (collectors read packed teams).
-4. **E5 and E2 are in** (`env.tracker()` under `--verbose`;
-   `nuzlocke_env.Rules`). The env plan is complete except E6.
-5. Deletion pass (2½) before step 3; `--parties beam|all` goes with it
-   unless the lifted box changes the picture.
-6. Then 1a (teacher ceiling decision), 2e (learned run layer, needs 2p),
-   step 3 (generality).
+1. ~~Trainer EVs/IVs/natures~~ done. ~~Encounters to the League, evolution
+   methods~~ done. Player-side EV fill is a flat 85 (`PLAYER_EVS`) — revisit
+   with the level rule.
+2. **Full-game tables** (`--slice 405`): harvest → collect → pretrain →
+   heuristic and prior+search tables. Find the real walls (expect the League
+   rival, E4, Cynthia; Maylene's Lucario costs one mon per run).
+3. **Clone the damage-calc bot** (probe code in the 2026-09-18 session
+   scratchpad; README → Status describes it) as the next teacher: promote it
+   to `ai_util/`, add level + real stats to the encoder, harvest/collect/
+   pretrain, table it as prior, prior+search, and bot alone.
+4. **Deletion pass (2½)** including `evaluate.py --depth` (null), the EI /
+   value-head paths, and `order_bylevel.json`.
+5. Extend the encounter tables past Route 215 and the slice to Maylene.
 
-Not to retry (all measured, 2026-09-16, README → Status): `--refine`,
-`--climb` (deleted), `--parties beam|all` (null), lead order, a
-switch-out-after-a-hit wrapper, wider search at the Gyarados fight, a
-learned value head as the rollout leaf (null twice, 2026-09-15), more
-rival teacher data.
+Not to retry (measured, README → Status): `--refine`, `--climb`, `--parties
+beam|all`, lead order, a switch-out-after-a-hit wrapper, wider search at a
+wall, a learned value head as the rollout leaf, more rival teacher data,
+**depth-2 search** (2026-09-18, null at 6x), **calc-bot rollouts under
+prior candidates** (worse than either alone).
 
 ## Environment gotchas
 

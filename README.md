@@ -875,6 +875,140 @@ project_overview.md # the plan / roadmap
   Intimidate; Shinx Intimidate → Luxio Intimidate). Data: `data/species.json`
   from the dex (`gauntlet.py --build-species`; 275 species, also E1's
   species file). Not in base2; measured with E4.
+  **Teacher-ceiling round (2026-09-18, roadmap 1a).** Edwin and rival probes
+  (30 pairs x3, v3 prior, last4, `logs` in the session scratchpad):
+    Edwin  teacher 90.0% / 0.41   search k3r8 88.9% / 0.46   depth-2 search (6x compute) 90.0% / 0.38
+           calc bot alone 91.1% / 0.33   prior candidates + calc-bot rollouts 84.4% / 0.45
+    rival  teacher 97.8% / 0.31   search k3r8 96.7% / 0.20   depth-2 100% / 0.18
+           calc bot alone 98.9% / 0.08   prior candidates + calc-bot rollouts 97.8% / 0.26
+  Depth-2 search (`evaluate.py --depth 2`: max over our top-k again at the
+  next decision, r2 play-outs each) is null: the searcher's limit is not
+  depth. The **calc bot** — a 90-line scripted policy that runs the real
+  damage formula (own stats from the request, enemy stats at the 252-EV /
+  31-IV fill, boosts, STAB, effectiveness, 0.925 mean roll), takes a KO when
+  it has one, switches out when the next hit kills and a bench mon
+  survives, otherwise the max expected-damage move — beats every search
+  line on the rival and matches the best on Edwin at zero search cost. Its
+  edge is one rule the teacher lacks: the teacher loses Luxio in 26/34 Edwin
+  slots and 20/27 rival slots by staying in. Mixing it into rollouts under
+  prior-chosen candidates is worse (the value assumes a policy that never
+  acts). Verdict: the ceiling was SimpleHeuristics' rules, not imitation;
+  the next prior is a clone of the calc bot (encoder needs level + stats).
+  **The walls were level-sort artefacts.** Bulbapedia: Collector Edwin is in
+  the Cafe Cabin on Route 210 (after Solaceon, optional), Fisher Kenneth on
+  Route 213 (after Pastoria), the 19-21 rival is the Hearthome City fight —
+  all after Gardenia in route order. The order file was the trainer sheet
+  sorted by max level. Also found: the sheet has real EVs/IVs/natures per
+  trainer mon (rival Starly IVs 5) and `Mon.pack` drops them, so the sim
+  plays every trainer mon at 252 EVs / 31 IVs (Sudowoodo@19: HP 73 Def 66
+  SpD 47 vs ~57 / 50 / 31 real). Nothing catchable before Edwin one-shots
+  the sim's Sudowoodo at 22 (Roselia Magical Leaf 86% max roll; after one
+  Growth it does, outspeeding 54 vs 34); under real stats four species do.
+  **Route-ordered gauntlet (3a, 2026-09-18).** `scripts/build_order.py`
+  fetches Bulbapedia's BDSP trainer tables (raw wikitext, `{{Trainerentry}}`
+  with `game=BDSP`, rematches skipped) for the story locations in visit
+  order, splits twice-visited locations by level band (Route 204/205/208/
+  210/211/213, Oreburgh Gate, the lakes), matches each entry to
+  `trainers.json` by class+name+team (grunts by team, double battles as two
+  singles, wiki/sheet level typos by species), inserts the story battles by
+  id, and writes `data/bdsp/order.json` (405 trainers to Cynthia, every
+  optional included; `location`, `mandatory` per entry — mandatory only
+  for story battles and Galactic plot locations) plus the encounter gates
+  (`before_trainer` = first trainer of the location where the area opens,
+  `opens_at` for humans). Roark #20, Gardenia #58, Maylene #166, Wake #204
+  (now a breakpoint), Fantina #216, Byron #250, Candice #317, Volkner #355,
+  E4 #400-403, Cynthia #404. 3 wiki entries unmatched (missing from the
+  sheet), 301 sheet entries unplaced (rematches, tag partners, postgame,
+  Battle Tower). `SLICE_LEN` 51 -> 21; slices: 21 Roark / 59 Gardenia / 167
+  Maylene. Encounter tables still end at Route 215 (#152). Old order kept
+  as `order_bylevel.json` until the harvest is regenerated; every table
+  before this entry is on the old order and not comparable. One fast
+  episode through Gardenia: 59 cleared, 3 deaths (Roark 2, Gardenia 1).
+  **Trainer EVs/IVs/natures (2026-09-18).** `Mon.pack` writes the packed
+  string directly (poke-env's text roundtrip drops an all-zero EV spread and
+  the validator then fills 252s): trainers carry the sheet's nature / EVs /
+  IVs (1167 of 1563 trainer mons have 0 IVs and 0 EVs; bosses 31 / 510),
+  player mons get 31 IVs and a flat 85 EVs per stat (`PLAYER_EVS`). Edwin's
+  Sudowoodo@19: HP 73 -> 55; Roark's Cranidos 42 HP. **Route-order tables
+  through Maylene (slice 167; harvest 300 fast eps 2 min; collect 48k
+  pairs 1 min; pretrain val CE 0.061 -> `models/game_policy_route.pt`):**
+    fast heuristic harvest (300)         167 / 73.7  / 3.80 / 100%
+    heuristic + risk parties (20, 12 min) 167 / 143.8 / 2.20 / 100%
+    prior + search 3,8 all, deep 4,16 (20, 26 min) 167 / 157.7 / 1.25 / 100%   (`logs/plan_route167_*.log`)
+  Maylene's Lucario takes exactly one mon per run under every brain (20/20);
+  the rest is noise. The slice through Maylene is solved; the benchmark is
+  the full game now.
+  **Env finished for the full game (2026-09-18): encounters + evolution
+  methods.** `build_order.py` also parses Bulbapedia's Generation VIII
+  `{{Catch/entrybdsp}}` tables (walking encounters only: Grass / Cave /
+  Building, BD column, max over time-of-day columns; surf, fishing, radar,
+  swarm, honey, Underground excluded) into `encounters.json`: 43 areas, 225
+  rows, one area per story visit (twice-visited pages split by sub-area
+  keyword or level band; Mt. Coronet = South / Celestic side / Snowpoint
+  side), species as Showdown ids. Replaces the hand-written v2 tables (which
+  stopped at Route 215 and were recollection). Evolutions: `evolutions.json`
+  carries every method from the dex (gen 4 dex, no regional formes);
+  `gauntlet.evolve(species, level, rng, caught_level, trainer_idx)`: level
+  always; friendship at catch level + 10 (`FRIENDSHIP_LEVELS`; Mon.caught_level);
+  stones / held items / places behind location gates (`STONE_GATE` = Eterna
+  Gym, the Grand Underground; Moss Rock = Eterna Forest, Ice Rock = Route
+  217, magnetic field = Route 208, Razor Claw/Fang = Victory Road); Mimic
+  evolutions at the learn level; trade never. Branches (Eevee, Wurmple) pick
+  with the env rng. 81 species have learnsets, 274 species.json. One fast
+  episode over all 405: 397 cleared, 32 deaths, wiped by the League rival —
+  the full game is a real benchmark.
+  **Water, gifts, rival, box (2026-09-18, later).** Encounter rows carry a
+  `method`: walk (Grass/Cave/Building), old / good (Old Rod from the
+  Jubilife gate house = Route 203, Good Rod = Route 209; Super Rod is
+  postgame), surf (HM after Celestic = Route 218), gift (gift / egg rows:
+  Happiny egg in Hearthome, Riolu egg on Iron Island; Mew / Jirachi /
+  starters / postgame Eevee excluded). An area opens at its first visit if
+  any method is available then, else when the first water method arrives
+  (Twinleaf Town opens with the Old Rod); the pool is the methods available
+  at that point. The env rolls **one pick per method** and the run layer
+  takes at most one (`pending` is a list of alternatives; action k = take
+  alternative k); the scripted planner picks by the base stat total of the
+  species' final evolution (`final_bst`; Magikarp -> Gyarados wins the rod
+  every time). Dupes clause per method: a rod whose only family is owned is
+  not offered, and an area with no new family gives no catch (was: a dupe).
+  One encounter per route: the second visits of Routes 204 / 205 / 210 /
+  211 and the Surf revisits are not areas. 47 areas, 301 rows. **Rival:**
+  the table has one record per starter choice and the order carried all
+  three, so every rival battle was fought three times (the level-sorted
+  order did the same); `NuzlockeEnv._skip_other_rivals` now fights only the
+  variant whose starter counters ours (Turtwig -> the Chimchar rival). The
+  skipped records still count as cleared in the summary (+2 per rival
+  battle). **Box** default 30 -> 50 (47 areas). Tests cover both. Fast
+  episode over 405, seed 11: 400 cleared, 29 deaths, Riolu and one
+  Gyarados in the box. The first full-game tables (harvest
+  `battles_route405.jsonl`, prior `game_policy_route405.pt`, val CE 0.232)
+  ran on the env *before* these fixes: heuristic table
+  `logs/plan_route405_heuristic.log`, the search table was stopped at 8/20
+  episodes (superseded). Regeneration on the fixed env: `*_route405b*`.
+  **First full-game table (old env: three rivals, walking encounters, box
+  30; heuristic + risk parties, 20 eps, 5 workers, 90 min,
+  `logs/plan_route405_heuristic.log`):**
+    402.5 cleared / 149.9 no-death / 32.45 deaths / 5% clears
+  Deaths sit where a Nuzlocke's do: Cynthia 55 deaths + 11 wipes / 20 runs,
+  the League rival 52-53 per variant, Flint 48, Aaron 36, Lucian 36,
+  Bertha 31, Volkner 28. Everything before Sunyshore is noise. The full
+  game is the benchmark and the League is the wall.
+  **Fixed env (one rival, water / gifts, box 50), harvest 200 fast eps
+  (394.6 / 76.7 / 36.0), collect 95.6k pairs, `game_policy_route405b.pt`
+  val CE 0.219. Prior + search 3,8 all, deep 4,16 (10 eps, 10 workers, 67
+  min, `logs/plan_route405b_search.log`):**
+    403.4 cleared / 184.8 no-death / 27.6 deaths / 0% clears, 20 deep fights per run
+  Cynthia 48 deaths and 8 wipes in 10 runs, Flint 38, Bertha 22, Lucian
+  21, Aaron 19, the League rival 18, Volkner 13, Maylene 11. Search moves
+  the first death from ~150 to ~185 and trims the E4, but Cynthia at parity
+  (Garchomp@66 vs our 66s) wipes 8 of 10 runs: the prior is a heuristic
+  clone and the rollouts are heuristic-quality, and the five League fights
+  are still played on full heals. This is where the calc-bot teacher, the
+  League-healing rule and the BDSP mod get measured.
+  Heuristic + risk parties on the same env (20 eps, 5 workers,
+  `logs/plan_route405b_heuristic.log`): **403.05 / 139.2 / 31.95 / 10%**
+  (2 of 20 runs beat Cynthia). Search buys ~45 trainers of first death and
+  ~4 deaths per run; neither line beats the League reliably.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the
