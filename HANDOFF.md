@@ -258,13 +258,20 @@ boss's max level (14 = Roark). ~85 s/episode.
 2. **Full-game tables** (`--slice 405`): harvest → collect → pretrain →
    heuristic and prior+search tables. Find the real walls (expect the League
    rival, E4, Cynthia; Maylene's Lucario costs one mon per run).
-3. **Clone the damage-calc bot** (probe code in the 2026-09-18 session
-   scratchpad; README → Status describes it) as the next teacher: promote it
-   to `ai_util/`, add level + real stats to the encoder, harvest/collect/
-   pretrain, table it as prior, prior+search, and bot alone.
-4. **Deletion pass (2½)** including `evaluate.py --depth` (null), the EI /
-   value-head paths, and `order_bylevel.json`.
-5. Extend the encounter tables past Route 215 and the slice to Maylene.
+3. ~~Clone the damage-calc bot~~ done and measured: the clone fits badly
+   (val CE 0.455) and search over the calc bot itself is the better line
+   (probes: rival 0.03 deaths/mon; full game: route ≈ 1 death/run). The BC
+   prior is no longer on the path; the battler is `--policy calc --search 9,8`.
+4. **The League** (`no_heal` block: party locked, PP carried, full heal
+   between fights, one cap 66): E4 costs 3 / 5 / 16 deaths per 10 runs,
+   **Cynthia wipes 8 of 10**. Probe from full HP at parity: calc bot 2.7%
+   wins; legal EV training +1–3 points; her Garchomp and Lucario kill 1.5
+   mons each per fight. Next, on the roadmap only (2026-09-19, not started):
+   E8 League party building from the whole box, then E7 TM movesets with
+   **reusable TMs** (decided), then E9 held items.
+5. **Deletion pass (2½)**: `evaluate.py --depth`, the EI / value-head
+   paths, `collect_game`'s BC pipeline if the prior stays off the path,
+   `order_bylevel.json`.
 
 Not to retry (measured, README → Status): `--refine`, `--climb`, `--parties
 beam|all`, lead order, a switch-out-after-a-hit wrapper, wider search at a

@@ -441,19 +441,32 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       drops and the party per trainer. The scratch replay script is gone.
 - [ ] **E6. Variable-roster obs/action (2p).** Only when 2e is attempted;
       the scripted planner never reads the obs. Do not build now.
-- [ ] **E7. A real moveset system (later; added 2026-09-18).** `best4` is a
-      stopgap: base power only, level-up pool only, one hand-ordered status
-      list. It decides which mons are usable (E4 was the largest gain in
-      the project), so it deserves a proper version once the run layer and
-      step 3 are in. Candidates, cheapest first: (a) widen the pool with
-      TM / tutor / egg moves the game actually makes available by that
-      point in the order (data question, 3a); (b) choose the four by the
-      sim instead of by base power — score each candidate set with the
-      risk query against the next few trainers, the same way parties are
-      chosen; (c) section 7 stage 2: a `MOVE_SELECTION` phase where the
-      run layer decides moves as it decides parties. Every version is a
-      progression change: harvest → collect → pretrain → table, and the
-      prior only works under the rule it was cloned on.
+- [ ] **E7. TM movesets (decided 2026-09-19; not started).** `best4` over
+      level-up moves is the stopgap. **Decision: TMs are reusable** (as in
+      every game after BDSP; BDSP's single-use TMs would make this a budget
+      problem for no research value). Plan: (a) TM / HM list with the
+      location where the game hands each out (Bulbapedia, same scrape as the
+      trainer and catch tables) → a gate per TM on the route order, like the
+      rods and Surf; (b) the move pool for a mon = level-up moves ∪ TMs
+      obtained so far that the species can learn (Showdown's learnsets carry
+      TM compatibility); (c) the rule stays `best4` over the widened pool
+      first — one table tells how much Ice Beam / Earthquake / Toxic buy at
+      Cynthia (the probe: calc bot 2.7% from full HP at parity with level-up
+      moves) — then (d) choose the four by the sim (risk query against the
+      next fights / the League block), then (e) a `MOVE_SELECTION` decision
+      for the run layer. Tutors and egg moves stay out. Every version is a
+      progression change (harvest → table; the calc bot needs no retraining).
+- [ ] **E8. Party building for the League from the whole box (2026-09-19).**
+      The block estimate exists (`estimate_block`, one party through all
+      five fights); the candidate set is still top-6-by-level + single swaps
+      and carries filler (Unown, Girafarig, Bibarel among the top deaths at
+      Cynthia). Score a wider set at the block opener — beam or all
+      6-subsets of a shortlist by type coverage against her six — with more
+      samples than n=8. Half a day, no new data. Do before E7 so E7's table
+      is not confounded by selection.
+- [ ] **E9. Held items (later).** Leftovers, Choice items, Focus Sash: data
+      (where obtainable) + an assignment rule. Smaller lever pre-League.
+      In-battle items stay out (hardcore rule).
 
 Order: E3 (an afternoon, one table) → E1 (a day, behaviour-preserving) →
 E4 (one OOD loop + table) → E5 alongside → E2 last. The `--roster 30`
@@ -531,7 +544,7 @@ table (2026-09-16, pending) is E3c's measurement.
 - [ ] Value-of-information behaviour: does it scout?
 
 ### 5. Later
-- [ ] Move events / builds (stage 1–2 above; see 2¾ → E7)
+- [ ] Move events / builds (stage 1–2 above; see 2¾ → E7, reusable TMs)
 - [ ] Showdown mods approximating specific hacks
 - [ ] Opponent AI tiers by trainer class (random < gym < E4/champion)
 

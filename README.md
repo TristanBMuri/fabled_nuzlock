@@ -1108,6 +1108,38 @@ project_overview.md # the plan / roadmap
   Rule now: **one cap per no-heal block = its highest level (66), reached
   before Aaron** (the standard hardcore convention for the E4). The
   summary also prints deaths by species from here.
+  **Block cap 66 + items between fights, calc + search 9,8 (10 eps, 38 min,
+  `logs/plan_league3_calcsearch.log`):** 403.7 / 371.8 / 5.9 deaths / 0%
+  clears. Bertha 3, Flint 5, Lucian 16, **Cynthia 30 deaths + 8 wipes / 10**;
+  route ~1. Deaths by species: Bibarel 13, Gyarados 9, Staraptor 7, Luxray
+  5, Infernape 5. The E4 is handled at 66; Cynthia is the wall, and the
+  party that reaches her carries filler (Bibarel is top-6-by-level tie-break
+  material). Next: a Cynthia matchup probe from the harvest's League parties.
+  Calc bot alone, same rules (10 eps, 49 min, `logs/plan_league3_calcbot.log`):
+  402.6 / 259.9 / 10.0 / 0% — dies at Flint (5) and Lucian (4); search halves
+  the League cost (5.9) and gets 8 of 10 runs to Cynthia.
+  **Cynthia probe (`models/cynthia66_pairs.json`):** 150 six-mon parties the
+  fast heuristic fielded at trainers 380-399, re-leveled to 66 with best4
+  movesets, 85 EVs, vs Cynthia from full HP, n=2: **calc bot 2.7% wins,
+  0.99 deaths/mon** — a near-certain wipe at level parity against a team
+  with 31 IVs / 510 EVs and real held items. The League table's 8 wipes are
+  this, not the planner. Levers, all player-side realism: EV training
+  (`PLAYER_EVS` is a flat 85), TM movesets (E7), held items, in-battle
+  items. Species reaching the League: Weavile, Lapras, Abomasnow, Crobat,
+  Chimecho, Mantine, Chatot, Skuntank, Golduck, Luxray, Bronzong.
+  Player-stat sweep on the same probe (calc bot, n=2): 85 flat 2.7% wins;
+  legal EV training 252 attack + 252 HP 3.7%, 252 attack + 252 Spe 6.0%;
+  the old 252-in-every-stat fill 41%. Faints by her active mon per 100
+  battles: Garchomp 152, Lucario 144, Roserade 119, Gastrodon 75, Milotic
+  53, Spiritomb 52; we KO Spiritomb 100, Lucario 47, Gastrodon 39,
+  Roserade 33, Garchomp 24, Milotic 16. Our dead: Unown 46, Crobat 40,
+  Octillery 40, Girafarig 40, Kadabra 34, Blissey 32 — the level-sorted
+  party carries filler into the fight. Verdict: at level parity, under
+  hardcore rules (cap, no items in battle) with level-up movesets and
+  route-catch stats, Cynthia is a coin flip at best for the *best* party
+  and a wipe for a typical one. The legal levers are TM movesets (E7,
+  single-use TMs in BDSP), held items, and party building for the League
+  from the whole box (both need the run layer to plan for #404 from far out).
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the
