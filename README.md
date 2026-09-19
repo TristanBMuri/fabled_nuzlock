@@ -1083,6 +1083,15 @@ project_overview.md # the plan / roadmap
   party that enters the League is the one that survives the League in
   simulation, not the one that beats Aaron. ~0.4 s per candidate at n=8.
   The single-fight query still drives the deep-search trigger.
+  **League with no items (2026-09-19, calc + search 9,8, 10 eps, 47 min):**
+  402.0 / 345.3 / 6.7 deaths / 0% clears; ~1 death per run before the League,
+  then Aaron 5, Bertha 25, Flint 27 (8 wipes), Lucian 3 — the party enters
+  Flint on what Bertha left. The game is not this: a run enters each E4 fight
+  on Full Restores. Rule from here: **party locked, PP carried, HP / status
+  restored between fights** (items and money out of scope, so healing
+  between fights is free); the no-items line stays as the lower bound.
+  (Found on the way: killing a planner by its main PID orphaned its workers
+  and their sim bridges; 15 of them ran for 90 min. Kill the tree.)
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the

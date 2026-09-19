@@ -381,8 +381,10 @@ class NuzlockeEnv(Env):
                             self.trainer_idx += 1
                             self._skip_other_rivals()
                             nxt = ORDER[self.trainer_idx] if self.trainer_idx < self.slice_len else {}
-                            # no heal before the next fight: keep the party, carry its state
-                            self.carry = ({self.roster.index(m): st for m, st in zip(party, state) if m.alive}
+                            # the League block: the party is locked (no box) and PP carries over;
+                            # HP and status are restored between fights (Full Restores — items and
+                            # money are out of scope, so healing between fights is free)
+                            self.carry = ({self.roster.index(m): {"pp": st["pp"]} for m, st in zip(party, state) if m.alive}
                                           if nxt.get("no_heal") else None)
                             if self.trainer_idx >= self.slice_len:
                                 reward += 10.0

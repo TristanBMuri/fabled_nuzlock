@@ -262,8 +262,9 @@ class SimBattleRunner:
         return r["p_win"], r["p_death"], r["hp"]
 
     def estimate_block(self, player_packed: str, enemies_packed: list[str], n: int = 8):
-        """estimate() over consecutive no-heal fights (the League): each starts
-        from the last one's state. (P(all won), [P(death_i)], mean HP left)."""
+        """estimate() over the League block: the same party through every fight,
+        PP carried, HP / status restored between fights, the dead stay dead.
+        (P(all won), [P(death_i)], mean HP left at the end)."""
         from ai_util.sim import SimBattle
         wins, deaths, hp = 0, None, 0.0
         try:
@@ -274,7 +275,8 @@ class SimBattleRunner:
                     sb.play({"p1": self.player, "p2": self.enemy}, self.max_turns)
                     st = sb.state()
                     sb.close()
-                    carry = [{"hp": m["hp"], "status": m.get("status", ""), "pp": m.get("pp")} for m in st["p1"]]
+                    # between fights: HP / status restored (items), PP carried, the dead stay dead
+                    carry = [{"hp": 0 if m["fainted"] else None, "pp": m.get("pp")} for m in st["p1"]]
                     if st["winner"] != "p1":
                         won = False
                         break
