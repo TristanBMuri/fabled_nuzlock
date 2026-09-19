@@ -228,17 +228,32 @@ class NuzlockeEnv(Env):
         enemy = trainer_mons(TRAINERS[entry["trainer_id"]])
         return pack_team(party), pack_team(enemy), entry
 
+    def _block(self) -> list[int] | None:
+        """Indices of the no-heal block the next fight opens (Aaron + the rest of
+        the League), or None: the party chosen here fights all of them."""
+        i = self.trainer_idx
+        if self.party_locked or i + 1 >= self.slice_len or not ORDER[i + 1].get("no_heal"):
+            return None
+        j = i + 1
+        while j < self.slice_len and ORDER[j].get("no_heal"):
+            j += 1
+        return list(range(i, j))
+
     def risk(self, party_idx=None, n: int = RISK_BATTLES):
         """(P(win), [P(death_i)], mean HP fraction left) for a party (default:
-        current) vs the next trainer, from n battles under the fast brain.
-        Cached per (party, trainer, n). Zeros if unavailable."""
+        current) vs the next trainer — or vs the whole no-heal block it opens —
+        from n battles under the fast brain. Cached per (party, trainer, n)."""
         party_idx = tuple(self.party if party_idx is None else party_idx)
         key = (party_idx, self.trainer_idx, n)
         if key not in self._risk_cache:
             est = None
             if party_idx and self.trainer_idx < self.slice_len and hasattr(self.runner, "estimate"):
                 pp, ep, _ = self._packed_matchup(party_idx)
-                if pp and ep:
+                block = self._block()
+                if pp and ep and block:
+                    enemies = [pack_team(trainer_mons(TRAINERS[ORDER[k]["trainer_id"]])) for k in block]
+                    est = self.runner.estimate_block(pp, enemies, n=n)
+                elif pp and ep:
                     est = self.runner.estimate(pp, ep, n=n, carry=self._carry_list(party_idx))
             self._risk_cache[key] = est or (0.0, [0.0] * len(party_idx), 0.0)
         return self._risk_cache[key]

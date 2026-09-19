@@ -261,6 +261,32 @@ class SimBattleRunner:
             return None
         return r["p_win"], r["p_death"], r["hp"]
 
+    def estimate_block(self, player_packed: str, enemies_packed: list[str], n: int = 8):
+        """estimate() over consecutive no-heal fights (the League): each starts
+        from the last one's state. (P(all won), [P(death_i)], mean HP left)."""
+        from ai_util.sim import SimBattle
+        wins, deaths, hp = 0, None, 0.0
+        try:
+            for _ in range(n):
+                carry, won, st = None, True, None
+                for enemy in enemies_packed:
+                    sb = SimBattle(self.bridge, BATTLE_FORMAT, player_packed, enemy, carry=carry)
+                    sb.play({"p1": self.player, "p2": self.enemy}, self.max_turns)
+                    st = sb.state()
+                    sb.close()
+                    carry = [{"hp": m["hp"], "status": m.get("status", ""), "pp": m.get("pp")} for m in st["p1"]]
+                    if st["winner"] != "p1":
+                        won = False
+                        break
+                wins += won
+                dead = [m["fainted"] for m in st["p1"]]
+                deaths = [d + float(x) for d, x in zip(deaths, dead)] if deaths else [float(x) for x in dead]
+                hp += float(sum(m["hp"] / max(m["maxhp"], 1) for m in st["p1"]) / len(st["p1"]))
+        except Exception as e:
+            print(f"SimBattleRunner.estimate_block failed: {type(e).__name__}: {e}")
+            return None
+        return wins / n, [d / n for d in deaths], hp / n
+
     def run(self, player_packed: str, enemy_packed: str, timeout: float = 0.0,
             boss: bool = False, search: tuple[int, int] | None = None, carry: list | None = None):
         """One battle. Returns (won, alive_mask, state) aligned to player_packed

@@ -107,16 +107,14 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
             env.step(1 + pick if catch else 0)
             info = {"action_mask": env._mask()}
             continue
-        if env.party_locked:  # the League: no heal, no swaps
+        if env.party_locked:  # the League: no heal, no swaps — the fielded party fights on
             if verbose:
                 print(f"  [locked] {ORDER[env.trainer_idx]['trainer_name']}: party fights on, "
                       f"HP {[env.carry[i]['hp'] for i in env.party if i in env.carry]}")
-            env.step(0)
-            info = {"action_mask": env._mask()}
-            continue
-        for i in choose_party(env, lam, verbose, fast, parties):
-            if i not in env.party:
-                env.step(1 + i)
+        else:
+            for i in choose_party(env, lam, verbose, fast, parties):
+                if i not in env.party:
+                    env.step(1 + i)
         alive_before = sum(m.alive for m in env.roster)
         t = env.trainer_idx
         env.step(0)  # confirm -> battle

@@ -1049,11 +1049,21 @@ project_overview.md # the plan / roadmap
   9. Fewer deaths than any prior line (heur+search 27.6, calc prior+search
   17.9) at zero search cost; the clone + search wins on clears (30% vs 15%)
   by trading route deaths for League deaths.
+  **Encoder control:** the heuristic clone on the new encoder + search, same
+  matchups (10 eps, `logs/plan_route405b_heurprior_search.log`): 403.3 /
+  176.8 / 28.3 / 0% — yesterday's 27.6 on the old encoder. Level + real
+  stats change nothing for the heuristic clone; the teacher is the lever.
   **Search over the calc bot, candidate order.** With no prior, switch
   actions came first among candidates and won every tie in the noisy
   rollout values: battles stalled (42 turns vs 13) and Edwin went to 0.45
   deaths/mon (calc alone 0.33). The rollout brain's own choice is now the
-  first candidate; 6-pair smoke back to 0.31 / 23 turns. Probes re-running.
+  first candidate; 6-pair smoke back to 0.31 / 23 turns. Probes (30 x3):
+    Edwin  calc+search k9 r8  86.7% / 0.35     (calc alone 91.1% / 0.33, teacher 90.0% / 0.41, prior+search 88.9% / 0.46)
+    rival  calc+search k9 r8  97.8% / 0.03     (calc alone 98.9% / 0.08, teacher 97.8% / 0.31, prior+search 96.7% / 0.20)
+  Search over the calc bot is the best line on the rival and neutral on
+  Edwin, where no play fixes a party without a Rock answer. ~2 min/pair
+  under load; a full-game episode is hours, so the League-rule table runs
+  10 episodes on 10 workers.
   **The League block (2026-09-19).** Bertha, Flint, Lucian and Cynthia
   carry `no_heal` in `order.json` (Aaron is entered fresh). Inside the
   block the party is locked (no swaps, no box) and every fight starts from
@@ -1065,6 +1075,14 @@ project_overview.md # the plan / roadmap
   calc-bot episode: Aaron costs 2, the four survivors enter Bertha at
   58 / 147 / 119 / 204 HP and wipe — every earlier League number was on
   full heals. Tables under the rule: `logs/plan_league_*.log`.
+  **Party for the whole block.** At the fight that opens a no-heal block
+  (Aaron), `env.risk()` scores a candidate party by
+  `SimBattleRunner.estimate_block`: n samples of the five fights in a row
+  under the fast brain, state carried, P(all won) / deaths over the block /
+  HP left at the end. The planner's candidate loop is unchanged, so the
+  party that enters the League is the one that survives the League in
+  simulation, not the one that beats Aaron. ~0.4 s per candidate at n=8.
+  The single-fight query still drives the deep-search trigger.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the
