@@ -1092,6 +1092,22 @@ project_overview.md # the plan / roadmap
   between fights is free); the no-items line stays as the lower bound.
   (Found on the way: killing a planner by its main PID orphaned its workers
   and their sim bridges; 15 of them ran for 90 min. Kill the tree.)
+  **League with items between fights, calc + search 9,8 (10 eps, 36 min,
+  `logs/plan_league2_calcsearch.log`):** 402.9 / 342.2 / 6.7 deaths / 10%
+  clears. Route ~1 death per run; the block: Bertha 23 deaths (1 wipe),
+  Cynthia 12 (3 wipes), Flint 10 (4 wipes), Lucian 10 (1), Aaron 2. Runs
+  end at 401 / 402x4 / 403 / 404x3, one clear. Full heals moved the wipes
+  from Flint to Cynthia and Flint but did not change the count: the locked
+  six chosen at Aaron (top-6-by-level + single swaps, scored by the block
+  estimate at n=8) do not carry a Bertha answer and a Garchomp answer at
+  once. Next: widen the candidate set at the block (`--parties beam`).
+  `--parties beam` on the same line (10 eps, 47 min): 402.3 / 380.4 / 6.8 /
+  0% — null again; the candidate set is not the limit. Found meanwhile: the
+  level rule kept stepping inside the block (57 at Aaron, 59 at Bertha, ...
+  66 at Cynthia), which is leveling where there are no wild encounters.
+  Rule now: **one cap per no-heal block = its highest level (66), reached
+  before Aaron** (the standard hardcore convention for the E4). The
+  summary also prints deaths by species from here.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the

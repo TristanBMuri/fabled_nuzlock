@@ -196,6 +196,14 @@ class NuzlockeEnv(Env):
     def _apply_level_rule(self, entry):
         self.max_enemy_level = max(self.max_enemy_level, entry["max_level"])
         cap = self.max_enemy_level
+        # a no-heal block (the League) has one cap: its highest level (Cynthia's
+        # 66), reached before Aaron — there is no leveling between the E4 fights
+        j = self.trainer_idx
+        while j + 1 < self.slice_len and ORDER[j + 1].get("no_heal"):
+            j += 1
+        block_cap = max(ORDER[k]["max_level"] for k in range(self.trainer_idx, j + 1))
+        self.max_enemy_level = max(self.max_enemy_level, block_cap)
+        cap = self.max_enemy_level
         if self.rules.level_rule == "cap":
             boss = next((e for e in ORDER[self.trainer_idx:self.slice_len]
                          if e["breakpoint"] != "none"), ORDER[self.slice_len - 1])

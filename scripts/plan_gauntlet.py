@@ -76,6 +76,7 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
 BEAM, BEAM_ROUNDS = 3, 3  # --parties beam: top-3 parties expanded three times
 HP_WEIGHT = 0.2  # margin tie-breaker weight in the party score (--hp-weight)
 DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes)
+DEATHS_BY_SPECIES: dict[str, int] = {}  # species -> deaths (all episodes)
 LOSSES_AT: dict[int, int] = {}  # trainer index -> lost battles
 
 
@@ -110,7 +111,7 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
         if env.party_locked:  # the League: no heal, no swaps — the fielded party fights on
             if verbose:
                 print(f"  [locked] {ORDER[env.trainer_idx]['trainer_name']}: party fights on, "
-                      f"HP {[env.carry[i]['hp'] for i in env.party if i in env.carry]}")
+                      f"PP left {[sum(env.carry[i].get('pp') or []) for i in env.party if i in env.carry]}")
         else:
             for i in choose_party(env, lam, verbose, fast, parties):
                 if i not in env.party:
@@ -122,6 +123,8 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
         deaths += died
         if died:
             DEATHS_AT[t] = DEATHS_AT.get(t, 0) + died
+            for m in env.graveyard[-died:]:
+                DEATHS_BY_SPECIES[m.species] = DEATHS_BY_SPECIES.get(m.species, 0) + 1
         if env.trainer_idx == t:
             LOSSES_AT[t] = LOSSES_AT.get(t, 0) + 1
         if died and first_death_at is None:
@@ -166,7 +169,7 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict]
         print(f"ep seed {s:4d}: cleared {r['cleared']:3d}  no-death {r['cleared_no_death']:3d}  "
               f"deaths {r['deaths']:2d}  {'CLEAR' if r['slice_clear'] else ''}  "
               f"({(time.time() - t0) / (n + 1):.0f}s/ep)", flush=True)
-    return rows, DEATHS_AT, LOSSES_AT, env.n_deep
+    return rows, DEATHS_AT, LOSSES_AT, env.n_deep, DEATHS_BY_SPECIES
 
 
 def main() -> None:
@@ -218,12 +221,14 @@ def main() -> None:
         parts = [run_episodes(args, seeds)]
     rows = [r for p in parts for r in p[0]]
     n_deep = sum(p[3] for p in parts)
-    deaths_at, losses_at = {}, {}  # merged histograms (the globals belong to the workers)
+    deaths_at, losses_at, by_species = {}, {}, {}  # merged histograms (the globals belong to the workers)
     for p in parts:
         for t, d in p[1].items():
             deaths_at[t] = deaths_at.get(t, 0) + d
         for t, d in p[2].items():
             losses_at[t] = losses_at.get(t, 0) + d
+        for sp, d in (p[4] if len(p) > 4 else {}).items():
+            by_species[sp] = by_species.get(sp, 0) + d
     k = lambda f: np.mean([r[f] for r in rows])
     print(f"\n{args.episodes} episodes | slice {args.slice} | battler={args.policy or 'SimpleHeuristics'} "
           f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} "
@@ -241,6 +246,9 @@ def main() -> None:
         team = ", ".join(f"{p['species']}@{p['level']}" for p in TRAINERS[e["trainer_id"]]["party"])
         print(f"    #{t:2d} {e['trainer_name']:<22} {e['breakpoint']:<10} "
               f"deaths {d:3d}  lost {losses_at.get(t, 0):2d}  [{team}]")
+    if by_species:
+        print("  deaths by species: " + ", ".join(
+            f"{sp} {d}" for sp, d in sorted(by_species.items(), key=lambda kv: -kv[1])[:12]))
 
 
 if __name__ == "__main__":
