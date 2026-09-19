@@ -12,6 +12,7 @@ without a death, deaths, and slice clears over N episodes.
 """
 
 import argparse
+import functools
 import itertools
 import multiprocessing as mp
 import sys
@@ -21,7 +22,8 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from nuzlocke_env import DEEP_HP, MAX_PARTY, SLICE_LEN, NuzlockeEnv, Rules  # noqa: E402
+from nuzlocke_env import DEEP_HP, EVOS, MAX_PARTY, SLICE_LEN, NuzlockeEnv, Rules  # noqa: E402
+from gauntlet import load_species  # noqa: E402
 
 def swaps(base, alive):
     """The party plus every single swap with a box mon."""
@@ -77,17 +79,32 @@ DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes)
 LOSSES_AT: dict[int, int] = {}  # trainer index -> lost battles
 
 
+@functools.lru_cache(maxsize=None)
+def final_bst(species: str) -> int:
+    """Base stat total of the species' last reachable evolution (first branch,
+    trade excluded): the scripted rule for choosing among an area's methods."""
+    seen = set()
+    while species not in seen:
+        seen.add(species)
+        nxt = [e["to"] for e in EVOS.get(species, []) if e["type"] != "trade"]
+        if not nxt:
+            break
+        species = nxt[0]
+    return sum(load_species().get(species, {}).get("baseStats", {}).values())
+
+
 def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool = False,
             parties: str = "swap") -> dict:
     obs, info = env.reset(seed=seed)
     deaths, first_death_at = 0, None
     while not env.done:
         if env.phase == "ENCOUNTER":
-            offer, catch = env.pending[0], bool(info["action_mask"][1])
+            alts, catch = env.pending[0], bool(info["action_mask"][1])
+            pick = max(range(len(alts)), key=lambda i: final_bst(alts[i].species))  # the method choice
             if verbose:
-                print(f"  offer {offer.species}@{offer.level}: {'caught' if catch else 'no room'}"
-                      f"  box {len(env.roster)}/{env.max_roster}")
-            env.step(1 if catch else 0)
+                print(f"  offer {' | '.join(f'{m.species}@{m.level}' for m in alts)}: "
+                      f"{'caught ' + alts[pick].species if catch else 'no room'}  box {len(env.roster)}/{env.max_roster}")
+            env.step(1 + pick if catch else 0)
             info = {"action_mask": env._mask()}
             continue
         for i in choose_party(env, lam, verbose, fast, parties):
@@ -170,7 +187,7 @@ def main() -> None:
     ap.add_argument("--fast", action="store_true",
                     help="no risk queries (highest-level party): bulk harvesting")
     ap.add_argument("--slice", type=int, default=SLICE_LEN,
-                    help="trainers per episode (51 = through Roark, 186 = through Gardenia)")
+                    help="trainers per episode (21 = through Roark, 59 = through Gardenia, 167 = Maylene)")
     ap.add_argument("--roster", type=int, default=Rules.box,
                     help="box slots for living mons (default 30 = unbounded on the 186 slice, "
                          "starter + 21 areas; the old 12-slot box dropped 5-7 encounters per run)")

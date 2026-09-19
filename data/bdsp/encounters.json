@@ -1,5 +1,5 @@
 {
- "_comment": "BDSP encounter tables through Eterna, v2 hand-written (2026-09-15). level range is [min,max] sampled uniformly; weights are relative. 'before_trainer' = the encounter fires before this index of the level-sorted gauntlet order (bdsp_gauntlet_order.json is sorted by trainer level, not by route, so areas are gated by the level band they belong to: Roark is #50 at L14, Gardenia #185 at L22). Version-exclusive species are left out. Abilities: none listed; every mon gets its species' first ability slot (the validator's default; checked equal to the old hand table for all 41 species, 2026-09-16).",
+ "_comment": "BDSP encounters (BD column) per story visit from Bulbapedia's Generation VIII tables (scripts/build_order.py): methods walk (Grass/Cave/Building), old / good (Old and Good Rod), surf, gift (gift/egg Pokémon); Super Rod, radar, swarm, honey, Underground, trades excluded. One encounter per area: the env rolls one pick per method available when the area opens and the run layer takes at most one. level = [min,max] uniform; weights are the table rates normalized per method. 'before_trainer' = the area opens before this index of the route-ordered gauntlet (order.json); 'opens_at' names the visit (a water-only area waits for the Old Rod at Route 203, Good Rod Route 209, Surf Route 218).",
  "starter": [
   "chimchar",
   "piplup",
@@ -7,24 +7,18 @@
  ],
  "routes": [
   {
-   "name": "Route 201",
+   "name": "Route 202",
    "before_trainer": 0,
+   "opens_at": "Route 202",
    "encounters": [
-    {
-     "species": "starly",
-     "level": [
-      2,
-      4
-     ],
-     "weight": 0.55
-    },
     {
      "species": "bidoof",
      "level": [
       2,
       4
      ],
-     "weight": 0.35
+     "weight": 0.25,
+     "method": "walk"
     },
     {
      "species": "kricketot",
@@ -32,165 +26,248 @@
       3,
       4
      ],
-     "weight": 0.1
-    }
-   ]
-  },
-  {
-   "name": "Route 202",
-   "before_trainer": 4,
-   "encounters": [
+     "weight": 0.1667,
+     "method": "walk"
+    },
     {
      "species": "shinx",
      "level": [
-      4,
-      6
+      3,
+      4
      ],
-     "weight": 0.4
+     "weight": 0.25,
+     "method": "walk"
     },
     {
      "species": "starly",
      "level": [
-      4,
-      6
+      2,
+      4
      ],
-     "weight": 0.35
-    },
+     "weight": 0.3333,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Route 201",
+   "before_trainer": 0,
+   "opens_at": "start",
+   "encounters": [
     {
      "species": "bidoof",
      "level": [
-      4,
-      6
+      2,
+      3
      ],
-     "weight": 0.25
+     "weight": 0.5455,
+     "method": "walk"
+    },
+    {
+     "species": "starly",
+     "level": [
+      2,
+      3
+     ],
+     "weight": 0.4545,
+     "method": "walk"
     }
    ]
   },
   {
-   "name": "Route 203",
-   "before_trainer": 8,
+   "name": "Lake Verity",
+   "before_trainer": 0,
+   "opens_at": "start",
    "encounters": [
     {
-     "species": "shinx",
+     "species": "bidoof",
      "level": [
-      6,
-      8
+      2,
+      4
      ],
-     "weight": 0.25
+     "weight": 0.5455,
+     "method": "walk"
     },
     {
-     "species": "abra",
+     "species": "starly",
      "level": [
-      6,
-      8
+      2,
+      4
      ],
-     "weight": 0.15
-    },
-    {
-     "species": "kricketot",
-     "level": [
-      6,
-      8
-     ],
-     "weight": 0.2
-    },
-    {
-     "species": "zubat",
-     "level": [
-      6,
-      8
-     ],
-     "weight": 0.25
-    },
-    {
-     "species": "budew",
-     "level": [
-      6,
-      8
-     ],
-     "weight": 0.15
-    }
-   ]
-  },
-  {
-   "name": "Oreburgh Gate",
-   "before_trainer": 12,
-   "encounters": [
-    {
-     "species": "zubat",
-     "level": [
-      6,
-      8
-     ],
-     "weight": 0.5
-    },
-    {
-     "species": "geodude",
-     "level": [
-      6,
-      8
-     ],
-     "weight": 0.4
-    },
-    {
-     "species": "psyduck",
-     "level": [
-      6,
-      8
-     ],
-     "weight": 0.1
+     "weight": 0.4545,
+     "method": "walk"
     }
    ]
   },
   {
    "name": "Route 204 South",
-   "before_trainer": 16,
+   "before_trainer": 3,
+   "opens_at": "Route 204 South",
    "encounters": [
+    {
+     "species": "bidoof",
+     "level": [
+      4,
+      6
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
     {
      "species": "budew",
      "level": [
-      7,
-      9
+      4,
+      5
      ],
-     "weight": 0.2
+     "weight": 0.2083,
+     "method": "walk"
     },
     {
-     "species": "wurmple",
+     "species": "kricketot",
      "level": [
-      7,
-      9
+      4,
+      4
      ],
-     "weight": 0.25
-    },
-    {
-     "species": "starly",
-     "level": [
-      7,
-      9
-     ],
-     "weight": 0.3
+     "weight": 0.0833,
+     "method": "walk"
     },
     {
      "species": "shinx",
      "level": [
-      7,
-      9
+      4,
+      5
      ],
-     "weight": 0.25
+     "weight": 0.125,
+     "method": "walk"
+    },
+    {
+     "species": "starly",
+     "level": [
+      4,
+      6
+     ],
+     "weight": 0.2917,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      4,
+      4
+     ],
+     "weight": 0.0833,
+     "method": "walk"
     }
    ]
   },
   {
-   "name": "Ravaged Path",
-   "before_trainer": 20,
+   "name": "Route 203",
+   "before_trainer": 6,
+   "opens_at": "Route 203",
    "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "abra",
+     "level": [
+      4,
+      5
+     ],
+     "weight": 0.125,
+     "method": "walk"
+    },
+    {
+     "species": "bidoof",
+     "level": [
+      4,
+      6
+     ],
+     "weight": 0.125,
+     "method": "walk"
+    },
+    {
+     "species": "kricketot",
+     "level": [
+      4,
+      4
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "shinx",
+     "level": [
+      4,
+      5
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "starly",
+     "level": [
+      4,
+      6
+     ],
+     "weight": 0.375,
+     "method": "walk"
+    },
     {
      "species": "zubat",
      "level": [
-      8,
+      5,
+      5
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Twinleaf Town",
+   "before_trainer": 6,
+   "opens_at": "start",
+   "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      3,
       10
      ],
-     "weight": 0.7
+     "weight": 1.0,
+     "method": "old"
+    }
+   ]
+  },
+  {
+   "name": "Oreburgh Gate",
+   "before_trainer": 14,
+   "opens_at": "Oreburgh Gate",
+   "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "geodude",
+     "level": [
+      4,
+      9
+     ],
+     "weight": 0.45,
+     "method": "walk"
     },
     {
      "species": "psyduck",
@@ -198,273 +275,300 @@
       8,
       10
      ],
-     "weight": 0.3
+     "weight": 0.15,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      6,
+      10
+     ],
+     "weight": 0.4,
+     "method": "walk"
     }
    ]
   },
   {
    "name": "Oreburgh Mine",
-   "before_trainer": 26,
+   "before_trainer": 16,
+   "opens_at": "Oreburgh Mine",
    "encounters": [
     {
      "species": "geodude",
      "level": [
-      9,
-      11
+      5,
+      10
      ],
-     "weight": 0.6
-    },
-    {
-     "species": "zubat",
-     "level": [
-      9,
-      11
-     ],
-     "weight": 0.3
+     "weight": 0.7,
+     "method": "walk"
     },
     {
      "species": "onix",
      "level": [
-      9,
-      11
+      8,
+      9
      ],
-     "weight": 0.1
+     "weight": 0.1,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      7,
+      8
+     ],
+     "weight": 0.2,
+     "method": "walk"
     }
    ]
   },
   {
-   "name": "Route 204 North",
-   "before_trainer": 32,
+   "name": "Route 207",
+   "before_trainer": 16,
+   "opens_at": "Oreburgh Mine",
    "encounters": [
     {
-     "species": "budew",
+     "species": "geodude",
      "level": [
-      10,
-      13
+      5,
+      7
      ],
-     "weight": 0.2
+     "weight": 0.4583,
+     "method": "walk"
     },
     {
-     "species": "wurmple",
+     "species": "kricketot",
      "level": [
-      10,
-      13
+      6,
+      6
      ],
-     "weight": 0.15
+     "weight": 0.0833,
+     "method": "walk"
     },
     {
-     "species": "starly",
+     "species": "machop",
      "level": [
-      10,
-      13
+      5,
+      7
      ],
-     "weight": 0.25
+     "weight": 0.375,
+     "method": "walk"
     },
     {
-     "species": "shinx",
+     "species": "zubat",
      "level": [
-      10,
-      13
+      6,
+      6
      ],
-     "weight": 0.2
-    },
-    {
-     "species": "kricketune",
-     "level": [
-      10,
-      13
-     ],
-     "weight": 0.2
+     "weight": 0.0833,
+     "method": "walk"
     }
    ]
   },
   {
-   "name": "Floaroma Meadow",
-   "before_trainer": 38,
+   "name": "Ravaged Path",
+   "before_trainer": 23,
+   "opens_at": "Route 204 North",
    "encounters": [
     {
-     "species": "budew",
+     "species": "magikarp",
      "level": [
-      10,
-      12
+      3,
+      10
      ],
-     "weight": 0.6
+     "weight": 1.0,
+     "method": "old"
     },
     {
-     "species": "cherubi",
+     "species": "geodude",
      "level": [
-      10,
-      12
+      5,
+      5
      ],
-     "weight": 0.4
-    }
-   ]
-  },
-  {
-   "name": "Valley Windworks",
-   "before_trainer": 44,
-   "encounters": [
-    {
-     "species": "shellos",
-     "level": [
-      11,
-      13
-     ],
-     "weight": 0.35
+     "weight": 0.2,
+     "method": "walk"
     },
     {
-     "species": "buizel",
+     "species": "psyduck",
      "level": [
-      11,
-      13
+      5,
+      5
      ],
-     "weight": 0.35
+     "weight": 0.02,
+     "method": "walk"
     },
     {
-     "species": "pachirisu",
+     "species": "zubat",
      "level": [
-      11,
-      13
+      4,
+      6
      ],
-     "weight": 0.2
-    },
-    {
-     "species": "bidoof",
-     "level": [
-      11,
-      13
-     ],
-     "weight": 0.1
+     "weight": 0.78,
+     "method": "walk"
     }
    ]
   },
   {
    "name": "Route 205 South",
-   "before_trainer": 51,
+   "before_trainer": 31,
+   "opens_at": "Route 205 South",
    "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "bidoof",
+     "level": [
+      9,
+      9
+     ],
+     "weight": 0.1,
+     "method": "walk"
+    },
+    {
+     "species": "buizel",
+     "level": [
+      8,
+      10
+     ],
+     "weight": 0.35,
+     "method": "walk"
+    },
     {
      "species": "pachirisu",
      "level": [
-      9,
-      12
+      8,
+      9
      ],
-     "weight": 0.2
+     "weight": 0.1,
+     "method": "walk"
     },
     {
-     "species": "buneary",
+     "species": "shellos",
      "level": [
-      9,
-      12
+      8,
+      10
      ],
-     "weight": 0.2
-    },
-    {
-     "species": "budew",
-     "level": [
-      9,
-      12
-     ],
-     "weight": 0.2
-    },
-    {
-     "species": "shinx",
-     "level": [
-      9,
-      12
-     ],
-     "weight": 0.2
-    },
-    {
-     "species": "hoothoot",
-     "level": [
-      9,
-      12
-     ],
-     "weight": 0.2
+     "weight": 0.45,
+     "method": "walk"
     }
    ]
   },
   {
-   "name": "Eterna Forest",
-   "before_trainer": 59,
+   "name": "Valley Windworks (Galactic)",
+   "before_trainer": 34,
+   "opens_at": "Valley Windworks (Galactic)",
    "encounters": [
     {
-     "species": "budew",
+     "species": "magikarp",
      "level": [
-      10,
-      14
+      3,
+      10
      ],
-     "weight": 0.2
+     "weight": 1.0,
+     "method": "old"
     },
     {
-     "species": "buneary",
+     "species": "bidoof",
      "level": [
-      10,
-      14
+      8,
+      8
      ],
-     "weight": 0.2
+     "weight": 0.1,
+     "method": "walk"
     },
     {
-     "species": "silcoon",
+     "species": "buizel",
      "level": [
-      10,
-      14
+      7,
+      9
      ],
-     "weight": 0.1
+     "weight": 0.35,
+     "method": "walk"
     },
     {
-     "species": "cascoon",
+     "species": "pachirisu",
      "level": [
-      10,
-      14
+      7,
+      8
      ],
-     "weight": 0.1
+     "weight": 0.25,
+     "method": "walk"
     },
+    {
+     "species": "shellos",
+     "level": [
+      7,
+      9
+     ],
+     "weight": 0.3,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Old Chateau (optional)",
+   "before_trainer": 54,
+   "opens_at": "Eterna Gym",
+   "encounters": [
     {
      "species": "gastly",
      "level": [
-      10,
-      14
+      12,
+      16
      ],
-     "weight": 0.2
-    },
-    {
-     "species": "hoothoot",
-     "level": [
-      10,
-      14
-     ],
-     "weight": 0.1
-    },
-    {
-     "species": "cherubi",
-     "level": [
-      10,
-      14
-     ],
-     "weight": 0.1
+     "weight": 1.0,
+     "method": "walk"
     }
    ]
   },
   {
-   "name": "Route 211 West",
-   "before_trainer": 70,
+   "name": "Route 211 West (optional)",
+   "before_trainer": 66,
+   "opens_at": "Route 211 West (optional)",
    "encounters": [
     {
-     "species": "machop",
+     "species": "bidoof",
      "level": [
       12,
       14
      ],
-     "weight": 0.3
+     "weight": 0.2917,
+     "method": "walk"
     },
     {
      "species": "chingling",
      "level": [
-      12,
+      13,
+      13
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "geodude",
+     "level": [
+      13,
+      13
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "hoothoot",
+     "level": [
+      14,
       14
      ],
-     "weight": 0.2
+     "weight": 0.0833,
+     "method": "walk"
     },
     {
      "species": "meditite",
@@ -472,53 +576,139 @@
       12,
       14
      ],
-     "weight": 0.2
+     "weight": 0.2917,
+     "method": "walk"
     },
     {
      "species": "ponyta",
      "level": [
-      12,
-      14
+      13,
+      13
      ],
-     "weight": 0.2
+     "weight": 0.0833,
+     "method": "walk"
     },
     {
-     "species": "bidoof",
+     "species": "zubat",
      "level": [
       12,
-      14
+      12
      ],
-     "weight": 0.1
+     "weight": 0.0833,
+     "method": "walk"
     }
    ]
   },
   {
-   "name": "Route 206",
-   "before_trainer": 81,
+   "name": "Mt. Coronet North (Celestic side)",
+   "before_trainer": 66,
+   "opens_at": "Route 211 West (optional)",
    "encounters": [
     {
-     "species": "ponyta",
+     "species": "chingling",
      "level": [
-      14,
-      16
+      13,
+      13
      ],
-     "weight": 0.2
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "cleffa",
+     "level": [
+      12,
+      12
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "geodude",
+     "level": [
+      12,
+      13
+     ],
+     "weight": 0.25,
+     "method": "walk"
+    },
+    {
+     "species": "machop",
+     "level": [
+      13,
+      13
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "meditite",
+     "level": [
+      13,
+      14
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      12,
+      13
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Route 206 (Cycling Road)",
+   "before_trainer": 69,
+   "opens_at": "Route 206 (Cycling Road)",
+   "encounters": [
+    {
+     "species": "bronzor",
+     "level": [
+      15,
+      15
+     ],
+     "weight": 0.0769,
+     "method": "walk"
     },
     {
      "species": "geodude",
      "level": [
       14,
-      16
+      14
      ],
-     "weight": 0.3
+     "weight": 0.0769,
+     "method": "walk"
+    },
+    {
+     "species": "kricketot",
+     "level": [
+      14,
+      14
+     ],
+     "weight": 0.0769,
+     "method": "walk"
     },
     {
      "species": "kricketune",
      "level": [
       14,
+      15
+     ],
+     "weight": 0.1538,
+     "method": "walk"
+    },
+    {
+     "species": "ponyta",
+     "level": [
+      14,
       16
      ],
-     "weight": 0.15
+     "weight": 0.3462,
+     "method": "walk"
     },
     {
      "species": "stunky",
@@ -526,173 +716,313 @@
       14,
       16
      ],
-     "weight": 0.2
+     "weight": 0.1923,
+     "method": "walk"
     },
+    {
+     "species": "zubat",
+     "level": [
+      15,
+      15
+     ],
+     "weight": 0.0769,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Wayward Cave (optional)",
+   "before_trainer": 78,
+   "opens_at": "Wayward Cave (optional)",
+   "encounters": [
     {
      "species": "bronzor",
      "level": [
       14,
-      16
+      17
      ],
-     "weight": 0.15
-    }
-   ]
-  },
-  {
-   "name": "Route 207",
-   "before_trainer": 90,
-   "encounters": [
+     "weight": 0.4,
+     "method": "walk"
+    },
     {
      "species": "geodude",
      "level": [
-      13,
-      15
-     ],
-     "weight": 0.35
-    },
-    {
-     "species": "ponyta",
-     "level": [
-      13,
-      15
-     ],
-     "weight": 0.2
-    },
-    {
-     "species": "kricketot",
-     "level": [
-      13,
-      15
-     ],
-     "weight": 0.15
-    },
-    {
-     "species": "machop",
-     "level": [
-      13,
-      15
-     ],
-     "weight": 0.3
-    }
-   ]
-  },
-  {
-   "name": "Mt. Coronet South",
-   "before_trainer": 100,
-   "encounters": [
-    {
-     "species": "geodude",
-     "level": [
-      14,
+      15,
       16
      ],
-     "weight": 0.3
+     "weight": 0.125,
+     "method": "walk"
+    },
+    {
+     "species": "gible",
+     "level": [
+      15,
+      17
+     ],
+     "weight": 0.075,
+     "method": "walk"
     },
     {
      "species": "zubat",
      "level": [
       14,
-      16
-     ],
-     "weight": 0.3
-    },
-    {
-     "species": "chingling",
-     "level": [
-      14,
-      16
-     ],
-     "weight": 0.1
-    },
-    {
-     "species": "bronzor",
-     "level": [
-      14,
-      16
-     ],
-     "weight": 0.15
-    },
-    {
-     "species": "meditite",
-     "level": [
-      14,
-      16
-     ],
-     "weight": 0.15
-    }
-   ]
-  },
-  {
-   "name": "Old Chateau",
-   "before_trainer": 110,
-   "encounters": [
-    {
-     "species": "gastly",
-     "level": [
-      14,
       17
      ],
-     "weight": 1.0
+     "weight": 0.4,
+     "method": "walk"
     }
    ]
   },
   {
    "name": "Route 208",
-   "before_trainer": 120,
+   "before_trainer": 94,
+   "opens_at": "Route 208",
    "encounters": [
     {
-     "species": "ralts",
+     "species": "magikarp",
      "level": [
-      15,
-      17
+      3,
+      10
      ],
-     "weight": 0.1
+     "weight": 1.0,
+     "method": "old"
     },
     {
      "species": "bibarel",
      "level": [
-      15,
-      17
+      17,
+      18
      ],
-     "weight": 0.15
+     "weight": 0.0833,
+     "method": "walk"
     },
     {
-     "species": "roselia",
+     "species": "bidoof",
      "level": [
-      15,
-      17
+      16,
+      16
      ],
-     "weight": 0.15
+     "weight": 0.1667,
+     "method": "walk"
     },
     {
-     "species": "buizel",
+     "species": "machop",
      "level": [
-      15,
+      16,
       17
      ],
-     "weight": 0.3
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "meditite",
+     "level": [
+      16,
+      17
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "psyduck",
+     "level": [
+      16,
+      18
+     ],
+     "weight": 0.25,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      16,
+      16
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Mt. Coronet South",
+   "before_trainer": 94,
+   "opens_at": "Route 208",
+   "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "chingling",
+     "level": [
+      15,
+      15
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "cleffa",
+     "level": [
+      14,
+      14
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "geodude",
+     "level": [
+      14,
+      15
+     ],
+     "weight": 0.25,
+     "method": "walk"
     },
     {
      "species": "machop",
      "level": [
       15,
-      17
+      16
      ],
-     "weight": 0.3
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "meditite",
+     "level": [
+      15,
+      15
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      14,
+      15
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Route 212 (optional detour)",
+   "before_trainer": 102,
+   "opens_at": "Route 212 (optional detour)",
+   "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "bibarel",
+     "level": [
+      18,
+      20
+     ],
+     "weight": 0.1458,
+     "method": "walk"
+    },
+    {
+     "species": "budew",
+     "level": [
+      16,
+      16
+     ],
+     "weight": 0.125,
+     "method": "walk"
+    },
+    {
+     "species": "kricketune",
+     "level": [
+      17,
+      19
+     ],
+     "weight": 0.25,
+     "method": "walk"
+    },
+    {
+     "species": "roselia",
+     "level": [
+      16,
+      20
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "staravia",
+     "level": [
+      17,
+      18
+     ],
+     "weight": 0.1042,
+     "method": "walk"
+    },
+    {
+     "species": "starly",
+     "level": [
+      16,
+      16
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "wooper",
+     "level": [
+      18,
+      18
+     ],
+     "weight": 0.125,
+     "method": "walk"
     }
    ]
   },
   {
    "name": "Route 209",
-   "before_trainer": 135,
+   "before_trainer": 122,
+   "opens_at": "Route 209",
    "encounters": [
     {
-     "species": "chansey",
+     "species": "goldeen",
      "level": [
-      16,
-      18
+      10,
+      25
      ],
-     "weight": 0.05
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
     },
     {
      "species": "bibarel",
@@ -700,15 +1030,35 @@
       16,
       18
      ],
-     "weight": 0.25
+     "weight": 0.3214,
+     "method": "walk"
     },
     {
-     "species": "roselia",
+     "species": "chansey",
      "level": [
       16,
-      18
+      16
      ],
-     "weight": 0.2
+     "weight": 0.0357,
+     "method": "walk"
+    },
+    {
+     "species": "gastly",
+     "level": [
+      16,
+      16
+     ],
+     "weight": 0.0714,
+     "method": "walk"
+    },
+    {
+     "species": "mimejr",
+     "level": [
+      16,
+      16
+     ],
+     "weight": 0.1786,
+     "method": "walk"
     },
     {
      "species": "staravia",
@@ -716,131 +1066,1981 @@
       16,
       18
      ],
-     "weight": 0.25
+     "weight": 0.1786,
+     "method": "walk"
     },
     {
-     "species": "mimejr",
+     "species": "starly",
      "level": [
       16,
-      18
+      16
      ],
-     "weight": 0.1
+     "weight": 0.1429,
+     "method": "walk"
     },
     {
-     "species": "duskull",
+     "species": "zubat",
      "level": [
       16,
-      18
+      16
      ],
-     "weight": 0.15
+     "weight": 0.0714,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Hearthome City",
+   "before_trainer": 122,
+   "opens_at": "Route 209",
+   "encounters": [
+    {
+     "species": "happiny",
+     "level": [
+      1,
+      1
+     ],
+     "weight": 1.0,
+     "method": "gift"
+    }
+   ]
+  },
+  {
+   "name": "Lost Tower (optional)",
+   "before_trainer": 132,
+   "opens_at": "Lost Tower (optional)",
+   "encounters": [
+    {
+     "species": "gastly",
+     "level": [
+      16,
+      22
+     ],
+     "weight": 0.4167,
+     "method": "walk"
+    },
+    {
+     "species": "golbat",
+     "level": [
+      19,
+      23
+     ],
+     "weight": 0.0267,
+     "method": "walk"
+    },
+    {
+     "species": "murkrow",
+     "level": [
+      17,
+      21
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      16,
+      21
+     ],
+     "weight": 0.39,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Solaceon Ruins (optional)",
+   "before_trainer": 140,
+   "opens_at": "Solaceon Ruins (optional)",
+   "encounters": [
+    {
+     "species": "unown",
+     "level": [
+      14,
+      25
+     ],
+     "weight": 1.0,
+     "method": "walk"
     }
    ]
   },
   {
    "name": "Route 210 South",
-   "before_trainer": 150,
+   "before_trainer": 141,
+   "opens_at": "Route 210 South",
    "encounters": [
-    {
-     "species": "ponyta",
-     "level": [
-      18,
-      20
-     ],
-     "weight": 0.25
-    },
-    {
-     "species": "machoke",
-     "level": [
-      18,
-      20
-     ],
-     "weight": 0.15
-    },
     {
      "species": "chansey",
      "level": [
       18,
       20
      ],
-     "weight": 0.05
+     "weight": 0.0357,
+     "method": "walk"
     },
     {
      "species": "geodude",
      "level": [
-      18,
-      20
+      19,
+      19
      ],
-     "weight": 0.2
+     "weight": 0.2143,
+     "method": "walk"
     },
     {
      "species": "kricketune",
      "level": [
       18,
-      20
+      19
      ],
-     "weight": 0.15
+     "weight": 0.2143,
+     "method": "walk"
     },
     {
-     "species": "bonsly",
+     "species": "mimejr",
      "level": [
       18,
       20
      ],
-     "weight": 0.1
+     "weight": 0.1786,
+     "method": "walk"
     },
     {
-     "species": "hoothoot",
+     "species": "ponyta",
      "level": [
       18,
       20
      ],
-     "weight": 0.1
+     "weight": 0.3571,
+     "method": "walk"
     }
    ]
   },
   {
    "name": "Route 215",
-   "before_trainer": 162,
+   "before_trainer": 152,
+   "opens_at": "Route 215",
    "encounters": [
     {
-     "species": "kadabra",
+     "species": "abra",
      "level": [
-      19,
-      22
+      20,
+      20
      ],
-     "weight": 0.2
+     "weight": 0.0769,
+     "method": "walk"
     },
     {
      "species": "geodude",
      "level": [
-      19,
+      20,
       22
      ],
-     "weight": 0.2
+     "weight": 0.2692,
+     "method": "walk"
+    },
+    {
+     "species": "kadabra",
+     "level": [
+      20,
+      22
+     ],
+     "weight": 0.1154,
+     "method": "walk"
+    },
+    {
+     "species": "kricketune",
+     "level": [
+      20,
+      22
+     ],
+     "weight": 0.2308,
+     "method": "walk"
     },
     {
      "species": "ponyta",
      "level": [
-      19,
+      21,
       22
      ],
-     "weight": 0.2
+     "weight": 0.3077,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Route 214",
+   "before_trainer": 167,
+   "opens_at": "Route 214",
+   "encounters": [
+    {
+     "species": "goldeen",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
     },
     {
-     "species": "machoke",
+     "species": "magikarp",
      "level": [
-      19,
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "geodude",
+     "level": [
+      22,
       22
      ],
-     "weight": 0.15
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "girafarig",
+     "level": [
+      24,
+      24
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "graveler",
+     "level": [
+      23,
+      24
+     ],
+     "weight": 0.125,
+     "method": "walk"
+    },
+    {
+     "species": "kricketune",
+     "level": [
+      23,
+      24
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "ponyta",
+     "level": [
+      23,
+      24
+     ],
+     "weight": 0.2917,
+     "method": "walk"
+    },
+    {
+     "species": "stunky",
+     "level": [
+      23,
+      24
+     ],
+     "weight": 0.125,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Valor Lakefront",
+   "before_trainer": 176,
+   "opens_at": "Valor Lakefront",
+   "encounters": [
+    {
+     "species": "bibarel",
+     "level": [
+      21,
+      22
+     ],
+     "weight": 0.125,
+     "method": "walk"
+    },
+    {
+     "species": "geodude",
+     "level": [
+      20,
+      20
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "girafarig",
+     "level": [
+      21,
+      22
+     ],
+     "weight": 0.25,
+     "method": "walk"
+    },
+    {
+     "species": "graveler",
+     "level": [
+      21,
+      22
+     ],
+     "weight": 0.125,
+     "method": "walk"
+    },
+    {
+     "species": "kricketune",
+     "level": [
+      21,
+      22
+     ],
+     "weight": 0.2083,
+     "method": "walk"
     },
     {
      "species": "staravia",
      "level": [
-      19,
+      21,
       22
      ],
-     "weight": 0.25
+     "weight": 0.125,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Route 213",
+   "before_trainer": 195,
+   "opens_at": "Route 213",
+   "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "remoraid",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "buizel",
+     "level": [
+      20,
+      21
+     ],
+     "weight": 0.2727,
+     "method": "walk"
+    },
+    {
+     "species": "floatzel",
+     "level": [
+      22,
+      22
+     ],
+     "weight": 0.0909,
+     "method": "walk"
+    },
+    {
+     "species": "shellos",
+     "level": [
+      20,
+      22
+     ],
+     "weight": 0.4545,
+     "method": "walk"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      20,
+      20
+     ],
+     "weight": 0.1818,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Pastoria City",
+   "before_trainer": 198,
+   "opens_at": "Pastoria Gym",
+   "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "remoraid",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    }
+   ]
+  },
+  {
+   "name": "Celestic Town",
+   "before_trainer": 235,
+   "opens_at": "Celestic Town",
+   "encounters": [
+    {
+     "species": "barboach",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    }
+   ]
+  },
+  {
+   "name": "Route 218",
+   "before_trainer": 236,
+   "opens_at": "Route 218",
+   "encounters": [
+    {
+     "species": "finneon",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "pelipper",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "tentacool",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.6,
+     "method": "surf"
+    },
+    {
+     "species": "tentacruel",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.3,
+     "method": "surf"
+    },
+    {
+     "species": "floatzel",
+     "level": [
+      28,
+      30
+     ],
+     "weight": 0.35,
+     "method": "walk"
+    },
+    {
+     "species": "gastrodon",
+     "level": [
+      28,
+      30
+     ],
+     "weight": 0.2,
+     "method": "walk"
+    },
+    {
+     "species": "mrmime",
+     "level": [
+      29,
+      30
+     ],
+     "weight": 0.15,
+     "method": "walk"
+    },
+    {
+     "species": "shellos",
+     "level": [
+      28,
+      28
+     ],
+     "weight": 0.2,
+     "method": "walk"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      29,
+      29
+     ],
+     "weight": 0.1,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Canalave City",
+   "before_trainer": 243,
+   "opens_at": "Canalave Gym",
+   "encounters": [
+    {
+     "species": "finneon",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "pelipper",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "tentacool",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.6,
+     "method": "surf"
+    },
+    {
+     "species": "tentacruel",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.3,
+     "method": "surf"
+    }
+   ]
+  },
+  {
+   "name": "Iron Island (optional)",
+   "before_trainer": 251,
+   "opens_at": "Iron Island (optional)",
+   "encounters": [
+    {
+     "species": "riolu",
+     "level": [
+      1,
+      1
+     ],
+     "weight": 1.0,
+     "method": "gift"
+    },
+    {
+     "species": "finneon",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "pelipper",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "tentacool",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.6,
+     "method": "surf"
+    },
+    {
+     "species": "tentacruel",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.3,
+     "method": "surf"
+    },
+    {
+     "species": "geodude",
+     "level": [
+      29,
+      32
+     ],
+     "weight": 0.078,
+     "method": "walk"
+    },
+    {
+     "species": "golbat",
+     "level": [
+      30,
+      32
+     ],
+     "weight": 0.18,
+     "method": "walk"
+    },
+    {
+     "species": "graveler",
+     "level": [
+      29,
+      34
+     ],
+     "weight": 0.462,
+     "method": "walk"
+    },
+    {
+     "species": "onix",
+     "level": [
+      31,
+      33
+     ],
+     "weight": 0.22,
+     "method": "walk"
+    },
+    {
+     "species": "steelix",
+     "level": [
+      33,
+      34
+     ],
+     "weight": 0.04,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      30,
+      30
+     ],
+     "weight": 0.02,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Fuego Ironworks (optional)",
+   "before_trainer": 259,
+   "opens_at": "Fuego Ironworks (optional)",
+   "encounters": [
+    {
+     "species": "finneon",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "pelipper",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "tentacool",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.6,
+     "method": "surf"
+    },
+    {
+     "species": "tentacruel",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.3,
+     "method": "surf"
+    },
+    {
+     "species": "floatzel",
+     "level": [
+      29,
+      30
+     ],
+     "weight": 0.25,
+     "method": "walk"
+    },
+    {
+     "species": "gastrodon",
+     "level": [
+      29,
+      30
+     ],
+     "weight": 0.15,
+     "method": "walk"
+    },
+    {
+     "species": "luxio",
+     "level": [
+      29,
+      29
+     ],
+     "weight": 0.1,
+     "method": "walk"
+    },
+    {
+     "species": "pachirisu",
+     "level": [
+      29,
+      29
+     ],
+     "weight": 0.1,
+     "method": "walk"
+    },
+    {
+     "species": "shellos",
+     "level": [
+      28,
+      28
+     ],
+     "weight": 0.2,
+     "method": "walk"
+    },
+    {
+     "species": "shinx",
+     "level": [
+      28,
+      28
+     ],
+     "weight": 0.1,
+     "method": "walk"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      29,
+      29
+     ],
+     "weight": 0.1,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Route 219 (optional)",
+   "before_trainer": 262,
+   "opens_at": "Route 219 (optional)",
+   "encounters": [
+    {
+     "species": "finneon",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "pelipper",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "tentacool",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.6,
+     "method": "surf"
+    },
+    {
+     "species": "tentacruel",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.3,
+     "method": "surf"
+    }
+   ]
+  },
+  {
+   "name": "Route 220 (optional)",
+   "before_trainer": 264,
+   "opens_at": "Route 220 (optional)",
+   "encounters": [
+    {
+     "species": "finneon",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "pelipper",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "tentacool",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.6,
+     "method": "surf"
+    },
+    {
+     "species": "tentacruel",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.3,
+     "method": "surf"
+    }
+   ]
+  },
+  {
+   "name": "Route 221 (optional)",
+   "before_trainer": 271,
+   "opens_at": "Route 221 (optional)",
+   "encounters": [
+    {
+     "species": "finneon",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "pelipper",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "tentacool",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.6,
+     "method": "surf"
+    },
+    {
+     "species": "tentacruel",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.3,
+     "method": "surf"
+    },
+    {
+     "species": "floatzel",
+     "level": [
+      28,
+      30
+     ],
+     "weight": 0.25,
+     "method": "walk"
+    },
+    {
+     "species": "gastrodon",
+     "level": [
+      29,
+      30
+     ],
+     "weight": 0.1,
+     "method": "walk"
+    },
+    {
+     "species": "roselia",
+     "level": [
+      29,
+      29
+     ],
+     "weight": 0.1,
+     "method": "walk"
+    },
+    {
+     "species": "shellos",
+     "level": [
+      28,
+      28
+     ],
+     "weight": 0.1,
+     "method": "walk"
+    },
+    {
+     "species": "skuntank",
+     "level": [
+      29,
+      30
+     ],
+     "weight": 0.15,
+     "method": "walk"
+    },
+    {
+     "species": "stunky",
+     "level": [
+      28,
+      28
+     ],
+     "weight": 0.2,
+     "method": "walk"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      29,
+      29
+     ],
+     "weight": 0.1,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Lake Valor (Galactic)",
+   "before_trainer": 284,
+   "opens_at": "Lake Valor (Galactic)",
+   "encounters": [
+    {
+     "species": "goldeen",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "golduck",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.1,
+     "method": "surf"
+    },
+    {
+     "species": "psyduck",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.9,
+     "method": "surf"
+    },
+    {
+     "species": "bibarel",
+     "level": [
+      34,
+      36
+     ],
+     "weight": 0.375,
+     "method": "walk"
+    },
+    {
+     "species": "chingling",
+     "level": [
+      35,
+      36
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "noctowl",
+     "level": [
+      34,
+      36
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "psyduck",
+     "level": [
+      35,
+      36
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "staravia",
+     "level": [
+      34,
+      36
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Route 216",
+   "before_trainer": 293,
+   "opens_at": "Route 216",
+   "encounters": [
+    {
+     "species": "graveler",
+     "level": [
+      33,
+      34
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "machoke",
+     "level": [
+      33,
+      34
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "meditite",
+     "level": [
+      33,
+      34
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "noctowl",
+     "level": [
+      33,
+      33
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "sneasel",
+     "level": [
+      32,
+      33
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "snover",
+     "level": [
+      32,
+      33
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      33,
+      33
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Mt. Coronet North (Snowpoint side)",
+   "before_trainer": 293,
+   "opens_at": "Route 216",
+   "encounters": [
+    {
+     "species": "abomasnow",
+     "level": [
+      40,
+      40
+     ],
+     "weight": 0.0476,
+     "method": "walk"
+    },
+    {
+     "species": "bronzong",
+     "level": [
+      38,
+      40
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "chingling",
+     "level": [
+      30,
+      40
+     ],
+     "weight": 0.0952,
+     "method": "walk"
+    },
+    {
+     "species": "clefairy",
+     "level": [
+      30,
+      40
+     ],
+     "weight": 0.119,
+     "method": "walk"
+    },
+    {
+     "species": "golbat",
+     "level": [
+      31,
+      39
+     ],
+     "weight": 0.119,
+     "method": "walk"
+    },
+    {
+     "species": "graveler",
+     "level": [
+      31,
+      40
+     ],
+     "weight": 0.1905,
+     "method": "walk"
+    },
+    {
+     "species": "machoke",
+     "level": [
+      31,
+      40
+     ],
+     "weight": 0.119,
+     "method": "walk"
+    },
+    {
+     "species": "medicham",
+     "level": [
+      39,
+      40
+     ],
+     "weight": 0.0952,
+     "method": "walk"
+    },
+    {
+     "species": "meditite",
+     "level": [
+      31,
+      32
+     ],
+     "weight": 0.0595,
+     "method": "walk"
+    },
+    {
+     "species": "noctowl",
+     "level": [
+      39,
+      39
+     ],
+     "weight": 0.0238,
+     "method": "walk"
+    },
+    {
+     "species": "snover",
+     "level": [
+      38,
+      38
+     ],
+     "weight": 0.0476,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Route 217",
+   "before_trainer": 302,
+   "opens_at": "Route 217",
+   "encounters": [
+    {
+     "species": "machoke",
+     "level": [
+      35,
+      36
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "medicham",
+     "level": [
+      35,
+      36
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "meditite",
+     "level": [
+      35,
+      35
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "noctowl",
+     "level": [
+      35,
+      35
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "sneasel",
+     "level": [
+      34,
+      35
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "snover",
+     "level": [
+      34,
+      35
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      35,
+      35
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Acuity Lakefront",
+   "before_trainer": 311,
+   "opens_at": "Snowpoint Gym",
+   "encounters": [
+    {
+     "species": "machoke",
+     "level": [
+      35,
+      36
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "medicham",
+     "level": [
+      35,
+      36
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "meditite",
+     "level": [
+      35,
+      35
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "noctowl",
+     "level": [
+      35,
+      35
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    },
+    {
+     "species": "sneasel",
+     "level": [
+      34,
+      35
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "snover",
+     "level": [
+      34,
+      35
+     ],
+     "weight": 0.2083,
+     "method": "walk"
+    },
+    {
+     "species": "zubat",
+     "level": [
+      35,
+      35
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Sunyshore City",
+   "before_trainer": 347,
+   "opens_at": "Sunyshore Gym",
+   "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "remoraid",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "mantyke",
+     "level": [
+      30,
+      45
+     ],
+     "weight": 0.1,
+     "method": "surf"
+    },
+    {
+     "species": "pelipper",
+     "level": [
+      35,
+      45
+     ],
+     "weight": 0.3,
+     "method": "surf"
+    },
+    {
+     "species": "tentacruel",
+     "level": [
+      35,
+      45
+     ],
+     "weight": 0.6,
+     "method": "surf"
+    }
+   ]
+  },
+  {
+   "name": "Route 222",
+   "before_trainer": 356,
+   "opens_at": "Route 222",
+   "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "remoraid",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "pelipper",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "tentacool",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.6,
+     "method": "surf"
+    },
+    {
+     "species": "tentacruel",
+     "level": [
+      20,
+      40
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      20,
+      30
+     ],
+     "weight": 0.3,
+     "method": "surf"
+    },
+    {
+     "species": "chatot",
+     "level": [
+      40,
+      41
+     ],
+     "weight": 0.1667,
+     "method": "walk"
+    },
+    {
+     "species": "floatzel",
+     "level": [
+      40,
+      42
+     ],
+     "weight": 0.2917,
+     "method": "walk"
+    },
+    {
+     "species": "gastrodon",
+     "level": [
+      40,
+      42
+     ],
+     "weight": 0.3333,
+     "method": "walk"
+    },
+    {
+     "species": "mrmime",
+     "level": [
+      41,
+      42
+     ],
+     "weight": 0.125,
+     "method": "walk"
+    },
+    {
+     "species": "wingull",
+     "level": [
+      41,
+      41
+     ],
+     "weight": 0.0833,
+     "method": "walk"
+    }
+   ]
+  },
+  {
+   "name": "Route 223",
+   "before_trainer": 368,
+   "opens_at": "Route 223",
+   "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.55,
+     "method": "good"
+    },
+    {
+     "species": "remoraid",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 0.45,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "mantyke",
+     "level": [
+      30,
+      45
+     ],
+     "weight": 0.1,
+     "method": "surf"
+    },
+    {
+     "species": "pelipper",
+     "level": [
+      35,
+      45
+     ],
+     "weight": 0.3,
+     "method": "surf"
+    },
+    {
+     "species": "tentacruel",
+     "level": [
+      35,
+      45
+     ],
+     "weight": 0.6,
+     "method": "surf"
+    }
+   ]
+  },
+  {
+   "name": "Victory Road",
+   "before_trainer": 381,
+   "opens_at": "Victory Road",
+   "encounters": [
+    {
+     "species": "magikarp",
+     "level": [
+      10,
+      25
+     ],
+     "weight": 1.0,
+     "method": "good"
+    },
+    {
+     "species": "magikarp",
+     "level": [
+      3,
+      10
+     ],
+     "weight": 1.0,
+     "method": "old"
+    },
+    {
+     "species": "golbat",
+     "level": [
+      35,
+      55
+     ],
+     "weight": 0.95,
+     "method": "surf"
+    },
+    {
+     "species": "lapras",
+     "level": [
+      40,
+      60
+     ],
+     "weight": 0.05,
+     "method": "surf"
+    },
+    {
+     "species": "floatzel",
+     "level": [
+      44,
+      51
+     ],
+     "weight": 0.12,
+     "method": "walk"
+    },
+    {
+     "species": "golbat",
+     "level": [
+      44,
+      52
+     ],
+     "weight": 0.2,
+     "method": "walk"
+    },
+    {
+     "species": "graveler",
+     "level": [
+      45,
+      51
+     ],
+     "weight": 0.12,
+     "method": "walk"
+    },
+    {
+     "species": "kadabra",
+     "level": [
+      45,
+      47
+     ],
+     "weight": 0.05,
+     "method": "walk"
+    },
+    {
+     "species": "machoke",
+     "level": [
+      44,
+      52
+     ],
+     "weight": 0.2,
+     "method": "walk"
+    },
+    {
+     "species": "medicham",
+     "level": [
+      44,
+      52
+     ],
+     "weight": 0.15,
+     "method": "walk"
+    },
+    {
+     "species": "onix",
+     "level": [
+      44,
+      50
+     ],
+     "weight": 0.06,
+     "method": "walk"
+    },
+    {
+     "species": "steelix",
+     "level": [
+      46,
+      52
+     ],
+     "weight": 0.1,
+     "method": "walk"
     }
    ]
   }

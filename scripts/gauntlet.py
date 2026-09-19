@@ -16,6 +16,7 @@ import subprocess
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from poke_env.data import to_id_str
 from poke_env.player import SimpleHeuristicsPlayer
 from poke_env.teambuilder import Teambuilder
 from poke_env.teambuilder.constant_teambuilder import ConstantTeambuilder
@@ -83,6 +84,15 @@ def species_name(species: str) -> str:
     return species.capitalize()
 
 
+STATS = ("hp", "atk", "def", "spa", "spd", "spe")
+_STAT_NAMES = dict(zip(STATS, ("HP", "Atk", "Def", "SpA", "SpD", "Spe")))
+# Player mons: 31 IVs and a flat 85 EVs per stat (the 510 total a trained mon
+# carries, spread evenly). The format has no EV limit, so an omitted spread
+# would be filled with 252 per stat by the validator (README: the EV bug).
+PLAYER_EVS = {k: 85 for k in STATS}
+PLAYER_IVS = {k: 31 for k in STATS}
+
+
 @dataclass
 class Mon:
     species: str
@@ -91,22 +101,24 @@ class Mon:
     ability: str | None = None
     item: str | None = None
     alive: bool = True
+    caught_level: int | None = None    # friendship evolutions fire FRIENDSHIP_LEVELS above it
+    nature: str | None = None          # None = neutral (Serious)
+    evs: dict | None = None            # None = PLAYER_EVS; trainers carry the sheet's spread
+    ivs: dict | None = None            # None = PLAYER_IVS
 
     def pack(self) -> str:
-        """Showdown text -> packed string. Level line survives the roundtrip."""
-        lines = [f"{species_name(self.species)} (M)"]
-        if self.ability:
-            lines.append(f"Ability: {self.ability}")
-        if self.item:
-            lines[0] += f" @ {self.item}"
-        lines.append(f"Level: {self.level}")
-        lines += [f"- {m}" for m in self.moves]
-        return lines
+        """Showdown packed string (nick|species|item|ability|moves|nature|evs|gender|
+        ivs|shiny|level|happiness). Written directly: poke-env's text roundtrip
+        drops an all-zero EV spread, which the validator then fills with 252s."""
+        spread = lambda d: ",".join(str(d[k]) for k in STATS)
+        return "|".join([species_name(self.species), "", to_id_str(self.item or ""),
+                         to_id_str(self.ability or ""), ",".join(to_id_str(m) for m in self.moves),
+                         self.nature or "Serious", spread(self.evs or PLAYER_EVS), "M",
+                         spread(self.ivs or PLAYER_IVS), "", str(self.level), ""])
 
 
 def pack_team(mons: list[Mon]) -> str:
-    text = "\n\n".join("\n".join(m.pack()) for m in mons)
-    return Teambuilder.join_team(Teambuilder.parse_showdown_team(text))
+    return "]".join(m.pack() for m in mons)
 
 
 def trainer_mons(trainer: dict) -> list[Mon]:
@@ -116,8 +128,9 @@ def trainer_mons(trainer: dict) -> list[Mon]:
         if not moves:  # 2 records in source data have empty movesets;
             # server rejects moveless mons — learnset fallback
             moves = encounter_moves(p["species"].lower(), p["level"]) or ["tackle"]
-        mons.append(Mon(p["species"].lower(), p["level"], moves,
-                        p.get("ability"), p.get("item")))
+        mons.append(Mon(p["species"].lower(), p["level"], moves, p.get("ability"), p.get("item"),
+                        nature=p.get("nature"), evs=p.get("evs") or dict.fromkeys(STATS, 0),
+                        ivs=p.get("ivs") or dict.fromkeys(STATS, 0)))
     return mons
 
 
@@ -303,12 +316,17 @@ const {Dex} = require(path.join(process.argv[1], 'dist', 'sim'));
 const maxLevel = Number(process.argv[2]);
 // closure over level-up evolutions: evolved forms need learnsets too
 const species = new Set(process.argv.slice(3));
+// every evolution method (gen 4 dex, no regional formes); the closure adds evolved forms
 const evos = {};
-for (const sp of species) {
-  evos[sp] = Dex.species.get(sp).evos
-    .map(e => Dex.species.get(e)).filter(e => e.evoLevel && !e.evoType)
-    .map(e => [e.id, e.evoLevel]);
-  for (const [id] of evos[sp]) species.add(id);
+const queue = [...species];
+while (queue.length) {
+  const sp = queue.pop();
+  if (evos[sp]) continue;
+  evos[sp] = Dex.species.get(sp).evos.map(e => Dex.species.get(e))
+    .filter(e => e.exists && e.num <= 493 && !e.forme)
+    .map(e => ({to: e.id, type: e.evoType || "level", level: e.evoLevel || null,
+                item: e.evoItem || null, move: e.evoMove || null}));
+  for (const e of evos[sp]) { species.add(e.to); queue.push(e.to); }
 }
 const out = {};
 for (const sp of species) {
@@ -332,9 +350,9 @@ console.log(JSON.stringify({moves: out, evos, movedata: moves}));
 def build_moves(max_level: int = 100) -> None:
     """learnsets.json (species -> [[move, level], ...], every level-up move up to
     max_level, sorted by level) and evolutions.json (species -> [[evolved id,
-    level]]; level evolutions only — item / friendship / trade evolutions are
-    not modelled) in the game folder, for the encounter species and their
-    evolutions."""
+    method fields: type level|levelFriendship|useItem|levelHold|levelMove|trade,
+    level, item, move]) in the game folder, for the encounter species and
+    their evolutions (every method, gen 4 dex)."""
     enc = json.load(open(DATA / GAME / "encounters.json"))
     species = sorted({e["species"] for r in enc["routes"] for e in r["encounters"]}
                      | set(enc["starter"]))
@@ -452,12 +470,44 @@ def load_evolutions() -> dict:
     return load_game()["evolutions"]
 
 
-def evolve(species: str, level: int, rng=None) -> str:
-    """Species after every level evolution reachable at `level` (branching
-    evolutions such as Wurmple pick with rng, first branch without)."""
+# Evolution methods without an in-game mechanic here, as progression rules:
+FRIENDSHIP_LEVELS = 10   # a friendship evolution fires this many levels after the catch
+STONE_GATE = "Eterna Gym"  # the Grand Underground (every evolution stone) opens in Eterna City
+EVO_GATES = {"leafeon": "Eterna Forest", "glaceon": "Route 217",            # Moss Rock, Ice Rock
+             "magnezone": "Route 208", "probopass": "Route 208"}            # Mt. Coronet's field
+ITEM_GATES = {"Razor Claw": "Victory Road", "Razor Fang": "Victory Road"}  # Weavile, Gliscor
+# trade evolutions never happen (no trading in a Nuzlocke)
+
+
+@functools.lru_cache(maxsize=None)
+def first_index(location: str) -> int:
+    """order_index of the first trainer whose location starts with `location`."""
+    return next(e["order_index"] for e in load_game()["order"] if e["location"].startswith(location))
+
+
+def _evo_due(species: str, e: dict, level: int, caught_level, trainer_idx) -> bool:
+    t = e["type"]
+    if t == "level":
+        return e["level"] <= level
+    if t == "levelMove":  # Bonsly / Mime Jr.: when the move is learned
+        learned = [l for m, l in load_game()["learnsets"].get(species, []) if m == to_id_str(e["move"])]
+        return bool(learned) and min(learned) <= level
+    if t == "levelFriendship":
+        return caught_level is not None and level >= caught_level + FRIENDSHIP_LEVELS
+    if t in ("useItem", "levelHold", "levelExtra"):
+        gate = EVO_GATES.get(e["to"]) or ITEM_GATES.get(e["item"] or "") or STONE_GATE
+        return trainer_idx is not None and trainer_idx >= first_index(gate)
+    return False
+
+
+def evolve(species: str, level: int, rng=None, caught_level: int | None = None,
+           trainer_idx: int | None = None) -> str:
+    """Species after every evolution due at `level`: level-up always; friendship
+    needs caught_level, stones / items / places need trainer_idx (the gates
+    above); trade never. Branches (Wurmple, Eevee) pick with rng, first without."""
     evos = load_evolutions()
     while True:
-        due = [e for e, lvl in evos.get(species, []) if lvl <= level]
+        due = [e["to"] for e in evos.get(species, []) if _evo_due(species, e, level, caught_level, trainer_idx)]
         if not due:
             return species
         species = rng.choice(due) if rng else due[0]
@@ -465,7 +515,7 @@ def evolve(species: str, level: int, rng=None) -> str:
 
 # --------------------------------------------------------------------- checks
 
-def check(slice_len: int = 50) -> None:
+def check(slice_len: int = 21) -> None:
     trainers, order = load_trainers()
     enc = load_encounters()
     learnsets = json.loads(subprocess.run(
@@ -508,7 +558,7 @@ if __name__ == "__main__":
     ap.add_argument("--check", action="store_true")
     ap.add_argument("--build-moves", action="store_true")
     ap.add_argument("--build-species", action="store_true", help="data/species.json from the dex")
-    ap.add_argument("--slice", type=int, default=50)
+    ap.add_argument("--slice", type=int, default=21)
     ap.add_argument("--max-level", type=int, default=100)
     args = ap.parse_args()
     if args.check:

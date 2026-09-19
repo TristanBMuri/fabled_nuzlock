@@ -31,19 +31,19 @@ class Rules:
     harvest and re-clone the prior)."""
     level_rule: str = "cap"      # cap: every mon at the next boss's max level (hardcore); match: max enemy seen
     level_margin: int = 0        # levels above the rule (XP proxy)
-    box: int = 30                # living mons the box holds (30 >= starter + 21 areas = unbounded here)
-    dupes_clause: bool = True    # an area's encounter is rerolled among families never owned
+    box: int = 50                # living mons the box holds (50 > starter + 45 areas = unbounded)
+    dupes_clause: bool = True    # an area's encounter is rerolled among families never owned (none left: no catch)
     moveset: str = "best4"       # best4: strongest STAB / other-type / next attack + a status move; last4: last learned
 
     def __str__(self):
         return (f"level_rule={self.level_rule} margin={self.level_margin} box={self.box} "
                 f"dupes={self.dupes_clause} moveset={self.moveset}")
 BREAKPOINTS = ["none", "gym_leader", "elite_four", "champion"]
-SLICE_LEN = 51  # trainers per episode: through Gym Leader Roark (order_index 50)
+SLICE_LEN = 21  # trainers per episode: through Gym Leader Roark (order_index 20 in the route order)
 EVOS = load_evolutions()
 STARTERS = {"chimchar", "piplup", "turtwig"}
-STARTERS |= {e for s in list(STARTERS) for e, _ in EVOS.get(s, [])}
-STARTERS |= {e for s in list(STARTERS) for e, _ in EVOS.get(s, [])}  # second stage
+STARTERS |= {e["to"] for s in list(STARTERS) for e in EVOS.get(s, [])}
+STARTERS |= {e["to"] for s in list(STARTERS) for e in EVOS.get(s, [])}  # second stage
 
 TRAINERS, ORDER = load_trainers()
 
@@ -83,7 +83,7 @@ class NuzlockeEnv(Env):
                  risk_features: bool = True, search_all: bool = False,
                  slice_len: int = SLICE_LEN, deep: tuple[int, int] | None = None):
         """backend 'sim' (in-process, default) or 'server' (Showdown on `port`).
-        slice_len: trainers per episode (51 = through Roark, 186 = through Gardenia).
+        slice_len: trainers per episode (21 = through Roark, 59 = through Gardenia, 167 = Maylene).
         policy selects the sim battler (None = SimpleHeuristics); search=(k, r)
         switches boss fights (breakpoint trainers) to rollout search, search_all
         every fight. deep=(k, r): wider search at breakpoints and at any fight
@@ -114,13 +114,17 @@ class NuzlockeEnv(Env):
         # starters come with ability slot 0; wild catches roll slot 0 or 1
         # (roll_ability) and evolution keeps the slot (evolved_ability)
         self.roster = [Mon(starter, 5, encounter_moves(starter, 5, self.rules.moveset),
-                           ability=ability_slots(starter).get("0"))]
+                           ability=ability_slots(starter).get("0"), caught_level=5)]
         self.graveyard: list[Mon] = []  # dead mons leave the roster (box slots free up)
         self.party = []  # indices into roster
         self.trainer_idx = 0
+        rival = {"turtwig": "chimchar", "chimchar": "piplup", "piplup": "turtwig"}[starter]
+        self._rival_family = {rival} | {e["to"] for e in EVOS.get(rival, [])}
+        self._rival_family |= {e["to"] for s in list(self._rival_family) for e in EVOS.get(s, [])}
+        self._skip_other_rivals()
         self.max_enemy_level = 0
         self.phase = "ENCOUNTER"  # first route unlocks before trainer 0
-        self.pending: list[Mon] = []  # encounter offers not yet answered (one per area)
+        self.pending: list[list[Mon]] = []  # offers not yet answered: per area, one pick per method
         self.dropped: list[str] = []  # offers that found no box slot (species), this run
         self._route_cursor = 0  # routes consumed
         self.done = False
@@ -142,9 +146,21 @@ class NuzlockeEnv(Env):
             sp = stack.pop()
             if sp not in fam:
                 fam.add(sp)
-                stack += [e for e, _ in EVOS.get(sp, [])]
+                stack += [e["to"] for e in EVOS.get(sp, [])]
         # an evolved catch also claims its pre-evolutions
-        return fam | {pre for pre, evs in EVOS.items() if any(e in fam for e, _ in evs)}
+        return fam | {pre for pre, evs in EVOS.items() if any(e["to"] in fam for e in evs)}
+
+    def _skip_other_rivals(self):
+        """The trainer table has one rival record per starter choice; only the
+        one whose starter counters ours is fought (Turtwig -> Chimchar rival...)."""
+        while self.trainer_idx < self.slice_len:
+            e = ORDER[self.trainer_idx]
+            if e["trainer_name"] != "Pokémon Trainer Cedric":
+                break
+            party = {p["species"].lower() for p in TRAINERS[e["trainer_id"]]["party"]}
+            if party & self._rival_family:
+                break
+            self.trainer_idx += 1
 
     def _maybe_sample_encounter(self):
         """Queue one first encounter for every area whose trainer gate has
@@ -154,19 +170,24 @@ class NuzlockeEnv(Env):
                <= self.trainer_idx):
             route = self.encounters[self._route_cursor]
             self._route_cursor += 1
-            table = route["encounters"]
-            if self.rules.dupes_clause:
-                owned = self._owned_families()
-                table = [e for e in table if e["species"] not in owned] or table
-            pick = self.rng.choices(
-                table, weights=[e["weight"] for e in table])[0]
-            lvl = self.rng.randint(*pick["level"])
-            mon = Mon(pick["species"], lvl, encounter_moves(pick["species"], lvl, self.rules.moveset),
-                      ability=roll_ability(pick["species"], self.rng))
+            owned = self._owned_families() if self.rules.dupes_clause else set()
+            alts = []  # one roll per method (grass, rod, surf, gift): the run layer picks the method
+            methods = sorted({e.get("method", "walk") for e in route["encounters"]})
+            tables = {m: [e for e in route["encounters"] if e.get("method", "walk") == m] for m in methods}
+            if self.rules.dupes_clause:  # a method whose whole pool is owned is not offered;
+                tables = {m: t for m, t in ((m, [e for e in t if e["species"] not in owned])
+                                            for m, t in tables.items()) if t}
+                if not tables:  # every family here is owned: no catch in this area
+                    continue
+            for method, table in tables.items():
+                pick = self.rng.choices(table, weights=[e["weight"] for e in table])[0]
+                lvl = self.rng.randint(*pick["level"])
+                alts.append(Mon(pick["species"], lvl, encounter_moves(pick["species"], lvl, self.rules.moveset),
+                                ability=roll_ability(pick["species"], self.rng), caught_level=lvl))
             if len(self.roster) + len(self.pending) < self.max_roster:
-                self.pending.append(mon)
+                self.pending.append(alts)
             else:
-                self.dropped.append(mon.species)
+                self.dropped.append("/".join(m.species for m in alts))
         if self.pending:
             self.phase = "ENCOUNTER"
 
@@ -182,7 +203,7 @@ class NuzlockeEnv(Env):
         for m in self.roster:  # player level rule: match max (+margin), never decrease
             if m.level < target:
                 m.level = target
-                evolved = evolve(m.species, m.level, self.rng)  # level-up evolutions
+                evolved = evolve(m.species, m.level, self.rng, m.caught_level, self.trainer_idx)
                 if evolved != m.species:
                     m.ability = evolved_ability(m.species, m.ability, evolved)
                     m.species = evolved
@@ -278,7 +299,7 @@ class NuzlockeEnv(Env):
         if self.phase == "ENCOUNTER":
             m[0] = 1  # skip
             if self.pending and len(self.roster) < self.max_roster:
-                m[1] = 1  # catch
+                m[1:1 + len(self.pending[0])] = 1  # catch alternative k
         else:  # PRE_BATTLE — nuzlocke rule: field everything you can.
             alive_idx = [i for i, mon in enumerate(self.roster[:self.max_roster])
                          if mon.alive]
@@ -301,9 +322,9 @@ class NuzlockeEnv(Env):
     def step(self, action):
         reward = 0.0
         if self.phase == "ENCOUNTER":
-            mon = self.pending.pop(0) if self.pending else None
-            if action == 1 and mon is not None:
-                self.roster.append(mon)
+            alts = self.pending.pop(0) if self.pending else []
+            if 1 <= action <= len(alts):
+                self.roster.append(alts[action - 1])
             self.phase = "ENCOUNTER" if self.pending else "PRE_BATTLE"
         else:  # PRE_BATTLE
             if action == 0:  # confirm -> battle (or end if no alive mons)
@@ -330,6 +351,7 @@ class NuzlockeEnv(Env):
                         if won:
                             reward += 1.0
                             self.trainer_idx += 1
+                            self._skip_other_rivals()
                             if self.trainer_idx >= self.slice_len:
                                 reward += 10.0
                                 self.done = True

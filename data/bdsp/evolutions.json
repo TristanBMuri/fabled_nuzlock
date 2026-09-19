@@ -1,232 +1,533 @@
 {
- "abra": [
-  [
-   "kadabra",
-   16
-  ]
+ "zubat": [
+  {
+   "to": "golbat",
+   "type": "level",
+   "level": 22,
+   "item": null,
+   "move": null
+  }
  ],
- "bibarel": [],
- "bidoof": [
-  [
-   "bibarel",
-   15
-  ]
+ "golbat": [
+  {
+   "to": "crobat",
+   "type": "levelFriendship",
+   "level": null,
+   "item": null,
+   "move": null
+  }
  ],
- "bonsly": [],
- "bronzor": [
-  [
-   "bronzong",
-   33
-  ]
+ "crobat": [],
+ "wooper": [
+  {
+   "to": "quagsire",
+   "type": "level",
+   "level": 20,
+   "item": null,
+   "move": null
+  }
  ],
- "budew": [],
- "buizel": [
-  [
-   "floatzel",
-   26
-  ]
+ "quagsire": [],
+ "wingull": [
+  {
+   "to": "pelipper",
+   "type": "level",
+   "level": 25,
+   "item": null,
+   "move": null
+  }
  ],
- "buneary": [],
- "cascoon": [
-  [
-   "dustox",
-   10
-  ]
+ "pelipper": [],
+ "unown": [],
+ "turtwig": [
+  {
+   "to": "grotle",
+   "type": "level",
+   "level": 18,
+   "item": null,
+   "move": null
+  }
  ],
- "chansey": [],
- "cherubi": [
-  [
-   "cherrim",
-   25
-  ]
+ "grotle": [
+  {
+   "to": "torterra",
+   "type": "level",
+   "level": 32,
+   "item": null,
+   "move": null
+  }
  ],
- "chimchar": [
-  [
-   "monferno",
-   14
-  ]
- ],
- "chingling": [],
- "duskull": [
-  [
-   "dusclops",
-   37
-  ]
- ],
- "gastly": [
-  [
-   "haunter",
-   25
-  ]
- ],
- "geodude": [
-  [
-   "graveler",
-   25
-  ]
- ],
- "hoothoot": [
-  [
-   "noctowl",
-   20
-  ]
- ],
- "kadabra": [],
- "kricketot": [
-  [
-   "kricketune",
-   10
-  ]
- ],
- "kricketune": [],
- "machoke": [],
- "machop": [
-  [
-   "machoke",
-   28
-  ]
- ],
- "meditite": [
-  [
-   "medicham",
-   37
-  ]
- ],
- "mimejr": [],
- "onix": [],
- "pachirisu": [],
- "piplup": [
-  [
-   "prinplup",
-   16
-  ]
- ],
- "ponyta": [
-  [
-   "rapidash",
-   40
-  ]
- ],
- "psyduck": [
-  [
-   "golduck",
-   33
-  ]
- ],
- "ralts": [
-  [
-   "kirlia",
-   20
-  ]
- ],
- "roselia": [],
- "shellos": [
-  [
-   "gastrodon",
-   30
-  ]
- ],
- "shinx": [
-  [
-   "luxio",
-   15
-  ]
- ],
- "silcoon": [
-  [
-   "beautifly",
-   10
-  ]
- ],
- "staravia": [
-  [
-   "staraptor",
-   34
-  ]
- ],
- "starly": [
-  [
-   "staravia",
-   14
-  ]
+ "torterra": [],
+ "tentacruel": [],
+ "tentacool": [
+  {
+   "to": "tentacruel",
+   "type": "level",
+   "level": 30,
+   "item": null,
+   "move": null
+  }
  ],
  "stunky": [
-  [
-   "skuntank",
-   34
-  ]
+  {
+   "to": "skuntank",
+   "type": "level",
+   "level": 34,
+   "item": null,
+   "move": null
+  }
  ],
- "turtwig": [
-  [
-   "grotle",
-   18
-  ]
+ "skuntank": [],
+ "steelix": [],
+ "starly": [
+  {
+   "to": "staravia",
+   "type": "level",
+   "level": 14,
+   "item": null,
+   "move": null
+  }
  ],
- "wurmple": [
-  [
-   "silcoon",
-   7
-  ],
-  [
-   "cascoon",
-   7
-  ]
+ "staravia": [
+  {
+   "to": "staraptor",
+   "type": "level",
+   "level": 34,
+   "item": null,
+   "move": null
+  }
  ],
- "zubat": [
-  [
-   "golbat",
-   22
-  ]
+ "staraptor": [],
+ "snover": [
+  {
+   "to": "abomasnow",
+   "type": "level",
+   "level": 40,
+   "item": null,
+   "move": null
+  }
  ],
- "bronzong": [],
- "floatzel": [],
- "dustox": [],
- "cherrim": [],
- "monferno": [
-  [
-   "infernape",
-   36
-  ]
+ "abomasnow": [],
+ "sneasel": [
+  {
+   "to": "weavile",
+   "type": "levelHold",
+   "level": null,
+   "item": "Razor Claw",
+   "move": null
+  }
  ],
- "dusclops": [],
- "haunter": [],
- "graveler": [],
- "noctowl": [],
- "medicham": [],
- "prinplup": [
-  [
-   "empoleon",
-   36
-  ]
+ "weavile": [],
+ "shinx": [
+  {
+   "to": "luxio",
+   "type": "level",
+   "level": 15,
+   "item": null,
+   "move": null
+  }
  ],
- "rapidash": [],
- "golduck": [],
- "kirlia": [
-  [
-   "gardevoir",
-   30
-  ]
+ "luxio": [
+  {
+   "to": "luxray",
+   "type": "level",
+   "level": 30,
+   "item": null,
+   "move": null
+  }
+ ],
+ "luxray": [],
+ "shellos": [
+  {
+   "to": "gastrodon",
+   "type": "level",
+   "level": 30,
+   "item": null,
+   "move": null
+  }
  ],
  "gastrodon": [],
- "luxio": [
-  [
-   "luxray",
-   30
-  ]
+ "roselia": [
+  {
+   "to": "roserade",
+   "type": "useItem",
+   "level": null,
+   "item": "Shiny Stone",
+   "move": null
+  }
  ],
- "beautifly": [],
- "staraptor": [],
- "skuntank": [],
- "grotle": [
-  [
-   "torterra",
-   32
-  ]
+ "roserade": [],
+ "riolu": [
+  {
+   "to": "lucario",
+   "type": "levelFriendship",
+   "level": null,
+   "item": null,
+   "move": null
+  }
  ],
- "golbat": [],
- "infernape": [],
+ "lucario": [],
+ "remoraid": [
+  {
+   "to": "octillery",
+   "type": "level",
+   "level": 25,
+   "item": null,
+   "move": null
+  }
+ ],
+ "octillery": [],
+ "psyduck": [
+  {
+   "to": "golduck",
+   "type": "level",
+   "level": 33,
+   "item": null,
+   "move": null
+  }
+ ],
+ "golduck": [],
+ "ponyta": [
+  {
+   "to": "rapidash",
+   "type": "level",
+   "level": 40,
+   "item": null,
+   "move": null
+  }
+ ],
+ "rapidash": [],
+ "piplup": [
+  {
+   "to": "prinplup",
+   "type": "level",
+   "level": 16,
+   "item": null,
+   "move": null
+  }
+ ],
+ "prinplup": [
+  {
+   "to": "empoleon",
+   "type": "level",
+   "level": 36,
+   "item": null,
+   "move": null
+  }
+ ],
  "empoleon": [],
- "gardevoir": [],
- "luxray": [],
- "torterra": []
+ "pachirisu": [],
+ "onix": [
+  {
+   "to": "steelix",
+   "type": "trade",
+   "level": null,
+   "item": "Metal Coat",
+   "move": null
+  }
+ ],
+ "noctowl": [],
+ "murkrow": [
+  {
+   "to": "honchkrow",
+   "type": "useItem",
+   "level": null,
+   "item": "Dusk Stone",
+   "move": null
+  }
+ ],
+ "honchkrow": [],
+ "mrmime": [],
+ "mimejr": [
+  {
+   "to": "mrmime",
+   "type": "levelMove",
+   "level": null,
+   "item": null,
+   "move": "Mimic"
+  }
+ ],
+ "meditite": [
+  {
+   "to": "medicham",
+   "type": "level",
+   "level": 37,
+   "item": null,
+   "move": null
+  }
+ ],
+ "medicham": [],
+ "mantyke": [
+  {
+   "to": "mantine",
+   "type": "levelExtra",
+   "level": null,
+   "item": null,
+   "move": null
+  }
+ ],
+ "mantine": [],
+ "magikarp": [
+  {
+   "to": "gyarados",
+   "type": "level",
+   "level": 20,
+   "item": null,
+   "move": null
+  }
+ ],
+ "gyarados": [],
+ "machop": [
+  {
+   "to": "machoke",
+   "type": "level",
+   "level": 28,
+   "item": null,
+   "move": null
+  }
+ ],
+ "machoke": [
+  {
+   "to": "machamp",
+   "type": "trade",
+   "level": null,
+   "item": null,
+   "move": null
+  }
+ ],
+ "machamp": [],
+ "lapras": [],
+ "kricketune": [],
+ "kricketot": [
+  {
+   "to": "kricketune",
+   "type": "level",
+   "level": 10,
+   "item": null,
+   "move": null
+  }
+ ],
+ "kadabra": [
+  {
+   "to": "alakazam",
+   "type": "trade",
+   "level": null,
+   "item": null,
+   "move": null
+  }
+ ],
+ "alakazam": [],
+ "hoothoot": [
+  {
+   "to": "noctowl",
+   "type": "level",
+   "level": 20,
+   "item": null,
+   "move": null
+  }
+ ],
+ "happiny": [
+  {
+   "to": "chansey",
+   "type": "levelHold",
+   "level": null,
+   "item": "Oval Stone",
+   "move": null
+  }
+ ],
+ "chansey": [
+  {
+   "to": "blissey",
+   "type": "levelFriendship",
+   "level": null,
+   "item": null,
+   "move": null
+  }
+ ],
+ "blissey": [],
+ "graveler": [
+  {
+   "to": "golem",
+   "type": "trade",
+   "level": null,
+   "item": null,
+   "move": null
+  }
+ ],
+ "golem": [],
+ "goldeen": [
+  {
+   "to": "seaking",
+   "type": "level",
+   "level": 33,
+   "item": null,
+   "move": null
+  }
+ ],
+ "seaking": [],
+ "girafarig": [],
+ "gible": [
+  {
+   "to": "gabite",
+   "type": "level",
+   "level": 24,
+   "item": null,
+   "move": null
+  }
+ ],
+ "gabite": [
+  {
+   "to": "garchomp",
+   "type": "level",
+   "level": 48,
+   "item": null,
+   "move": null
+  }
+ ],
+ "garchomp": [],
+ "geodude": [
+  {
+   "to": "graveler",
+   "type": "level",
+   "level": 25,
+   "item": null,
+   "move": null
+  }
+ ],
+ "gastly": [
+  {
+   "to": "haunter",
+   "type": "level",
+   "level": 25,
+   "item": null,
+   "move": null
+  }
+ ],
+ "haunter": [
+  {
+   "to": "gengar",
+   "type": "trade",
+   "level": null,
+   "item": null,
+   "move": null
+  }
+ ],
+ "gengar": [],
+ "floatzel": [],
+ "finneon": [
+  {
+   "to": "lumineon",
+   "type": "level",
+   "level": 31,
+   "item": null,
+   "move": null
+  }
+ ],
+ "lumineon": [],
+ "cleffa": [
+  {
+   "to": "clefairy",
+   "type": "levelFriendship",
+   "level": null,
+   "item": null,
+   "move": null
+  }
+ ],
+ "clefairy": [
+  {
+   "to": "clefable",
+   "type": "useItem",
+   "level": null,
+   "item": "Moon Stone",
+   "move": null
+  }
+ ],
+ "clefable": [],
+ "chingling": [
+  {
+   "to": "chimecho",
+   "type": "levelFriendship",
+   "level": null,
+   "item": null,
+   "move": null
+  }
+ ],
+ "chimecho": [],
+ "chimchar": [
+  {
+   "to": "monferno",
+   "type": "level",
+   "level": 14,
+   "item": null,
+   "move": null
+  }
+ ],
+ "monferno": [
+  {
+   "to": "infernape",
+   "type": "level",
+   "level": 36,
+   "item": null,
+   "move": null
+  }
+ ],
+ "infernape": [],
+ "chatot": [],
+ "buizel": [
+  {
+   "to": "floatzel",
+   "type": "level",
+   "level": 26,
+   "item": null,
+   "move": null
+  }
+ ],
+ "budew": [
+  {
+   "to": "roselia",
+   "type": "levelFriendship",
+   "level": null,
+   "item": null,
+   "move": null
+  }
+ ],
+ "bronzor": [
+  {
+   "to": "bronzong",
+   "type": "level",
+   "level": 33,
+   "item": null,
+   "move": null
+  }
+ ],
+ "bronzong": [],
+ "bidoof": [
+  {
+   "to": "bibarel",
+   "type": "level",
+   "level": 15,
+   "item": null,
+   "move": null
+  }
+ ],
+ "bibarel": [],
+ "barboach": [
+  {
+   "to": "whiscash",
+   "type": "level",
+   "level": 30,
+   "item": null,
+   "move": null
+  }
+ ],
+ "whiscash": [],
+ "abra": [
+  {
+   "to": "kadabra",
+   "type": "level",
+   "level": 16,
+   "item": null,
+   "move": null
+  }
+ ]
 }

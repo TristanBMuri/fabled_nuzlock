@@ -19,7 +19,7 @@ from nuzlocke_env import NuzlockeEnv, Rules  # noqa: E402
 
 @pytest.fixture(scope="module")
 def env():
-    e = NuzlockeEnv(seed=0, risk_features=False, slice_len=186)
+    e = NuzlockeEnv(seed=0, risk_features=False, slice_len=59)
     yield e
     e.runner.bridge.close()
 
@@ -37,10 +37,10 @@ def test_every_area_is_offered(env):
     try:
         two_areas_at_once(env)
         env.reset(seed=1)
-        assert [m.species for m in env.pending] == ["bidoof", "zubat"]
+        assert [m.species for a in env.pending for m in a] == ["bidoof", "zubat"]
         assert env.phase == "ENCOUNTER"
         env.step(1)  # catch bidoof -> still answering zubat
-        assert env.phase == "ENCOUNTER" and [m.species for m in env.pending] == ["zubat"]
+        assert env.phase == "ENCOUNTER" and [m.species for a in env.pending for m in a] == ["zubat"]
         env.step(0)  # skip zubat
         assert env.phase == "PRE_BATTLE" and not env.pending
         assert [m.species for m in env.roster[1:]] == ["bidoof"]
@@ -60,13 +60,13 @@ def test_dupes_clause_rerolls_owned_families(env):
         assert {"starly", "staravia", "staraptor", "bidoof", "bibarel"} <= env._owned_families()
         env.pending, env._route_cursor = [], 0
         env._maybe_sample_encounter()
-        assert [m.species for m in env.pending] == ["shinx"]  # starly rerolled away
+        assert [m.species for a in env.pending for m in a] == ["shinx"]  # starly rerolled away
         env.rules = Rules(dupes_clause=False)
         env.pending, env._route_cursor = [], 0
         for _ in range(20):
             env._maybe_sample_encounter()
             env._route_cursor = 0
-        assert "starly" in {m.species for m in env.pending}
+        assert "starly" in {m.species for a in env.pending for m in a}
     finally:
         env.encounters, env.rules = real, Rules()
 
@@ -77,7 +77,7 @@ def test_box_cap_counts_pending_offers(env):
         two_areas_at_once(env)
         env.max_roster = 2
         env.reset(seed=3)  # starter + one slot: only the first offer fits
-        assert [m.species for m in env.pending] == ["bidoof"]
+        assert [m.species for a in env.pending for m in a] == ["bidoof"]
         assert env.dropped == ["zubat"]
     finally:
         env.encounters, env.max_roster = real, 12
@@ -96,7 +96,7 @@ def test_ability_slot_rolls_at_capture_and_survives_evolution():
 def test_evolution_keeps_the_slot_in_the_env(env):
     env.reset(seed=4)
     env.roster = [Mon("shinx", 5, ["tackle"], ability="Intimidate"), Mon("starly", 5, ["tackle"], ability="Keen Eye")]
-    env.trainer_idx = 139  # Gardenia's cap (22): Shinx evolves at 15, Starly at 14
+    env.trainer_idx = 50  # before Gardenia (#58, cap 22): Shinx evolves at 15, Starly at 14
     env._apply_level_rule({"max_level": 19})
     assert [(m.species, m.ability) for m in env.roster] == [("luxio", "Intimidate"), ("staravia", "Intimidate")]
 
@@ -105,7 +105,8 @@ def test_best4_moveset_rule():
     assert encounter_moves("meditite", 22, "last4") == ["detect", "hiddenpower", "mindreader", "feint"]
     best = encounter_moves("meditite", 22, "best4")
     assert len(best) == 4 and best[0] == "confusion" and "hiddenpower" in best  # attacks at last
-    assert encounter_moves("bonsly", 22, "best4")[:2] == ["rockthrow", "lowkick"]  # variable power counts
+    machop = encounter_moves("machop", 22, "best4")
+    assert "seismictoss" in machop or "lowkick" in machop  # variable power counts as 50
     assert "selfdestruct" not in encounter_moves("geodude", 22, "best4")  # self-KO never
     lux = encounter_moves("luxio", 22, "best4")
     assert lux[0] == "spark"  # strongest STAB first
@@ -113,14 +114,46 @@ def test_best4_moveset_rule():
 
 
 def test_rules_reach_the_env(env):
-    assert str(env.rules) == "level_rule=cap margin=0 box=30 dupes=True moveset=best4"
-    last4 = NuzlockeEnv(seed=0, risk_features=False, slice_len=186, rules=Rules(moveset="last4", box=12))
+    assert str(env.rules) == "level_rule=cap margin=0 box=50 dupes=True moveset=best4"
+    last4 = NuzlockeEnv(seed=0, risk_features=False, slice_len=59, rules=Rules(moveset="last4", box=12))
     try:
         last4.reset(seed=4)
         last4.roster = [Mon("meditite", 5, ["bide"])]
-        last4.trainer_idx = 139
+        last4.trainer_idx = 50
         last4._apply_level_rule({"max_level": 19})
         assert last4.roster[0].moves == ["detect", "hiddenpower", "mindreader", "feint"]
         assert last4.max_roster == 12
     finally:
         last4.runner.bridge.close()
+
+
+def test_only_the_countering_rival_is_fought(env):
+    from nuzlocke_env import ORDER, TRAINERS
+    counter = {"turtwig": "chimchar", "chimchar": "piplup", "piplup": "turtwig"}
+    for seed in range(6):
+        env.reset(seed=seed)
+        starter = env.roster[0].species
+        env.slice_len = 405
+        for idx in (6, 99, 205):  # the first record of each rival battle
+            env.trainer_idx = idx
+            env._skip_other_rivals()
+            e = ORDER[env.trainer_idx]
+            party = {p["species"].lower() for p in TRAINERS[e["trainer_id"]]["party"]}
+            assert e["trainer_name"] == "Pokémon Trainer Cedric" and any(
+                sp in party for sp in env._rival_family), (starter, idx, party)
+
+
+def test_method_alternatives_respect_the_dupes_clause(env):
+    real = env.encounters
+    try:
+        env.encounters = [{"name": "A", "before_trainer": 0, "encounters": [
+            {"species": "magikarp", "level": [3, 3], "weight": 1, "method": "old"},
+            {"species": "zubat", "level": [3, 3], "weight": 1, "method": "walk"}]}]
+        env.reset(seed=1)
+        assert sorted(m.species for m in env.pending[0]) == ["magikarp", "zubat"]
+        env.step(1 + [m.species for m in env.pending[0]].index("magikarp"))
+        env.pending, env._route_cursor = [], 0
+        env._maybe_sample_encounter()
+        assert [m.species for m in env.pending[0]] == ["zubat"]  # the rod's only family is owned
+    finally:
+        env.encounters = real

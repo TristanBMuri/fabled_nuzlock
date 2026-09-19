@@ -1620,26 +1620,6 @@
    "spe": 102
   }
  },
- "gardevoir": {
-  "name": "Gardevoir",
-  "types": [
-   "Psychic",
-   "Fairy"
-  ],
-  "abilities": {
-   "0": "Synchronize",
-   "1": "Trace",
-   "H": "Telepathy"
-  },
-  "baseStats": {
-   "hp": 68,
-   "atk": 65,
-   "def": 65,
-   "spa": 125,
-   "spd": 115,
-   "spe": 80
-  }
- },
  "gastly": {
   "name": "Gastly",
   "types": [
@@ -3718,26 +3698,6 @@
    "spe": 110
   }
  },
- "ralts": {
-  "name": "Ralts",
-  "types": [
-   "Psychic",
-   "Fairy"
-  ],
-  "abilities": {
-   "0": "Synchronize",
-   "1": "Trace",
-   "H": "Telepathy"
-  },
-  "baseStats": {
-   "hp": 28,
-   "atk": 25,
-   "def": 25,
-   "spa": 45,
-   "spd": 35,
-   "spe": 40
-  }
- },
  "rampardos": {
   "name": "Rampardos",
   "types": [
@@ -4889,6 +4849,23 @@
    "spa": 35,
    "spd": 35,
    "spe": 35
+  }
+ },
+ "unown": {
+  "name": "Unown",
+  "types": [
+   "Psychic"
+  ],
+  "abilities": {
+   "0": "Levitate"
+  },
+  "baseStats": {
+   "hp": 48,
+   "atk": 72,
+   "def": 48,
+   "spa": 72,
+   "spd": 48,
+   "spe": 48
   }
  },
  "ursaring": {
