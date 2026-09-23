@@ -264,12 +264,15 @@ class SimBattleRunner:
     def estimate_block(self, player_packed: str, enemies_packed: list[str], n: int = 8):
         """estimate() over the League block: the same party through every fight,
         PP carried, HP / status restored between fights, the dead stay dead.
-        (P(all won), [P(death_i)], mean HP left at the end)."""
+        (P(all won), [P(death_i)], progress) — progress = fights won plus the
+        lost fight's KOs, over the block (1.0 = cleared): the HP slot. When
+        every party wipes (the fast brain at Cynthia) deaths are all 1 and
+        how far a party gets is the only ordering left."""
         from ai_util.sim import SimBattle
-        wins, deaths, hp = 0, None, 0.0
+        wins, deaths, progress = 0, None, 0.0
         try:
             for _ in range(n):
-                carry, won, st = None, True, None
+                carry, won, st, fights = None, True, None, 0.0
                 for enemy in enemies_packed:
                     sb = SimBattle(self.bridge, BATTLE_FORMAT, player_packed, enemy, carry=carry)
                     sb.play({"p1": self.player, "p2": self.enemy}, self.max_turns)
@@ -279,15 +282,17 @@ class SimBattleRunner:
                     carry = [{"hp": 0 if m["fainted"] else None, "pp": m.get("pp")} for m in st["p1"]]
                     if st["winner"] != "p1":
                         won = False
+                        fights += sum(m["fainted"] for m in st["p2"]) / len(st["p2"])
                         break
+                    fights += 1
                 wins += won
                 dead = [m["fainted"] for m in st["p1"]]
                 deaths = [d + float(x) for d, x in zip(deaths, dead)] if deaths else [float(x) for x in dead]
-                hp += float(sum(m["hp"] / max(m["maxhp"], 1) for m in st["p1"]) / len(st["p1"]))
+                progress += fights / len(enemies_packed)
         except Exception as e:
             print(f"SimBattleRunner.estimate_block failed: {type(e).__name__}: {e}")
             return None
-        return wins / n, [d / n for d in deaths], hp / n
+        return wins / n, [d / n for d in deaths], progress / n
 
     def run(self, player_packed: str, enemy_packed: str, timeout: float = 0.0,
             boss: bool = False, search: tuple[int, int] | None = None, carry: list | None = None):

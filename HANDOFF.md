@@ -1,4 +1,4 @@
-# HANDOFF — state of the project as of 2026-09-18
+# HANDOFF — state of the project as of 2026-09-23
 
 Read this first. `project_overview.md` is the plan, `README.md` → Status is the
 full lab notebook (chronological, with every number). This file is the
@@ -220,6 +220,12 @@ boss's max level (14 = Roark). ~85 s/episode.
   `tests/test_sim.py::test_duplicate_multiword_species`. A runner failure
   ends the episode as a loss, so a crash looks like a wall in the death
   histogram: check the log for `rebuild after` before believing a wall.
+- **Dupes clause one step deep, offers rolled early, League party rebuilt by
+  value** (2026-09-23): a Crobat left Zubat catchable (`_owned_families`
+  now walks the whole line); two areas gated at one trainer both rolled
+  Magikarp (offers roll one at a time, `env._queue`); two value-equal mons
+  made a 7-mon locked party (`Invalid action 6 ... [6 switches]` rebuilds —
+  a crash counted as a Cynthia loss). Boxes had 2–5 Crobats before this.
 
 ## Artifacts
 
@@ -264,7 +270,13 @@ boss's max level (14 = Roark). ~85 s/episode.
    prior is no longer on the path; the battler is `--policy calc --search 9,8`.
 4. **The League** (`no_heal` block: party locked, PP carried, full heal
    between fights, one cap 66): E4 costs 3 / 5 / 16 deaths per 10 runs,
-   **Cynthia wipes 8 of 10**. Probe from full HP at parity: calc bot 2.7%
+   **Cynthia wipes 8 of 10** (2 of those 10 were crashes; box full of
+   Crobats — see defects). **Benchmark on the fixed env (2026-09-23,
+   `logs/plan_league4_swap.log`): 403.8 / 368.0 / 5.9 deaths / 20% clears;
+   Cynthia 35 deaths, 6 wipes; E4 8 / 8 / 4.** E8 (`--league 10`: the
+   League party from every 6-subset of a 10-mon shortlist, scored on the
+   block by progress + deaths) is null: 404.0 / 325.6 / 6.4 / 10%. Default
+   off. Next: E7 TM movesets (reusable TMs), then E9 held items. Probe from full HP at parity: calc bot 2.7%
    wins; legal EV training +1–3 points; her Garchomp and Lucario kill 1.5
    mons each per fight. Next, on the roadmap only (2026-09-19, not started):
    E8 League party building from the whole box, then E7 TM movesets with
@@ -277,7 +289,9 @@ Not to retry (measured, README → Status): `--refine`, `--climb`, `--parties
 beam|all`, lead order, a switch-out-after-a-hit wrapper, wider search at a
 wall, a learned value head as the rollout leaf, more rival teacher data,
 **depth-2 search** (2026-09-18, null at 6x), **calc-bot rollouts under
-prior candidates** (worse than either alone).
+prior candidates** (worse than either alone), **League party from the
+whole box scored by the fast brain** (E8, 2026-09-23, null: the fast
+brain's block ranking does not transfer to search play at Cynthia).
 
 ## Environment gotchas
 

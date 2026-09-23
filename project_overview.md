@@ -456,7 +456,16 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       next fights / the League block), then (e) a `MOVE_SELECTION` decision
       for the run layer. Tutors and egg moves stay out. Every version is a
       progression change (harvest → table; the calc bot needs no retraining).
-- [ ] **E8. Party building for the League from the whole box (2026-09-19).**
+- [x] **E8. Party building for the League from the whole box (2026-09-19;
+      built 2026-09-23: `--league K`, every 6-subset of a K-mon shortlist on
+      the block, top 8 re-scored at n=32; `estimate_block` scores progress
+      through the block since every party wipes under the fast brain; table
+      in README → Status 2026-09-23: **null**, 404.0 / 325.6 / 6.4 / 10% vs
+      swap 403.8 / 368.0 / 5.9 / 20%; default off). Three env defects found on the way
+      (dupes clause one step deep, offers rolled before the previous answer,
+      League party rebuilt by value equality → 7-mon parties → crashes),
+      fixed with tests: every League table before 2026-09-23 is on a box
+      full of Crobats.
       The block estimate exists (`estimate_block`, one party through all
       five fights); the candidate set is still top-6-by-level + single swaps
       and carries filler (Unown, Girafarig, Bibarel among the top deaths at

@@ -3,8 +3,9 @@
 Per trainer: candidate parties = the base party (top-6 by level) plus every
 single swap with a box mon; each is scored by the sim's death-probability
 query (P(win) − λ·mean P(death) + HP margin); the best is fielded. At a fight
-the best swap still finds hard, `--parties beam|all` widens the candidate set. Encounters are always
-caught while there is room. Reports trainers cleared, trainers cleared
+the best swap still finds hard, `--parties beam|all` widens the candidate set. At the
+League opener `--league K` builds the party from the whole box (E8, null). Encounters are
+always caught while there is room. Reports trainers cleared, trainers cleared
 without a death, deaths, and slice clears over N episodes.
 
   uv run python scripts/plan_gauntlet.py --episodes 20
@@ -22,7 +23,7 @@ from pathlib import Path
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
-from nuzlocke_env import DEEP_HP, EVOS, MAX_PARTY, ORDER, SLICE_LEN, NuzlockeEnv, Rules  # noqa: E402
+from nuzlocke_env import DEEP_HP, EVOS, MAX_PARTY, ORDER, RISK_BATTLES, SLICE_LEN, NuzlockeEnv, Rules  # noqa: E402
 from gauntlet import load_species  # noqa: E402
 
 def swaps(base, alive):
@@ -33,7 +34,7 @@ def swaps(base, alive):
 
 
 def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False,
-                 parties: str = "swap") -> list[int]:
+                 parties: str = "swap", league: int = 0) -> list[int]:
     alive = [i for i, m in enumerate(env.roster) if m.alive]
     if len(alive) <= MAX_PARTY:
         return alive  # nuzlocke rule: field everything you can
@@ -43,20 +44,30 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
         return base
     memo = {}
 
-    def score(p):
+    def score(p, n=RISK_BATTLES):
         # P(win) − λ·mean P(death) + margin: at n=8 most candidates show zero
         # deaths, and HP left is what separates a safe party from a lucky one
-        if p not in memo:
-            p_win, p_death, hp = env.risk(p)
-            memo[p] = p_win - lam * float(np.mean(p_death)) + HP_WEIGHT * hp if p_death else p_win
-        return memo[p]
+        if (p, n) not in memo:
+            p_win, p_death, hp = env.risk(p, n=n)
+            memo[p, n] = p_win - lam * float(np.mean(p_death)) + HP_WEIGHT * hp if p_death else p_win
+        return memo[p, n]
 
     def hard(p):  # same trigger as the env's deep search (cached: free)
         p_win, p_death, hp = env.risk(p)
         return p_win < 1.0 or max(p_death, default=0.0) > 0.0 or hp < DEEP_HP
 
     front = sorted(swaps(base, alive), key=score, reverse=True)
-    if parties != "swap" and hard(front[0]):
+    if league and env._block():
+        # E8: the League party from the whole box. Every mon is at the cap, so the
+        # base is roster order and carries filler. Shortlist the mons by the best
+        # swap they appear in, score every 6-subset of the shortlist on the block,
+        # re-score the top few with more samples (n=8 picks on noise among hundreds).
+        best_with = lambda i: max(score(p) for p in front if i in p)
+        short = sorted(alive, key=best_with, reverse=True)[:league]
+        pool = sorted((tuple(sorted(c)) for c in itertools.combinations(short, MAX_PARTY)),
+                      key=score, reverse=True)
+        front = sorted(pool[:LEAGUE_TOP], key=lambda p: score(p, LEAGUE_N), reverse=True)
+    elif parties != "swap" and hard(front[0]):
         # The swap set is the limit at a wall (README 2o): a hard fight may need
         # several changes from the base party. Widen only there (cost).
         if parties == "all":
@@ -74,6 +85,7 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
 
 
 BEAM, BEAM_ROUNDS = 3, 3  # --parties beam: top-3 parties expanded three times
+LEAGUE_TOP, LEAGUE_N = 8, 32  # --league: the top-8 subsets re-scored at n=32
 HP_WEIGHT = 0.2  # margin tie-breaker weight in the party score (--hp-weight)
 DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes)
 DEATHS_BY_SPECIES: dict[str, int] = {}  # species -> deaths (all episodes)
@@ -95,7 +107,7 @@ def final_bst(species: str) -> int:
 
 
 def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool = False,
-            parties: str = "swap") -> dict:
+            parties: str = "swap", league: int = 0) -> dict:
     obs, info = env.reset(seed=seed)
     deaths, first_death_at = 0, None
     while not env.done:
@@ -113,7 +125,7 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
                 print(f"  [locked] {ORDER[env.trainer_idx]['trainer_name']}: party fights on, "
                       f"PP left {[sum(env.carry[i].get('pp') or []) for i in env.party if i in env.carry]}")
         else:
-            for i in choose_party(env, lam, verbose, fast, parties):
+            for i in choose_party(env, lam, verbose, fast, parties, league):
                 if i not in env.party:
                     env.step(1 + i)
         alive_before = sum(m.alive for m in env.roster)
@@ -164,7 +176,7 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict]
                       slice_len=args.slice, deep=width(args.deep))
     t0, rows = time.time(), []
     for n, s in enumerate(seeds):
-        r = episode(env, s, args.lam, args.verbose, args.fast, args.parties)
+        r = episode(env, s, args.lam, args.verbose, args.fast, args.parties, args.league)
         rows.append(r)
         print(f"ep seed {s:4d}: cleared {r['cleared']:3d}  no-death {r['cleared_no_death']:3d}  "
               f"deaths {r['deaths']:2d}  {'CLEAR' if r['slice_clear'] else ''}  "
@@ -186,6 +198,10 @@ def main() -> None:
                     help="candidate parties when the best single swap is still flagged hard: "
                          "beam = top-3 parties' swaps expanded 3 rounds (~10 s), "
                          "all = every 6-of-roster party (~2 min at 12 mons)")
+    ap.add_argument("--league", type=int, default=0, metavar="K",
+                    help="League party from the whole box: every 6-subset of the K mons with the best "
+                         "swap score, on the block, top-8 re-scored at n=32 (~3 min; null at K=10, "
+                         "README 2026-09-23; 0 = plain swaps)")
     ap.add_argument("--lam", type=float, default=1.0, help="death penalty weight")
     ap.add_argument("--level-margin", type=int, default=0,
                     help="player level = rule level + this (XP proxy)")
@@ -232,7 +248,7 @@ def main() -> None:
     k = lambda f: np.mean([r[f] for r in rows])
     print(f"\n{args.episodes} episodes | slice {args.slice} | battler={args.policy or 'SimpleHeuristics'} "
           f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} "
-          f"parties={args.parties} lam={args.lam} | rules: {rules(args)} "
+          f"parties={args.parties} league={args.league} lam={args.lam} | rules: {rules(args)} "
           f"| {args.workers} workers, {(time.time() - t0) / 60:.0f} min\n"
           f"  trainers cleared        {k('cleared'):.2f}\n"
           f"  cleared without a death {k('cleared_no_death'):.2f}\n"

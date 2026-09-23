@@ -1146,6 +1146,53 @@ project_overview.md # the plan / roadmap
   rate sixfold but a win still costs ~5 of 6 mons: no deathless line exists
   for these parties. The box and the movesets are the lever, not the play. Roadmap: E8 League
   party building, E7 TM movesets (reusable TMs, decided 2026-09-19), E9 items.
+  **Three env defects behind the League table (2026-09-23), each with a test
+  in `tests/test_nuzlocke_env.py`.** Six fast full-game runs on the old env
+  ended with 2–5 Crobats and two Gyarados / Bibarels each, under the dupes
+  clause: (a) `_owned_families` claimed one pre-evolution step only (a
+  Crobat left Zubat catchable) — now the whole line; (b) every area gated
+  at one trainer was rolled at once, so two water areas both rolled
+  Magikarp before either was answered — offers now roll one at a time
+  (`env._queue`), after the previous answer; (c) inside the League the
+  locked party was rebuilt with dataclass equality (`m in party`), so a
+  value-equal twin in the box (same species / level / moves / ability at
+  the cap) joined as a 7th member — the `Invalid action 6 ... not in valid
+  orders [6 switches]` rebuilds in `plan_league3_calcsearch.log`: two of
+  those ten runs ended in a crash, not at Cynthia. Now by identity. Six
+  fast runs on the fixed env: no duplicate species. **Every League table
+  before this is on a box full of Crobats.**
+  **E8, the League party from the whole box (2026-09-23,
+  `plan_gauntlet.py --league K`, default 10).** Every mon is at the cap at
+  the League, so top-6-by-level is roster order and the swap set is one
+  change away from the first six catches. At the block opener the planner
+  now shortlists the K mons by the best swap they appear in, scores every
+  6-subset of the shortlist on the block (n=8, ~0.5 s each), and re-scores
+  the top 8 at n=32 (winner's curse among hundreds of noisy scores). First
+  probe: every candidate wiped under the fast brain, all scores ≈ −0.9, and
+  the stable sort returned the base party — deaths carry no signal when all
+  six are certain. `estimate_block` therefore returns **progress** (fights
+  won + the lost fight's KOs, over the block; 1.0 = cleared) in the HP slot.
+  Same box after that: 475 candidates spread −0.94…−0.68; the E8 party's
+  mean P(death) at n=32 0.76 vs 0.92 for the best swap (progress 0.63 vs
+  0.69). ~2.5 min per episode at the opener. Table: swap vs E8 on the fixed
+  env, calc + search 9,8 / deep 9,16, seeds 300–309, 10 workers each
+  (`logs/plan_league4_{swap,e8}.log`, 38 / 40 min, no rebuilds in either):
+    swap (`--league 0`): 403.80 cleared / 368.0 no-death / 5.90 deaths / **20% clears**
+      Cynthia 35 deaths, 6 losses; Flint 8, Bertha 8, Lucian 4; routes ~1
+    E8 (`--league 10`):  404.00 / 325.6 / 6.40 / 10%
+      Cynthia 34 deaths, 8 losses; Lucian 12, Bertha 6, Flint 6
+  **E8 is null** (noise floor ±1.9 deaths, ±15 points of clear rate). The
+  E8 parties are different (Crobat 7, Graveler 5, Lapras 4 among the dead
+  vs Staraptor / Luxray / Gyarados under swap) and no better: the fast
+  brain's block score does not order parties by what search-play does at
+  Cynthia (calc alone 2.7% there, search 18%), and no party in the box
+  has a deathless line anyway (the probe). Default back to `--league 0`;
+  the flag stays for a scorer that plays the block with search (8
+  candidates × n=4 × 5 fights × ~30 s ≈ 80 min per episode: not now).
+  **The benchmark table is the swap line on the fixed env: 403.8 / 368.0 /
+  5.9 / 20%.** The two clears beat Cynthia with 4 deaths each; the fix of
+  the three defects took the clear rate from 0% (two of ten runs crashed)
+  to 20%. Cynthia wipes 6 of 10. Next lever: E7 TM movesets.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the
