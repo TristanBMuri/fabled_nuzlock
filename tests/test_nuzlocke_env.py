@@ -37,9 +37,9 @@ def test_every_area_is_offered(env):
     try:
         two_areas_at_once(env)
         env.reset(seed=1)
-        assert [m.species for a in env.pending for m in a] == ["bidoof", "zubat"]
-        assert env.phase == "ENCOUNTER"
-        env.step(1)  # catch bidoof -> still answering zubat
+        assert [m.species for a in env.pending for m in a] == ["bidoof"]  # B waits for A's answer
+        assert [r["name"] for r in env._queue] == ["B"] and env.phase == "ENCOUNTER"
+        env.step(1)  # catch bidoof -> now answering zubat
         assert env.phase == "ENCOUNTER" and [m.species for a in env.pending for m in a] == ["zubat"]
         env.step(0)  # skip zubat
         assert env.phase == "PRE_BATTLE" and not env.pending
@@ -71,6 +71,47 @@ def test_dupes_clause_rerolls_owned_families(env):
         env.encounters, env.rules = real, Rules()
 
 
+def test_dupes_clause_spans_the_whole_line(env):
+    env.reset(seed=2)
+    env.roster.append(Mon("crobat", 30, ["bite"]))
+    assert {"zubat", "golbat", "crobat"} <= env._owned_families()  # not one step down only
+
+
+def test_offers_roll_after_the_previous_catch(env):
+    """Two areas gated at one trainer: the second rolls after the first is
+    answered, so it cannot offer the family just caught."""
+    real = env.encounters
+    try:
+        table = [{"species": "magikarp", "level": [3, 3], "weight": 0.999},
+                 {"species": "zubat", "level": [3, 3], "weight": 0.001}]
+        env.encounters = [{"name": "A", "before_trainer": 0, "encounters": table},
+                          {"name": "B", "before_trainer": 0, "encounters": table}]
+        env.reset(seed=5)
+        assert [m.species for m in env.pending[0]] == ["magikarp"]
+        env.step(1)
+        assert [m.species for m in env.pending[0]] == ["zubat"]
+    finally:
+        env.encounters = real
+
+
+def test_locked_party_is_rebuilt_by_identity(env):
+    """Two value-equal mons (twins at the cap) must not both land in the
+    locked League party (a 7-mon party crashed the runner)."""
+    from nuzlocke_env import ORDER
+    env.reset(seed=6)
+    env.slice_len = 405
+    env.trainer_idx = next(i for i in range(len(ORDER) - 1) if ORDER[i + 1].get("no_heal"))  # Aaron
+    env.roster = [Mon("crobat", 66, ["bite"]), Mon("crobat", 66, ["bite"])]
+    env.phase, env.party = "PRE_BATTLE", [0]
+    run = env.runner.run
+    env.runner.run = lambda *a, **k: (True, [True], [{"hp": 100, "status": "", "pp": [10]}])
+    try:
+        env.step(0)
+    finally:
+        env.runner.run = run
+    assert env.party_locked and env.party == [0]
+
+
 def test_box_cap_counts_pending_offers(env):
     real = env.encounters
     try:
@@ -78,7 +119,7 @@ def test_box_cap_counts_pending_offers(env):
         env.max_roster = 2
         env.reset(seed=3)  # starter + one slot: only the first offer fits
         assert [m.species for a in env.pending for m in a] == ["bidoof"]
-        assert env.dropped == ["zubat"]
+        assert env.dropped == ["B"]
     finally:
         env.encounters, env.max_roster = real, 12
 

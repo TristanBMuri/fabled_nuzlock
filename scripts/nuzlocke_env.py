@@ -124,7 +124,8 @@ class NuzlockeEnv(Env):
         self._skip_other_rivals()
         self.max_enemy_level = 0
         self.phase = "ENCOUNTER"  # first route unlocks before trainer 0
-        self.pending: list[list[Mon]] = []  # offers not yet answered: per area, one pick per method
+        self.pending: list[list[Mon]] = []  # the offer being answered: one pick per method
+        self._queue: list[dict] = []  # areas whose gate has arrived, rolled one at a time
         self.carry: dict[int, dict] | None = None  # roster index -> {hp, status, pp}: no heal since the last fight
         self.dropped: list[str] = []  # offers that found no box slot (species), this run
         self._route_cursor = 0  # routes consumed
@@ -148,8 +149,13 @@ class NuzlockeEnv(Env):
             if sp not in fam:
                 fam.add(sp)
                 stack += [e["to"] for e in EVOS.get(sp, [])]
-        # an evolved catch also claims its pre-evolutions
-        return fam | {pre for pre, evs in EVOS.items() if any(e["to"] in fam for e in evs)}
+        # an evolved catch also claims its pre-evolutions, all the way down
+        # (a Crobat used to leave Zubat catchable: one step only)
+        pre = {p for p, evs in EVOS.items() if any(e["to"] in fam for e in evs)} - fam
+        while pre:
+            fam |= pre
+            pre = {p for p, evs in EVOS.items() if any(e["to"] in fam for e in evs)} - fam
+        return fam
 
     def _skip_other_rivals(self):
         """The trainer table has one rival record per starter choice; only the
@@ -164,13 +170,27 @@ class NuzlockeEnv(Env):
             self.trainer_idx += 1
 
     def _maybe_sample_encounter(self):
-        """Queue one first encounter for every area whose trainer gate has
-        arrived; the ENCOUNTER phase answers them one at a time."""
+        """Queue every area whose trainer gate has arrived; the ENCOUNTER phase
+        answers them one at a time."""
         while (self._route_cursor < len(self.encounters)
                and self.encounters[self._route_cursor]["before_trainer"]
                <= self.trainer_idx):
             route = self.encounters[self._route_cursor]
             self._route_cursor += 1
+            if len(self.roster) + len(self.pending) + len(self._queue) < self.max_roster:
+                self._queue.append(route)
+            else:
+                self.dropped.append(route["name"])
+        self._roll_next()
+        if self.pending:
+            self.phase = "ENCOUNTER"
+
+    def _roll_next(self):
+        """Roll the next queued area's first encounter once the previous offer is
+        answered, so the dupes clause sees that catch (two water areas opening
+        at one trainer both rolled Magikarp when rolled together)."""
+        while self._queue and not self.pending:
+            route = self._queue.pop(0)
             owned = self._owned_families() if self.rules.dupes_clause else set()
             alts = []  # one roll per method (grass, rod, surf, gift): the run layer picks the method
             methods = sorted({e.get("method", "walk") for e in route["encounters"]})
@@ -185,12 +205,7 @@ class NuzlockeEnv(Env):
                 lvl = self.rng.randint(*pick["level"])
                 alts.append(Mon(pick["species"], lvl, encounter_moves(pick["species"], lvl, self.rules.moveset),
                                 ability=roll_ability(pick["species"], self.rng), caught_level=lvl))
-            if len(self.roster) + len(self.pending) < self.max_roster:
-                self.pending.append(alts)
-            else:
-                self.dropped.append("/".join(m.species for m in alts))
-        if self.pending:
-            self.phase = "ENCOUNTER"
+            self.pending.append(alts)
 
     # ---------------------------------------------------------------- battle
     def _apply_level_rule(self, entry):
@@ -361,6 +376,7 @@ class NuzlockeEnv(Env):
             alts = self.pending.pop(0) if self.pending else []
             if 1 <= action <= len(alts):
                 self.roster.append(alts[action - 1])
+            self._roll_next()
             self.phase = "ENCOUNTER" if self.pending else "PRE_BATTLE"
         else:  # PRE_BATTLE
             if action == 0:  # confirm -> battle (or end if no alive mons)
@@ -383,7 +399,8 @@ class NuzlockeEnv(Env):
                                 reward -= 1.0
                         self.graveyard += [m for m in self.roster if not m.alive]
                         self.roster = [m for m in self.roster if m.alive]
-                        self.party = [i for i, m in enumerate(self.roster) if m in party]
+                        # by identity: two value-equal mons (twins at the cap) made a 7-mon League party
+                        self.party = [i for i, m in enumerate(self.roster) if any(m is p for p in party)]
                         if won:
                             reward += 1.0
                             self.trainer_idx += 1
@@ -442,7 +459,7 @@ class NuzlockeEnv(Env):
         """The box as a Nuzlocke tracker would show it: party first, then the
         bench, then the graveyard, with level, ability and moves."""
         party = [self.roster[i] for i in self.party]
-        rows = [("party", m) for m in party] + [("box", m) for m in self.roster if m not in party]
+        rows = [("party", m) for m in party] + [("box", m) for m in self.roster if not any(m is p for p in party)]
         rows += [("dead", m) for m in self.graveyard]
         lines = [f"    {tag:<5} {m.species:<11} L{m.level:<3} {m.ability or '-':<12} {', '.join(m.moves)}"
                  for tag, m in rows]
