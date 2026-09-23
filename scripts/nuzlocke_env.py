@@ -111,6 +111,7 @@ class NuzlockeEnv(Env):
     # ------------------------------------------------------------- lifecycle
     def _reset_state(self):
         self.run_id = uuid.uuid4().hex[:8]
+        self.trainer_idx = 0  # before the starter: its moves depend on the TMs in hand
         starter = self.rng.choice(load_encounters()["starter"])
         # starters come with ability slot 0; wild catches roll slot 0 or 1
         # (roll_ability) and evolution keeps the slot (evolved_ability)
@@ -118,7 +119,6 @@ class NuzlockeEnv(Env):
                            ability=ability_slots(starter).get("0"), caught_level=5)]
         self.graveyard: list[Mon] = []  # dead mons leave the roster (box slots free up)
         self.party = []  # indices into roster
-        self.trainer_idx = 0
         rival = {"turtwig": "chimchar", "chimchar": "piplup", "piplup": "turtwig"}[starter]
         self._rival_family = {rival} | {e["to"] for e in EVOS.get(rival, [])}
         self._rival_family |= {e["to"] for s in list(self._rival_family) for e in EVOS.get(s, [])}

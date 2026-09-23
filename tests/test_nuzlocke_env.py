@@ -165,6 +165,15 @@ def test_tm_movesets_follow_the_route():
     assert encounter_moves("lapras", 66, "best4", progress=404)[:3] == ["surf", "icebeam", "thunderbolt"]
     assert "icebeam" not in encounter_moves("staraptor", 66, "best4", progress=404)  # cannot learn it
     assert encounter_moves("gyarados", 66, "last4", progress=404) == encounter_moves("gyarados", 66, "last4")
+    tm_env = NuzlockeEnv(seed=0, risk_features=False, slice_len=405, rules=Rules(tms=True))
+    try:
+        tm_env.reset(seed=7)
+        tm_env.roster = [Mon("gyarados", 5, ["splash"], caught_level=5)]
+        tm_env.trainer_idx = 160
+        tm_env._apply_level_rule({"max_level": 40})
+        assert "earthquake" in tm_env.roster[0].moves  # Wayward Cave's TM26 is in hand at #160
+    finally:
+        tm_env.runner.bridge.close()
 
 
 def test_rules_reach_the_env(env):
