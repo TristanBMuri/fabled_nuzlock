@@ -34,7 +34,7 @@ class Rules:
     box: int = 50                # living mons the box holds (50 > starter + 45 areas = unbounded)
     dupes_clause: bool = True    # an area's encounter is rerolled among families never owned (none left: no catch)
     moveset: str = "best4"       # best4: strongest STAB / other-type / next attack + a status move; last4: last learned
-    tms: bool = False            # best4 also over the TMs handed out so far (reusable; data/bdsp/tms.json)
+    tms: bool = True             # best4 also over the TMs handed out so far (reusable; data/bdsp/tms.json)
 
     def __str__(self):
         return (f"level_rule={self.level_rule} margin={self.level_margin} box={self.box} "

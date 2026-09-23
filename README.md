@@ -1226,7 +1226,23 @@ project_overview.md # the plan / roadmap
   Hammer / Earthquake / Ice Beam / Swords Dance, Golduck Surf / Psychic /
   Ice Beam. The status slot is often Rest (the calc bot never uses it).
   Tables (calc + search 9,8 / deep 9,16, seeds 300–309, 10 workers each,
-  `logs/plan_best4v2.log`, `logs/plan_best4v2_tms.log`): **pending**.
+  29 min each, no rebuilds):
+    best4 v2, level-up only (`logs/plan_best4v2.log`):
+      404.20 cleared / 337.4 no-death / 6.20 deaths / 20% clears
+      Cynthia 34 deaths, 8 losses; Lucian 11, Flint 4, Bertha 4
+    best4 v2 + TMs (`logs/plan_best4v2_tms.log`):
+      **404.60 / 358.6 / 5.20 / 70% clears**
+      Cynthia 34 deaths, **2 losses**; Lucian 7, Bertha 2, Flint 2, Aaron 1
+  **TMs are the first lever that moves Cynthia**: the rule change alone
+  (v2 vs v1: 20% vs 20%, 6.2 vs 5.9 deaths) is noise; the TMs take the
+  clear rate from 20% to 70% (noise floor ±15 points) and the E4 cost
+  from 19 to 12 deaths per 10 runs. Cynthia still costs 3.4 deaths per
+  run — the 8 clears beat her with 2–7 dead — so the League remains the
+  problem, now as a death count rather than a wall. `Rules.tms` is True by
+  default (`--no-tms` to compare). Deaths by species with TMs: Gyarados 8,
+  Bibarel 7, Luxray 6, Staraptor 6. Next levers, in order of cost: player
+  EV training (probe: flat 85 → 252/252 doubles the calc bot's Cynthia
+  wins), E7(d) the four moves chosen by the sim, E9 held items.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the

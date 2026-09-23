@@ -165,7 +165,7 @@ def test_tm_movesets_follow_the_route():
     assert encounter_moves("lapras", 66, "best4", progress=404)[:3] == ["surf", "icebeam", "thunderbolt"]
     assert "icebeam" not in encounter_moves("staraptor", 66, "best4", progress=404)  # cannot learn it
     assert encounter_moves("gyarados", 66, "last4", progress=404) == encounter_moves("gyarados", 66, "last4")
-    tm_env = NuzlockeEnv(seed=0, risk_features=False, slice_len=405, rules=Rules(tms=True))
+    tm_env = NuzlockeEnv(seed=0, risk_features=False, slice_len=405)
     try:
         tm_env.reset(seed=7)
         tm_env.roster = [Mon("gyarados", 5, ["splash"], caught_level=5)]
@@ -177,7 +177,7 @@ def test_tm_movesets_follow_the_route():
 
 
 def test_rules_reach_the_env(env):
-    assert str(env.rules) == "level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=False"
+    assert str(env.rules) == "level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True"
     last4 = NuzlockeEnv(seed=0, risk_features=False, slice_len=59, rules=Rules(moveset="last4", box=12))
     try:
         last4.reset(seed=4)

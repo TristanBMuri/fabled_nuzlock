@@ -277,10 +277,14 @@ boss's max level (14 = Roark). ~85 s/episode.
    Cynthia 35 deaths, 6 wipes; E4 8 / 8 / 4.** E8 (`--league 10`: the
    League party from every 6-subset of a 10-mon shortlist, scored on the
    block by progress + deaths) is null: 404.0 / 325.6 / 6.4 / 10%. Default
-   off. E7 TM movesets built the same day (`--tms`, `data/bdsp/tms.json`
-   from `scripts/build_tms.py`; best4 v2 rule: power x accuracy x STAB x
-   category fit, `NO_SLOT_MOVES`); table in README → Status 2026-09-23.
-   Then E9 held items. Probe from full HP at parity: calc bot 2.7%
+   off. **E7 TM movesets (default on, `--no-tms`; `data/bdsp/tms.json`
+   from `scripts/build_tms.py`; best4 v2: power x accuracy x STAB x
+   category fit, `NO_SLOT_MOVES`) is the first lever that moved Cynthia:
+   404.6 / 358.6 / 5.2 deaths / 70% clears (`logs/plan_best4v2_tms.log`),
+   Cynthia 2 losses in 10, E4 12 deaths per 10 runs. That is the
+   benchmark table now.** Cynthia still costs 3.4 deaths per run. Next:
+   player EV training (probe says it doubles the calc bot's Cynthia wins),
+   E7(d) moves chosen by the sim, E9 held items. Probe from full HP at parity: calc bot 2.7%
    wins; legal EV training +1–3 points; her Garchomp and Lucario kill 1.5
    mons each per fight. Next, on the roadmap only (2026-09-19, not started):
    E8 League party building from the whole box, then E7 TM movesets with
