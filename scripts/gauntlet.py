@@ -97,6 +97,17 @@ PLAYER_EVS = {k: 85 for k in STATS}
 PLAYER_IVS = {k: 31 for k in STATS}
 
 
+def player_evs(species: str, rule: str = "flat") -> dict:
+    """The player's EV spread (Rules.evs): flat = 85 in every stat (the old
+    fill); trained = 252 in the better attacking stat, 252 Spe, 4 HP — the
+    best legal spread on the Cynthia probe (README 2026-09-19: calc bot
+    2.7% -> 6.0% wins from full HP). Natures stay neutral (no mints in BDSP)."""
+    if rule == "flat":
+        return PLAYER_EVS
+    bs = load_game()["species"].get(species, {}).get("baseStats", {"atk": 1, "spa": 0})
+    return {**dict.fromkeys(STATS, 0), "hp": 4, "atk" if bs["atk"] >= bs["spa"] else "spa": 252, "spe": 252}
+
+
 @dataclass
 class Mon:
     species: str

@@ -16,7 +16,7 @@ from gymnasium.spaces import Box, Discrete
 from battle_env import SPECIES  # pool species (82) — union below with BDSP
 from gauntlet import (Mon, ability_slots, encounter_moves, evolve, evolved_ability,
                       load_encounters, load_evolutions, load_trainers, pack_team,
-                      record_battle, roll_ability, trainer_mons)
+                      player_evs, record_battle, roll_ability, trainer_mons)
 from gauntlet import BattleRunner, SimBattleRunner
 
 MAX_ROSTER = 12  # obs/mask slots for the legacy PPO layout; Rules.box sets the real box
@@ -35,10 +35,11 @@ class Rules:
     dupes_clause: bool = True    # an area's encounter is rerolled among families never owned (none left: no catch)
     moveset: str = "best4"       # best4: strongest STAB / other-type / next attack + a status move; last4: last learned
     tms: bool = True             # best4 also over the TMs handed out so far (reusable; data/bdsp/tms.json)
+    evs: str = "flat"            # player EVs: flat 85 each, or trained (252 attack / 252 Spe / 4 HP)
 
     def __str__(self):
         return (f"level_rule={self.level_rule} margin={self.level_margin} box={self.box} "
-                f"dupes={self.dupes_clause} moveset={self.moveset} tms={self.tms}")
+                f"dupes={self.dupes_clause} moveset={self.moveset} tms={self.tms} evs={self.evs}")
 BREAKPOINTS = ["none", "gym_leader", "elite_four", "champion"]
 SLICE_LEN = 21  # trainers per episode: through Gym Leader Roark (order_index 20 in the route order)
 EVOS = load_evolutions()
@@ -234,6 +235,7 @@ class NuzlockeEnv(Env):
                     m.species = evolved
             # moves follow the level and, with TMs, the trainer reached (a TM lands the fight after)
             m.moves = encounter_moves(m.species, m.level, self.rules.moveset, self._progress) or m.moves
+            m.evs = player_evs(m.species, self.rules.evs)
 
     @property
     def _progress(self) -> int | None:

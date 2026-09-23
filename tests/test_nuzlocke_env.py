@@ -172,12 +172,19 @@ def test_tm_movesets_follow_the_route():
         tm_env.trainer_idx = 160
         tm_env._apply_level_rule({"max_level": 40})
         assert "earthquake" in tm_env.roster[0].moves  # Wayward Cave's TM26 is in hand at #160
+        assert tm_env.roster[0].evs["atk"] == 85 and "85,85,85,85,85,85" in tm_env.roster[0].pack()
+        tm_env.rules = Rules(evs="trained")
+        tm_env._apply_level_rule({"max_level": 40})
+        assert tm_env.roster[0].evs == {"hp": 4, "atk": 252, "def": 0, "spa": 0, "spd": 0, "spe": 252}  # Gyarados: physical
+        tm_env.roster.append(Mon("alakazam", 40, ["psychic"]))
+        tm_env._apply_level_rule({"max_level": 40})
+        assert tm_env.roster[1].evs["spa"] == 252 and "4,0,0,252,0,252" in tm_env.roster[1].pack()
     finally:
         tm_env.runner.bridge.close()
 
 
 def test_rules_reach_the_env(env):
-    assert str(env.rules) == "level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True"
+    assert str(env.rules) == "level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True evs=flat"
     last4 = NuzlockeEnv(seed=0, risk_features=False, slice_len=59, rules=Rules(moveset="last4", box=12))
     try:
         last4.reset(seed=4)
