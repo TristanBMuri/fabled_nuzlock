@@ -60,13 +60,6 @@ def prior_probs(policy, mirror) -> tuple[np.ndarray, np.ndarray]:
     return probs, od["action_mask"][0].cpu().numpy()
 
 
-def prior_value(policy, mirror) -> float:
-    """The policy's value head: expected outcome_value from this state (only
-    meaningful for checkpoints trained with pretrain_bc --value)."""
-    with torch.no_grad():
-        return float(policy.predict_values(_obs_dict(policy, mirror))[0, 0])
-
-
 def outcome_value(state: dict, side: str, death_weight: float = 0.5,
                   importance: list[float] | None = None) -> float:
     """win (+1/-1) minus death_weight * importance-weighted fainted fraction of
@@ -85,73 +78,32 @@ def outcome_value(state: dict, side: str, death_weight: float = 0.5,
 class Searcher:
     """Top-k rollout search for one side; the enemy plays its fixed AI.
     policy=None: every legal action is a candidate (up to k) and `rollout`
-    (a scripted brain such as the calc bot) plays the rollouts — no network."""
+    (a scripted brain such as the calc bot) plays the rollouts — no network.
+    Rollouts play to the end and the outcome is the value: a learned leaf
+    value (twice) and a second ply (depth 2) were null (README -> Status)."""
 
     def __init__(self, policy, enemy: Brain, k: int = 3, rollouts: int = 8,
                  max_turns: int = 100, importance: list[float] | None = None,
                  death_weight: float = 0.5, confident: float | None = None,
-                 crn: bool = True, seed: int | None = None, horizon: int | None = None,
-                 depth: int = 1, r2: int = 4, rollout: Brain | None = None):
+                 crn: bool = True, seed: int | None = None, rollout: Brain | None = None):
         self.policy, self.enemy = policy, enemy
-        # depth=2: at our next decision inside each rollout expand the prior's
-        # top-k again (r2 rollouts each, common seeds) and take the best, so the
-        # value is a max over our reply too, not what the prior would have done.
-        self.depth, self.r2 = depth, r2
         self.prior = rollout or prior_brain(policy)
         self.k, self.rollouts, self.max_turns = k, rollouts, max_turns
         self.importance, self.death_weight, self.confident = importance, death_weight, confident
         # Common random numbers: rollout j uses the same engine seed for every
         # candidate, so candidates differ only by the action, not by luck.
         self.crn, self.rng = crn, np.random.default_rng(seed)
-        # horizon=None: play rollouts to the end. horizon=h: play h more turns,
-        # then score the leaf with the policy's value head (0 = one step + value).
-        self.horizon = horizon
         self.n_decisions = self.n_searched = 0
-        self.last_action: int | None = None  # chosen action index (for expert-iteration labels)
+        self.last_action: int | None = None  # chosen action index
         self.searched_last = False
-        # set to a list to record (leaf obs, mask, -1, rollout outcome) per rollout:
-        # on-policy training data for the value head (collect_game collect_search)
-        self.leaf_record: list | None = None
 
     def value(self, sb: SimBattle, side: str) -> float:
-        if self.horizon is not None and not sb.ended:
-            return prior_value(self.policy, sb.mirrors[side])
         return outcome_value(sb.state(), side, self.death_weight, self.importance)
 
     def _settle(self, f: SimBattle, side: str, opp: str) -> None:
-        """The value head is trained on our decision states: if the leaf is the
-        enemy's forced switch (we just KO'd), let it happen first."""
+        """If the leaf is the enemy's forced switch (we just KO'd), let it happen first."""
         while not f.ended and f.mirrors[side].wait and f.pending[opp]:
             f.step({opp: f.choice(opp, self.enemy)})
-
-    def _play_out(self, f: SimBattle, side: str, opp: str, depth: int) -> float:
-        """Value of fork f: play out with the prior, or (depth > 1) max over
-        our top-k at the next decision, each scored by r2 play-outs."""
-        if depth > 1:
-            self._settle(f, side, opp)
-            m = f.mirrors[side]
-            if not f.ended and f.pending[side] and not m.wait:
-                probs, mask = prior_probs(self.policy, m)
-                cands = [int(a) for a in np.argsort(-probs) if mask[a]][:self.k]
-                if len(cands) > 1:
-                    seeds = [self.rng.integers(1, 2 ** 16, 4).tolist() for _ in range(self.r2)]
-                    best = -np.inf
-                    for b in cands:
-                        msg = order_to_choice(SinglesEnv.action_to_order(np.int64(b), m))
-                        vals = []
-                        for seed in seeds:
-                            g = f.fork(seed=seed)
-                            first = {side: msg}
-                            if g.pending[opp]:
-                                first[opp] = self.enemy(g, opp)
-                            g.step(first)
-                            vals.append(self._play_out(g, side, opp, depth - 1))
-                            g.close()
-                        best = max(best, float(np.mean(vals)))
-                    return best
-        f.play({side: self.prior, opp: self.enemy}, self.max_turns)
-        self._settle(f, side, opp)
-        return self.value(f, side)
 
     def __call__(self, sb: SimBattle, side: str) -> str:
         m = sb.mirrors[side]
@@ -191,22 +143,9 @@ class Searcher:
                 if f.pending[opp]:
                     first[opp] = self.enemy(f, opp)
                 f.step(first)
-                if self.depth > 1 and self.horizon is None:
-                    vals.append(self._play_out(f, side, opp, self.depth))
-                    f.close()
-                    continue
-                leaf = None
-                if self.leaf_record is not None and self.horizon is None:
-                    self._settle(f, side, opp)
-                    if not f.ended:
-                        leaf = (embed_battle(f.mirrors[side]).astype(np.float16),
-                                action_mask(f.mirrors[side]).astype(np.int8), np.int16(-1))
-                until = None if self.horizon is None else f.turn + self.horizon
-                f.play({side: self.prior, opp: self.enemy}, self.max_turns, until=until)
+                f.play({side: self.prior, opp: self.enemy}, self.max_turns)
                 self._settle(f, side, opp)
                 vals.append(self.value(f, side))
-                if leaf is not None:
-                    self.leaf_record.append(leaf + (vals[-1],))
                 f.close()
             score = float(np.mean(vals))
             if score > best_score:
@@ -270,11 +209,6 @@ def main() -> None:
                         "the converged BC prior is >0.9 almost everywhere, so 0.9 disabled search)")
     p.add_argument("--no-crn", action="store_true",
                    help="fresh RNG per rollout instead of common random numbers across candidates")
-    p.add_argument("--horizon", type=int,
-                   help="truncate rollouts after this many turns and score the leaf with the "
-                        "policy's value head (needs a --value-trained checkpoint); default: play out")
-    p.add_argument("--depth", type=int, default=1, help="2 = max over our reply inside rollouts")
-    p.add_argument("--r2", type=int, default=4, help="play-outs per second-ply candidate")
     p.add_argument("--max-turns", type=int, default=100)
     p.add_argument("--raw-names", action="store_true",
                    help="keep duplicate-species nicknames (reproduces the server/poke-env "
@@ -308,11 +242,8 @@ def main() -> None:
             searcher = Searcher(policy, enemy, k=args.k, rollouts=args.rollouts,
                                 max_turns=args.max_turns, death_weight=args.death_weight,
                                 confident=args.confident, crn=not args.no_crn, seed=args.seed,
-                                horizon=args.horizon, depth=args.depth, r2=args.r2,
                                 rollout=fast if policy is None else None)
-            tag = (f"{tag}+search k={args.k} r={args.rollouts}{' nocrn' if args.no_crn else ''}"
-                   f"{'' if args.depth == 1 else f' d={args.depth} r2={args.r2}'}"
-                   f"{'' if args.horizon is None else f' h={args.horizon}'}")
+            tag = f"{tag}+search k={args.k} r={args.rollouts}{' nocrn' if args.no_crn else ''}"
             brain = searcher
         else:
             brain = fast

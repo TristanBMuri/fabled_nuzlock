@@ -87,10 +87,9 @@ ai_util/pretrain_bc.py  masked-CE pretrain; multiple --data; sim-based eval;
                         --init/--value-only/--value-coef train the critic on `value`.
 ai_util/diff_sets.py    sim-vs-server team-setup diff (found the EV bug).
 data/bdsp/              the game folder: trainers.json, order.json (route order,
-                        location + mandatory per entry; order_bylevel.json = the old
-                        level-sorted file, delete after the harvest is regenerated),
-                        encounters.json (gates = first trainer of the location,
-                        tables end at Route 215), learnsets/evolutions/species/moves.
+                        location + mandatory per entry), encounters.json (gates =
+                        first trainer of the location), learnsets (levelup + tm per
+                        species) / evolutions / species / moves, tms.json (TM gates).
 scripts/build_tms.py    rebuilds tms.json from each TM's Bulbapedia page: move -> TM number,
                         before_trainer (earliest fixed source on the route order), source.
 scripts/build_order.py  rebuilds order.json + encounters.json from Bulbapedia (trainer
@@ -286,9 +285,11 @@ boss's max level (14 = Roark). ~85 s/episode.
    mons each per fight. Next, on the roadmap only (2026-09-19, not started):
    E8 League party building from the whole box, then E7 TM movesets with
    **reusable TMs** (decided), then E9 held items.
-5. **Deletion pass (2½)**: `evaluate.py --depth`, the EI / value-head
-   paths, `collect_game`'s BC pipeline if the prior stays off the path,
-   `order_bylevel.json`.
+5. **Deletion pass (2½)**, 2026-09-23: `evaluate.py --depth/--horizon`, the
+   leaf recorder and `collect_game collect_search` (expert iteration) are
+   gone, `order_bylevel.json` too. Left: `collect_game`'s BC pipeline and
+   `pretrain_bc` if the prior stays off the path (the calc bot is the
+   battler; the BC files are the fallback, ~700 lines).
 
 Not to retry (measured, README → Status): `--refine`, `--climb`, `--parties
 beam|all`, lead order, a switch-out-after-a-hit wrapper, wider search at a
@@ -300,8 +301,7 @@ brain's block ranking does not transfer to search play at Cynthia).
 
 ## Environment gotchas
 
-- `git` is not on PATH inside the container this assistant ran in; commit
-  from your own terminal. Ports 8000–8007 belong to the old project.
+- Ports 8000–8007 belong to the old project.
 - No Showdown server is needed for anything in the sim path. The server
   path (`--backend server`, `collect_game.py baseline`) still exists for
   cross-checks: `./scripts/start_showdown.sh 1 8021`.

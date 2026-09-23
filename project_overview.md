@@ -353,9 +353,11 @@ until step 3 adds held-out gauntlets.
       server-backed `BattleRunner` and `collect_worker` (server) paths,
       `collect_game.py baseline`, `diff_sets.py`. Each was a stage that is
       done; the notebook keeps the results.
-- [ ] Null-result paths, per 1a: `Searcher.horizon`/`leaf_record`,
-      `prior_value`, `pretrain_bc --value-only/--value-coef`, the `value`
-      column, `temp/diag_value.py`. Delete unless 1a(i) reuses them.
+- [x] Null-result paths, per 1a (2026-09-23): `Searcher.horizon`/`depth`/
+      `leaf_record`, `prior_value`, `collect_game collect_search` (expert
+      iteration) and `order_bylevel.json` are gone (−150 lines). Left with
+      the BC pipeline: `pretrain_bc --value-only/--value-coef`, the `value`
+      column, `temp/diag_value.py`.
 - [ ] Housekeeping: cache `encounter_moves`/`evolve` tables (re-read from
       disk per call), move the README Status notebook out of a code fence
       into a `NOTEBOOK.md` with headings per finding, delete `temp/` or

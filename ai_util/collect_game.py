@@ -189,82 +189,6 @@ def collect_worker_sim(worker: int, pairs: list, out_dir: Path, teacher: str = "
           f"{failures} failed battles", flush=True)
 
 
-def collect_worker_search(worker: int, pairs: list, out_dir: Path, policy: str,
-                          k: int, rollouts: int) -> None:
-    """Expert iteration labels: the search's chosen action on each decision."""
-    from ai_util.battler_policy import load_policy
-    from ai_util.evaluate import Searcher, heuristic_brain, outcome_value
-    from ai_util.sim import SimBattle, SimBridge
-
-    bridge, foe = SimBridge(), heuristic_brain()
-    searcher = Searcher(load_policy(policy, device="cpu"), foe, k=k, rollouts=rollouts)
-    searcher.leaf_record = leaves = []  # (leaf obs, mask, -1, rollout outcome) per rollout
-    record, values, ctx, failures = [], [], {"n": 0, "switch": 0, "searched": 0, "changed": 0}, 0
-
-    def me(sb, side):
-        m = sb.mirrors[side]
-        if m.wait:
-            return "default"
-        obs, mask = embed_battle(m), action_mask(m)
-        choice = searcher(sb, side)
-        if searcher.last_action is not None and mask.sum() > 0:
-            record.append((obs.astype(np.float16), mask.astype(np.int8),
-                           np.int16(searcher.last_action)))
-            ctx["n"] += 1
-            ctx["searched"] += searcher.searched_last
-            if searcher.last_action < 6:
-                ctx["switch"] += 1
-        return choice
-
-    for i, (p_team, e_team) in enumerate(pairs):
-        start = len(record)
-        try:
-            sb = SimBattle(bridge, GAME_FORMAT, p_team, e_team)
-            sb.play({"p1": me, "p2": foe}, max_turns=100)
-            values += [outcome_value(sb.state(), "p1")] * (len(record) - start)
-            sb.close()
-        except Exception as e:
-            failures += 1
-            del record[start:]
-            print(f"worker {worker}: battle failed ({type(e).__name__}: {e})", flush=True)
-            bridge = SimBridge()
-            searcher.enemy = foe
-        if (i + 1) % 50 == 0:
-            print(f"worker {worker}: {i + 1}/{len(pairs)} battles, {ctx['n']} pairs "
-                  f"({ctx['searched']} searched), {failures} failures", flush=True)
-    bridge.close()
-    _save_shard(out_dir / f"shard_{worker}.npz", record, values)
-    _save_shard(out_dir / f"leaf_{worker}.npz", [r[:3] for r in leaves], [r[3] for r in leaves])
-    print(f"worker {worker} done: {len(record)} pairs, {len(leaves)} leaves, searched {ctx['searched']}, "
-          f"switch={ctx['switch'] / max(ctx['n'], 1):.1%}, {failures} failed battles", flush=True)
-
-
-def collect_search(args: argparse.Namespace) -> None:
-    """Search labels on matchups vs the given trainers (the deadliest fights)."""
-    stamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-    out_dir = Path(f"models/bc_search_{stamp}")
-    out_dir.mkdir(parents=True, exist_ok=True)
-    ids = {int(t) for t in args.trainers.split(",")} if args.trainers else None
-    pairs = sample_pairs(args.jsonl, args.battles, args.seed, ids)
-    print(f"{len(pairs)} matchups vs trainers {sorted(ids) if ids else 'all'}", flush=True)
-    chunks = [pairs[i::args.workers] for i in range(args.workers)]
-    ctx = mp.get_context("spawn")
-    procs = [ctx.Process(target=collect_worker_search,
-                         args=(w, chunks[w], out_dir, args.policy, args.k, args.rollouts))
-             for w in range(args.workers)]
-    for p in procs:
-        p.start()
-    for p in procs:
-        p.join()
-    for kind, name in (("shard", "data"), ("leaf", "leaves")):
-        shards = sorted(out_dir.glob(f"{kind}_*.npz"))
-        data = {k: np.concatenate([np.load(s)[k] for s in shards]) for k in KEYS}
-        np.savez_compressed(out_dir / f"{name}.npz", **data)
-        for s in shards:
-            s.unlink()
-        print(f"collected {len(data['action'])} {name} -> {out_dir / name}.npz")
-
-
 def synth(args: argparse.Namespace) -> None:
     """Synthetic matchups for targeted teacher data: late-game player parties
     from the harvest (fought at gauntlet order >= --min-order) x the teams of
@@ -358,17 +282,14 @@ def baseline(args: argparse.Namespace) -> None:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("mode", choices=["collect", "collect_search", "synth", "holdout", "baseline"])
-    p.add_argument("--policy", help="prior for collect_search")
+    p.add_argument("mode", choices=["collect", "synth", "holdout", "baseline"])
     p.add_argument("--teacher", choices=["heuristic", "calc"], default="heuristic",
                    help="collect: who labels the decisions (SimpleHeuristics or ai_util.calc_bot)")
-    p.add_argument("--trainers", help="comma-separated trainer_ids to restrict collect/collect_search "
-                                      "to, or the enemy teams for synth")
+    p.add_argument("--trainers", help="comma-separated trainer_ids to restrict collect to, "
+                                      "or the enemy teams for synth")
     p.add_argument("--parties", type=int, default=400, help="synth: player parties sampled")
     p.add_argument("--min-order", type=int, default=120,
                    help="synth: parties come from fights at this gauntlet order or later")
-    p.add_argument("--k", type=int, default=3)
-    p.add_argument("--rollouts", type=int, default=8)
     p.add_argument("--jsonl", default="data/teams/gauntlet_harvest/battles.jsonl")
     p.add_argument("--battles", type=int, default=20000)
     p.add_argument("--n", type=int, default=100)
@@ -380,8 +301,6 @@ def main() -> None:
     args = p.parse_args()
     if args.mode == "collect":
         collect(args)
-    elif args.mode == "collect_search":
-        collect_search(args)
     elif args.mode == "synth":
         synth(args)
     elif args.mode == "holdout":
