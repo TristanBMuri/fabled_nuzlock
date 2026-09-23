@@ -282,9 +282,10 @@ boss's max level (14 = Roark). ~85 s/episode.
    category fit, `NO_SLOT_MOVES`) is the first lever that moved Cynthia:
    404.6 / 358.6 / 5.2 deaths / 70% clears (`logs/plan_best4v2_tms.log`),
    Cynthia 2 losses in 10, E4 12 deaths per 10 runs. That is the
-   benchmark table now.** Cynthia still costs 3.4 deaths per run. Next:
-   player EV training (probe says it doubles the calc bot's Cynthia wins),
-   E7(d) moves chosen by the sim, E9 held items. Probe from full HP at parity: calc bot 2.7%
+   benchmark table now.** Cynthia still costs 3.4 deaths per run. Player
+   EV training (`--evs trained`, 252 attack / 252 Spe) measured the same
+   day: 404.5 / 375.9 / 5.8 / 50%, Cynthia 5 losses — null-to-negative,
+   flat stays. Next: E7(d) moves chosen by the sim, E9 held items. Probe from full HP at parity: calc bot 2.7%
    wins; legal EV training +1–3 points; her Garchomp and Lucario kill 1.5
    mons each per fight. Next, on the roadmap only (2026-09-19, not started):
    E8 League party building from the whole box, then E7 TM movesets with
@@ -301,7 +302,8 @@ wall, a learned value head as the rollout leaf, more rival teacher data,
 **depth-2 search** (2026-09-18, null at 6x), **calc-bot rollouts under
 prior candidates** (worse than either alone), **League party from the
 whole box scored by the fast brain** (E8, 2026-09-23, null: the fast
-brain's block ranking does not transfer to search play at Cynthia).
+brain's block ranking does not transfer to search play at Cynthia),
+**252 attack / 252 Spe player EVs** (2026-09-23, 70% → 50% clears).
 
 ## Environment gotchas
 

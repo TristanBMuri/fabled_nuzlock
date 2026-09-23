@@ -1243,6 +1243,17 @@ project_overview.md # the plan / roadmap
   Bibarel 7, Luxray 6, Staraptor 6. Next levers, in order of cost: player
   EV training (probe: flat 85 → 252/252 doubles the calc bot's Cynthia
   wins), E7(d) the four moves chosen by the sim, E9 held items.
+  **Player EV training (2026-09-23, `--evs trained`, `Rules.evs`):** 252
+  in the better attacking stat (base atk vs spa), 252 Spe, 4 HP — the
+  probe's best legal spread — on top of TMs, same seeds and config
+  (`logs/plan_tms_evs.log`, 31 min): 404.50 / 375.9 / 5.80 / **50%
+  clears**; Cynthia 40 deaths, 5 losses; Flint 8, Bertha 2, Aaron 2,
+  Lucian 1. Against the TM line (70%, Cynthia 34 / 2) that is −20 points
+  at a ±15 noise floor: null at best, likely negative — the probe's
+  calc-bot-only gain (2.7% → 6.0% from full HP) does not transfer to
+  search play through the block, and a spread with nothing in HP / Def
+  dies to hits it used to survive. Flat stays the default. Untested: the
+  probe's other spread (252 attack + 252 HP, 3.7%), and natures.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the
