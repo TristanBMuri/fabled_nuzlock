@@ -91,6 +91,8 @@ data/bdsp/              the game folder: trainers.json, order.json (route order,
                         level-sorted file, delete after the harvest is regenerated),
                         encounters.json (gates = first trainer of the location,
                         tables end at Route 215), learnsets/evolutions/species/moves.
+scripts/build_tms.py    rebuilds tms.json from each TM's Bulbapedia page: move -> TM number,
+                        before_trainer (earliest fixed source on the route order), source.
 scripts/build_order.py  rebuilds order.json + encounters.json from Bulbapedia (trainer
                         tables and Generation VIII catch tables per story visit; level
                         bands for twice-visited locations, story battles by trainer_id).
@@ -276,7 +278,10 @@ boss's max level (14 = Roark). ~85 s/episode.
    Cynthia 35 deaths, 6 wipes; E4 8 / 8 / 4.** E8 (`--league 10`: the
    League party from every 6-subset of a 10-mon shortlist, scored on the
    block by progress + deaths) is null: 404.0 / 325.6 / 6.4 / 10%. Default
-   off. Next: E7 TM movesets (reusable TMs), then E9 held items. Probe from full HP at parity: calc bot 2.7%
+   off. E7 TM movesets built the same day (`--tms`, `data/bdsp/tms.json`
+   from `scripts/build_tms.py`; best4 v2 rule: power x accuracy x STAB x
+   category fit, `NO_SLOT_MOVES`); table in README → Status 2026-09-23.
+   Then E9 held items. Probe from full HP at parity: calc bot 2.7%
    wins; legal EV training +1–3 points; her Garchomp and Lucario kill 1.5
    mons each per fight. Next, on the roadmap only (2026-09-19, not started):
    E8 League party building from the whole box, then E7 TM movesets with

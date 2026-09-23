@@ -3,7 +3,8 @@
 Pure logic (offline-testable) + BattleRunner (needs a Showdown server).
 Modes:
   --check        validate BDSP slice + encounters against Showdown learnsets
-  --build-moves  generate data/<game>/learnsets.json + evolutions.json from the dex (node, once)
+  --build-moves  generate data/<game>/learnsets.json (level-up + TM compatibility) + evolutions.json
+                 + moves.json from the dex (node, once); TM gates: scripts/build_tms.py
 """
 
 import argparse
@@ -40,10 +41,12 @@ GAME = "bdsp"  # the game folder under data/: everything the env knows about a g
 @functools.lru_cache(maxsize=None)
 def load_game(name: str = GAME) -> dict:
     """The game folder as one dict: trainers (id -> record), order (gauntlet
-    entries), encounters (starter + areas), learnsets (species -> [[move,
-    level], ...] sorted by level), evolutions (species -> [[to, level], ...]),
-    species (id -> name, types, ability slots, base stats). A second game is
-    a second folder with the same five files and no code change."""
+    entries), encounters (starter + areas), learnsets (species -> {levelup:
+    [[move, level], ...] sorted by level, tm: [moves the species takes from a
+    TM]}), evolutions (species -> [[to, level], ...]), species (id -> name,
+    types, ability slots, base stats), tms (move -> {tm, before_trainer, from}:
+    scripts/build_tms.py). A second game is a second folder with the same
+    files and no code change."""
     d = DATA / name
     j = lambda f: json.load(open(d / f))
     return {"trainers": {t["trainer_id"]: t for t in j("trainers.json")["trainers"]},
@@ -52,7 +55,8 @@ def load_game(name: str = GAME) -> dict:
             "learnsets": j("learnsets.json"),
             "evolutions": j("evolutions.json"),
             "species": j("species.json"),
-            "moves": j("moves.json")}
+            "moves": j("moves.json"),
+            "tms": j("tms.json")}
 
 
 def load_trainers():
@@ -353,6 +357,8 @@ def record_battle(run_id: str, trainer_id: int | None, info_mode: str,
 LEARNSET_SCRIPT = """
 const path = require('path');
 const {Learnsets} = require(path.join(process.argv[1], 'dist', 'data', 'learnsets.js'));
+// TM compatibility from the BDSP mod ("8M" = a machine move in BDSP)
+const BDSP = require(path.join(process.argv[1], 'dist', 'data', 'mods', 'gen8bdsp', 'learnsets.js')).Learnsets;
 const {Dex} = require(path.join(process.argv[1], 'dist', 'sim'));
 const maxLevel = Number(process.argv[2]);
 // closure over level-up evolutions: evolved forms need learnsets too
@@ -377,10 +383,11 @@ for (const sp of species) {
     .filter(([m, gens]) => gens.some(g => /^4L\\d+$/.test(g)))
     .map(([m, gens]) => [m, Math.max(...gens.filter(g => /^4L\\d+$/.test(g)).map(g => parseInt(g.slice(2))))]);
   levelup.sort((a, b) => a[1] - b[1]);
-  out[sp] = levelup.filter(([, l]) => l <= maxLevel);
+  const tm = Object.entries((BDSP[sp] || {}).learnset || {}).filter(([, g]) => g.includes("8M")).map(([m]) => m);
+  out[sp] = {levelup: levelup.filter(([, l]) => l <= maxLevel), tm};
 }
 const moves = {};
-for (const ls of Object.values(out)) for (const [m] of ls) {
+for (const ls of Object.values(out)) for (const m of [...ls.levelup.map(([m]) => m), ...ls.tm]) {
   const mv = Dex.moves.get(m);
   moves[mv.id] = {type: mv.type, power: mv.basePower, category: mv.category, accuracy: mv.accuracy};
 }
@@ -389,8 +396,8 @@ console.log(JSON.stringify({moves: out, evos, movedata: moves}));
 
 
 def build_moves(max_level: int = 100) -> None:
-    """learnsets.json (species -> [[move, level], ...], every level-up move up to
-    max_level, sorted by level) and evolutions.json (species -> [[evolved id,
+    """learnsets.json (species -> {levelup: [[move, level], ...] up to max_level,
+    sorted by level; tm: moves the species takes from a BDSP TM}) and evolutions.json (species -> [[evolved id,
     method fields: type level|levelFriendship|useItem|levelHold|levelMove|trade,
     level, item, move]) in the game folder, for the encounter species and
     their evolutions (every method, gen 4 dex)."""
@@ -468,8 +475,11 @@ def evolved_ability(species: str, ability: str | None, evolved: str) -> str | No
 
 MOVESET_RULE = "best4"  # or "last4" (plan_gauntlet --moveset); a rule change is a progression change
 # status moves worth a slot under best4, in preference order
-SELF_KO_MOVES = {"selfdestruct", "explosion", "memento", "finalgambit", "healingwish",
-                 "lunardance", "mistyexplosion"}  # never a slot under best4: the user faints
+NO_SLOT_MOVES = {"selfdestruct", "explosion", "memento", "finalgambit", "healingwish",  # the user faints
+                 "lunardance", "mistyexplosion",
+                 "hyperbeam", "gigaimpact", "solarbeam", "skyattack", "skullbash", "razorwind",  # a turn lost
+                 "focuspunch", "dreameater", "snore", "fling", "bide", "spitup", "counter",  # conditional
+                 "mirrorcoat", "lastresort"}  # never a slot under best4 (the calc bot cannot value them)
 STATUS_MOVES = ["swordsdance", "dragondance", "nastyplot", "calmmind", "bulkup", "growth",
                 "agility", "recover", "roost", "morningsun", "synthesis", "moonlight",
                 "softboiled", "milkdrink", "slackoff", "rest", "spore", "sleeppowder",
@@ -477,33 +487,51 @@ STATUS_MOVES = ["swordsdance", "dragondance", "nastyplot", "calmmind", "bulkup",
                 "leechseed", "reflect", "lightscreen", "substitute", "protect"]
 
 
-def encounter_moves(species: str, level: int, rule: str | None = None) -> list[str]:
-    """A mon's moves at `level` under the moveset rule:
+def encounter_moves(species: str, level: int, rule: str | None = None,
+                    progress: int | None = None) -> list[str]:
+    """A mon's moves at `level` under the moveset rule; progress = the trainer
+    index reached (None = no TMs): under best4 the pool also holds every TM
+    handed out before it that the species can learn (tms.json; reusable).
     last4 — the last four level-up moves learned (every new move replaced the
             oldest: what a player gets by never declining a move);
     best4 — from every level-up move learned so far: the strongest STAB
             attack, the strongest attack of another type, the next strongest
-            attack, one status move from STATUS_MOVES; slots left are filled
-            with the next attacks, then the latest moves. Variable-damage
-            attacks (Seismic Toss, Low Kick) count as 50 power; self-KO
-            moves (Selfdestruct, Explosion, Memento) never get a slot."""
-    pool = list(dict.fromkeys(m for m, lvl in load_game()["learnsets"].get(species, []) if lvl <= level))
+            attack of a third type, one status move from STATUS_MOVES; slots
+            left are filled with the next attacks, then the latest moves.
+            Strength = power x accuracy x STAB x category fit (a physical
+            move on a special attacker counts atk / spa of it; 2026-09-23,
+            with the TM pool raw power chose Hyper Beam / Hydro Pump for
+            everyone). Variable-damage
+            attacks (Seismic Toss, Low Kick) count as 50 power; NO_SLOT_MOVES
+            (self-KO, recharge, conditional) never get a slot."""
+    game = load_game()
+    ls = game["learnsets"].get(species, {})
+    pool = list(dict.fromkeys(m for m, lvl in ls.get("levelup", []) if lvl <= level))
     if (rule or MOVESET_RULE) == "last4" or not pool:
         return pool[-4:]
-    md, stab = load_game()["moves"], set(load_game()["species"].get(species, {}).get("types", []))
-    power = lambda m: md[m]["power"] or 50
-    attacks = sorted((m for m in pool if md[m]["category"] != "Status" and m not in SELF_KO_MOVES),
+    if progress is not None:  # TMs in hand, after the level-up moves (later = preferred on ties)
+        pool += [m for m in ls.get("tm", []) if m not in pool
+                 and m in game["tms"] and game["tms"][m]["before_trainer"] <= progress]
+    md, sp = game["moves"], game["species"].get(species, {})
+    stab, bs = set(sp.get("types", [])), sp.get("baseStats", {"atk": 1, "spa": 1})
+    fit = {"Physical": bs["atk"], "Special": bs["spa"]}
+
+    def power(m):  # expected damage scale: power x accuracy x STAB x category fit
+        acc = md[m]["accuracy"]
+        return ((md[m]["power"] or 50) * (1.0 if acc is True else acc / 100) * (1.5 if md[m]["type"] in stab else 1.0)
+                * fit[md[m]["category"]] / max(bs["atk"], bs["spa"]))
+    attacks = sorted((m for m in pool if md[m]["category"] != "Status" and m not in NO_SLOT_MOVES),
                      key=lambda m: (-power(m), -pool.index(m)))
     picks = []
     for cond in (lambda m: md[m]["type"] in stab,
                  lambda m: not picks or md[m]["type"] != md[picks[0]]["type"],
-                 lambda m: True):
+                 lambda m: md[m]["type"] not in {md[p]["type"] for p in picks}):  # coverage
         nxt = next((m for m in attacks if m not in picks and cond(m)), None)
         if nxt:
             picks.append(nxt)
     picks += [m for m in STATUS_MOVES if m in pool][:1]
     picks += [m for m in attacks if m not in picks]
-    picks += [m for m in reversed(pool) if m not in picks and m not in SELF_KO_MOVES]
+    picks += [m for m in reversed(pool) if m not in picks and m not in NO_SLOT_MOVES]
     return picks[:4]
 
 
@@ -531,7 +559,7 @@ def _evo_due(species: str, e: dict, level: int, caught_level, trainer_idx) -> bo
     if t == "level":
         return e["level"] <= level
     if t == "levelMove":  # Bonsly / Mime Jr.: when the move is learned
-        learned = [l for m, l in load_game()["learnsets"].get(species, []) if m == to_id_str(e["move"])]
+        learned = [l for m, l in load_game()["learnsets"].get(species, {}).get("levelup", []) if m == to_id_str(e["move"])]
         return bool(learned) and min(learned) <= level
     if t == "levelFriendship":
         return caught_level is not None and level >= caught_level + FRIENDSHIP_LEVELS

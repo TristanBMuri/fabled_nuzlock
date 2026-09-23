@@ -34,10 +34,11 @@ class Rules:
     box: int = 50                # living mons the box holds (50 > starter + 45 areas = unbounded)
     dupes_clause: bool = True    # an area's encounter is rerolled among families never owned (none left: no catch)
     moveset: str = "best4"       # best4: strongest STAB / other-type / next attack + a status move; last4: last learned
+    tms: bool = False            # best4 also over the TMs handed out so far (reusable; data/bdsp/tms.json)
 
     def __str__(self):
         return (f"level_rule={self.level_rule} margin={self.level_margin} box={self.box} "
-                f"dupes={self.dupes_clause} moveset={self.moveset}")
+                f"dupes={self.dupes_clause} moveset={self.moveset} tms={self.tms}")
 BREAKPOINTS = ["none", "gym_leader", "elite_four", "champion"]
 SLICE_LEN = 21  # trainers per episode: through Gym Leader Roark (order_index 20 in the route order)
 EVOS = load_evolutions()
@@ -113,7 +114,7 @@ class NuzlockeEnv(Env):
         starter = self.rng.choice(load_encounters()["starter"])
         # starters come with ability slot 0; wild catches roll slot 0 or 1
         # (roll_ability) and evolution keeps the slot (evolved_ability)
-        self.roster = [Mon(starter, 5, encounter_moves(starter, 5, self.rules.moveset),
+        self.roster = [Mon(starter, 5, encounter_moves(starter, 5, self.rules.moveset, self._progress),
                            ability=ability_slots(starter).get("0"), caught_level=5)]
         self.graveyard: list[Mon] = []  # dead mons leave the roster (box slots free up)
         self.party = []  # indices into roster
@@ -203,7 +204,7 @@ class NuzlockeEnv(Env):
             for method, table in tables.items():
                 pick = self.rng.choices(table, weights=[e["weight"] for e in table])[0]
                 lvl = self.rng.randint(*pick["level"])
-                alts.append(Mon(pick["species"], lvl, encounter_moves(pick["species"], lvl, self.rules.moveset),
+                alts.append(Mon(pick["species"], lvl, encounter_moves(pick["species"], lvl, self.rules.moveset, self._progress),
                                 ability=roll_ability(pick["species"], self.rng), caught_level=lvl))
             self.pending.append(alts)
 
@@ -231,7 +232,13 @@ class NuzlockeEnv(Env):
                 if evolved != m.species:
                     m.ability = evolved_ability(m.species, m.ability, evolved)
                     m.species = evolved
-                m.moves = encounter_moves(m.species, m.level, self.rules.moveset) or m.moves
+            # moves follow the level and, with TMs, the trainer reached (a TM lands the fight after)
+            m.moves = encounter_moves(m.species, m.level, self.rules.moveset, self._progress) or m.moves
+
+    @property
+    def _progress(self) -> int | None:
+        """Trainer index for the TM pool (None = TMs off)."""
+        return self.trainer_idx if self.rules.tms else None
 
     @property
     def party_locked(self) -> bool:

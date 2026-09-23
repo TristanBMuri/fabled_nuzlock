@@ -1193,6 +1193,40 @@ project_overview.md # the plan / roadmap
   5.9 / 20%.** The two clears beat Cynthia with 4 deaths each; the fix of
   the three defects took the clear rate from 0% (two of ten runs crashed)
   to 20%. Cynthia wipes 6 of 10. Next lever: E7 TM movesets.
+  **E7, TM movesets (2026-09-23, `--tms`, `Rules.tms`).** Data:
+  `scripts/build_tms.py` reads each TM's Bulbapedia page (TM001–TM100, the
+  BDSP row of its acquisition table) and writes `data/bdsp/tms.json` (move
+  → TM number, the trainer index it is in hand before, the source). A TM
+  counts from its earliest *fixed* source: a pickup, an NPC gift (gym
+  leaders after their fight), the Veilstone Department Store (all 22 of
+  its TMs on arrival, #160, incl. Ice Beam / Thunderbolt / Flamethrower /
+  Swords Dance), the Route 212 shard collector. Not counted: Grand
+  Underground merchants (random stock; they would put 83 TMs at Eterna),
+  the Battle Tower and post-game areas — so Calm Mind, Bulk Up, Will-O-Wisp,
+  Thunder Wave, Energy Ball, Overheat, Facade, Explosion never arrive.
+  92 TMs gated: Earthquake at Wayward Cave (#78), Stone Edge / Dragon
+  Pulse / Dark Pulse at Victory Road (#381), Surf #235, Waterfall #347.
+  TMs are reusable (decided 2026-09-19). Compatibility from Showdown's
+  BDSP mod (`8M` flags, `--build-moves`; learnsets.json is now `{levelup,
+  tm}` per species, moves.json 344 moves). `encounter_moves(...,
+  progress=trainer_idx)` widens the best4 pool with the TMs in hand, and
+  the env recomputes moves at every fight (a TM lands the fight after).
+  **best4 v2.** Over the wide pool the raw-power rule chose Hyper Beam /
+  Giga Impact / Focus Punch for nearly every species and Hydro Pump over
+  Waterfall on Gyarados (attack 125 / sp. attack 60); the calc bot cannot
+  value recharge or conditional moves, so those parties would have been
+  worse with TMs than without. The rule now scores an attack by power x
+  accuracy x STAB x category fit (atk or spa over the larger of the two),
+  the third attack must bring a third type, and `NO_SLOT_MOVES` (self-KO,
+  recharge / charge, conditional) never get a slot. Level-up-only picks
+  change too (Gyarados Aqua Tail / Thrash / Ice Fang / Dragon Dance instead
+  of Hydro Pump / Hyper Beam / Thrash), so the baseline moves with it.
+  With TMs at #404: Gyarados + Earthquake, Lapras Surf / Ice Beam /
+  Thunderbolt, Empoleon Surf / Flash Cannon / Ice Beam, Abomasnow Wood
+  Hammer / Earthquake / Ice Beam / Swords Dance, Golduck Surf / Psychic /
+  Ice Beam. The status slot is often Rest (the calc bot never uses it).
+  Tables (calc + search 9,8 / deep 9,16, seeds 300–309, 10 workers each,
+  `logs/plan_best4v2.log`, `logs/plan_best4v2_tms.log`): **pending**.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the

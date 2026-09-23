@@ -154,7 +154,7 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
 
 def rules(args: argparse.Namespace) -> Rules:
     return Rules(level_rule=args.level_rule, level_margin=args.level_margin, box=args.roster,
-                 dupes_clause=not args.no_dupes, moveset=args.moveset)
+                 dupes_clause=not args.no_dupes, moveset=args.moveset, tms=args.tms)
 
 
 def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict], dict, dict, int]:
@@ -218,6 +218,8 @@ def main() -> None:
     ap.add_argument("--moveset", choices=["last4", "best4"], default=Rules.moveset,
                     help="last4 = the last four level-up moves; best4 = strongest STAB, strongest "
                          "other-type attack, next strongest, one status move (see gauntlet.encounter_moves)")
+    ap.add_argument("--tms", action="store_true",
+                    help="best4 also over the TMs handed out so far (E7: reusable, data/bdsp/tms.json)")
     ap.add_argument("--hp-weight", type=float, default=HP_WEIGHT,
                     help="weight of mean HP left in the party score (0 = old score)")
     ap.add_argument("--harvest", metavar="JSONL",

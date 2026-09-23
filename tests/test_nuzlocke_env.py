@@ -154,8 +154,21 @@ def test_best4_moveset_rule():
     assert len(set(lux)) == len(lux)
 
 
+def test_tm_movesets_follow_the_route():
+    """E7: a TM joins the best4 pool once its hand-out trainer is passed."""
+    from gauntlet import load_game
+    assert load_game()["tms"]["earthquake"]["before_trainer"] == 78  # Wayward Cave
+    assert "earthquake" not in encounter_moves("gyarados", 66, "best4")  # no TMs
+    assert "earthquake" not in encounter_moves("gyarados", 66, "best4", progress=77)
+    assert "earthquake" in encounter_moves("gyarados", 66, "best4", progress=78)
+    assert "icebeam" in encounter_moves("abomasnow", 66, "best4", progress=160)  # Veilstone Department Store
+    assert encounter_moves("lapras", 66, "best4", progress=404)[:3] == ["surf", "icebeam", "thunderbolt"]
+    assert "icebeam" not in encounter_moves("staraptor", 66, "best4", progress=404)  # cannot learn it
+    assert encounter_moves("gyarados", 66, "last4", progress=404) == encounter_moves("gyarados", 66, "last4")
+
+
 def test_rules_reach_the_env(env):
-    assert str(env.rules) == "level_rule=cap margin=0 box=50 dupes=True moveset=best4"
+    assert str(env.rules) == "level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=False"
     last4 = NuzlockeEnv(seed=0, risk_features=False, slice_len=59, rules=Rules(moveset="last4", box=12))
     try:
         last4.reset(seed=4)

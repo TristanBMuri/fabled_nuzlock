@@ -1,0 +1,554 @@
+{
+ "bulletseed": {
+  "tm": 9,
+  "name": "Bullet Seed",
+  "before_trainer": 3,
+  "from": "Route 204"
+ },
+ "snarl": {
+  "tm": 78,
+  "name": "Snarl",
+  "before_trainer": 3,
+  "from": "Route 204"
+ },
+ "workup": {
+  "tm": 10,
+  "name": "Work Up",
+  "before_trainer": 4,
+  "from": "Trainers' School"
+ },
+ "focuspunch": {
+  "tm": 1,
+  "name": "Focus Punch",
+  "before_trainer": 14,
+  "from": "Oreburgh Gate"
+ },
+ "brickbreak": {
+  "tm": 31,
+  "name": "Brick Break",
+  "before_trainer": 14,
+  "from": "Oreburgh Gate"
+ },
+ "flash": {
+  "tm": 70,
+  "name": "Flash",
+  "before_trainer": 14,
+  "from": "Oreburgh Gate"
+ },
+ "rocksmash": {
+  "tm": 98,
+  "name": "Rock Smash",
+  "before_trainer": 14,
+  "from": "Oreburgh Gate"
+ },
+ "stealthrock": {
+  "tm": 76,
+  "name": "Stealth Rock",
+  "before_trainer": 21,
+  "from": "Roark"
+ },
+ "waterpulse": {
+  "tm": 3,
+  "name": "Water Pulse",
+  "before_trainer": 23,
+  "from": "Ravaged Path"
+ },
+ "rocktomb": {
+  "tm": 39,
+  "name": "Rock Tomb",
+  "before_trainer": 23,
+  "from": "Ravaged Path"
+ },
+ "pluck": {
+  "tm": 88,
+  "name": "Pluck",
+  "before_trainer": 29,
+  "from": "Floaroma Town"
+ },
+ "thunderbolt": {
+  "tm": 24,
+  "name": "Thunderbolt",
+  "before_trainer": 37,
+  "from": "Valley Windworks"
+ },
+ "sleeptalk": {
+  "tm": 82,
+  "name": "Sleep Talk",
+  "before_trainer": 46,
+  "from": "Eterna Forest"
+ },
+ "thief": {
+  "tm": 46,
+  "name": "Thief",
+  "before_trainer": 54,
+  "from": "Eterna City"
+ },
+ "recycle": {
+  "tm": 67,
+  "name": "Recycle",
+  "before_trainer": 54,
+  "from": "Eterna Condominiums"
+ },
+ "substitute": {
+  "tm": 90,
+  "name": "Substitute",
+  "before_trainer": 54,
+  "from": "Old Chateau"
+ },
+ "cut": {
+  "tm": 93,
+  "name": "Cut",
+  "before_trainer": 54,
+  "from": "Eterna City"
+ },
+ "grassknot": {
+  "tm": 86,
+  "name": "Grass Knot",
+  "before_trainer": 59,
+  "from": "Gardenia"
+ },
+ "taunt": {
+  "tm": 12,
+  "name": "Taunt",
+  "before_trainer": 66,
+  "from": "Route 211"
+ },
+ "psychic": {
+  "tm": 29,
+  "name": "Psychic",
+  "before_trainer": 66,
+  "from": "Route 211"
+ },
+ "psychup": {
+  "tm": 77,
+  "name": "Psych Up",
+  "before_trainer": 66,
+  "from": "Route 211"
+ },
+ "earthquake": {
+  "tm": 26,
+  "name": "Earthquake",
+  "before_trainer": 78,
+  "from": "Wayward Cave"
+ },
+ "doubleteam": {
+  "tm": 32,
+  "name": "Double Team",
+  "before_trainer": 78,
+  "from": "Wayward Cave"
+ },
+ "voltswitch": {
+  "tm": 43,
+  "name": "Volt Switch",
+  "before_trainer": 99,
+  "from": "Amity Square"
+ },
+ "attract": {
+  "tm": 45,
+  "name": "Attract",
+  "before_trainer": 99,
+  "from": "Amity Square"
+ },
+ "toxic": {
+  "tm": 6,
+  "name": "Toxic",
+  "before_trainer": 102,
+  "from": "Route 212"
+ },
+ "hail": {
+  "tm": 7,
+  "name": "Hail",
+  "before_trainer": 102,
+  "from": "Route 212"
+ },
+ "sunnyday": {
+  "tm": 11,
+  "name": "Sunny Day",
+  "before_trainer": 102,
+  "from": "Route 212"
+ },
+ "raindance": {
+  "tm": 18,
+  "name": "Rain Dance",
+  "before_trainer": 102,
+  "from": "Route 212"
+ },
+ "sandstorm": {
+  "tm": 37,
+  "name": "Sandstorm",
+  "before_trainer": 102,
+  "from": "Route 212"
+ },
+ "bugbuzz": {
+  "tm": 62,
+  "name": "Bug Buzz",
+  "before_trainer": 102,
+  "from": "Route 212"
+ },
+ "poisonjab": {
+  "tm": 84,
+  "name": "Poison Jab",
+  "before_trainer": 102,
+  "from": "Route 212"
+ },
+ "swagger": {
+  "tm": 87,
+  "name": "Swagger",
+  "before_trainer": 102,
+  "from": "Pok\u00e9mon Mansion"
+ },
+ "gigadrain": {
+  "tm": 19,
+  "name": "Giga Drain",
+  "before_trainer": 122,
+  "from": "Route 209"
+ },
+ "steelwing": {
+  "tm": 47,
+  "name": "Steel Wing",
+  "before_trainer": 122,
+  "from": "Route 209"
+ },
+ "lowsweep": {
+  "tm": 27,
+  "name": "Low Sweep",
+  "before_trainer": 132,
+  "from": "Lost Tower"
+ },
+ "strength": {
+  "tm": 96,
+  "name": "Strength",
+  "before_trainer": 132,
+  "from": "Lost Tower"
+ },
+ "dig": {
+  "tm": 28,
+  "name": "Dig",
+  "before_trainer": 140,
+  "from": "Maniac Tunnel"
+ },
+ "shadowball": {
+  "tm": 30,
+  "name": "Shadow Ball",
+  "before_trainer": 141,
+  "from": "Route 210"
+ },
+ "roost": {
+  "tm": 51,
+  "name": "Roost",
+  "before_trainer": 141,
+  "from": "Route 210"
+ },
+ "shockwave": {
+  "tm": 34,
+  "name": "Shock Wave",
+  "before_trainer": 152,
+  "from": "Route 215"
+ },
+ "payback": {
+  "tm": 66,
+  "name": "Payback",
+  "before_trainer": 152,
+  "from": "Route 215"
+ },
+ "icebeam": {
+  "tm": 13,
+  "name": "Ice Beam",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "blizzard": {
+  "tm": 14,
+  "name": "Blizzard",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "hyperbeam": {
+  "tm": 15,
+  "name": "Hyper Beam",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "lightscreen": {
+  "tm": 16,
+  "name": "Light Screen",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "protect": {
+  "tm": 17,
+  "name": "Protect",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "safeguard": {
+  "tm": 20,
+  "name": "Safeguard",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "dazzlinggleam": {
+  "tm": 21,
+  "name": "Dazzling Gleam",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "solarbeam": {
+  "tm": 22,
+  "name": "Solar Beam",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "thunder": {
+  "tm": 25,
+  "name": "Thunder",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "reflect": {
+  "tm": 33,
+  "name": "Reflect",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "flamethrower": {
+  "tm": 35,
+  "name": "Flamethrower",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "fireblast": {
+  "tm": 38,
+  "name": "Fire Blast",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "rest": {
+  "tm": 44,
+  "name": "Rest",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "focusblast": {
+  "tm": 52,
+  "name": "Focus Blast",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "falseswipe": {
+  "tm": 54,
+  "name": "False Swipe",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "endure": {
+  "tm": 58,
+  "name": "Endure",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "nastyplot": {
+  "tm": 63,
+  "name": "Nasty Plot",
+  "before_trainer": 160,
+  "from": "Veilstone City"
+ },
+ "gigaimpact": {
+  "tm": 68,
+  "name": "Giga Impact",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "gyroball": {
+  "tm": 74,
+  "name": "Gyro Ball",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "swordsdance": {
+  "tm": 75,
+  "name": "Swords Dance",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "bulldoze": {
+  "tm": 83,
+  "name": "Bulldoze",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "uturn": {
+  "tm": 89,
+  "name": "U-turn",
+  "before_trainer": 160,
+  "from": "Veilstone Department Store"
+ },
+ "drainpunch": {
+  "tm": 60,
+  "name": "Drain Punch",
+  "before_trainer": 167,
+  "from": "Maylene"
+ },
+ "dreameater": {
+  "tm": 85,
+  "name": "Dream Eater",
+  "before_trainer": 176,
+  "from": "Valor Lakefront"
+ },
+ "trickroom": {
+  "tm": 92,
+  "name": "Trick Room",
+  "before_trainer": 176,
+  "from": "Hotel Grand Lake"
+ },
+ "roar": {
+  "tm": 5,
+  "name": "Roar",
+  "before_trainer": 195,
+  "from": "Route 213"
+ },
+ "aerialace": {
+  "tm": 40,
+  "name": "Aerial Ace",
+  "before_trainer": 195,
+  "from": "Route 213"
+ },
+ "defog": {
+  "tm": 97,
+  "name": "Defog",
+  "before_trainer": 198,
+  "from": "Great Marsh"
+ },
+ "brine": {
+  "tm": 55,
+  "name": "Brine",
+  "before_trainer": 205,
+  "from": "Crasher Wake"
+ },
+ "shadowclaw": {
+  "tm": 65,
+  "name": "Shadow Claw",
+  "before_trainer": 217,
+  "from": "Fantina"
+ },
+ "surf": {
+  "tm": 95,
+  "name": "Surf",
+  "before_trainer": 235,
+  "from": "Celestic Town"
+ },
+ "skillswap": {
+  "tm": 48,
+  "name": "Skill Swap",
+  "before_trainer": 240,
+  "from": "Canalave City"
+ },
+ "irontail": {
+  "tm": 23,
+  "name": "Iron Tail",
+  "before_trainer": 251,
+  "from": "Iron Island"
+ },
+ "flashcannon": {
+  "tm": 91,
+  "name": "Flash Cannon",
+  "before_trainer": 251,
+  "from": "Byron"
+ },
+ "xscissor": {
+  "tm": 81,
+  "name": "X-Scissor",
+  "before_trainer": 271,
+  "from": "Route 221"
+ },
+ "rockclimb": {
+  "tm": 100,
+  "name": "Rock Climb",
+  "before_trainer": 302,
+  "from": "Route 217"
+ },
+ "sludgebomb": {
+  "tm": 36,
+  "name": "Sludge Bomb",
+  "before_trainer": 318,
+  "from": "Team Galactic HQ"
+ },
+ "scald": {
+  "tm": 49,
+  "name": "Scald",
+  "before_trainer": 318,
+  "from": "Team Galactic HQ"
+ },
+ "avalanche": {
+  "tm": 72,
+  "name": "Avalanche",
+  "before_trainer": 318,
+  "from": "Candice"
+ },
+ "fly": {
+  "tm": 94,
+  "name": "Fly",
+  "before_trainer": 318,
+  "from": "Team Galactic HQ"
+ },
+ "dragonclaw": {
+  "tm": 2,
+  "name": "Dragon Claw",
+  "before_trainer": 332,
+  "from": "Mount Coronet"
+ },
+ "rockpolish": {
+  "tm": 69,
+  "name": "Rock Polish",
+  "before_trainer": 332,
+  "from": "Mount Coronet"
+ },
+ "rockslide": {
+  "tm": 80,
+  "name": "Rock Slide",
+  "before_trainer": 332,
+  "from": "Mount Coronet"
+ },
+ "waterfall": {
+  "tm": 99,
+  "name": "Waterfall",
+  "before_trainer": 347,
+  "from": "Sunyshore City"
+ },
+ "fling": {
+  "tm": 56,
+  "name": "Fling",
+  "before_trainer": 356,
+  "from": "Route 222"
+ },
+ "chargebeam": {
+  "tm": 57,
+  "name": "Charge Beam",
+  "before_trainer": 356,
+  "from": "Volkner"
+ },
+ "torment": {
+  "tm": 41,
+  "name": "Torment",
+  "before_trainer": 381,
+  "from": "Victory Road"
+ },
+ "dragonpulse": {
+  "tm": 59,
+  "name": "Dragon Pulse",
+  "before_trainer": 381,
+  "from": "Victory Road"
+ },
+ "stoneedge": {
+  "tm": 71,
+  "name": "Stone Edge",
+  "before_trainer": 381,
+  "from": "Victory Road"
+ },
+ "darkpulse": {
+  "tm": 79,
+  "name": "Dark Pulse",
+  "before_trainer": 381,
+  "from": "Victory Road"
+ }
+}

@@ -441,7 +441,12 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       drops and the party per trainer. The scratch replay script is gone.
 - [ ] **E6. Variable-roster obs/action (2p).** Only when 2e is attempted;
       the scripted planner never reads the obs. Do not build now.
-- [ ] **E7. TM movesets (decided 2026-09-19; not started).** `best4` over
+- [ ] **E7. TM movesets (decided 2026-09-19; (a)–(c) built 2026-09-23:
+      `scripts/build_tms.py` → `data/bdsp/tms.json`, 92 TMs gated on the
+      route order from fixed sources only; `--tms`; best4 v2 scores power x
+      accuracy x STAB x category fit with a no-slot list, since raw power
+      over the TM pool picked Hyper Beam for everyone; table in README →
+      Status 2026-09-23).** `best4` over
       level-up moves is the stopgap. **Decision: TMs are reusable** (as in
       every game after BDSP; BDSP's single-use TMs would make this a budget
       problem for no research value). Plan: (a) TM / HM list with the
