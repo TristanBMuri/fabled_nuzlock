@@ -450,7 +450,12 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       since raw power over the TM pool picked Hyper Beam for everyone).
       Table: 404.6 / 358.6 / 5.2 / 70% clears vs 404.2 / 337.4 / 6.2 / 20%
       without — the first lever that moves Cynthia (2 losses in 10, was 8).
-      (d) and (e) stay open.** `best4` over
+      (d) measured 2026-09-26, negative: `plan_gauntlet.py --moves sim`
+      re-picks each party mon's set at hard fights by the risk query, one
+      slot swap at a time — 20% clears with the League opener, 40% without
+      it (TM line 70%; Cynthia 8 / 6 losses vs 2). The fast brain values
+      moves for its own play, not for search over it (README → Status);
+      off by default. (e) is moot until the scoring brain changes.** `best4` over
       level-up moves is the stopgap. **Decision: TMs are reusable** (as in
       every game after BDSP; BDSP's single-use TMs would make this a budget
       problem for no research value). Plan: (a) TM / HM list with the

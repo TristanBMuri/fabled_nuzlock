@@ -1254,6 +1254,49 @@ project_overview.md # the plan / roadmap
   search play through the block, and a spread with nothing in HP / Def
   dies to hits it used to survive. Flat stays the default. Untested: the
   probe's other spread (252 attack + 252 HP, 3.7%), and natures.
+  **E7(d), the four moves chosen by the sim (2026-09-26, `plan_gauntlet.py
+  --moves sim`).** Rule: at every fight the planner flags hard (the deep
+  trigger: a loss, a death or HP < DEEP_HP at n=8), each party mon's set is
+  varied one slot at a time over the next three moves of its ranked pool
+  (`encounter_moves(..., k=None)`: level-up + TMs in hand); a variant that
+  beats the current set at n=8 and again at n=16 replaces it, greedily over
+  the party. The choice persists (`Mon.chosen`) while the pool holds it —
+  relearning is free — and the risk cache keys on the moves. Motivation: the
+  calc bot only ever uses set-up moves among status moves (`CalcPlayer`:
+  boosts, target self), so best4's status slot (Rest on Luxray, Lapras,
+  Golduck at #404) is a wasted slot the sim can see. A route risk query is
+  0.02 s, a Cynthia query 0.3 s, a block estimate 0.6 s: ~70 variants per
+  hard fight cost nothing on routes and ~40 s at the League opener. A test
+  found the first version scoring the unchanged set: `risk()` runs the
+  level rule, which rewrites `m.moves` from the rule — variants go through
+  `m.chosen`. Table, same seeds and config as the TM line
+  (`logs/plan_tms_moves.log`, 35 min, 4.0 sets changed per run):
+    404.20 / 392.7 / 6.10 / **20% clears**; Cynthia 42 deaths, **8 losses**;
+    Lucian 7, Cedric 4, Flint 3 (TM line 404.6 / 358.6 / 5.2 / 70%, Cynthia 34 / 2).
+  Two effects pull apart: before the League the run is safer (no-death 358.6
+  → 392.7, E4 12 → 13 deaths), at Cynthia it is much worse (2 → 8 losses),
+  −50 points at a ±15 floor. The League opener's choices are scored by the
+  fast brain's block progress — the instrument E8 already showed does not
+  transfer to search play at Cynthia (every party wipes under the fast
+  brain; the ordering is how far it gets through Aaron–Lucian, and a move
+  that helps there is bought at Garchomp). Second table: the same rule with
+  the League opener excluded (`env._block()`), so only route and gym
+  choices are made and carried in (`logs/plan_tms_moves_noblock.log`, 36 min,
+  2.8 sets changed per run):
+    404.40 / 354.1 / 5.10 / **40% clears**; Cynthia 36 deaths, **6 losses**; Lucian 7.
+  Still −30 points and 6 vs 2 Cynthia losses on the same seeds, with only
+  route and gym choices made: what the fast brain prefers for its own play
+  at a route fight (a fourth attack over Dragon Dance / Swords Dance, Leaf
+  Storm over a repeatable hit) is carried into the League, where search
+  play needed the dropped move. Two tables, both negative, one mechanism:
+  **the calc bot values moves for the calc bot, not for search over it**,
+  the same transfer failure as E8 and the EV probe. `--moves sim` stays off
+  (kept, ~40 lines, as the measured option); best4 v2 + TMs remains the
+  benchmark (70%). What would be different, not tried: scoring variants by
+  the search brain itself (deep 9,16 through the block: ~40 min per opener
+  at 70 variants — the compute dial, not a rule), or re-picking per fight
+  without persistence (loses the League slot-for-slot anyway). The lever
+  left for Cynthia is E9 held items.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the

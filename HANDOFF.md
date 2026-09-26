@@ -1,4 +1,4 @@
-# HANDOFF — state of the project as of 2026-09-23
+# HANDOFF — state of the project as of 2026-09-26
 
 Read this first. `project_overview.md` is the plan, `README.md` → Status is the
 full lab notebook (chronological, with every number). This file is the
@@ -112,7 +112,8 @@ scripts/nuzlocke_env.py NuzlockeEnv: slice_len trainers (51 default), encounters
                         pending offers queue, dropped list, tracker().
 scripts/plan_gauntlet.py Scripted planner + evaluation harness + death histogram;
                         --slice N, --deep k,r, --parties swap|beam|all, --roster N,
-                        --no-dupes, --workers N, --verbose (encounter trace).
+                        --no-dupes, --moves sim (E7d: the sim re-picks moves at hard
+                        fights, Mon.chosen), --workers N, --verbose (encounter trace).
 tests/test_nuzlocke_env.py  env rules: queued offers, dupes clause, box cap.
 scripts/train_nuzlocke.py PPO meta-policy trainer (sim backend; NOT retrained yet
                         on the new obs — old checkpoint is skipped on resume).
@@ -285,7 +286,13 @@ boss's max level (14 = Roark). ~85 s/episode.
    benchmark table now.** Cynthia still costs 3.4 deaths per run. Player
    EV training (`--evs trained`, 252 attack / 252 Spe) measured the same
    day: 404.5 / 375.9 / 5.8 / 50%, Cynthia 5 losses — null-to-negative,
-   flat stays. Next: E7(d) moves chosen by the sim, E9 held items. Probe from full HP at parity: calc bot 2.7%
+   flat stays. **E7(d) moves chosen by the sim (2026-09-26, `--moves sim`:
+   one-slot swaps over the ranked pool at hard fights, accepted at n=8 and
+   n=16 by the risk query, persisting in `Mon.chosen`): 404.2 / 392.7 / 6.1
+   / 20% with the League opener, 404.4 / 354.1 / 5.1 / 40% without it
+   (`logs/plan_tms_moves{,_noblock}.log`); Cynthia 8 / 6 losses vs 2.
+   Negative: the calc bot picks moves for the calc bot, search play needs
+   the ones it drops (set-up). Off by default. Next: E9 held items.** Probe from full HP at parity: calc bot 2.7%
    wins; legal EV training +1–3 points; her Garchomp and Lucario kill 1.5
    mons each per fight. Next, on the roadmap only (2026-09-19, not started):
    E8 League party building from the whole box, then E7 TM movesets with
@@ -303,7 +310,10 @@ wall, a learned value head as the rollout leaf, more rival teacher data,
 prior candidates** (worse than either alone), **League party from the
 whole box scored by the fast brain** (E8, 2026-09-23, null: the fast
 brain's block ranking does not transfer to search play at Cynthia),
-**252 attack / 252 Spe player EVs** (2026-09-23, 70% → 50% clears).
+**252 attack / 252 Spe player EVs** (2026-09-23, 70% → 50% clears),
+**moves chosen by the fast brain's risk query** (E7(d), 2026-09-26, 70% →
+20% / 40%; anything scored by the fast brain at the League transfers badly
+to search play — three times now: E8, EVs, moves).
 
 ## Environment gotchas
 

@@ -14,7 +14,7 @@ pytestmark = pytest.mark.skipif(not (shutil.which("node") and _DIST.exists()),
                                 reason="node + built Showdown required")
 
 from gauntlet import Mon, encounter_moves, evolved_ability, roll_ability  # noqa: E402
-from nuzlocke_env import NuzlockeEnv, Rules  # noqa: E402
+from nuzlocke_env import ORDER, NuzlockeEnv, Rules  # noqa: E402
 
 
 @pytest.fixture(scope="module")
@@ -227,3 +227,23 @@ def test_method_alternatives_respect_the_dupes_clause(env):
         assert [m.species for m in env.pending[0]] == ["zubat"]  # the rod's only family is owned
     finally:
         env.encounters = real
+
+
+def test_sim_chosen_moves_persist_while_the_pool_holds_them(env):
+    """E7(d): a Mon.chosen set survives the level rule; the risk cache keys on moves."""
+    env.reset(seed=0)
+    env.trainer_idx = 100  # deep enough for a wide pool (level-up moves + TMs)
+    m, entry = env.roster[0], ORDER[env.trainer_idx]
+    env._apply_level_rule(entry)
+    pool = encounter_moves(m.species, m.level, "best4", env.trainer_idx, k=None)
+    assert pool[:4] == m.moves and len(pool) > 4
+    m.chosen = [pool[4]] + pool[:3]
+    env._apply_level_rule(entry)
+    assert m.moves == m.chosen
+    m.chosen = ["fly"]  # not in the pool: back to the rule
+    env._apply_level_rule(entry)
+    assert m.chosen is None and m.moves == pool[:4]
+    env.risk((0,), n=2)
+    m.chosen = pool[1:5]  # a different set is a new cache entry
+    env.risk((0,), n=2)
+    assert len([k for k in env._risk_cache if k[0] == (0,)]) == 2

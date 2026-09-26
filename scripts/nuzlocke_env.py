@@ -233,8 +233,15 @@ class NuzlockeEnv(Env):
                 if evolved != m.species:
                     m.ability = evolved_ability(m.species, m.ability, evolved)
                     m.species = evolved
-            # moves follow the level and, with TMs, the trainer reached (a TM lands the fight after)
+            # moves follow the level and, with TMs, the trainer reached (a TM lands the fight after);
+            # a sim-chosen set stays as long as the pool still holds every move (relearning is free)
             m.moves = encounter_moves(m.species, m.level, self.rules.moveset, self._progress) or m.moves
+            if m.chosen:
+                pool = encounter_moves(m.species, m.level, self.rules.moveset, self._progress, k=None)
+                if all(x in pool for x in m.chosen):
+                    m.moves = list(m.chosen)
+                else:
+                    m.chosen = None
             m.evs = player_evs(m.species, self.rules.evs)
 
     @property
@@ -276,7 +283,10 @@ class NuzlockeEnv(Env):
         current) vs the next trainer — or vs the whole no-heal block it opens —
         from n battles under the fast brain. Cached per (party, trainer, n)."""
         party_idx = tuple(self.party if party_idx is None else party_idx)
-        key = (party_idx, self.trainer_idx, n)
+        if self.trainer_idx < self.slice_len:
+            self._apply_level_rule(ORDER[self.trainer_idx])  # so the key sees this fight's moves
+        moves = tuple(tuple(self.roster[i].moves) for i in party_idx)
+        key = (party_idx, moves, self.trainer_idx, n)
         if key not in self._risk_cache:
             est = None
             if party_idx and self.trainer_idx < self.slice_len and hasattr(self.runner, "estimate"):

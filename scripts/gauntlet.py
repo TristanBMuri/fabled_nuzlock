@@ -120,6 +120,7 @@ class Mon:
     nature: str | None = None          # None = neutral (Serious)
     evs: dict | None = None            # None = PLAYER_EVS; trainers carry the sheet's spread
     ivs: dict | None = None            # None = PLAYER_IVS
+    chosen: list[str] | None = None    # moves the sim picked (plan --moves sim); kept while the pool holds them
 
     def pack(self) -> str:
         """Showdown packed string (nick|species|item|ability|moves|nature|evs|gender|
@@ -499,10 +500,12 @@ STATUS_MOVES = ["swordsdance", "dragondance", "nastyplot", "calmmind", "bulkup",
 
 
 def encounter_moves(species: str, level: int, rule: str | None = None,
-                    progress: int | None = None) -> list[str]:
+                    progress: int | None = None, k: int | None = 4) -> list[str]:
     """A mon's moves at `level` under the moveset rule; progress = the trainer
     index reached (None = no TMs): under best4 the pool also holds every TM
     handed out before it that the species can learn (tms.json; reusable).
+    k=None returns the whole eligible pool ranked (the first four are the
+    moveset): the candidates when the sim chooses the moves (plan --moves sim).
     last4 — the last four level-up moves learned (every new move replaced the
             oldest: what a player gets by never declining a move);
     best4 — from every level-up move learned so far: the strongest STAB
@@ -519,7 +522,7 @@ def encounter_moves(species: str, level: int, rule: str | None = None,
     ls = game["learnsets"].get(species, {})
     pool = list(dict.fromkeys(m for m, lvl in ls.get("levelup", []) if lvl <= level))
     if (rule or MOVESET_RULE) == "last4" or not pool:
-        return pool[-4:]
+        return pool[-4:] if k else pool
     if progress is not None:  # TMs in hand, after the level-up moves (later = preferred on ties)
         pool += [m for m in ls.get("tm", []) if m not in pool
                  and m in game["tms"] and game["tms"][m]["before_trainer"] <= progress]
@@ -543,7 +546,7 @@ def encounter_moves(species: str, level: int, rule: str | None = None,
     picks += [m for m in STATUS_MOVES if m in pool][:1]
     picks += [m for m in attacks if m not in picks]
     picks += [m for m in reversed(pool) if m not in picks and m not in NO_SLOT_MOVES]
-    return picks[:4]
+    return picks[:k] if k else picks
 
 
 def load_evolutions() -> dict:

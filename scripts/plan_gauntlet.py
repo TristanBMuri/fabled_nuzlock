@@ -24,7 +24,22 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
 from nuzlocke_env import DEEP_HP, EVOS, MAX_PARTY, ORDER, RISK_BATTLES, SLICE_LEN, NuzlockeEnv, Rules  # noqa: E402
-from gauntlet import load_species  # noqa: E402
+from gauntlet import encounter_moves, load_species  # noqa: E402
+
+
+def party_score(env: NuzlockeEnv, p, lam: float, n: int = RISK_BATTLES) -> float:
+    # P(win) − λ·mean P(death) + margin: at n=8 most candidates show zero
+    # deaths, and HP left is what separates a safe party from a lucky one
+    # (env.risk caches per party, moves, trainer and n)
+    p_win, p_death, hp = env.risk(tuple(p), n=n)
+    return p_win - lam * float(np.mean(p_death)) + HP_WEIGHT * hp if p_death else p_win
+
+
+def hard(env: NuzlockeEnv, p) -> bool:
+    """Same trigger as the env's deep search (cached: free)."""
+    p_win, p_death, hp = env.risk(tuple(p))
+    return p_win < 1.0 or max(p_death, default=0.0) > 0.0 or hp < DEEP_HP
+
 
 def swaps(base, alive):
     """The party plus every single swap with a box mon."""
@@ -42,20 +57,7 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
     base = by_level[:MAX_PARTY]
     if fast:  # no risk queries: highest levels, for bulk harvesting
         return base
-    memo = {}
-
-    def score(p, n=RISK_BATTLES):
-        # P(win) − λ·mean P(death) + margin: at n=8 most candidates show zero
-        # deaths, and HP left is what separates a safe party from a lucky one
-        if (p, n) not in memo:
-            p_win, p_death, hp = env.risk(p, n=n)
-            memo[p, n] = p_win - lam * float(np.mean(p_death)) + HP_WEIGHT * hp if p_death else p_win
-        return memo[p, n]
-
-    def hard(p):  # same trigger as the env's deep search (cached: free)
-        p_win, p_death, hp = env.risk(p)
-        return p_win < 1.0 or max(p_death, default=0.0) > 0.0 or hp < DEEP_HP
-
+    score = lambda p, n=RISK_BATTLES: party_score(env, p, lam, n)
     front = sorted(swaps(base, alive), key=score, reverse=True)
     if league and env._block():
         # E8: the League party from the whole box. Every mon is at the cap, so the
@@ -67,7 +69,7 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
         pool = sorted((tuple(sorted(c)) for c in itertools.combinations(short, MAX_PARTY)),
                       key=score, reverse=True)
         front = sorted(pool[:LEAGUE_TOP], key=lambda p: score(p, LEAGUE_N), reverse=True)
-    elif parties != "swap" and hard(front[0]):
+    elif parties != "swap" and hard(env, front[0]):
         # The swap set is the limit at a wall (README 2o): a hard fight may need
         # several changes from the base party. Widen only there (cost).
         if parties == "all":
@@ -78,18 +80,54 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
                 pool = set(front[:BEAM]) | {q for p in front[:BEAM] for q in swaps(p, alive)}
                 front = sorted(pool, key=score, reverse=True)
     if verbose:
-        print(f"    {len(memo)} candidates: best {score(front[0]):+.2f} "
+        print(f"    {len(front)} candidates: best {score(front[0]):+.2f} "
               f"{[env.roster[i].species for i in front[0]]}"
               + (f", next {score(front[1]):+.2f}" if len(front) > 1 else ""))
     return list(front[0])
 
 
+def choose_moves(env: NuzlockeEnv, party: list[int], lam: float, verbose: bool) -> int:
+    """E7(d): at a hard fight the sim picks each party mon's four moves. Candidates =
+    the current set with one slot swapped for one of the next MOVE_ALTS moves of the
+    ranked pool (level-up + TMs in hand); a variant replaces the set when it beats it
+    at n=8 and again at 2n (n=8 alone accepts noise). Greedy, one pass over the party;
+    the choice persists (Mon.chosen) while the pool holds it. Returns the sets changed."""
+    n2, changed = 2 * RISK_BATTLES, 0
+    base = party_score(env, party, lam)
+    for i in party:
+        m = env.roster[i]
+        cur, prev = list(m.moves), m.chosen  # the level rule inside risk() rewrites m.moves: vary m.chosen
+        pool = encounter_moves(m.species, m.level, env.rules.moveset, env._progress, k=None)
+        alts = [x for x in pool if x not in cur][:MOVE_ALTS]
+        best, best_s = None, base
+        for v in (cur[:j] + [a] + cur[j + 1:] for a in alts for j in range(len(cur))):
+            m.chosen = v
+            s = party_score(env, party, lam)
+            if s > best_s:
+                best, best_s = v, s
+        m.chosen = prev
+        if best:  # confirm at 2n against the current set
+            s_cur = party_score(env, party, lam, n2)
+            m.chosen = best
+            if party_score(env, party, lam, n2) > s_cur:
+                base, changed = best_s, changed + 1
+                if verbose:
+                    print(f"    moves {m.species}: {cur} -> {best} ({base:+.2f})")
+            else:
+                m.chosen, m.moves = prev, cur
+        else:
+            m.moves = cur
+    return changed
+
+
+MOVE_ALTS = 3  # --moves sim: the next 3 ranked moves are tried in every slot (12 variants per mon)
 BEAM, BEAM_ROUNDS = 3, 3  # --parties beam: top-3 parties expanded three times
 LEAGUE_TOP, LEAGUE_N = 8, 32  # --league: the top-8 subsets re-scored at n=32
 HP_WEIGHT = 0.2  # margin tie-breaker weight in the party score (--hp-weight)
 DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes)
 DEATHS_BY_SPECIES: dict[str, int] = {}  # species -> deaths (all episodes)
 LOSSES_AT: dict[int, int] = {}  # trainer index -> lost battles
+MOVE_CHANGES = [0]  # movesets the sim changed (--moves sim, all episodes)
 
 
 @functools.lru_cache(maxsize=None)
@@ -107,7 +145,7 @@ def final_bst(species: str) -> int:
 
 
 def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool = False,
-            parties: str = "swap", league: int = 0) -> dict:
+            parties: str = "swap", league: int = 0, moves: str = "rule") -> dict:
     obs, info = env.reset(seed=seed)
     deaths, first_death_at = 0, None
     while not env.done:
@@ -125,9 +163,14 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
                 print(f"  [locked] {ORDER[env.trainer_idx]['trainer_name']}: party fights on, "
                       f"PP left {[sum(env.carry[i].get('pp') or []) for i in env.party if i in env.carry]}")
         else:
-            for i in choose_party(env, lam, verbose, fast, parties, league):
+            party = choose_party(env, lam, verbose, fast, parties, league)
+            for i in party:
                 if i not in env.party:
                     env.step(1 + i)
+            # not at the League opener: the fast brain's block ranking does not transfer to
+            # search play at Cynthia (E8; moves chosen there took clears 70% -> 20%, README)
+            if moves == "sim" and not fast and len(party) > 1 and not env._block() and hard(env, party):
+                MOVE_CHANGES[0] += choose_moves(env, party, lam, verbose)
         alive_before = sum(m.alive for m in env.roster)
         t = env.trainer_idx
         env.step(0)  # confirm -> battle
@@ -176,12 +219,12 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict]
                       slice_len=args.slice, deep=width(args.deep))
     t0, rows = time.time(), []
     for n, s in enumerate(seeds):
-        r = episode(env, s, args.lam, args.verbose, args.fast, args.parties, args.league)
+        r = episode(env, s, args.lam, args.verbose, args.fast, args.parties, args.league, args.moves)
         rows.append(r)
         print(f"ep seed {s:4d}: cleared {r['cleared']:3d}  no-death {r['cleared_no_death']:3d}  "
               f"deaths {r['deaths']:2d}  {'CLEAR' if r['slice_clear'] else ''}  "
               f"({(time.time() - t0) / (n + 1):.0f}s/ep)", flush=True)
-    return rows, DEATHS_AT, LOSSES_AT, env.n_deep, DEATHS_BY_SPECIES
+    return rows, DEATHS_AT, LOSSES_AT, env.n_deep, DEATHS_BY_SPECIES, MOVE_CHANGES[0]
 
 
 def main() -> None:
@@ -203,6 +246,9 @@ def main() -> None:
                          "swap score, on the block, top-8 re-scored at n=32 (~3 min; null at K=10, "
                          "README 2026-09-23; 0 = plain swaps)")
     ap.add_argument("--lam", type=float, default=1.0, help="death penalty weight")
+    ap.add_argument("--moves", choices=["rule", "sim"], default="rule",
+                    help="sim = at hard fights the sim re-picks each party mon's four moves from its "
+                         "pool, one slot swap at a time (E7d); rule = best4 as computed")
     ap.add_argument("--level-margin", type=int, default=0,
                     help="player level = rule level + this (XP proxy)")
     ap.add_argument("--level-rule", choices=["match", "cap"], default="cap",
@@ -242,6 +288,7 @@ def main() -> None:
         parts = [run_episodes(args, seeds)]
     rows = [r for p in parts for r in p[0]]
     n_deep = sum(p[3] for p in parts)
+    n_moves = sum(p[5] for p in parts)
     deaths_at, losses_at, by_species = {}, {}, {}  # merged histograms (the globals belong to the workers)
     for p in parts:
         for t, d in p[1].items():
@@ -253,13 +300,14 @@ def main() -> None:
     k = lambda f: np.mean([r[f] for r in rows])
     print(f"\n{args.episodes} episodes | slice {args.slice} | battler={args.policy or 'SimpleHeuristics'} "
           f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} "
-          f"parties={args.parties} league={args.league} lam={args.lam} | rules: {rules(args)} "
+          f"parties={args.parties} league={args.league} moves={args.moves} lam={args.lam} | rules: {rules(args)} "
           f"| {args.workers} workers, {(time.time() - t0) / 60:.0f} min\n"
           f"  trainers cleared        {k('cleared'):.2f}\n"
           f"  cleared without a death {k('cleared_no_death'):.2f}\n"
           f"  deaths per run          {k('deaths'):.2f}\n"
           f"  slice clear rate        {k('slice_clear'):.0%}"
-          + (f"\n  deep-search fights      {n_deep / args.episodes:.1f} per run" if args.deep else ""))
+          + (f"\n  deep-search fights      {n_deep / args.episodes:.1f} per run" if args.deep else "")
+          + (f"\n  movesets changed        {n_moves / args.episodes:.1f} per run" if args.moves == "sim" else ""))
     from nuzlocke_env import ORDER, TRAINERS
     print("  deadliest trainers (deaths / lost battles over all episodes):")
     for t, d in sorted(deaths_at.items(), key=lambda kv: -kv[1])[:8]:
