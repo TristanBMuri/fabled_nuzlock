@@ -197,7 +197,8 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
 
 def rules(args: argparse.Namespace) -> Rules:
     return Rules(level_rule=args.level_rule, level_margin=args.level_margin, box=args.roster,
-                 dupes_clause=not args.no_dupes, moveset=args.moveset, tms=not args.no_tms, evs=args.evs)
+                 dupes_clause=not args.no_dupes, moveset=args.moveset, tms=not args.no_tms, evs=args.evs,
+                 items=not args.no_items)
 
 
 def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict], dict, dict, int]:
@@ -267,6 +268,9 @@ def main() -> None:
     ap.add_argument("--no-tms", action="store_true",
                     help="level-up moves only (default: best4 also over the TMs handed out so far, "
                          "E7: reusable, data/bdsp/tms.json; 20%% -> 70%% clears)")
+    ap.add_argument("--no-items", action="store_true",
+                    help="no held items (default: items found so far, one per mon, by gauntlet.assign_items; "
+                         "E9, data/bdsp/items.json)")
     ap.add_argument("--evs", choices=["flat", "trained"], default=Rules.evs,
                     help="player EVs: flat 85 each, or trained = 252 in the better attacking stat, 252 Spe, 4 HP")
     ap.add_argument("--hp-weight", type=float, default=HP_WEIGHT,

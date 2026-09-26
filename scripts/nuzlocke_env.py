@@ -14,7 +14,7 @@ from gymnasium import Env
 from gymnasium.spaces import Box, Discrete
 
 from battle_env import SPECIES  # pool species (82) — union below with BDSP
-from gauntlet import (Mon, ability_slots, encounter_moves, evolve, evolved_ability,
+from gauntlet import (Mon, ability_slots, assign_items, encounter_moves, evolve, evolved_ability,
                       load_encounters, load_evolutions, load_trainers, pack_team,
                       player_evs, record_battle, roll_ability, trainer_mons)
 from gauntlet import BattleRunner, SimBattleRunner
@@ -35,11 +35,12 @@ class Rules:
     dupes_clause: bool = True    # an area's encounter is rerolled among families never owned (none left: no catch)
     moveset: str = "best4"       # best4: strongest STAB / other-type / next attack + a status move; last4: last learned
     tms: bool = True             # best4 also over the TMs handed out so far (reusable; data/bdsp/tms.json)
+    items: bool = True           # held items found so far, assigned by gauntlet.assign_items (E9; data/bdsp/items.json)
     evs: str = "flat"            # player EVs: flat 85 each, or trained (252 attack / 252 Spe / 4 HP)
 
     def __str__(self):
         return (f"level_rule={self.level_rule} margin={self.level_margin} box={self.box} "
-                f"dupes={self.dupes_clause} moveset={self.moveset} tms={self.tms} evs={self.evs}")
+                f"dupes={self.dupes_clause} moveset={self.moveset} tms={self.tms} evs={self.evs} items={self.items}")
 BREAKPOINTS = ["none", "gym_leader", "elite_four", "champion"]
 SLICE_LEN = 21  # trainers per episode: through Gym Leader Roark (order_index 20 in the route order)
 EVOS = load_evolutions()
@@ -264,6 +265,7 @@ class NuzlockeEnv(Env):
         entry = ORDER[self.trainer_idx]
         self._apply_level_rule(entry)
         party = [self.roster[i] for i in party_idx]
+        assign_items(party, self.trainer_idx if self.rules.items else None)
         enemy = trainer_mons(TRAINERS[entry["trainer_id"]])
         return pack_team(party), pack_team(enemy), entry
 

@@ -1297,6 +1297,40 @@ project_overview.md # the plan / roadmap
   at 70 variants — the compute dial, not a rule), or re-picking per fight
   without persistence (loses the League slot-for-slot anyway). The lever
   left for Cynthia is E9 held items.
+  **E9, held items (2026-09-26, `Rules.items`, `--no-items`).** Data:
+  Bulbapedia sits behind a Cloudflare challenge since today (`build_order.fetch`
+  cached the challenge page; deleted), so `scripts/build_items.py` reads
+  Serebii's BDSP item list instead — one row per item with its fixed locations,
+  then Pickup / shop / wild-holder lines, which are dropped. An item counts
+  from its earliest fixed pre-League source, one copy per source; not counted:
+  the Grand Underground, Battle Park prizes (all Choice items but Specs, Life
+  Orb, Muscle Band, Scope Lens), shops, wild holders, post-game areas, and
+  consumables (Focus Sash, berries, herbs — a battle rebuilt from packed teams
+  would hand them back every fight). 40 items in `data/bdsp/items.json`:
+  Quick Claw #21, Sea Incense #23 (Water: the starter's first item), Miracle
+  Seed #29, plates and type boosters along the route, Shell Bell #99, Choice
+  Specs / Wise Glasses / Black Glasses at Celestic #235, Expert Belt #271,
+  Leftovers #381 (Victory Road), Sky Plate #397. Rule (`gauntlet.assign_items`,
+  at every fielding, deterministic in party x progress so the risk cache needs
+  no item key): item_value = the multiplier on the mon's attacks of the boosted
+  type (1.2 STAB, 1.1 off-type) or category (Choice x0.85 for the lock), or a
+  flat value (Leftovers 1.25 so it is always held, Expert Belt 1.1, Metronome
+  1.1, Shell Bell 1.08, Quick Claw / Wide Lens / Razor Claw 1.05); greedy over
+  (value, level), one item per mon, `copies` holders per item. At #404 a
+  Gyarados / Luxray / Staraptor / Torterra / Lapras / Golduck party holds
+  Splash Plate / Zap Plate / Sky Plate / Soft Sand / Wave Incense / Choice
+  Specs (+ Leftovers on the first by sort). Table, same seeds and config as
+  the TM line (`logs/plan_tms_items.log`, 31 min):
+    **404.80 / 402.8 / 4.30 / 80% clears**; Cynthia 36 deaths, 2 losses; Lucian 5,
+    Bertha 1, Cedric 1 (TM line 404.6 / 358.6 / 5.2 / 70%; Cynthia 34 / 2; E4 12).
+  One death before the League in ten runs (was ~10), the E4 halved (12 → 6),
+  Cynthia flat (34 → 36 deaths, 2 losses both). Clear rate +10 is inside the
+  ±15 floor; deaths 5.2 → 4.3 and no-death 358.6 → 402.8 are the gain, and the
+  rule is honest (found items only, one copy each). Items are on by default;
+  **this is the benchmark table now.** Cynthia costs 3.6 deaths per run with
+  every pre-League lever on the env side in (levels, movesets, TMs, items, the
+  box); what is left for her is play (search width at the block, the enemy
+  model) or the run layer bringing a different box.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the

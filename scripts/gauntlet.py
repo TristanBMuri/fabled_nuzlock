@@ -45,8 +45,9 @@ def load_game(name: str = GAME) -> dict:
     [[move, level], ...] sorted by level, tm: [moves the species takes from a
     TM]}), evolutions (species -> [[to, level], ...]), species (id -> name,
     types, ability slots, base stats), tms (move -> {tm, before_trainer, from}:
-    scripts/build_tms.py). A second game is a second folder with the same
-    files and no code change."""
+    scripts/build_tms.py), items (held items -> {before_trainer, from, copies,
+    effect}: scripts/build_items.py). A second game is a second folder with the
+    same files and no code change."""
     d = DATA / name
     j = lambda f: json.load(open(d / f))
     return {"trainers": {t["trainer_id"]: t for t in j("trainers.json")["trainers"]},
@@ -56,7 +57,8 @@ def load_game(name: str = GAME) -> dict:
             "evolutions": j("evolutions.json"),
             "species": j("species.json"),
             "moves": j("moves.json"),
-            "tms": j("tms.json")}
+            "tms": j("tms.json"),
+            "items": j("items.json")}
 
 
 def load_trainers():
@@ -547,6 +549,39 @@ def encounter_moves(species: str, level: int, rule: str | None = None,
     picks += [m for m in attacks if m not in picks]
     picks += [m for m in reversed(pool) if m not in picks and m not in NO_SLOT_MOVES]
     return picks[:k] if k else picks
+
+
+def item_value(m: Mon, item: dict, md: dict, types: set[str]) -> float:
+    """What holding `item` is worth to m: the multiplier on its attacks of the
+    boosted type (1.2 STAB / 1.1 off-type) or category (Choice locks: x0.85), or
+    the item's flat value (Leftovers 1.25). 1.0 = nothing."""
+    if "flat" in item:
+        return item["flat"]
+    attacks = [md[x] for x in m.moves if x in md and md[x]["category"] != "Status"]
+    if "type" in item:
+        hit = [a for a in attacks if a["type"] == item["type"]]
+        return item["mult"] if any(a["type"] in types for a in hit) else (1.0 + (item["mult"] - 1) / 2 if hit else 1.0)
+    if any(a["category"] == item["category"] for a in attacks[:1]):  # the strongest attack's category
+        return item["mult"] * (0.85 if item.get("lock") else 1.0)
+    return 1.0
+
+
+def assign_items(mons: list[Mon], progress: int | None) -> None:
+    """E9: hand the items in hand at trainer `progress` (None = no items) to the
+    party, greedily by item_value, one item per mon and `copies` holders per item.
+    Deterministic in (party, progress): the risk cache needs no item key."""
+    for m in mons:
+        m.item = None
+    if progress is None:
+        return
+    game = load_game()
+    md, sp = game["moves"], game["species"]
+    left = {k: v["copies"] for k, v in game["items"].items() if v["before_trainer"] <= progress}
+    cands = sorted(((item_value(m, game["items"][k], md, set(sp.get(m.species, {}).get("types", []))), m.level, k, i)
+                    for i, m in enumerate(mons) for k in left), reverse=True)
+    for value, _, k, i in cands:
+        if value > 1.0 and left[k] > 0 and mons[i].item is None:
+            mons[i].item, left[k] = k, left[k] - 1
 
 
 def load_evolutions() -> dict:

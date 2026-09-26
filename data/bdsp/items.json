@@ -1,0 +1,316 @@
+{
+ "quickclaw": {
+  "name": "Quick Claw",
+  "before_trainer": 21,
+  "from": "Jubilife City",
+  "copies": 1,
+  "flat": 1.05
+ },
+ "seaincense": {
+  "name": "Sea Incense",
+  "before_trainer": 23,
+  "from": "Route 204",
+  "copies": 1,
+  "type": "Water",
+  "mult": 1.2
+ },
+ "miracleseed": {
+  "name": "Miracle Seed",
+  "before_trainer": 29,
+  "from": "Floaroma Meadow",
+  "copies": 1,
+  "type": "Grass",
+  "mult": 1.2
+ },
+ "insectplate": {
+  "name": "Insect Plate",
+  "before_trainer": 46,
+  "from": "Eterna Forest",
+  "copies": 1,
+  "type": "Bug",
+  "mult": 1.2
+ },
+ "silverpowder": {
+  "name": "SilverPowder",
+  "before_trainer": 46,
+  "from": "Eterna Forest",
+  "copies": 1,
+  "type": "Bug",
+  "mult": 1.2
+ },
+ "dracoplate": {
+  "name": "Draco Plate",
+  "before_trainer": 54,
+  "from": "Eterna City",
+  "copies": 1,
+  "type": "Dragon",
+  "mult": 1.2
+ },
+ "dreadplate": {
+  "name": "Dread Plate",
+  "before_trainer": 54,
+  "from": "Old Chateau",
+  "copies": 1,
+  "type": "Dark",
+  "mult": 1.2
+ },
+ "poisonbarb": {
+  "name": "Poison Barb",
+  "before_trainer": 69,
+  "from": "Route 206",
+  "copies": 1,
+  "type": "Poison",
+  "mult": 1.2
+ },
+ "shellbell": {
+  "name": "Shell Bell",
+  "before_trainer": 99,
+  "from": "Hearthome City",
+  "copies": 1,
+  "flat": 1.08
+ },
+ "spookyplate": {
+  "name": "Spooky Plate",
+  "before_trainer": 99,
+  "from": "Amity Square",
+  "copies": 1,
+  "type": "Ghost",
+  "mult": 1.2
+ },
+ "roseincense": {
+  "name": "Rose Incense",
+  "before_trainer": 102,
+  "from": "Route 212",
+  "copies": 1,
+  "type": "Grass",
+  "mult": 1.2
+ },
+ "mindplate": {
+  "name": "Mind Plate",
+  "before_trainer": 140,
+  "from": "Solaceon Ruins",
+  "copies": 1,
+  "type": "Psychic",
+  "mult": 1.2
+ },
+ "oddincense": {
+  "name": "Odd Incense",
+  "before_trainer": 140,
+  "from": "Solaceon Ruins",
+  "copies": 1,
+  "type": "Psychic",
+  "mult": 1.2
+ },
+ "fistplate": {
+  "name": "Fist Plate",
+  "before_trainer": 152,
+  "from": "Route 215",
+  "copies": 1,
+  "type": "Fighting",
+  "mult": 1.2
+ },
+ "metronome": {
+  "name": "Metronome",
+  "before_trainer": 160,
+  "from": "Veilstone City",
+  "copies": 1,
+  "flat": 1.1
+ },
+ "silkscarf": {
+  "name": "Silk Scarf",
+  "before_trainer": 160,
+  "from": "Veilstone City",
+  "copies": 1,
+  "type": "Normal",
+  "mult": 1.2
+ },
+ "widelens": {
+  "name": "Wide Lens",
+  "before_trainer": 160,
+  "from": "Veilstone City",
+  "copies": 1,
+  "flat": 1.05
+ },
+ "toxicplate": {
+  "name": "Toxic Plate",
+  "before_trainer": 198,
+  "from": "Great Marsh",
+  "copies": 1,
+  "type": "Poison",
+  "mult": 1.2
+ },
+ "mysticwater": {
+  "name": "Mystic Water",
+  "before_trainer": 205,
+  "from": "Pastoria City",
+  "copies": 1,
+  "type": "Water",
+  "mult": 1.2
+ },
+ "meadowplate": {
+  "name": "Meadow Plate",
+  "before_trainer": 217,
+  "from": "Route 210",
+  "copies": 1,
+  "type": "Grass",
+  "mult": 1.2
+ },
+ "waveincense": {
+  "name": "Wave Incense",
+  "before_trainer": 217,
+  "from": "Route 210",
+  "copies": 1,
+  "type": "Water",
+  "mult": 1.2
+ },
+ "blackglasses": {
+  "name": "Black Glasses",
+  "before_trainer": 235,
+  "from": "Celestic Town",
+  "copies": 1,
+  "type": "Dark",
+  "mult": 1.2
+ },
+ "choicespecs": {
+  "name": "Choice Specs",
+  "before_trainer": 235,
+  "from": "Celestic Town",
+  "copies": 1,
+  "category": "Special",
+  "mult": 1.5,
+  "lock": true
+ },
+ "wiseglasses": {
+  "name": "Wise Glasses",
+  "before_trainer": 235,
+  "from": "Celestic Town",
+  "copies": 1,
+  "category": "Special",
+  "mult": 1.1
+ },
+ "metalcoat": {
+  "name": "Metal Coat",
+  "before_trainer": 251,
+  "from": "Iron Island",
+  "copies": 1,
+  "type": "Steel",
+  "mult": 1.2
+ },
+ "ironplate": {
+  "name": "Iron Plate",
+  "before_trainer": 251,
+  "from": "Iron Island",
+  "copies": 1,
+  "type": "Steel",
+  "mult": 1.2
+ },
+ "magnet": {
+  "name": "Magnet",
+  "before_trainer": 251,
+  "from": "Iron Island",
+  "copies": 1,
+  "type": "Electric",
+  "mult": 1.2
+ },
+ "rockincense": {
+  "name": "Rock Incense",
+  "before_trainer": 259,
+  "from": "Fuego Ironworks",
+  "copies": 1,
+  "type": "Rock",
+  "mult": 1.2
+ },
+ "splashplate": {
+  "name": "Splash Plate",
+  "before_trainer": 264,
+  "from": "Route 220",
+  "copies": 1,
+  "type": "Water",
+  "mult": 1.2
+ },
+ "blackbelt": {
+  "name": "Black Belt",
+  "before_trainer": 271,
+  "from": "Route 221",
+  "copies": 1,
+  "type": "Fighting",
+  "mult": 1.2
+ },
+ "expertbelt": {
+  "name": "Expert Belt",
+  "before_trainer": 271,
+  "from": "Route 221",
+  "copies": 1,
+  "flat": 1.1
+ },
+ "earthplate": {
+  "name": "Earth Plate",
+  "before_trainer": 277,
+  "from": "Oreburgh Gate",
+  "copies": 1,
+  "type": "Ground",
+  "mult": 1.2
+ },
+ "icicleplate": {
+  "name": "Icicle Plate",
+  "before_trainer": 302,
+  "from": "Route 217",
+  "copies": 1,
+  "type": "Ice",
+  "mult": 1.2
+ },
+ "spelltag": {
+  "name": "Spell Tag",
+  "before_trainer": 302,
+  "from": "Route 217",
+  "copies": 1,
+  "type": "Ghost",
+  "mult": 1.2
+ },
+ "softsand": {
+  "name": "Soft Sand",
+  "before_trainer": 332,
+  "from": "Mt. Coronet",
+  "copies": 1,
+  "type": "Ground",
+  "mult": 1.2
+ },
+ "stoneplate": {
+  "name": "Stone Plate",
+  "before_trainer": 332,
+  "from": "Mt. Coronet",
+  "copies": 1,
+  "type": "Rock",
+  "mult": 1.2
+ },
+ "zapplate": {
+  "name": "Zap Plate",
+  "before_trainer": 347,
+  "from": "Sunyshore City",
+  "copies": 1,
+  "type": "Electric",
+  "mult": 1.2
+ },
+ "razorclaw": {
+  "name": "Razor Claw",
+  "before_trainer": 381,
+  "from": "Victory Road",
+  "copies": 1,
+  "flat": 1.05
+ },
+ "leftovers": {
+  "name": "Leftovers",
+  "before_trainer": 381,
+  "from": "Victory Road",
+  "copies": 1,
+  "flat": 1.25
+ },
+ "skyplate": {
+  "name": "Sky Plate",
+  "before_trainer": 397,
+  "from": "Pokemon League",
+  "copies": 1,
+  "type": "Flying",
+  "mult": 1.2
+ }
+}

@@ -13,7 +13,7 @@ _DIST = ROOT / "pokemon-showdown" / "dist" / "sim" / "index.js"
 pytestmark = pytest.mark.skipif(not (shutil.which("node") and _DIST.exists()),
                                 reason="node + built Showdown required")
 
-from gauntlet import Mon, encounter_moves, evolved_ability, roll_ability  # noqa: E402
+from gauntlet import Mon, assign_items, encounter_moves, evolved_ability, roll_ability  # noqa: E402
 from nuzlocke_env import ORDER, NuzlockeEnv, Rules  # noqa: E402
 
 
@@ -184,7 +184,7 @@ def test_tm_movesets_follow_the_route():
 
 
 def test_rules_reach_the_env(env):
-    assert str(env.rules) == "level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True evs=flat"
+    assert str(env.rules) == "level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True evs=flat items=True"
     last4 = NuzlockeEnv(seed=0, risk_features=False, slice_len=59, rules=Rules(moveset="last4", box=12))
     try:
         last4.reset(seed=4)
@@ -247,3 +247,22 @@ def test_sim_chosen_moves_persist_while_the_pool_holds_them(env):
     m.chosen = pool[1:5]  # a different set is a new cache entry
     env.risk((0,), n=2)
     assert len([k for k in env._risk_cache if k[0] == (0,)]) == 2
+
+
+def test_held_items_follow_the_route(env):
+    """E9: items in hand are handed out by value, one per mon, one holder per copy."""
+    party = [Mon("prinplup", 20, ["bubblebeam", "peck", "growl", "metalclaw"]),
+             Mon("grotle", 20, ["razorleaf", "tackle", "bite", "curse"]),
+             Mon("luxio", 20, ["spark", "bite", "tackle", "charge"])]
+    assign_items(party, None)
+    assert all(m.item is None for m in party)
+    assign_items(party, 30)  # Sea Incense (#23), Miracle Seed (#29), Quick Claw (#21) in hand
+    assert [m.item for m in party] == ["seaincense", "miracleseed", "quickclaw"]
+    party2 = [Mon("empoleon", 66, ["surf", "flashcannon", "icebeam", "rest"]) for _ in range(3)]
+    assign_items(party2, 400)
+    items = [m.item for m in party2]
+    assert len(set(items)) == 3 and set(items) <= {"leftovers", "choicespecs", "mysticwater", "seaincense", "waveincense", "splashplate"}
+    env.reset(seed=0)
+    env.trainer_idx = 30
+    pp, _, _ = env._packed_matchup(tuple(range(len(env.roster))))
+    assert "|seaincense|" in pp or "|miracleseed|" in pp or "|quickclaw|" in pp

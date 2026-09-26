@@ -89,7 +89,12 @@ ai_util/diff_sets.py    sim-vs-server team-setup diff (found the EV bug).
 data/bdsp/              the game folder: trainers.json, order.json (route order,
                         location + mandatory per entry), encounters.json (gates =
                         first trainer of the location), learnsets (levelup + tm per
-                        species) / evolutions / species / moves, tms.json (TM gates).
+                        species) / evolutions / species / moves, tms.json (TM gates),
+                        items.json (held items: gate, copies, effect).
+scripts/build_items.py  rebuilds items.json from Serebii's BDSP item list (Bulbapedia is
+                        behind a Cloudflare challenge since 2026-09-26): fixed pre-League
+                        sources only (no Grand Underground / Battle Park / shops / wild
+                        holders / consumables); effect model = the ITEMS table in the script.
 scripts/build_tms.py    rebuilds tms.json from each TM's Bulbapedia page: move -> TM number,
                         before_trainer (earliest fixed source on the route order), source.
 scripts/build_order.py  rebuilds order.json + encounters.json from Bulbapedia (trainer
@@ -97,7 +102,8 @@ scripts/build_order.py  rebuilds order.json + encounters.json from Bulbapedia (t
                         bands for twice-visited locations, story battles by trainer_id).
                         Then `gauntlet.py --build-moves` and `--build-species`.
 scripts/gauntlet.py     load_game() (cached, the only reader of the folder), Mon/
-                        pack_team, encounter_moves (last4 rule), evolve(), ability
+                        pack_team, encounter_moves (best4 / last4; k=None = ranked pool),
+                        assign_items (E9: greedy by item_value at fielding), evolve(), ability
                         slots, BattleRunner (server, legacy), SimBattleRunner
                         (default): run(boss=, search=(k,r)), estimate(), one Searcher
                         per width. --build-moves / --build-species regenerate the
@@ -125,7 +131,8 @@ tests/test_sim.py       bridge: play, mirror, fork. `uv run pytest -q`.
 ```bash
 uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 59 \
     --policy models/game_policy_best4.pt --search 3,8 --search-all --deep 4,16 --workers 10
-# defaults: --roster 30 (unbounded box), dupes clause on, --moveset best4
+# defaults: --roster 50 (unbounded box), dupes clause on, --moveset best4, TMs on, items on
+# the full-game benchmark (the table that matters): --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 10
 # --slice 59 = through Gardenia on the route order (was 186 on the level order);
 # the best4 prior was cloned on the old order's harvest — regenerate before trusting a table.
 ```
@@ -292,7 +299,14 @@ boss's max level (14 = Roark). ~85 s/episode.
    / 20% with the League opener, 404.4 / 354.1 / 5.1 / 40% without it
    (`logs/plan_tms_moves{,_noblock}.log`); Cynthia 8 / 6 losses vs 2.
    Negative: the calc bot picks moves for the calc bot, search play needs
-   the ones it drops (set-up). Off by default. Next: E9 held items.** Probe from full HP at parity: calc bot 2.7%
+   the ones it drops (set-up). Off by default.** **E9 held items (2026-09-26,
+   default on, `--no-items`; `data/bdsp/items.json` from
+   `scripts/build_items.py` — Serebii, since Bulbapedia is behind Cloudflare;
+   `gauntlet.assign_items` greedy by a multiplier model): 404.8 / 402.8 / 4.3
+   / 80% clears (`logs/plan_tms_items.log`); one pre-League death in ten
+   runs, E4 6 deaths per 10 runs (was 12), Cynthia 36 deaths / 2 losses
+   (flat). That is the benchmark table now.** Every env-side pre-League lever
+   is in; Cynthia's 3.6 deaths per run are the whole problem. Probe from full HP at parity: calc bot 2.7%
    wins; legal EV training +1–3 points; her Garchomp and Lucario kill 1.5
    mons each per fight. Next, on the roadmap only (2026-09-19, not started):
    E8 League party building from the whole box, then E7 TM movesets with

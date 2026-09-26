@@ -487,9 +487,15 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       6-subsets of a shortlist by type coverage against her six — with more
       samples than n=8. Half a day, no new data. Do before E7 so E7's table
       is not confounded by selection.
-- [ ] **E9. Held items (later).** Leftovers, Choice items, Focus Sash: data
-      (where obtainable) + an assignment rule. Smaller lever pre-League.
-      In-battle items stay out (hardcore rule).
+- [x] **E9. Held items (2026-09-26; `scripts/build_items.py` → `data/bdsp/items.json`,
+      40 items from Serebii's BDSP list, fixed pre-League sources only, no
+      consumables; `gauntlet.assign_items` greedy by a multiplier model at every
+      fielding; `Rules.items`, `--no-items`). Table 404.8 / 402.8 / 4.3 / 80%
+      vs 404.6 / 358.6 / 5.2 / 70%: one pre-League death in ten runs, the E4
+      halved, Cynthia flat (README → Status). Default on; the benchmark now.**
+      Was: Leftovers, Choice items, Focus Sash: data (where obtainable) + an
+      assignment rule. Smaller lever pre-League. In-battle items stay out
+      (hardcore rule).
 
 Order: E3 (an afternoon, one table) → E1 (a day, behaviour-preserving) →
 E4 (one OOD loop + table) → E5 alongside → E2 last. The `--roster 30`
