@@ -16,6 +16,7 @@ import argparse
 import functools
 import itertools
 import multiprocessing as mp
+import pickle
 import sys
 import time
 from pathlib import Path
@@ -144,10 +145,23 @@ def final_bst(species: str) -> int:
     return sum(load_species().get(species, {}).get("baseStats", {}).values())
 
 
+# Run state at the League opener (league_test.py replays the block from it). The
+# runner, the risk cache and the settings stay with the env that restores it.
+SNAPSHOT = ("run_id", "trainer_idx", "roster", "graveyard", "party", "_rival_family", "max_enemy_level",
+            "phase", "pending", "_queue", "carry", "dropped", "_route_cursor", "done", "rng")
+
+
 def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool = False,
-            parties: str = "swap", league: int = 0, moves: str = "rule") -> dict:
+            parties: str = "swap", league: int = 0, moves: str = "rule", save: Path | None = None) -> dict:
     obs, info = env.reset(seed=seed)
-    deaths, first_death_at = 0, None
+    return play(env, info, lam, verbose, fast, parties, league, moves, save)
+
+
+def play(env: NuzlockeEnv, info: dict, lam: float, verbose: bool, fast: bool = False,
+         parties: str = "swap", league: int = 0, moves: str = "rule", save: Path | None = None) -> dict:
+    """The planner from the env's current state to the end of the run. save: pickle the
+    run state here at the League opener (once)."""
+    deaths, first_death_at, deaths_at = 0, None, {}
     while not env.done:
         if env.phase == "ENCOUNTER":
             alts, catch = env.pending[0], bool(info["action_mask"][1])
@@ -163,6 +177,10 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
                 print(f"  [locked] {ORDER[env.trainer_idx]['trainer_name']}: party fights on, "
                       f"PP left {[sum(env.carry[i].get('pp') or []) for i in env.party if i in env.carry]}")
         else:
+            if save and env._block():
+                save.parent.mkdir(parents=True, exist_ok=True)
+                save.write_bytes(pickle.dumps({k: getattr(env, k) for k in SNAPSHOT}))
+                save = None
             party = choose_party(env, lam, verbose, fast, parties, league)
             for i in party:
                 if i not in env.party:
@@ -177,6 +195,7 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
         died = alive_before - sum(m.alive for m in env.roster)
         deaths += died
         if died:
+            deaths_at[t] = died
             DEATHS_AT[t] = DEATHS_AT.get(t, 0) + died
             for m in env.graveyard[-died:]:
                 DEATHS_BY_SPECIES[m.species] = DEATHS_BY_SPECIES.get(m.species, 0) + 1
@@ -192,7 +211,7 @@ def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool =
         info = {"action_mask": env._mask()}
     return {"cleared": env.trainer_idx, "deaths": deaths,
             "cleared_no_death": env.trainer_idx if first_death_at is None else first_death_at,
-            "slice_clear": env.trainer_idx >= env.slice_len}
+            "slice_clear": env.trainer_idx >= env.slice_len, "deaths_at": deaths_at}
 
 
 def rules(args: argparse.Namespace) -> Rules:
@@ -201,26 +220,31 @@ def rules(args: argparse.Namespace) -> Rules:
                  items=not args.no_items)
 
 
-def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict], dict, dict, int]:
-    """One env, the given episode seeds (a worker). Returns the per-episode rows,
-    the death / loss histograms and the number of deep-search fights."""
+def make_env(args: argparse.Namespace) -> NuzlockeEnv:
     global HP_WEIGHT
     import torch
     torch.set_num_threads(1)  # batch-1 MLP: the intra-op pool only adds overhead
     HP_WEIGHT = args.hp_weight
-    if args.harvest:
-        import gauntlet
-        gauntlet.HARVEST = Path(args.harvest)
     width = lambda s: tuple(int(x) for x in s.split(",")) if s else None
     # risk_features off: the planner queries env.risk() for its candidates
     # directly and never reads the obs; leaving them on re-queried every
     # intermediate party while the team was being built (+50% cost).
-    env = NuzlockeEnv(seed=args.seed, backend="sim", policy=args.policy, search=width(args.search),
-                      rules=rules(args), risk_features=False, search_all=args.search_all,
-                      slice_len=args.slice, deep=width(args.deep))
+    return NuzlockeEnv(seed=args.seed, backend="sim", policy=args.policy, search=width(args.search),
+                       rules=rules(args), risk_features=False, search_all=args.search_all,
+                       slice_len=args.slice, deep=width(args.deep))
+
+
+def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict], dict, dict, int]:
+    """One env, the given episode seeds (a worker). Returns the per-episode rows,
+    the death / loss histograms and the number of deep-search fights."""
+    if args.harvest:
+        import gauntlet
+        gauntlet.HARVEST = Path(args.harvest)
+    env = make_env(args)
     t0, rows = time.time(), []
     for n, s in enumerate(seeds):
-        r = episode(env, s, args.lam, args.verbose, args.fast, args.parties, args.league, args.moves)
+        save = Path(args.save_league) / f"seed{s}.pkl" if args.save_league else None
+        r = episode(env, s, args.lam, args.verbose, args.fast, args.parties, args.league, args.moves, save)
         rows.append(r)
         print(f"ep seed {s:4d}: cleared {r['cleared']:3d}  no-death {r['cleared_no_death']:3d}  "
               f"deaths {r['deaths']:2d}  {'CLEAR' if r['slice_clear'] else ''}  "
@@ -228,8 +252,9 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple[list[dict]
     return rows, DEATHS_AT, LOSSES_AT, env.n_deep, DEATHS_BY_SPECIES, MOVE_CHANGES[0]
 
 
-def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__)
+def parser(doc: str = __doc__) -> argparse.ArgumentParser:
+    """The planner and rules flags (league_test.py takes the same ones)."""
+    ap = argparse.ArgumentParser(description=doc)
     ap.add_argument("--episodes", type=int, default=20)
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--policy", help="BC prior for the battler (default SimpleHeuristics), or "
@@ -280,8 +305,15 @@ def main() -> None:
     ap.add_argument("--workers", type=int, default=1,
                     help="episodes run in this many processes (one env + one sim each, ~1 GB; "
                          "check free -g first)")
+    ap.add_argument("--save-league", metavar="DIR",
+                    help="pickle each episode's run state at the League opener to DIR/seed<N>.pkl "
+                         "(the input of scripts/league_test.py)")
     ap.add_argument("--verbose", action="store_true")
-    args = ap.parse_args()
+    return ap
+
+
+def main() -> None:
+    args = parser().parse_args()
     seeds = [args.seed + e for e in range(args.episodes)]
     t0 = time.time()
     if args.workers > 1:

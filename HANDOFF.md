@@ -120,6 +120,10 @@ scripts/plan_gauntlet.py Scripted planner + evaluation harness + death histogram
                         --slice N, --deep k,r, --parties swap|beam|all, --roster N,
                         --no-dupes, --moves sim (E7d: the sim re-picks moves at hard
                         fights, Mon.chosen), --workers N, --verbose (encounter trace).
+                        --save-league DIR pickles each run's state at the League opener.
+scripts/league_test.py  The League alone (2026-10-09): replays Aaron .. Cynthia from saved
+                        openers R times each, same planner flags; --vs pairs two variants by
+                        snapshot (same boxes). ~4 min per block vs ~28 min per full episode.
 tests/test_nuzlocke_env.py  env rules: queued offers, dupes clause, box cap.
 scripts/train_nuzlocke.py PPO meta-policy trainer (sim backend; NOT retrained yet
                         on the new obs — old checkpoint is skipped on resume).
@@ -305,7 +309,10 @@ boss's max level (14 = Roark). ~85 s/episode.
    `gauntlet.assign_items` greedy by a multiplier model): 404.8 / 402.8 / 4.3
    / 80% clears (`logs/plan_tms_items.log`); one pre-League death in ten
    runs, E4 6 deaths per 10 runs (was 12), Cynthia 36 deaths / 2 losses
-   (flat). That is the benchmark table now.** Every env-side pre-League lever
+   (flat). That is the benchmark table now.** **2026-10-09: a 20-episode replicate of
+   that table gave 55% clears / 9 Cynthia losses (README → League test); the
+   League test (`scripts/league_test.py`, baseline 0.70 ± 0.07 block clears,
+   3.12 deaths at Cynthia) is where League levers are measured now.** Every env-side pre-League lever
    is in; Cynthia's 3.6 deaths per run are the whole problem. Probe from full HP at parity: calc bot 2.7%
    wins; legal EV training +1–3 points; her Garchomp and Lucario kill 1.5
    mons each per fight. Next, on the roadmap only (2026-09-19, not started):

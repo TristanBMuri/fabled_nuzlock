@@ -1331,6 +1331,25 @@ project_overview.md # the plan / roadmap
   every pre-League lever on the env side in (levels, movesets, TMs, items, the
   box); what is left for her is play (search width at the block, the enemy
   model) or the run layer bringing a different box.
+  **The League test (2026-10-09, `scripts/league_test.py`).** A 20-episode
+  replicate of the benchmark on unchanged code (seeds 300-319, `--save-league
+  models/league_tms_items`, `logs/plan_league_snapshots.log`, 63 min):
+    404.55 / 382.1 / 3.85 / **55% clears**; Cynthia 59 deaths, **9 losses**; Lucian 7.
+  The 10-episode table said 80% / 2 losses. 25 points between identical configs
+  is past the ±15 floor quoted above: every League verdict since 2026-09-19
+  that rests on clear rate alone (E8, EVs, E7(d), E9's +10) is inside noise.
+  `plan_gauntlet.py --save-league DIR` pickles the run state at Aaron (before
+  the League party is chosen); `league_test.py` replays the block from every
+  opener R times with the planner's flags and pairs variants by box (`--vs`).
+  ~4 min per block vs ~28 min per full episode. Baseline, 20 boxes x 4 replays
+  (`logs/league_base.{log,jsonl}`, 32 min):
+    **block clear 0.70 ± 0.07 / 3.69 ± 0.25 deaths per block / 3.12 ± 0.20 at
+    Cynthia**; Aaron, Bertha, Flint, Lucian 80/80 won, Cynthia 56/80.
+  (± = standard error over boxes.) Per box: 7 boxes clear 4/4, 6 clear 3/4,
+  4 clear 2/4, 2 clear 1/4, 1 clears 0/4 — most of the spread is the dice, not
+  the box. The E4 never loses; the whole League problem is Cynthia's 3.1 deaths.
+  A lever needs about +0.15 block clears or -0.5 deaths to show at this size;
+  smaller ones need more replays. Every League lever is tested here first now.
   **Lead order is not a lever (probe, 2 seeds at Edwin).** The packed order
   is the party's roster order, so the lead is whichever mon was caught
   first. Rotating each of the six into the lead: under the fast prior the
