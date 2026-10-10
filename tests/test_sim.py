@@ -95,3 +95,18 @@ def test_fork_seed_is_reproducible(bridge):
         f.close()
     assert runs[0] == runs[1]
     sb.close()
+
+
+def test_forme_next_to_base_form_gets_distinct_names(bridge):
+    """Raticate + Raticate-Alola: Showdown names both 'p1: Raticate' (a nickname equal
+    to the species becomes the base species), so the mirror collapsed them and offered
+    the active one as a switch (Radical Red probe, 2026-10-10)."""
+    from ai_util.sim import dedupe_nicknames
+    team = packed("Raticate\nLevel: 16\n- Tackle\n\nRaticate-Alola\nLevel: 16\n- Tackle\n\nLedian\nLevel: 16\n- Tackle")
+    assert dedupe_nicknames(team).count("Raticate1|") == 1 and "Raticate2|Raticate-Alola" in dedupe_nicknames(team)
+    sb = SimBattle(bridge, FMT, team, TEAM_B)
+    m = sb.mirrors["p1"]
+    assert len(m.team) == 3 and [p.species for p in m.available_switches] == ["raticatealola", "ledian"]
+    sb.play(brains(), max_turns=60)
+    assert sb.ended and sb.stats["rejected"] == 0
+    sb.close()

@@ -28,6 +28,7 @@ _LOG = logging.getLogger("sim")
 _LOG.setLevel(logging.CRITICAL)
 _IDS = itertools.count()
 _IGNORE = Player.MESSAGES_TO_IGNORE | {"message"}
+_DEX = GenData.from_gen(9).pokedex  # base species for nickname dedupe (formes)
 
 # (battle, side) -> Showdown choice string ("move tackle", "switch 2", "default")
 Brain = Callable[["SimBattle", str], str]
@@ -45,14 +46,22 @@ def dedupe_nicknames(packed: str) -> str:
     search candidates; rare under the prior, which seldom proposed it)."""
     parts = [mon.split("|") for mon in packed.split("]")]
     species_of = lambda f: (f[1] or f[0]) if len(f) >= 2 else None
-    count = Counter(species_of(f) for f in parts if len(f) >= 2)
+    # Showdown names a mon whose nickname equals its species after the *base* species
+    # ('Raticate-Alola' -> 'p1: Raticate'), so a forme next to its base form collides too
+    def base_of(s):  # the dex stores baseSpecies as an id for base forms and a name for formes
+        if not s:
+            return s
+        bid = to_id_str(_DEX.get(to_id_str(s), {}).get("baseSpecies", s))
+        return _DEX.get(bid, {}).get("name", s)
+    count = Counter(base_of(species_of(f)) for f in parts if len(f) >= 2)
     seen: dict[str, int] = {}
     mons = []
     for f in parts:
         species = species_of(f)
-        if species is not None and count[species] > 1:  # every member: Bidoof1, Bidoof2
-            n = seen[species] = seen.get(species, 0) + 1
-            f[0], f[1] = f"{species}{n}", species
+        base = base_of(species)
+        if species is not None and count[base] > 1:  # every member: Raticate1, Raticate2
+            n = seen[base] = seen.get(base, 0) + 1
+            f[0], f[1] = f"{base}{n}", species
         mons.append("|".join(f))
     return "]".join(mons)
 
