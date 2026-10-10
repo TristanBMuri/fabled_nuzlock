@@ -1,0 +1,157 @@
+"""data/rr/: the Radical Red game folder for the boss probe, from the tracker's
+docs export (encounters, bosses, items) and the RadicalRedShowdown fork's
+gen9rr mod (learnsets, evolutions, species, moves). Minimal: what
+gauntlet.encounter_moves / evolve / the probe need. Not a full gauntlet yet
+(no route trainers in order.json).
+
+  uv run python scripts/build_rr.py            # needs pokemon-showdown-rr/ built
+"""
+
+import json
+import subprocess
+from pathlib import Path
+
+from poke_env.data import to_id_str
+
+ROOT = Path(__file__).resolve().parents[1]
+RR = ROOT / "data" / "rr"
+FORK = ROOT / "pokemon-showdown-rr"
+
+NODE = """
+const {Dex} = require(process.argv[1] + '/dist/sim');
+const d = Dex.mod('gen9rr');
+const want = new Set(process.argv.slice(2));
+const evos = {}, queue = [...want];
+while (queue.length) {                       // evolution closure, every method
+  const sp = queue.pop();
+  if (evos[sp]) continue;
+  const s = d.species.get(sp);
+  if (!s.exists) { evos[sp] = []; continue; }
+  evos[sp] = s.evos.map(e => d.species.get(e)).filter(e => e.exists)
+    .map(e => ({to: e.id, type: e.evoType || "level", level: e.evoLevel || null, item: e.evoItem || null, move: e.evoMove || null}));
+  for (const e of evos[sp]) { want.add(e.to); queue.push(e.to); }
+}
+const learnsets = {}, species = {}, moves = {};
+for (const sp of want) {
+  const s = d.species.get(sp);
+  if (!s.exists) continue;
+  species[s.id] = {name: s.name, types: s.types, abilities: s.abilities, baseStats: s.baseStats};
+  const ls = (d.data.Learnsets[s.id] || d.data.Learnsets[s.baseSpecies ? d.species.get(s.baseSpecies).id : s.id] || {}).learnset || {};
+  const levelup = [], tm = [];
+  for (const [m, srcs] of Object.entries(ls)) {
+    const lv = srcs.filter(x => /^9L\\d+$/.test(x)).map(x => parseInt(x.slice(2)));
+    if (lv.length) levelup.push([m, Math.min(...lv)]);
+    if (srcs.some(x => x === "9M" || x === "9T")) tm.push(m);
+  }
+  levelup.sort((a, b) => a[1] - b[1]);
+  learnsets[s.id] = {levelup, tm};
+  for (const m of [...levelup.map(x => x[0]), ...tm]) {
+    const mv = d.moves.get(m);
+    moves[mv.id] = {type: mv.type, power: mv.basePower, category: mv.category, accuracy: mv.accuracy};
+  }
+}
+console.log(JSON.stringify({learnsets, evos, species, moves}));
+"""
+
+
+STATS = ("hp", "atk", "def", "spa", "spd", "spe")
+PLUS = {"Lonely": "atk", "Brave": "atk", "Adamant": "atk", "Naughty": "atk", "Bold": "def", "Relaxed": "def", "Impish": "def",
+        "Lax": "def", "Timid": "spe", "Hasty": "spe", "Jolly": "spe", "Naive": "spe", "Modest": "spa", "Mild": "spa",
+        "Quiet": "spa", "Rash": "spa", "Calm": "spd", "Gentle": "spd", "Sassy": "spd", "Careful": "spd"}
+
+
+def guess_evs(nature: str, cats: list[str]) -> dict:
+    """The dump strips EVs; hardcore bosses are fully trained (docs). Assume a competitive
+    252/252/4 from the nature: a speed nature pairs with the attacking stat the set uses, an
+    attacking nature with Spe, a defensive nature with HP; neutral: attacking stat + Spe."""
+    plus = PLUS.get(nature)
+    atk = "atk" if cats.count("Physical") >= cats.count("Special") else "spa"
+    ev = dict.fromkeys(STATS, 0)
+    if plus == "spe":
+        ev["spe"], ev[atk], ev["hp"] = 252, 252, 4
+    elif plus in ("atk", "spa"):
+        ev[plus], ev["spe"], ev["hp"] = 252, 252, 4
+    elif plus in ("def", "spd"):
+        ev[plus], ev["hp"], ev[atk] = 252, 252, 4
+    else:
+        ev[atk], ev["spe"], ev["hp"] = 252, 252, 4
+    return ev
+
+
+def parse_dump(moves: dict) -> None:
+    """data/rr/trainers_hardcore.json from the ROM dump: every trainer with its mons
+    (species, item, ability, level, nature, moves, IVs, assumed EVs) and a packed team."""
+    import re
+    txt = open(RR / "rr41_hardcore_trainers.txt", encoding="utf-8").read()
+    out = []
+    for b in re.split(r"\n(?=\S.*\(id: 0x[0-9a-f]+\)\n)", txt):
+        m = re.match(r"(.+?) \(id: (0x[0-9a-f]+)\)", b)
+        if not m:
+            continue
+        mons = []
+        for sec in re.split(r"\n\n", b.split("\n", 1)[1]):  # the header shares its paragraph with the lead
+            lines = [l for l in sec.strip().splitlines() if l.strip()]
+            hm = lines and re.match(r"(.+?)(?: \((M|F|Gender unknown)\))?(?: @ (.+))?$", lines[0])
+            if not hm:
+                continue
+            d = {"species": hm.group(1).strip(), "gender": {"M": "M", "F": "F"}.get(hm.group(2) or "", ""),
+                 "item": (hm.group(3) or "").strip(), "ability": "", "level": None, "nature": "Serious", "moves": [],
+                 "ivs": dict.fromkeys(STATS, 31)}
+            for l in lines[1:]:
+                if l.startswith("Ability: "):
+                    d["ability"] = l[9:].strip()
+                elif l.startswith("Level: "):
+                    d["level"] = int(l[7:]) if l[7:].strip().isdigit() else None
+                elif l.endswith(" Nature"):
+                    d["nature"] = l[:-7].strip()
+                elif l.startswith("- "):
+                    d["moves"].append(l[2:].strip())
+                elif l.startswith("IVs: "):
+                    for part in l[5:].split("/"):
+                        v, k = part.strip().split(" ", 1)
+                        d["ivs"][{"HP": "hp", "Atk": "atk", "Def": "def", "SpA": "spa", "SpD": "spd", "Spe": "spe"}[k]] = int(v)
+            if d["level"] is None or not d["moves"]:
+                continue
+            d["evs"] = guess_evs(d["nature"], [moves.get(to_id_str(x), {}).get("category", "Status") for x in d["moves"]])
+            mons.append(d)
+        if not mons:
+            continue
+        spread = lambda e: ",".join(str(e[k]) for k in STATS)
+        packed = "]".join("|".join([d["species"], "", to_id_str(d["item"]), to_id_str(d["ability"]),
+                                    ",".join(to_id_str(x) for x in d["moves"]), d["nature"], spread(d["evs"]), d["gender"],
+                                    spread(d["ivs"]), "", str(d["level"]), ""]) for d in mons)
+        out.append({"name": m[1].strip(), "id": m[2], "cap": max(d["level"] for d in mons), "n": len(mons),
+                    "mons": mons, "packed": packed})
+    (RR / "trainers_hardcore.json").write_text(json.dumps(out))
+    print(f"data/rr/trainers_hardcore.json: {len(out)} trainers from the dump")
+
+
+def main() -> None:
+    enc = json.load(open(RR / "tracker_encounters.json"))
+    bosses = json.load(open(RR / "tracker_bosses.json"))
+    names = {e["species"] for l in enc["locations"] for t in l["methods"].values() for e in t}
+    names |= {p["species"] for mode in bosses.values() for c in mode["categories"] for x in c["bosses"] for p in x["pokemon"]}
+    ids = sorted({to_id_str(n) for n in names})
+    raw = subprocess.run(["node", "-e", NODE, str(FORK), *ids], capture_output=True, text=True, check=True).stdout
+    data = json.loads(raw)
+    missing = [i for i in ids if i not in data["species"]]
+    (RR / "learnsets.json").write_text(json.dumps(data["learnsets"]))
+    (RR / "evolutions.json").write_text(json.dumps(data["evos"]))
+    (RR / "species.json").write_text(json.dumps(data["species"]))
+    (RR / "moves.json").write_text(json.dumps(data["moves"]))
+    # every TM / tutor move is "in hand" from the start: the probe's upper bound (gates come with the gauntlet)
+    (RR / "tms.json").write_text(json.dumps({m: {"tm": 0, "name": m, "before_trainer": 0, "from": "any"}
+                                             for ls in data["learnsets"].values() for m in ls["tm"]}))
+    (RR / "items.json").write_text("{}")
+    (RR / "trainers.json").write_text(json.dumps({"trainers": []}))
+    (RR / "order.json").write_text(json.dumps({"entries": []}))
+    (RR / "encounters.json").write_text(json.dumps({"starter": [], "routes": []}))
+    print(f"data/rr: {len(data['species'])} species, {len(data['moves'])} moves; {len(missing)} ids unknown to the mod: {missing[:30]}")
+    all_moves = json.loads(subprocess.run(["node", "-e", "const {Dex}=require(process.argv[1]+'/dist/sim');const d=Dex.mod('gen9rr');"
+                                           "const o={};for(const m of d.moves.all())o[m.id]={category:m.category};console.log(JSON.stringify(o))",
+                                           str(FORK)], capture_output=True, text=True, check=True).stdout)
+    parse_dump(all_moves)
+
+
+if __name__ == "__main__":
+    main()

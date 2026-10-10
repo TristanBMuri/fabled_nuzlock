@@ -21,8 +21,13 @@ DATA = ROOT / "data"
 GAME = "bdsp"  # the game folder under data/: everything the env knows about a game
 
 
+def load_game(name: str | None = None) -> dict:
+    """The game folder (default: GAME, read at call time so a script can switch folders)."""
+    return _load_game(name or GAME)
+
+
 @functools.lru_cache(maxsize=None)
-def load_game(name: str = GAME) -> dict:
+def _load_game(name: str) -> dict:
     """The game folder as one dict: trainers (id -> record), order (gauntlet
     entries), encounters (starter + areas), learnsets (species -> {levelup:
     [[move, level], ...] sorted by level, tm: [moves the species takes from a

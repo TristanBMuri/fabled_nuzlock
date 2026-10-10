@@ -17,7 +17,8 @@
 const path = require('path');
 const readline = require('readline');
 
-const ROOT = path.join(__dirname, '..', 'pokemon-showdown', 'dist');
+// SHOWDOWN_DIR picks another build (e.g. the Radical Red fork); default: the vendored clone
+const ROOT = path.join(process.env.SHOWDOWN_DIR ? path.resolve(process.env.SHOWDOWN_DIR) : path.join(__dirname, '..', 'pokemon-showdown'), 'dist');
 const { Battle, Teams, TeamValidator } = require(path.join(ROOT, 'sim'));
 const { extractChannelMessages } = require(path.join(ROOT, 'sim', 'battle'));
 
@@ -35,8 +36,11 @@ function prepPlayer(format, opts) {
   return { ...opts, team };
 }
 
-function attach(entry) {
-  entry.battle.send = (type, data) => {
+// The channel must exist before the battle starts: the opening requests are
+// emitted at start (older builds, e.g. the Radical Red fork, do not re-emit them
+// on the first flush), so `new` passes it in the constructor and fork attaches it.
+function sender(entry) {
+  return (type, data) => {
     if (Array.isArray(data)) data = data.join('\n');
     if (type === 'update') {
       const ch = extractChannelMessages(data, [1, 2]);
@@ -47,6 +51,10 @@ function attach(entry) {
       entry.out[data.slice(0, i)].push(data.slice(i + 1));
     }
   };
+}
+
+function attach(entry) {
+  entry.battle.send = sender(entry);
 }
 
 function winnerId(b) {
@@ -84,7 +92,7 @@ function handle(msg) {
       // carry: per p1 mon in team order {hp, status, pp} from a previous battle
       // (the League: no heal between fights). The battle starts only once both
       // players are set, so p1's state is edited before p2 is added.
-      e.battle = new Battle({ formatid: msg.format, seed: msg.seed, p1: prepPlayer(msg.format, msg.p1) });
+      e.battle = new Battle({ formatid: msg.format, seed: msg.seed, send: sender(e), p1: prepPlayer(msg.format, msg.p1) });
       if (msg.carry) {
         const side = e.battle.sides[0];
         msg.carry.forEach((c, i) => {
@@ -99,7 +107,6 @@ function handle(msg) {
         });
       }
       e.battle.setPlayer('p2', prepPlayer(msg.format, msg.p2));
-      attach(e);
       battles.set(msg.id, e);
       return flush(e);
     }

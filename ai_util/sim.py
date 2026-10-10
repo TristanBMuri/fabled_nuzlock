@@ -9,6 +9,7 @@ the per-side protocol history (deterministic, a few ms).
 import itertools
 import json
 import logging
+import os
 import re
 import subprocess
 from collections import Counter
@@ -57,10 +58,15 @@ def dedupe_nicknames(packed: str) -> str:
 
 
 class SimBridge:
-    def __init__(self):
+    def __init__(self, showdown: str | None = None):
+        """showdown: a Showdown build directory other than the vendored clone (the
+        Radical Red fork); also settable with SHOWDOWN_DIR in the environment."""
+        env = dict(os.environ)
+        if showdown:
+            env["SHOWDOWN_DIR"] = str(Path(showdown).resolve())
         self.proc = subprocess.Popen(
             ["node", str(BRIDGE)], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
-            text=True, bufsize=1)
+            text=True, bufsize=1, env=env)
 
     def call(self, **msg) -> dict:
         self.proc.stdin.write(json.dumps(msg) + "\n")
@@ -126,6 +132,7 @@ class SimBattle:
             for m in Teambuilder.parse_packed_team(self.teams[opp]):
                 m.nickname, m.species = m.nickname or None, m.species or None
                 name = m.nickname or m.species
+                m.moves = [x for x in m.moves if to_id_str(x) in data.moves]  # a mod's own moves stay unknown
                 mon = Pokemon(gen=self.gen, teambuilder=m, name=name)
                 raw = compute_raw_stats(to_id_str(m.species or m.nickname), list(m.evs), list(m.ivs),
                                         m.level or 100, (m.nature or "serious").lower(), data)

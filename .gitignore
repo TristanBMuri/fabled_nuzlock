@@ -14,3 +14,4 @@ pokemon-showdown/
 # regenerable, large: model checkpoints, BC datasets, battle harvests
 models/
 data/teams/gauntlet_harvest/
+pokemon-showdown-rr/
