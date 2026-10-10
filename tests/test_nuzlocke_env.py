@@ -19,7 +19,7 @@ from nuzlocke_env import ORDER, NuzlockeEnv, Rules  # noqa: E402
 
 @pytest.fixture(scope="module")
 def env():
-    e = NuzlockeEnv(seed=0, risk_features=False, slice_len=59)
+    e = NuzlockeEnv(seed=0, slice_len=59)
     yield e
     e.runner.bridge.close()
 
@@ -121,7 +121,7 @@ def test_box_cap_counts_pending_offers(env):
         assert [m.species for a in env.pending for m in a] == ["bidoof"]
         assert env.dropped == ["B"]
     finally:
-        env.encounters, env.max_roster = real, 12
+        env.encounters, env.max_roster = real, env.rules.box
 
 
 def test_ability_slot_rolls_at_capture_and_survives_evolution():
@@ -165,7 +165,7 @@ def test_tm_movesets_follow_the_route():
     assert encounter_moves("lapras", 66, "best4", progress=404)[:3] == ["surf", "icebeam", "thunderbolt"]
     assert "icebeam" not in encounter_moves("staraptor", 66, "best4", progress=404)  # cannot learn it
     assert encounter_moves("gyarados", 66, "last4", progress=404) == encounter_moves("gyarados", 66, "last4")
-    tm_env = NuzlockeEnv(seed=0, risk_features=False, slice_len=405)
+    tm_env = NuzlockeEnv(seed=0, slice_len=405)
     try:
         tm_env.reset(seed=7)
         tm_env.roster = [Mon("gyarados", 5, ["splash"], caught_level=5)]
@@ -185,7 +185,7 @@ def test_tm_movesets_follow_the_route():
 
 def test_rules_reach_the_env(env):
     assert str(env.rules) == "level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True evs=flat items=True"
-    last4 = NuzlockeEnv(seed=0, risk_features=False, slice_len=59, rules=Rules(moveset="last4", box=12))
+    last4 = NuzlockeEnv(seed=0, slice_len=59, rules=Rules(moveset="last4", box=12))
     try:
         last4.reset(seed=4)
         last4.roster = [Mon("meditite", 5, ["bide"])]
@@ -199,7 +199,6 @@ def test_rules_reach_the_env(env):
 
 def test_only_the_countering_rival_is_fought(env):
     from nuzlocke_env import ORDER, TRAINERS
-    counter = {"turtwig": "chimchar", "chimchar": "piplup", "piplup": "turtwig"}
     for seed in range(6):
         env.reset(seed=seed)
         starter = env.roster[0].species
@@ -229,26 +228,6 @@ def test_method_alternatives_respect_the_dupes_clause(env):
         env.encounters = real
 
 
-def test_sim_chosen_moves_persist_while_the_pool_holds_them(env):
-    """E7(d): a Mon.chosen set survives the level rule; the risk cache keys on moves."""
-    env.reset(seed=0)
-    env.trainer_idx = 100  # deep enough for a wide pool (level-up moves + TMs)
-    m, entry = env.roster[0], ORDER[env.trainer_idx]
-    env._apply_level_rule(entry)
-    pool = encounter_moves(m.species, m.level, "best4", env.trainer_idx, k=None)
-    assert pool[:4] == m.moves and len(pool) > 4
-    m.chosen = [pool[4]] + pool[:3]
-    env._apply_level_rule(entry)
-    assert m.moves == m.chosen
-    m.chosen = ["fly"]  # not in the pool: back to the rule
-    env._apply_level_rule(entry)
-    assert m.chosen is None and m.moves == pool[:4]
-    env.risk((0,), n=2)
-    m.chosen = pool[1:5]  # a different set is a new cache entry
-    env.risk((0,), n=2)
-    assert len([k for k in env._risk_cache if k[0] == (0,)]) == 2
-
-
 def test_held_items_follow_the_route(env):
     """E9: items in hand are handed out by value, one per mon, one holder per copy."""
     party = [Mon("prinplup", 20, ["bubblebeam", "peck", "growl", "metalclaw"]),
@@ -264,5 +243,56 @@ def test_held_items_follow_the_route(env):
     assert len(set(items)) == 3 and set(items) <= {"leftovers", "choicespecs", "mysticwater", "seaincense", "waveincense", "splashplate"}
     env.reset(seed=0)
     env.trainer_idx = 30
+    env._apply_level_rule(ORDER[30])
     pp, _, _ = env._packed_matchup(tuple(range(len(env.roster))))
     assert "|seaincense|" in pp or "|miracleseed|" in pp or "|quickclaw|" in pp
+
+
+def test_league_carry_is_keyed_by_identity(env):
+    """Two value-equal twins in the locked party each keep their own PP (Mon is
+    identity-compared; `roster.index` used to return the first twin for both)."""
+    env.reset(seed=6)
+    env.slice_len = 405
+    env.trainer_idx = next(i for i in range(len(ORDER) - 1) if ORDER[i + 1].get("no_heal"))  # Aaron
+    env.roster = [Mon("crobat", 66, ["bite"]), Mon("crobat", 66, ["bite"])]
+    env.phase, env.party = "PRE_BATTLE", [0, 1]
+    run = env.runner.run
+    env.runner.run = lambda *a, **k: (True, [True, True], [{"hp": 1, "status": "", "pp": [3]},
+                                                            {"hp": 1, "status": "", "pp": [7]}])
+    try:
+        env.step(0)
+    finally:
+        env.runner.run = run
+    assert env.party_locked and env.carry == {0: {"pp": [3]}, 1: {"pp": [7]}}
+
+
+def test_level_rule_applies_on_entering_pre_battle(env):
+    """The level rule runs once per trainer when the offers are answered, not
+    inside the risk query: a query is read-only."""
+    env.reset(seed=8)
+    assert env.phase == "ENCOUNTER" and env.roster[0].level == 5
+    while env.phase == "ENCOUNTER":
+        env.step(0)
+    assert env.phase == "PRE_BATTLE" and env.roster[0].level == 14  # Roark's cap
+    roster_before = [(m.species, m.level, tuple(m.moves)) for m in env.roster]
+    env.risk((0,), n=1)
+    assert [(m.species, m.level, tuple(m.moves)) for m in env.roster] == roster_before
+
+
+def test_snapshot_round_trip(env):
+    """plan_gauntlet.SNAPSHOT restored into a fresh env continues the same run."""
+    import pickle
+    from plan_gauntlet import SNAPSHOT
+    env.reset(seed=9)
+    while env.phase == "ENCOUNTER":
+        env.step(1)
+    blob = pickle.dumps({k: getattr(env, k) for k in SNAPSHOT})
+    other = NuzlockeEnv(seed=1, slice_len=59)
+    try:
+        for k, v in pickle.loads(blob).items():
+            setattr(other, k, v)
+        assert [m.species for m in other.roster] == [m.species for m in env.roster]
+        assert other.trainer_idx == env.trainer_idx and other.phase == "PRE_BATTLE"
+        assert other.risk(tuple(range(len(other.roster))), n=1)[0] in (0.0, 1.0)
+    finally:
+        other.runner.bridge.close()

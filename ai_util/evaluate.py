@@ -32,14 +32,14 @@ from ai_util.battler_obs import embed_battle
 from ai_util.battler_policy import PolicyPlayer, action_mask, load_policy
 from ai_util.sim import Brain, SimBattle, SimBridge, order_to_choice, player_brain
 from poke_env.environment import SinglesEnv
-from poke_env.player import MaxBasePowerPlayer, RandomPlayer, SimpleHeuristicsPlayer
+from poke_env.player import SimpleHeuristicsPlayer
 
 GAME_FORMAT = "gen8customgamenogimmicks"
-_BASELINES = {"heuristic": SimpleHeuristicsPlayer, "maxbp": MaxBasePowerPlayer, "random": RandomPlayer}
 
 
-def heuristic_brain(kind: str = "heuristic", fmt: str = GAME_FORMAT) -> Brain:
-    return player_brain(_BASELINES[kind](battle_format=fmt, start_listening=False, log_level=50))
+def heuristic_brain() -> Brain:
+    """SimpleHeuristics as a sim Brain: the enemy AI, and the default player."""
+    return player_brain(SimpleHeuristicsPlayer(battle_format=GAME_FORMAT, start_listening=False, log_level=50))
 
 
 def prior_brain(policy) -> Brain:
@@ -84,12 +84,12 @@ class Searcher:
 
     def __init__(self, policy, enemy: Brain, k: int = 3, rollouts: int = 8,
                  max_turns: int = 100, importance: list[float] | None = None,
-                 death_weight: float = 0.5, confident: float | None = None,
-                 crn: bool = True, seed: int | None = None, rollout: Brain | None = None):
+                 death_weight: float = 0.5, crn: bool = True, seed: int | None = None,
+                 rollout: Brain | None = None):
         self.policy, self.enemy = policy, enemy
         self.prior = rollout or prior_brain(policy)
         self.k, self.rollouts, self.max_turns = k, rollouts, max_turns
-        self.importance, self.death_weight, self.confident = importance, death_weight, confident
+        self.importance, self.death_weight = importance, death_weight
         # Common random numbers: rollout j uses the same engine seed for every
         # candidate, so candidates differ only by the action, not by luck.
         self.crn, self.rng = crn, np.random.default_rng(seed)
@@ -126,7 +126,7 @@ class Searcher:
         if not cands:
             return "default"
         self.last_action = cands[0]
-        if len(cands) <= 1 or (self.confident is not None and probs[cands[0]] >= self.confident):
+        if len(cands) <= 1:
             return order_to_choice(SinglesEnv.action_to_order(np.int64(cands[0]), m))
         self.n_searched += 1
         self.searched_last = True
@@ -197,39 +197,24 @@ def main() -> None:
     p.add_argument("--policy", help="state_dict of the prior, or 'calc' for the damage-calc bot; omit for --check")
     p.add_argument("--net-arch", default="256,256")
     p.add_argument("--check", action="store_true", help="SimpleHeuristics on both sides")
-    p.add_argument("--check-vs", choices=["maxbp", "random"],
-                   help="mirror reference: SimpleHeuristics vs this baseline on generated "
-                        "gen9randombattle teams (server numbers: maxbp ~88%%, random ~97%%)")
     p.add_argument("--search", action="store_true")
     p.add_argument("--k", type=int, default=3)
     p.add_argument("--rollouts", type=int, default=8)
     p.add_argument("--death-weight", type=float, default=0.5)
-    p.add_argument("--confident", type=float,
-                   help="skip search when the prior's top prob >= this (default: never skip; "
-                        "the converged BC prior is >0.9 almost everywhere, so 0.9 disabled search)")
     p.add_argument("--no-crn", action="store_true",
                    help="fresh RNG per rollout instead of common random numbers across candidates")
     p.add_argument("--max-turns", type=int, default=100)
-    p.add_argument("--raw-names", action="store_true",
-                   help="keep duplicate-species nicknames (reproduces the server/poke-env "
-                        "team collapse; only for apples-to-apples checks vs old numbers)")
     args = p.parse_args()
 
-    fmt = GAME_FORMAT
-    if args.check_vs:
-        fmt = "gen9randombattle"
-        pairs = [(None, None)] * args.n_pairs
-    elif args.from_harvest:
+    if args.from_harvest:
         from ai_util.collect_game import sample_pairs
         pairs = sample_pairs(args.from_harvest, args.n_pairs, args.seed)
     else:
         pairs = json.loads(Path(args.pairs).read_text())[args.offset:args.offset + args.n_pairs]
     bridge = SimBridge()
-    enemy = heuristic_brain(args.check_vs or "heuristic", fmt)
+    enemy = heuristic_brain()
     searcher = None
-    if args.check_vs:
-        brain, tag = heuristic_brain("heuristic", fmt), f"heuristic vs {args.check_vs}"
-    elif args.check:
+    if args.check:
         brain, tag = heuristic_brain(), "heuristic"
     else:
         if args.policy == "calc":
@@ -241,7 +226,7 @@ def main() -> None:
         if args.search:
             searcher = Searcher(policy, enemy, k=args.k, rollouts=args.rollouts,
                                 max_turns=args.max_turns, death_weight=args.death_weight,
-                                confident=args.confident, crn=not args.no_crn, seed=args.seed,
+                                crn=not args.no_crn, seed=args.seed,
                                 rollout=fast if policy is None else None)
             tag = f"{tag}+search k={args.k} r={args.rollouts}{' nocrn' if args.no_crn else ''}"
             brain = searcher
@@ -250,8 +235,7 @@ def main() -> None:
 
     t0, wins, deaths, mons, turns, stats = time.time(), 0.0, 0.0, 0, 0.0, {}
     for i, (party, enemy_team) in enumerate(pairs):
-        r = evaluate(bridge, party, enemy_team, brain, enemy, n=args.n,
-                     max_turns=args.max_turns, fmt=fmt, dedupe=not args.raw_names)
+        r = evaluate(bridge, party, enemy_team, brain, enemy, n=args.n, max_turns=args.max_turns)
         wins += r["p_win"]
         deaths += sum(r["p_death"])
         mons += len(r["p_death"])

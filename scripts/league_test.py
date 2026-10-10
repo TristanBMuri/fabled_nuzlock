@@ -9,7 +9,7 @@ opener on, the box itself is what the saved run caught.
 
   uv run python scripts/league_test.py --snapshots results/league_snapshots --replays 4 \\
       --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 10 --out results/league_base.jsonl
-  ... --league 10 --out results/league_e8.jsonl --vs results/league_base.jsonl
+  ... --no-items --out logs/league_noitems.jsonl --vs results/league_base.jsonl
 """
 
 import json
@@ -35,10 +35,10 @@ def run_jobs(args, jobs: list[tuple[str, int]]) -> list[dict]:
         for k, v in pickle.loads(Path(path).read_bytes()).items():
             setattr(env, k, v)
         env._risk_cache = {}
-        env.rng = random.Random(f"{Path(path).stem}-{j}")  # evolutions / encounters after the opener
+        env.rng = random.Random(f"{Path(path).stem}-{j}")  # evolutions after the opener
+        env._apply_level_rule(ORDER[env.trainer_idx])  # the block cap (66) — snapshots predate the eager rule
         start = env.trainer_idx
-        r = pg.play(env, {"action_mask": env._mask()}, args.lam, args.verbose, args.fast,
-                    args.parties, args.league, args.moves)
+        r = pg.play(env, args.lam, args.verbose, args.fast)
         last = args.slice - 1
         row = {"snapshot": Path(path).stem, "replay": j, "start": start, "reached": r["cleared"],
                "clear": r["slice_clear"], "deaths": r["deaths"],
@@ -80,8 +80,8 @@ def main() -> None:
         return np.mean(v), (np.std(v, ddof=1) / np.sqrt(len(v)) if len(v) > 1 else 0.0)
 
     print(f"\n{len(snaps)} snapshots x {args.replays} replays | battler={args.policy or 'SimpleHeuristics'} "
-          f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} parties={args.parties} "
-          f"league={args.league} moves={args.moves} | rules: {pg.rules(args)} | {args.workers} workers, "
+          f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} "
+          f"| rules: {pg.rules(args)} | {args.workers} workers, "
           f"{(time.time() - t0) / 60:.0f} min")
     for f, name in [("clear", "block clear rate"), ("deaths", "deaths per block"),
                     ("champion_deaths", "deaths at the champion")]:
