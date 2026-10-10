@@ -1,0 +1,63 @@
+BROCK: A solo scores for 124 species in 3s; top: tentacruel 0.44, patrat 0.41, clawitzer 0.40, wailord 0.40, sewaddle 0.33, ledyba 0.33, rattata 0.32, sinistea 0.32
+LT. SURGE: A solo scores for 272 species in 3s; top: sizzlipede 0.33, ponytagalar 0.33, ekans 0.33, ponyta 0.28, fletchling 0.28, nickit 0.27, solrock 0.27, snubbull 0.27
+MISTY: A solo scores for 219 species in 3s; top: ekans 0.36, wooloo 0.29, seviper 0.26, shinx 0.25, gyarados 0.24, yamper 0.24, volbeat 0.23, wattrel 0.22
+ERIKA: A solo scores for 360 species in 4s; top: gulpin 0.32, yanma 0.31, sizzlipede 0.29, ekans 0.29, cubchoo 0.28, fletchling 0.27, doduo 0.27, grimer 0.25
+KOGA: A solo scores for 449 species in 4s; top: ponytagalar 0.40, qwilfishhisui 0.28, grimeralola 0.25, pineco 0.23, aron 0.22, sneaselhisui 0.21, komala 0.21, dugtrio 0.21
+BLAINE: A solo scores for 545 species in 5s; top: vikavolt 0.28, lapras 0.27, shelloseast 0.23, noibat 0.21, goldeen 0.21, mimejr 0.20, shellos 0.20, wishiwashi 0.20
+KOGA: B 279 teams scored in 19s; greedy ('bouffalant', 'cutiefly', 'diglett', 'ponytagalar', 'sneaselhisui', 'varoom') (1.38); best fast ('bouffalant', 'cutiefly', 'diglett', 'ponytagalar', 'sneaselhisui', 'varoom') (1.38)
+LT. SURGE: B 279 teams scored in 20s; greedy ('nickit', 'ponyta', 'ponytagalar', 'sizzlipede', 'volbeat', 'zangoose') (1.46); best fast ('shinx', 'snubbull', 'tatsugiri', 'whismur', 'wimpod', 'zangoose') (1.62)
+ERIKA: B 279 teams scored in 23s; greedy ('gulpin', 'houndour', 'meditite', 'sizzlipede', 'volbeat', 'yanma') (1.79); best fast ('gulpin', 'houndour', 'meditite', 'sizzlipede', 'volbeat', 'yanma') (1.79)
+BROCK: B 279 teams scored in 27s; greedy ('clawitzer', 'patrat', 'scraggy', 'sinistea', 'tentacruel', 'wailord') (1.96); best fast ('clawitzer', 'patrat', 'scraggy', 'sinistea', 'tentacruel', 'wailord') (1.96)
+MISTY: B 279 teams scored in 27s; greedy ('axew', 'dondozo', 'ekans', 'elekid', 'magikarp', 'seviper') (1.50); best fast ('ekans', 'gyarados', 'paras', 'sharpedo', 'snubbull', 'stunky') (1.71)
+BLAINE: B 279 teams scored in 29s; greedy ('bulbasaur', 'chansey', 'ferroseed', 'lapras', 'vikavolt', 'wishiwashi') (1.54); best fast ('bulbasaur', 'chansey', 'ferroseed', 'lapras', 'vikavolt', 'wishiwashi') (1.54)
+KOGA       items=False evs=flat    best team under search: win  100% deaths/mon 0.61 ['bouffalant', 'diglett', 'graveleralola', 'ponytagalar', 'sneaselhisui', 'varoom']  (others: 83%, 67%, 67%, 50%, 33%)  (352s)
+LT. SURGE  items=False evs=flat    best team under search: win  100% deaths/mon 0.53 ['nickit', 'ponytagalar', 'sizzlipede', 'snubbull', 'volbeat', 'zangoose']  (others: 83%, 67%, 67%, 50%, 33%)  (492s)
+KOGA       items=False evs=trained best team under search: win  100% deaths/mon 0.33 ['bouffalant', 'diglett', 'graveleralola', 'ponytagalar', 'sneaselhisui', 'varoom']  (others: 100%, 100%, 83%, 83%, 83%)  (668s)
+ERIKA      items=False evs=flat    best team under search: win  100% deaths/mon 0.28 ['gulpin', 'houndour', 'meditite', 'muk', 'volbeat', 'yanma']  (others: 100%, 100%, 83%, 67%, 33%)  (735s)
+KOGA       items=True  evs=flat    best team under search: win  100% deaths/mon 0.72 ['bouffalant', 'diglett', 'greavard', 'ponytagalar', 'sneaselhisui', 'varoom']  (others: 83%, 67%, 67%, 67%, 50%)  (920s)
+LT. SURGE  items=False evs=trained best team under search: win  100% deaths/mon 0.36 ['nickit', 'ponyta', 'ponytagalar', 'sizzlipede', 'volbeat', 'zangoose']  (others: 100%, 100%, 100%, 83%, 50%)  (925s)
+BLAINE     items=False evs=flat    best team under search: win  100% deaths/mon 0.53 ['bulbasaur', 'chansey', 'lapras', 'vikavolt', 'wishiwashi', 'yamask']  (others: 100%, 83%, 83%, 67%, 67%)  (1096s)
+KOGA       items=True  evs=trained best team under search: win  100% deaths/mon 0.28 ['bouffalant', 'diglett', 'ponytagalar', 'sneaselhisui', 'varoom', 'yanma']  (others: 100%, 100%, 100%, 100%, 100%)  (1115s)
+MISTY      items=False evs=flat    best team under search: win  100% deaths/mon 0.36 ['ekans', 'gyarados', 'paras', 'sharpedo', 'snubbull', 'stunky']  (others: 83%, 83%, 67%, 67%, 67%)  (1153s)
+BROCK      items=False evs=flat    best team under search: win  100% deaths/mon 0.00 ['cutiefly', 'ledyba', 'poliwhirl', 'scraggy', 'sinistea', 'tentacruel']  (others: 100%, 100%, 100%, 83%, 83%)  (1169s)
+ERIKA      items=False evs=trained best team under search: win  100% deaths/mon 0.06 ['gulpin', 'houndour', 'meditite', 'surskit', 'volbeat', 'yanma']  (others: 100%, 100%, 100%, 83%, 67%)  (1292s)
+LT. SURGE  items=True  evs=flat    best team under search: win  100% deaths/mon 0.33 ['shinx', 'snubbull', 'tatsugiri', 'whismur', 'wimpod', 'zangoose']  (others: 83%, 83%, 83%, 67%, 67%)  (1297s)
+LT. SURGE  items=True  evs=trained best team under search: win  100% deaths/mon 0.50 ['nickit', 'ponytagalar', 'sizzlipede', 'snubbull', 'volbeat', 'zangoose']  (others: 100%, 83%, 67%, 50%, 33%)  (1655s)
+ERIKA      items=True  evs=flat    best team under search: win  100% deaths/mon 0.33 ['gulpin', 'houndour', 'meditite', 'muk', 'volbeat', 'yanma']  (others: 100%, 100%, 83%, 83%, 83%)  (1886s)
+BROCK      items=False evs=trained best team under search: win  100% deaths/mon 0.00 ['cutiefly', 'ledyba', 'poliwhirl', 'scraggy', 'sinistea', 'tentacruel']  (others: 100%, 100%, 100%, 100%, 100%)  (1892s)
+MISTY      items=False evs=trained best team under search: win  100% deaths/mon 0.25 ['axew', 'dondozo', 'ekans', 'elekid', 'magikarp', 'seviper']  (others: 100%, 100%, 83%, 67%, 50%)  (2045s)
+BLAINE     items=False evs=trained best team under search: win  100% deaths/mon 0.69 ['bulbasaur', 'chansey', 'lapras', 'vikavolt', 'wishiwashi', 'yamask']  (others: 100%, 67%, 50%, 33%, 33%)  (2107s)
+ERIKA      items=True  evs=trained best team under search: win  100% deaths/mon 0.22 ['gulpin', 'houndour', 'meditite', 'tarountula', 'volbeat', 'yanma']  (others: 100%, 100%, 100%, 100%, 83%)  (2314s)
+BROCK      items=True  evs=flat    best team under search: win  100% deaths/mon 0.00 ['cubchoo', 'lanturn', 'ledyba', 'sentret', 'tentacruel', 'wailord']  (others: 100%, 100%, 100%, 100%, 83%)  (2709s)
+MISTY      items=True  evs=flat    best team under search: win  100% deaths/mon 0.17 ['axew', 'dondozo', 'ekans', 'elekid', 'magikarp', 'stunky']  (others: 100%, 100%, 100%, 100%, 83%)  (2745s)
+BLAINE     items=True  evs=flat    best team under search: win   83% deaths/mon 0.67 ['bulbasaur', 'chansey', 'lapras', 'vikavolt', 'wishiwashi', 'yamask']  (others: 67%, 67%, 33%, 33%, 0%)  (2818s)
+BROCK      items=True  evs=trained best team under search: win  100% deaths/mon 0.00 ['cutiefly', 'ledyba', 'poliwhirl', 'scraggy', 'sinistea', 'tentacruel']  (others: 100%, 100%, 100%, 100%, 100%)  (3304s)
+MISTY      items=True  evs=trained best team under search: win  100% deaths/mon 0.25 ['ekans', 'gyarados', 'paras', 'sharpedo', 'snubbull', 'stunky']  (others: 100%, 100%, 100%, 83%, 67%)  (3491s)
+BLAINE     items=True  evs=trained best team under search: win  100% deaths/mon 0.69 ['bulbasaur', 'chansey', 'lapras', 'seaking', 'vikavolt', 'wishiwashi']  (others: 83%, 67%, 50%, 50%, 17%)  (3670s)
+
+Radical Red best-six probe | shortlist 24, top 6 teams, search 9,8 x n=6 | enemy = RR AI, full info | 61 min
+  boss       cap items  evs        win deaths/mon  best team
+  BROCK       16 False  flat      100%       0.00  cutiefly, ledyba, poliwhirl, scraggy, sinistea, tentacruel
+  BROCK       16 False  trained   100%       0.00  cutiefly, ledyba, poliwhirl, scraggy, sinistea, tentacruel
+  BROCK       16 True   flat      100%       0.00  cubchoo, lanturn, ledyba, sentret, tentacruel, wailord
+  BROCK       16 True   trained   100%       0.00  cutiefly, ledyba, poliwhirl, scraggy, sinistea, tentacruel
+  MISTY       28 False  flat      100%       0.36  ekans, gyarados, paras, sharpedo, snubbull, stunky
+  MISTY       28 False  trained   100%       0.25  axew, dondozo, ekans, elekid, magikarp, seviper
+  MISTY       28 True   flat      100%       0.17  axew, dondozo, ekans, elekid, magikarp, stunky
+  MISTY       28 True   trained   100%       0.25  ekans, gyarados, paras, sharpedo, snubbull, stunky
+  LT. SURGE   36 False  flat      100%       0.53  nickit, ponytagalar, sizzlipede, snubbull, volbeat, zangoose
+  LT. SURGE   36 False  trained   100%       0.36  nickit, ponyta, ponytagalar, sizzlipede, volbeat, zangoose
+  LT. SURGE   36 True   flat      100%       0.33  shinx, snubbull, tatsugiri, whismur, wimpod, zangoose
+  LT. SURGE   36 True   trained   100%       0.50  nickit, ponytagalar, sizzlipede, snubbull, volbeat, zangoose
+  ERIKA       44 False  flat      100%       0.28  gulpin, houndour, meditite, muk, volbeat, yanma
+  ERIKA       44 False  trained   100%       0.06  gulpin, houndour, meditite, surskit, volbeat, yanma
+  ERIKA       44 True   flat      100%       0.33  gulpin, houndour, meditite, muk, volbeat, yanma
+  ERIKA       44 True   trained   100%       0.22  gulpin, houndour, meditite, tarountula, volbeat, yanma
+  KOGA        68 False  flat      100%       0.61  bouffalant, diglett, graveleralola, ponytagalar, sneaselhisui, varoom
+  KOGA        68 False  trained   100%       0.33  bouffalant, diglett, graveleralola, ponytagalar, sneaselhisui, varoom
+  KOGA        68 True   flat      100%       0.72  bouffalant, diglett, greavard, ponytagalar, sneaselhisui, varoom
+  KOGA        68 True   trained   100%       0.28  bouffalant, diglett, ponytagalar, sneaselhisui, varoom, yanma
+  BLAINE      76 False  flat      100%       0.53  bulbasaur, chansey, lapras, vikavolt, wishiwashi, yamask
+  BLAINE      76 False  trained   100%       0.69  bulbasaur, chansey, lapras, vikavolt, wishiwashi, yamask
+  BLAINE      76 True   flat       83%       0.67  bulbasaur, chansey, lapras, vikavolt, wishiwashi, yamask
+  BLAINE      76 True   trained   100%       0.69  bulbasaur, chansey, lapras, seaking, vikavolt, wishiwashi

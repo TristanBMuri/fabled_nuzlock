@@ -343,18 +343,21 @@ to search play — three times now: E8, EVs, moves).
 
 ## Radical Red (2026-10-10)
 
-The question the project exists for. Step one is measured (NOTEBOOK.md →
-Radical Red boss probe, `results/rr_probe.log`): on the RadicalRedShowdown
-fork with the CFRU AI port as the enemy and full information, calc + search
-beats hardcore Brock 93% of the time from a random box at the cap, Misty 38%,
-Lt. Surge 18-27%, Erika 18%, Blaine 8%, Koga 2% (every TM allowed; gym field
-effects not modelled, which favours the player). **The battler cannot beat
-Radical Red; it clears the first gym only.** Open: whether a planned box
-(DexNav encounter choice, items, EV training) changes that — the "best six
-in the pool" probe — and the gym field effects, which only make it harder.
+The question the project exists for. Two measurements (NOTEBOOK.md → Radical
+Red boss probe / best-six probe): on the RadicalRedShowdown fork with the CFRU
+AI port as the enemy and full information, **a random box at the cap clears
+Brock only** (93% / 38% / 18-27% / 18% / 2% / 8% from Brock to Blaine, with
+252-EV enemies), but **the best six in the reachable pool beat every probed
+gym at 100% under search** with the real hardcore rules (no EVs on either
+side, no items, the 82 banned moves removed), Blaine least convincingly
+(top-six spread 100 → 17%). The battler is not the blocker given the team;
+the run layer (which encounters, which six) and what is not modelled (arena
+effects, doubles, natures, ability swaps) are.
 Pieces: `pokemon-showdown-rr/` (ignored; clone + `node build` +
 `config/custom-formats.ts` as README → Setup for the main clone),
-`scripts/build_rr.py` → `data/rr/`, `scripts/rr_probe.py`, `ai_util/rr_ai.py`.
+`scripts/build_rr.py` → `data/rr/`, `scripts/rr_probe.py`,
+`scripts/rr_team_probe.py` (`--legal`), `ai_util/rr_ai.py`,
+`gauntlet.BANNED_MOVES`.
 **Data for the full run is collected (2026-10-10 evening): `data/rr/README.md`**
 — the three official 4.1 sheets (`data/rr/sheets/`), the hardcore rules as
 JSON (no EVs for anyone, 31 IVs, 82 banned player moves, ability swaps, 18

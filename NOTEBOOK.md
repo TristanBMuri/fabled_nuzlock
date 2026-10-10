@@ -1517,3 +1517,56 @@ everywhere past Brock. What this does not settle: how much a planned box
 (DexNav picks, items, EV training) recovers — a "best party in the pool" probe
 (search over which six to bring) is the step-two measurement, and the field
 effects would push the other way.
+
+## Radical Red best-six probe (2026-10-10, `scripts/rr_team_probe.py`, `results/rr_team_probe_{v1,all,legal}.{log,jsonl}`)
+
+Step two of the Radical Red question: does *any* team from the encounters
+available before a hardcore boss win the fight reliably under search play?
+Per boss: (A) every species in the pool (the tracker's encounter tables for
+every non-postgame location up to the boss's, all methods; 124 species by
+Brock … 545 by Blaine), evolved by level at the cap, best4 moves over every
+TM, ability slot 0, fights the boss solo under the calc bot (n=3) — progress
+(enemy mons fainted + damage on the rest, +survivors on a win) is its score;
+(B) the 24 best are combined, greedy plus 150 random six-subsets, each team
+scored by the calc bot (n=4); (C) the six best teams are played with calc +
+search k9 r8, n=6, and the best is reported. Enemy = the RR AI port with full
+information both ways, ability immunities in both bots (fixes from the
+afternoon: Dry Skin Jynx had swept Misty).
+
+Three runs. **v1** (61 min, 6 workers) gave the enemy the 252/252/4 EV guess
+and the player four variants (Eviolite/Life Orb or none × flat 85 EVs or
+252/252). Then the official hardcore sheet (`data/rr/README.md`) showed that
+hardcore is Minimal Grinding Mode — **nobody has EVs**, items are single late
+copies, and the player loses 82 moves — so **all** (21 min) and **legal**
+(25 min) rerun it with EVs 0 on both sides and no items, without and with the
+82-move ban in every stage.
+
+  boss       cap  v1 no items / flat 85   all moves (no EVs)   legal moves (no EVs)   top-6 spread (legal)
+  Brock       16  100%  0.00              100%  0.00           100%  0.03             100 100 100 100 100 83
+  Misty       28  100%  0.36              100%  0.03           100%  0.17             100 100 100 100 83 83
+  Lt. Surge   36  100%  0.53              100%  0.28           100%  0.25             100 100 100 100 100 67
+  Erika       44  100%  0.28              100%  0.36           100%  0.19             100 100 100 100 100 100
+  Koga        68  100%  0.61              100%  0.28           100%  0.14             100 100 100 100 100 100
+  Blaine      76  100%  0.53               83%  0.67           100%  0.47             100 100 83 67 33 17
+  (win rate of the best team under search, deaths per mon; v1's other three
+  variants are in the log: all 100% except Blaine with items 83%)
+
+Verdict: **a planned team beats every probed gym under search**, Blaine
+least convincingly. With the real EVs (0) Koga goes from "one team at 100%,
+the rest 33-83%" to all six at 100% with 0.14 deaths per mon; the move ban
+costs nothing measurable (legal ≥ all at every boss but Brock's noise), because
+the calc bot never set up anyway — the ban bites the enemy's sweepers' model,
+not this player. Blaine's spread (100 → 17% across six teams, both runs) is
+the one place the result is a winner's-curse pick at n=6; everywhere else the
+top six agree. Deaths per mon of 0.1-0.5 in a won fight are still far from
+Nuzlocke-clean.
+
+What this still leaves out, all against the player: the gyms' permanent
+arena effects (sandstorm, rain, terrains, Koga's Tailwind, Blaine's Desolate
+Land), the player's ability swaps (Drizzle → Adaptability etc.), natures, and
+the pool being the whole reachable dex rather than a run's box (no rarity, no
+one-per-route, no HM gates, no starter). In the player's favour: nothing left
+now — items and EVs are gone. So the open question moved: not "can the battler
+win a boss fight" (yes, given the team) but "can the run layer assemble such
+a team from real encounters, and survive the arena effects and the doubles
+fights". `data/rr/README.md` lists the data and gaps in order.

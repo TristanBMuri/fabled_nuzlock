@@ -1,0 +1,27 @@
+BROCK: A solo scores for 124 species in 3s; top: ledyba 0.59, tentacruel 0.53, ponytagalar 0.38, bramblin 0.34, clawitzer 0.34, wailord 0.33, sewaddle 0.33, sentret 0.32
+LT. SURGE: A solo scores for 272 species in 4s; top: illumise 0.45, drilbur 0.43, ponyta 0.43, klawf 0.37, sizzlipede 0.33, ponytagalar 0.33, fletchling 0.31, snubbull 0.29
+MISTY: A solo scores for 219 species in 4s; top: ekans 0.31, seviper 0.29, elekid 0.27, nickit 0.25, wooloo 0.25, axew 0.24, teddiursa 0.23, yamper 0.23
+ERIKA: A solo scores for 360 species in 6s; top: pidove 0.35, gulpin 0.32, grimer 0.31, tinkatink 0.31, yanma 0.30, sizzlipede 0.30, scatterbug 0.30, cutiefly 0.29
+KOGA: A solo scores for 449 species in 6s; top: darumaka 0.32, sneaselhisui 0.32, mismagius 0.30, whirlipede 0.28, shroodle 0.28, aron 0.28, ponytagalar 0.27, slowpokegalar 0.27
+BLAINE: A solo scores for 545 species in 7s; top: vikavolt 0.28, shelloseast 0.24, floetteeternal 0.24, shellos 0.23, vanillite 0.23, seaking 0.22, noibat 0.22, jynx 0.22
+KOGA: B 279 teams scored in 27s; greedy ('darumaka', 'drilbur', 'ponytagalar', 'shroodle', 'sneaselhisui', 'whirlipede') (1.83); best fast ('darumaka', 'drilbur', 'ponytagalar', 'shroodle', 'sneaselhisui', 'whirlipede') (1.83)
+LT. SURGE: B 279 teams scored in 28s; greedy ('illumise', 'pachirisu', 'ponytagalar', 'shinx', 'yamper', 'yanma') (1.79); best fast ('illumise', 'pachirisu', 'ponytagalar', 'shinx', 'yamper', 'yanma') (1.79)
+ERIKA: B 279 teams scored in 31s; greedy ('pidove', 'starly', 'taillow', 'trubbish', 'volbeat', 'yanma') (1.88); best fast ('pidove', 'starly', 'taillow', 'trubbish', 'volbeat', 'yanma') (1.88)
+BLAINE: B 279 teams scored in 33s; greedy ('cyclizar', 'nickit', 'ninetalesalola', 'noibat', 'seismitoad', 'vanillite') (1.26); best fast ('frosmoth', 'nickit', 'noibat', 'seaking', 'shellos', 'vikavolt') (1.54)
+MISTY: B 279 teams scored in 34s; greedy ('dunsparce', 'ekans', 'elekid', 'magikarp', 'nickit', 'teddiursa') (1.83); best fast ('dunsparce', 'ekans', 'elekid', 'magikarp', 'nickit', 'teddiursa') (1.83)
+BROCK: B 279 teams scored in 47s; greedy ('bramblin', 'clawitzer', 'ledyba', 'ponytagalar', 'sewaddle', 'tentacruel') (2.00); best fast ('bramblin', 'clawitzer', 'ledyba', 'ponytagalar', 'sewaddle', 'tentacruel') (2.00)
+KOGA       legal=True  best team under search: win  100% deaths/mon 0.14 ['darumaka', 'drilbur', 'ponytagalar', 'shroodle', 'sneaselhisui', 'whirlipede']  (others: 100%, 100%, 100%, 100%, 100%)  (413s)
+LT. SURGE  legal=True  best team under search: win  100% deaths/mon 0.25 ['illumise', 'pachirisu', 'ponytagalar', 'shinx', 'yamper', 'yanma']  (others: 100%, 100%, 100%, 100%, 67%)  (646s)
+BLAINE     legal=True  best team under search: win  100% deaths/mon 0.47 ['frosmoth', 'nickit', 'noibat', 'seaking', 'shellos', 'vikavolt']  (others: 100%, 83%, 67%, 33%, 17%)  (868s)
+ERIKA      legal=True  best team under search: win  100% deaths/mon 0.19 ['ekans', 'fletchling', 'noibat', 'snubbull', 'tinkatink', 'yanma']  (others: 100%, 100%, 100%, 100%, 100%)  (956s)
+MISTY      legal=True  best team under search: win  100% deaths/mon 0.17 ['ekans', 'magikarp', 'nickit', 'seviper', 'smoochum', 'stunky']  (others: 100%, 100%, 100%, 83%, 83%)  (1106s)
+BROCK      legal=True  best team under search: win  100% deaths/mon 0.03 ['bramblin', 'clawitzer', 'ledyba', 'ponytagalar', 'sewaddle', 'tentacruel']  (others: 100%, 100%, 100%, 100%, 83%)  (1522s)
+
+Radical Red best-six probe | legal moves only: True | shortlist 24, top 6 teams, search 9,8 x n=6 | no EVs, no items | enemy = RR AI, full info | 25 min
+  boss       cap   win deaths/mon  best team
+  BROCK       16  100%       0.03  bramblin, clawitzer, ledyba, ponytagalar, sewaddle, tentacruel
+  MISTY       28  100%       0.17  ekans, magikarp, nickit, seviper, smoochum, stunky
+  LT. SURGE   36  100%       0.25  illumise, pachirisu, ponytagalar, shinx, yamper, yanma
+  ERIKA       44  100%       0.19  ekans, fletchling, noibat, snubbull, tinkatink, yanma
+  KOGA        68  100%       0.14  darumaka, drilbur, ponytagalar, shroodle, sneaselhisui, whirlipede
+  BLAINE      76  100%       0.47  frosmoth, nickit, noibat, seaking, shellos, vikavolt
