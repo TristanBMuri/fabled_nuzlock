@@ -1465,3 +1465,55 @@ itself (K x R block plays at the opener: K=4, R=2 ≈ 8 blocks ≈ 15 min per
 episode at the League — affordable on the League test, 2 h for 80 blocks,
 not for a full-game table). Not built yet. A fairer regret would replay the
 top-3 more times; the slot table is the unbiased view.
+
+## Radical Red boss probe (2026-10-10, `scripts/rr_probe.py`, `results/rr_probe.{log,jsonl}`)
+
+The question behind the project: can the solver beat a Radical Red hardcore
+Nuzlocke? Step one: can the battler win the boss fights at the level cap?
+Stack: the RadicalRedShowdown fork (`pokemon-showdown-rr/`, commit 5495579,
+mod `gen9rr`, custom format `gen9rrcustomgamenogimmicks` = any team, no
+Dynamax / Tera, Megas and Z-moves allowed) through the bridge (`SHOWDOWN_DIR`;
+the channel now goes into the Battle constructor, since this older build
+emits the opening requests only at start); `data/rr/` from the tracker's
+docs export (encounters per location and method, hardcore trainer order with
+caps, boss effects) and the ROM dump (sets with canonical names; EVs assumed
+252/252/4 from the nature — the hardcore docs carry none); the mod's own
+moves / species injected into poke-env's gen 9 tables; the CFRU AI port
+(`ai_util/rr_ai.py`, back from the pre-cleanup tag) as the enemy, with megas.
+Found on the way: a forme next to its base form collapsed in the mirror
+(`dedupe_nicknames` by base species now); gen 9 species packed as raw ids
+(`species_name` on the gen 9 dex, nickname = base species).
+
+Method per boss: 30 boxes of 10 species drawn uniformly from the encounter
+pool available before the boss (124 species by Brock, 219 by Misty, 272 by
+Lt. Surge, 360 by Erika, 449 by Koga, 545 by Blaine), evolved by level at the
+cap, the six with the highest base-stat total fielded at the cap with best4
+movesets (level-up only / every TM and tutor move = upper bound), flat 85 EVs,
+no items, ability slot 0 or 1, full enemy information; n=2 battles per box;
+calc bot alone and calc + search k9 r8. Not modelled, all in the player's
+favour: the gyms' permanent field effects (Brock's sandstorm and -33% on
+super-effective hits, Misty's rain, Surge's terrain, Erika's terrain and
+grass-move rules, Koga's tailwind, Blaine's Desolate Land), the real EV
+spreads. In the boss's favour: no held items, no EV training, no natures, and
+a random box instead of a planned one (Radical Red lets the player pick
+encounters with DexNav).
+
+  boss       cap  calc alone (lv-up / +TMs)   calc+search (lv-up / +TMs)   deaths/mon (search, +TMs)
+  Brock       16      40% / 73%                   87% / 93%                 0.29
+  Misty       28       2% /  7%                   17% / 38%                 0.85
+  Lt. Surge   36       7% /  5%                   27% / 18%                 0.93
+  Erika       44       3% /  2%                   17% / 18%                 0.92
+  Koga        68       0% /  0%                    2% /  2%                 0.99
+  Blaine      76       5% /  3%                    8% /  8%                 0.97
+  (70 min on 12 workers; the RR AI costs 8 ms per decision, 10x SimpleHeuristics)
+
+Verdict for step one: the battler clears Brock and nothing after it. From
+Misty on a random box at the cap loses 60-98% of fights even with search and
+every TM, and loses nearly the whole party when it loses. Search is worth 3-5x
+over the calc bot alone at the early gyms and nothing at Koga / Blaine, where
+the fights are decided before a decision matters. The criterion set before the
+run (under 50% per boss = no until the battler or the team changes) is met
+everywhere past Brock. What this does not settle: how much a planned box
+(DexNav picks, items, EV training) recovers — a "best party in the pool" probe
+(search over which six to bring) is the step-two measurement, and the field
+effects would push the other way.

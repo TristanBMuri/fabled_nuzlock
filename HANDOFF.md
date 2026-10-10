@@ -341,6 +341,21 @@ brain's block ranking does not transfer to search play at Cynthia),
 20% / 40%; anything scored by the fast brain at the League transfers badly
 to search play — three times now: E8, EVs, moves).
 
+## Radical Red (2026-10-10)
+
+The question the project exists for. Step one is measured (NOTEBOOK.md →
+Radical Red boss probe, `results/rr_probe.log`): on the RadicalRedShowdown
+fork with the CFRU AI port as the enemy and full information, calc + search
+beats hardcore Brock 93% of the time from a random box at the cap, Misty 38%,
+Lt. Surge 18-27%, Erika 18%, Blaine 8%, Koga 2% (every TM allowed; gym field
+effects not modelled, which favours the player). **The battler cannot beat
+Radical Red; it clears the first gym only.** Open: whether a planned box
+(DexNav encounter choice, items, EV training) changes that — the "best six
+in the pool" probe — and the gym field effects, which only make it harder.
+Pieces: `pokemon-showdown-rr/` (ignored; clone + `node build` +
+`config/custom-formats.ts` as README → Setup for the main clone),
+`scripts/build_rr.py` → `data/rr/`, `scripts/rr_probe.py`, `ai_util/rr_ai.py`.
+
 ## Environment gotchas
 
 - Ports 8000–8007 belong to the old project.
