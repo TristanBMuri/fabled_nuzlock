@@ -1,0 +1,18 @@
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner.estimate failed: AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+ep   0: cleared 158  no-death 50  deaths 4    (90s/ep)
+ep   1: cleared 157  no-death 32  deaths 12    (79s/ep)
+ep   2: cleared 136  no-death 50  deaths 12    (66s/ep)

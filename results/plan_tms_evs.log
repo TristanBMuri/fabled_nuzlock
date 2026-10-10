@@ -1,0 +1,27 @@
+ep seed  306: cleared 404  no-death 402  deaths  6    (1529s/ep)
+ep seed  309: cleared 404  no-death 281  deaths  7    (1588s/ep)
+ep seed  307: cleared 405  no-death 402  deaths  5  CLEAR  (1648s/ep)
+ep seed  305: cleared 404  no-death 404  deaths  6    (1658s/ep)
+ep seed  301: cleared 404  no-death 317  deaths  8    (1661s/ep)
+ep seed  302: cleared 405  no-death 404  deaths  5  CLEAR  (1667s/ep)
+ep seed  303: cleared 404  no-death 400  deaths  6    (1681s/ep)
+ep seed  304: cleared 405  no-death 346  deaths  6  CLEAR  (1690s/ep)
+ep seed  308: cleared 405  no-death 399  deaths  6  CLEAR  (1740s/ep)
+ep seed  300: cleared 405  no-death 404  deaths  3  CLEAR  (1845s/ep)
+
+10 episodes | slice 405 | battler=calc search=9,8 (all) deep=9,16 parties=swap league=0 lam=1.0 | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True evs=trained | 10 workers, 31 min
+  trainers cleared        404.50
+  cleared without a death 375.90
+  deaths per run          5.80
+  slice clear rate        50%
+  deep-search fights      14.4 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #404 Champion Cynthia       champion   deaths  40  lost  5  [Spiritomb@61, Roserade@60, Gastrodon@60, Lucario@63, Milotic@63, Garchomp@66]
+    #402 Elite Four Flint       elite_four deaths   8  lost  0  [Rapidash@58, Steelix@57, Drifblim@58, Lopunny@57, Infernape@61]
+    #401 Elite Four Bertha      elite_four deaths   2  lost  0  [Quagsire@55, Sudowoodo@56, Golem@56, Whiscash@55, Hippowdon@59]
+    #400 Elite Four Aaron       elite_four deaths   2  lost  0  [Dustox@53, Beautifly@53, Vespiquen@54, Heracross@54, Drapion@57]
+    #317 Gym Leader Candice     gym_leader deaths   1  lost  0  [Snover@38, Sneasel@38, Medicham@40, Abomasnow@42]
+    #355 Gym Leader Volkner     gym_leader deaths   1  lost  0  [Raichu@46, Ambipom@47, Octillery@47, Luxray@49]
+    #346 Team Galactic Boss Cyrus none       deaths   1  lost  0  [Honchkrow@45, Crobat@46, Gyarados@45, Weavile@48]
+    #403 Elite Four Lucian      elite_four deaths   1  lost  0  [Mr. Mime@59, Girafarig@59, Medicham@60, Alakazam@60, Bronzong@63]
+  deaths by species: gyarados 8, bibarel 8, staraptor 7, kricketune 5, luxray 5, crobat 5, infernape 4, roserade 3, graveler 3, empoleon 2, lapras 2, gastrodon 2

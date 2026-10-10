@@ -1,0 +1,55 @@
+ep   0: cleared 50  no-death 50  deaths 0  CLEAR  (32s/ep)
+ep   1: cleared 50  no-death 32  deaths 3  CLEAR  (29s/ep)
+ep   2: cleared 50  no-death 50  deaths 0  CLEAR  (30s/ep)
+ep   3: cleared 50  no-death 19  deaths 1  CLEAR  (28s/ep)
+ep   4: cleared 50  no-death 30  deaths 7  CLEAR  (26s/ep)
+ep   5: cleared 50  no-death 19  deaths 3  CLEAR  (25s/ep)
+ep   6: cleared 50  no-death 32  deaths 1  CLEAR  (27s/ep)
+ep   7: cleared 50  no-death 36  deaths 1  CLEAR  (26s/ep)
+ep   8: cleared 50  no-death 30  deaths 2  CLEAR  (26s/ep)
+ep   9: cleared 50  no-death 19  deaths 3  CLEAR  (25s/ep)
+ep  10: cleared 50  no-death 50  deaths 0  CLEAR  (25s/ep)
+ep  11: cleared 50  no-death 50  deaths 0  CLEAR  (26s/ep)
+ep  12: cleared 50  no-death 50  deaths 0  CLEAR  (26s/ep)
+ep  13: cleared 50  no-death 50  deaths 0  CLEAR  (26s/ep)
+ep  14: cleared 50  no-death 30  deaths 2  CLEAR  (26s/ep)
+ep  15: cleared 50  no-death 32  deaths 4  CLEAR  (26s/ep)
+ep  16: cleared 50  no-death 19  deaths 5  CLEAR  (25s/ep)
+ep  17: cleared 50  no-death 32  deaths 1  CLEAR  (25s/ep)
+ep  18: cleared 50  no-death 50  deaths 0  CLEAR  (25s/ep)
+ep  19: cleared 50  no-death 30  deaths 4  CLEAR  (25s/ep)
+ep  20: cleared 50  no-death 32  deaths 3  CLEAR  (25s/ep)
+ep  21: cleared 50  no-death 32  deaths 1  CLEAR  (25s/ep)
+ep  22: cleared 50  no-death 36  deaths 2  CLEAR  (25s/ep)
+ep  23: cleared 50  no-death 50  deaths 0  CLEAR  (25s/ep)
+ep  24: cleared 50  no-death 50  deaths 0  CLEAR  (25s/ep)
+ep  25: cleared 50  no-death 39  deaths 1  CLEAR  (25s/ep)
+ep  26: cleared 50  no-death 19  deaths 3  CLEAR  (25s/ep)
+ep  27: cleared 50  no-death 19  deaths 1  CLEAR  (25s/ep)
+ep  28: cleared 50  no-death 50  deaths 0  CLEAR  (25s/ep)
+ep  29: cleared 50  no-death 32  deaths 1  CLEAR  (25s/ep)
+ep  30: cleared 50  no-death 50  deaths 0  CLEAR  (25s/ep)
+ep  31: cleared 50  no-death 36  deaths 2  CLEAR  (25s/ep)
+ep  32: cleared 50  no-death 45  deaths 2  CLEAR  (25s/ep)
+ep  33: cleared 50  no-death 50  deaths 0  CLEAR  (25s/ep)
+ep  34: cleared 50  no-death 30  deaths 4  CLEAR  (25s/ep)
+ep  35: cleared 44  no-death 19  deaths 12    (25s/ep)
+ep  36: cleared 50  no-death 19  deaths 5  CLEAR  (24s/ep)
+ep  37: cleared 50  no-death 30  deaths 3  CLEAR  (24s/ep)
+ep  38: cleared 50  no-death 19  deaths 6  CLEAR  (24s/ep)
+ep  39: cleared 50  no-death 19  deaths 5  CLEAR  (24s/ep)
+
+40 episodes | battler=SimpleHeuristics search=None lam=1.0 level_rule=cap margin=0
+  trainers cleared        49.85
+  cleared without a death 34.65
+  deaths per run          2.20
+  slice clear rate        98%
+  deadliest trainers (deaths / lost battles over all episodes):
+    #32 Hiker Daniel           none       deaths  27  lost  0  [Geodude@11, Machop@11, Geodude@11, Bidoof@11]
+    #30 Youngster Jonathon     none       deaths  13  lost  0  [Geodude@10]
+    #19 Youngster Darius       none       deaths  10  lost  0  [Geodude@8, Onix@8]
+    #39 Fisher Zachary         none       deaths   9  lost  0  [Magikarp@10, Goldeen@13, Magikarp@10]
+    #41 Bug Catcher Phillip    none       deaths   6  lost  0  [Wurmple@9, Cascoon@11, Dustox@13]
+    #36 Picnicker Siena        none       deaths   6  lost  0  [Shinx@12, Pachirisu@12]
+    #45 Pokémon Trainer Lucas  none       deaths   2  lost  0  [Chimchar@13]
+    #44 Pokémon Trainer Lucas  none       deaths   2  lost  1  [Turtwig@13]

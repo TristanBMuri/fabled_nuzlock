@@ -1,0 +1,36 @@
+ep seed  309: cleared 162  no-death  32  deaths 13    (550s/ep)
+ep seed  308: cleared 173  no-death  32  deaths 17    (563s/ep)
+ep seed  304: cleared 184  no-death  32  deaths 17    (576s/ep)
+ep seed  307: cleared 162  no-death  36  deaths 11    (589s/ep)
+ep seed  306: cleared 179  no-death 136  deaths 14    (670s/ep)
+ep seed  305: cleared 186  no-death  32  deaths 13  CLEAR  (686s/ep)
+ep seed  300: cleared 184  no-death  48  deaths 14    (721s/ep)
+ep seed  302: cleared 172  no-death 158  deaths 13    (752s/ep)
+ep seed  301: cleared 184  no-death  32  deaths 16    (852s/ep)
+ep seed  303: cleared 186  no-death  32  deaths 14  CLEAR  (1013s/ep)
+ep seed  317: cleared 166  no-death  32  deaths 17    (594s/ep)
+ep seed  314: cleared 170  no-death  39  deaths 16    (596s/ep)
+ep seed  319: cleared 186  no-death 129  deaths 11  CLEAR  (605s/ep)
+ep seed  316: cleared 186  no-death  32  deaths  8  CLEAR  (620s/ep)
+ep seed  312: cleared 180  no-death 139  deaths 13    (688s/ep)
+ep seed  311: cleared 169  no-death  32  deaths 14    (698s/ep)
+ep seed  318: cleared 176  no-death  36  deaths 14    (726s/ep)
+ep seed  310: cleared 186  no-death 139  deaths  9  CLEAR  (751s/ep)
+ep seed  315: cleared 165  no-death  32  deaths 21    (833s/ep)
+ep seed  313: cleared 169  no-death  50  deaths 15    (840s/ep)
+
+20 episodes | slice 186 | battler=models/game_policy_cap186v3.pt search=3,8 (all) deep=4,16 parties=swap roster=12 dupes=True lam=1.0 level_rule=cap margin=0 | 10 workers, 28 min
+  trainers cleared        176.25
+  cleared without a death 61.50
+  deaths per run          14.00
+  slice clear rate        25%
+  deep-search fights      21.9 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #169 Fisher Juan            none       deaths  27  lost  2  [Gyarados@21]
+    #139 Collector Edwin        none       deaths  24  lost  0  [Sudowoodo@19, Sudowoodo@19, Sudowoodo@19]
+    #184 Fisher Kenneth         none       deaths  22  lost  3  [Magikarp@19, Remoraid@19, Gyarados@22]
+    #165 Pokémon Trainer Cedric none       deaths  21  lost  1  [Starly@19, Buizel@20, Roselia@20, Monferno@21]
+    #164 Pokémon Trainer Cedric none       deaths  18  lost  0  [Starly@19, Buizel@20, Ponyta@20, Grotle@21]
+    #162 Tuber Jared            none       deaths  18  lost  2  [Shellos (East Sea)@19, Shellos (East Sea)@21, Shellos@20]
+    #166 Pokémon Trainer Cedric none       deaths  16  lost  1  [Starly@19, Roselia@20, Ponyta@20, Prinplup@21]
+    #32 Hiker Daniel           none       deaths  13  lost  0  [Geodude@11, Machop@11, Geodude@11, Bidoof@11]

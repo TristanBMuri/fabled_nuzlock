@@ -1,0 +1,26 @@
+ep seed  305: cleared 401  no-death 400  deaths  6    (2449s/ep)
+ep seed  307: cleared 403  no-death 204  deaths 12    (2516s/ep)
+ep seed  308: cleared 403  no-death 399  deaths  7    (2543s/ep)
+ep seed  302: cleared 401  no-death 400  deaths  6    (2591s/ep)
+ep seed  301: cleared 404  no-death 401  deaths  6    (2663s/ep)
+ep seed  304: cleared 403  no-death 400  deaths  6    (2674s/ep)
+ep seed  300: cleared 402  no-death 400  deaths  6    (2731s/ep)
+ep seed  309: cleared 403  no-death 399  deaths  7    (2783s/ep)
+ep seed  306: cleared 401  no-death 400  deaths  6    (2791s/ep)
+ep seed  303: cleared 402  no-death 401  deaths  6    (2799s/ep)
+
+10 episodes | slice 405 | battler=calc search=9,8 (all) deep=9,16 parties=beam lam=1.0 | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 | 10 workers, 47 min
+  trainers cleared        402.30
+  cleared without a death 380.40
+  deaths per run          6.80
+  slice clear rate        0%
+  deep-search fights      11.4 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #401 Elite Four Bertha      elite_four deaths  24  lost  3  [Quagsire@55, Sudowoodo@56, Golem@56, Whiscash@55, Hippowdon@59]
+    #400 Elite Four Aaron       elite_four deaths  13  lost  0  [Dustox@53, Beautifly@53, Vespiquen@54, Heracross@54, Drapion@57]
+    #403 Elite Four Lucian      elite_four deaths  12  lost  4  [Mr. Mime@59, Girafarig@59, Medicham@60, Alakazam@60, Bronzong@63]
+    #402 Elite Four Flint       elite_four deaths  10  lost  2  [Rapidash@58, Steelix@57, Drifblim@58, Lopunny@57, Infernape@61]
+    #398 Pokémon Trainer Cedric none       deaths   4  lost  0  [Staraptor@49, Floatzel@49, Heracross@51, Roserade@49, Snorlax@52, Infernape@55]
+    #204 Gym Leader Wake        gym_leader deaths   2  lost  0  [Gyarados@27, Quagsire@27, Floatzel@30]
+    #399 Pokémon Trainer Cedric none       deaths   2  lost  0  [Staraptor@49, Roserade@49, Heracross@51, Rapidash@49, Snorlax@52, Empoleon@55]
+    #404 Champion Cynthia       champion   deaths   1  lost  1  [Spiritomb@61, Roserade@60, Gastrodon@60, Lucario@63, Milotic@63, Garchomp@66]

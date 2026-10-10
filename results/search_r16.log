@@ -1,0 +1,12 @@
+search k=3 r=16: 10/100 pairs  win 76.7%  deaths/mon 0.23  turns 9.8  7.56s/pair
+search k=3 r=16: 20/100 pairs  win 78.3%  deaths/mon 0.26  turns 11.3  9.86s/pair
+search k=3 r=16: 30/100 pairs  win 70.0%  deaths/mon 0.31  turns 10.1  8.21s/pair
+search k=3 r=16: 40/100 pairs  win 67.5%  deaths/mon 0.34  turns 10.3  8.45s/pair
+search k=3 r=16: 50/100 pairs  win 67.3%  deaths/mon 0.33  turns 9.9  7.91s/pair
+search k=3 r=16: 60/100 pairs  win 70.0%  deaths/mon 0.31  turns 9.9  7.81s/pair
+search k=3 r=16: 70/100 pairs  win 71.0%  deaths/mon 0.31  turns 10.0  7.95s/pair
+search k=3 r=16: 80/100 pairs  win 72.5%  deaths/mon 0.31  turns 10.0  8.06s/pair
+search k=3 r=16: 90/100 pairs  win 71.1%  deaths/mon 0.31  turns 9.8  7.74s/pair
+search k=3 r=16: 100/100 pairs  win 71.0%  deaths/mon 0.32  turns 10.0  8.05s/pair
+choices 6334: rejected by sim 0.00%, forced default 0.00%, brain default 0.00%
+searched 2852/3057 decisions

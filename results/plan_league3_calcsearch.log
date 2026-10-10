@@ -1,0 +1,39 @@
+ep seed  305: cleared 404  no-death 399  deaths  7    (1981s/ep)
+ep seed  309: cleared 404  no-death 299  deaths  7    (2020s/ep)
+ep seed  304: cleared 404  no-death 401  deaths  6    (2049s/ep)
+ep seed  302: cleared 404  no-death 403  deaths  6    (2062s/ep)
+ep seed  307: cleared 404  no-death 403  deaths  6    (2160s/ep)
+ep seed  301: cleared 404  no-death 404  deaths  6    (2178s/ep)
+ep seed  306: cleared 404  no-death 250  deaths  7    (2189s/ep)
+ep seed  308: cleared 403  no-death 402  deaths  6    (2194s/ep)
+SimBattleRunner: rebuild after ValueError: Invalid action 6 from player p1 in battle b523650 - converted order /choose move bugbuzz not in valid orders ['/choose switch Gyarados2', '/choose switch Bibarel1', '/choose switch Staraptor', '/choose switch Gyarados1', '/choose switch Bibarel2', '/choose switch Luxray']!
+    raise ValueError(
+    ...<3 lines>...
+    )
+ValueError: Invalid action 6 from player p1 in battle b523650 - converted order /choose move bugbuzz not in valid orders ['/choose switch Gyarados2', '/choose switch Bibarel1', '/choose switch Staraptor', '/choose switch Gyarados1', '/choose switch Bibarel2', '/choose switch Luxray']!
+
+SimBattleRunner: rebuild after ValueError: Invalid action 6 from player p1 in battle b528115 - converted order /choose move hydropump not in valid orders ['/choose switch Bibarel1', '/choose switch Kricketune', '/choose switch Staraptor', '/choose switch Gyarados1', '/choose switch Bibarel2', '/choose switch Luxray']!
+    raise ValueError(
+    ...<3 lines>...
+    )
+ValueError: Invalid action 6 from player p1 in battle b528115 - converted order /choose move hydropump not in valid orders ['/choose switch Bibarel1', '/choose switch Kricketune', '/choose switch Staraptor', '/choose switch Gyarados1', '/choose switch Bibarel2', '/choose switch Luxray']!
+
+ep seed  300: cleared 402  no-death 402  deaths  0    (2272s/ep)
+ep seed  303: cleared 404  no-death 355  deaths  8    (2285s/ep)
+
+10 episodes | slice 405 | battler=calc search=9,8 (all) deep=9,16 parties=swap lam=1.0 | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 | 10 workers, 38 min
+  trainers cleared        403.70
+  cleared without a death 371.80
+  deaths per run          5.90
+  slice clear rate        0%
+  deep-search fights      13.6 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #404 Champion Cynthia       champion   deaths  30  lost  8  [Spiritomb@61, Roserade@60, Gastrodon@60, Lucario@63, Milotic@63, Garchomp@66]
+    #403 Elite Four Lucian      elite_four deaths  16  lost  1  [Mr. Mime@59, Girafarig@59, Medicham@60, Alakazam@60, Bronzong@63]
+    #402 Elite Four Flint       elite_four deaths   5  lost  1  [Rapidash@58, Steelix@57, Drifblim@58, Lopunny@57, Infernape@61]
+    #401 Elite Four Bertha      elite_four deaths   3  lost  0  [Quagsire@55, Sudowoodo@56, Golem@56, Whiscash@55, Hippowdon@59]
+    #355 Gym Leader Volkner     gym_leader deaths   1  lost  0  [Raichu@46, Ambipom@47, Octillery@47, Luxray@49]
+    #395 Veteran Edgar          none       deaths   1  lost  0  [Tentacruel@45, Golem@45, Empoleon@48]
+    #399 Pokémon Trainer Cedric none       deaths   1  lost  0  [Staraptor@49, Roserade@49, Heracross@51, Rapidash@49, Snorlax@52, Empoleon@55]
+    #250 Gym Leader Byron       gym_leader deaths   1  lost  0  [Bronzor@36, Steelix@36, Bastiodon@39]
+  deaths by species: bibarel 13, gyarados 9, staraptor 7, luxray 5, infernape 5, machoke 3, roserade 3, empoleon 2, lapras 2, torterra 2, kricketune 2, graveler 2

@@ -1,0 +1,23 @@
+ep seed  309: cleared 405  no-death 401  deaths  4  CLEAR  (1680s/ep)
+ep seed  308: cleared 404  no-death 403  deaths  6    (1708s/ep)
+ep seed  305: cleared 405  no-death 404  deaths  2  CLEAR  (1711s/ep)
+ep seed  306: cleared 404  no-death 403  deaths  6    (1740s/ep)
+ep seed  302: cleared 405  no-death 404  deaths  5  CLEAR  (1779s/ep)
+ep seed  307: cleared 405  no-death 404  deaths  4  CLEAR  (1801s/ep)
+ep seed  301: cleared 405  no-death 397  deaths  6  CLEAR  (1806s/ep)
+ep seed  304: cleared 405  no-death 404  deaths  4  CLEAR  (1820s/ep)
+ep seed  300: cleared 405  no-death 404  deaths  5  CLEAR  (1852s/ep)
+ep seed  303: cleared 405  no-death 404  deaths  1  CLEAR  (1859s/ep)
+
+10 episodes | slice 405 | battler=calc search=9,8 (all) deep=9,16 parties=swap league=0 moves=rule lam=1.0 | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True evs=flat items=True | 10 workers, 31 min
+  trainers cleared        404.80
+  cleared without a death 402.80
+  deaths per run          4.30
+  slice clear rate        80%
+  deep-search fights      14.0 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #404 Champion Cynthia       champion   deaths  36  lost  2  [Spiritomb@61, Roserade@60, Gastrodon@60, Lucario@63, Milotic@63, Garchomp@66]
+    #403 Elite Four Lucian      elite_four deaths   5  lost  0  [Mr. Mime@59, Girafarig@59, Medicham@60, Alakazam@60, Bronzong@63]
+    #397 Pokémon Trainer Cedric none       deaths   1  lost  0  [Staraptor@49, Floatzel@49, Heracross@51, Rapidash@49, Snorlax@52, Torterra@55]
+    #401 Elite Four Bertha      elite_four deaths   1  lost  0  [Quagsire@55, Sudowoodo@56, Golem@56, Whiscash@55, Hippowdon@59]
+  deaths by species: bibarel 7, gyarados 6, staraptor 5, infernape 4, torterra 3, kricketune 3, luxray 3, empoleon 2, crobat 2, machoke 2, whiscash 1, garchomp 1

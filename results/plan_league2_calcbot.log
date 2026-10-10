@@ -1,0 +1,17 @@
+ep seed  303: cleared 402  no-death  20  deaths 22    (1464s/ep)
+ep seed  302: cleared 401  no-death 346  deaths  7    (1531s/ep)
+ep seed  300: cleared 403  no-death 204  deaths 13    (1538s/ep)
+ep seed  304: cleared 401  no-death 250  deaths 12    (1571s/ep)
+ep seed  301: cleared 402  no-death 250  deaths 10    (1611s/ep)
+ep seed  306: cleared 401  no-death 204  deaths 11    (1489s/ep)
+ep seed  305: cleared 402  no-death 399  deaths  7    (1502s/ep)
+ep seed  307: cleared 402  no-death 166  deaths 11    (1511s/ep)
+ep seed  308: cleared 401  no-death 249  deaths 11    (1517s/ep)
+ep seed  309: cleared 402  no-death 162  deaths 15    (1532s/ep)
+ep seed  312: cleared 401  no-death 303  deaths 11    (1498s/ep)
+ep seed  313: cleared 402  no-death 165  deaths 14    (1506s/ep)
+ep seed  311: cleared 402  no-death 317  deaths  9    (1518s/ep)
+ep seed  314: cleared 401  no-death 242  deaths 13    (1533s/ep)
+ep seed  310: cleared 402  no-death 165  deaths 11    (1546s/ep)
+/var/home/tristan/.local/share/uv/python/cpython-3.13.9-linux-x86_64-gnu/lib/python3.13/multiprocessing/resource_tracker.py:324: UserWarning: resource_tracker: There appear to be 6 leaked semaphore objects to clean up at shutdown: {'/mp-gqudltwt', '/mp-yl25w4n6', '/mp-kq54pz0d', '/mp-hnw0eb75', '/mp-bv8wjlqx', '/mp-o3kob551'}
+  warnings.warn(

@@ -1,0 +1,8 @@
+calc+search k=9 r=8: 10/50 pairs  win 10.0%  deaths/mon 0.95  turns 24.1  32.87s/pair
+calc+search k=9 r=8: 20/50 pairs  win 17.5%  deaths/mon 0.94  turns 25.2  32.47s/pair
+calc+search k=9 r=8: 30/50 pairs  win 21.7%  deaths/mon 0.92  turns 26.2  35.12s/pair
+calc+search k=9 r=8: 40/50 pairs  win 18.8%  deaths/mon 0.93  turns 25.8  34.25s/pair
+calc+search k=9 r=8: 50/50 pairs  win 18.0%  deaths/mon 0.94  turns 25.1  32.42s/pair
+choices 5783: rejected by sim 0.00%, forced default 0.00%, brain default 0.00%
+searched 2809/2991 decisions
+totals: pairs 50 n 2 wins 9 deaths 281 mons 300

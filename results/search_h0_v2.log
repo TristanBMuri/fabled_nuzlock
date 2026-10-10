@@ -1,0 +1,23 @@
+search k=3 r=8 h=0: 10/200 pairs  win 36.7%  deaths/mon 0.71  turns 9.5  0.80s/pair
+search k=3 r=8 h=0: 20/200 pairs  win 40.0%  deaths/mon 0.73  turns 11.1  0.96s/pair
+search k=3 r=8 h=0: 30/200 pairs  win 45.6%  deaths/mon 0.65  turns 9.7  0.83s/pair
+search k=3 r=8 h=0: 40/200 pairs  win 44.2%  deaths/mon 0.64  turns 10.0  0.87s/pair
+search k=3 r=8 h=0: 50/200 pairs  win 43.3%  deaths/mon 0.65  turns 9.9  0.85s/pair
+search k=3 r=8 h=0: 60/200 pairs  win 45.6%  deaths/mon 0.62  turns 10.2  0.87s/pair
+search k=3 r=8 h=0: 70/200 pairs  win 41.0%  deaths/mon 0.66  turns 10.7  0.92s/pair
+search k=3 r=8 h=0: 80/200 pairs  win 43.8%  deaths/mon 0.65  turns 11.0  0.96s/pair
+search k=3 r=8 h=0: 90/200 pairs  win 40.4%  deaths/mon 0.67  turns 10.9  0.93s/pair
+search k=3 r=8 h=0: 100/200 pairs  win 40.3%  deaths/mon 0.67  turns 11.0  0.93s/pair
+search k=3 r=8 h=0: 110/200 pairs  win 38.5%  deaths/mon 0.69  turns 11.1  0.93s/pair
+search k=3 r=8 h=0: 120/200 pairs  win 40.6%  deaths/mon 0.67  turns 11.0  0.92s/pair
+search k=3 r=8 h=0: 130/200 pairs  win 40.5%  deaths/mon 0.67  turns 11.0  0.92s/pair
+search k=3 r=8 h=0: 140/200 pairs  win 41.2%  deaths/mon 0.67  turns 10.9  0.91s/pair
+search k=3 r=8 h=0: 150/200 pairs  win 40.9%  deaths/mon 0.67  turns 11.0  0.91s/pair
+search k=3 r=8 h=0: 160/200 pairs  win 41.3%  deaths/mon 0.68  turns 11.1  0.92s/pair
+search k=3 r=8 h=0: 170/200 pairs  win 40.8%  deaths/mon 0.68  turns 11.0  0.91s/pair
+search k=3 r=8 h=0: 180/200 pairs  win 40.6%  deaths/mon 0.68  turns 11.1  0.91s/pair
+search k=3 r=8 h=0: 190/200 pairs  win 39.8%  deaths/mon 0.69  turns 11.0  0.89s/pair
+search k=3 r=8 h=0: 200/200 pairs  win 41.2%  deaths/mon 0.67  turns 11.0  0.89s/pair
+choices 14012: rejected by sim 0.56%, forced default 0.28%, brain default 0.00%
+      78  rejected: [Invalid choice] Can't switch: You can't switch to an active Pokémon
+searched 5752/6903 decisions

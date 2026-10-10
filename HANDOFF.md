@@ -14,8 +14,8 @@ slice is **186 trainers through Gym Leader Gardenia**; the default config
 (`--search 3,8 --search-all --deep 4,16`, prior `game_policy_best4.pt`)
 clears **185.95 trainers / 6.30 deaths / 95% of runs** with the box
 unbounded, the dupes clause on and `best4` movesets with the prior cloned
-under them (20 episodes, `logs/plan_cap186_best4prior.log`; replicate on the
-final code `logs/plan_cap186_final.log`: 184.6 / 7.05 / 85%; before the env
+under them (20 episodes, `results/plan_cap186_best4prior.log`; replicate on the
+final code `results/plan_cap186_final.log`: 184.6 / 7.05 / 85%; before the env
 upgrade the same recipe gave 178.6 / 13.4 / 40%, and 183.15 / 16.25 / 60%
 with the box and clause alone; noise floor between identical runs: ±2
 cleared, ±1.9 deaths, ±15 points of clear rate). On 2026-09-16 every
@@ -49,7 +49,7 @@ the first route-order tables exist: through Maylene the prior+search line is
 (`--slice 405`) from here.** A fast episode over 405 wipes at the League rival.
 Then: water / fishing / gift encounters as per-method alternatives the run
 layer chooses between, the rival fought once per battle (was three times),
-box 50. Full-game tables on this env (`logs/plan_route405b_*.log`):
+box 50. Full-game tables on this env (`results/plan_route405b_*.log`):
 heuristic + risk parties 403.05 / 139.2 / 31.95 deaths / 10% clears (20 eps);
 prior + search 403.4 / 184.8 / 27.6 / 0% (10 eps). Cynthia wipes most runs;
 the E4 costs ~5 deaths each. That table is the benchmark now.
@@ -252,7 +252,7 @@ boss's max level (14 = Roark). ~85 s/episode.
   Only valid with `--moveset best4`; v3 only with last4 (the obs encodes moves).
 - `models/edwin_pairs.json` — 30 late parties vs Collector Edwin: the matchup probe.
 - `models/rival_pairs.json` — 10 hard-synth parties x each rival variant (351/352/353).
-- `logs/plan_cap186v3_deep.log` — the current run config (deep 4,16), 10 eps.
+- `results/plan_cap186v3_deep.log` — the current run config (deep 4,16), 10 eps.
 - `models/game_policy_cap_value.pt` / `_value2.pt` — same actor + trained
   critic (teacher outcomes / search leaves). Null as a search leaf; reference only.
 - `models/bc_game_20260915_164023` (match, 178k) / `_164025` (cap, 127k) —
@@ -265,8 +265,8 @@ boss's max level (14 = Roark). ~85 s/episode.
 - `data/teams/gauntlet_harvest/battles_cap_all.jsonl` (24k, 50-slice),
   `battles_cap51.jsonl` (200 eps through Roark), `battles_cap_ei.jsonl` (merge).
   `battles.jsonl` (483k) is the old match-rule harvest.
-- `logs/plan_cap_crn.log` — the current default run (`plan_cap_full.log` =
-  same without CRN). `logs/search_{prior,crn,nocrn,h0,h3,h0_k6r16,h0_v2}.log`
+- `results/plan_cap_crn.log` — the current default run (`plan_cap_full.log` =
+  same without CRN). `results/search_{prior,crn,nocrn,h0,h3,h0_k6r16,h0_v2}.log`
   — the 2l holdout table. `models/` and `logs/` are gitignored.
 
 ## Next steps (2026-09-18)
@@ -285,14 +285,14 @@ boss's max level (14 = Roark). ~85 s/episode.
    between fights, one cap 66): E4 costs 3 / 5 / 16 deaths per 10 runs,
    **Cynthia wipes 8 of 10** (2 of those 10 were crashes; box full of
    Crobats — see defects). **Benchmark on the fixed env (2026-09-23,
-   `logs/plan_league4_swap.log`): 403.8 / 368.0 / 5.9 deaths / 20% clears;
+   `results/plan_league4_swap.log`): 403.8 / 368.0 / 5.9 deaths / 20% clears;
    Cynthia 35 deaths, 6 wipes; E4 8 / 8 / 4.** E8 (`--league 10`: the
    League party from every 6-subset of a 10-mon shortlist, scored on the
    block by progress + deaths) is null: 404.0 / 325.6 / 6.4 / 10%. Default
    off. **E7 TM movesets (default on, `--no-tms`; `data/bdsp/tms.json`
    from `scripts/build_tms.py`; best4 v2: power x accuracy x STAB x
    category fit, `NO_SLOT_MOVES`) is the first lever that moved Cynthia:
-   404.6 / 358.6 / 5.2 deaths / 70% clears (`logs/plan_best4v2_tms.log`),
+   404.6 / 358.6 / 5.2 deaths / 70% clears (`results/plan_best4v2_tms.log`),
    Cynthia 2 losses in 10, E4 12 deaths per 10 runs. That is the
    benchmark table now.** Cynthia still costs 3.4 deaths per run. Player
    EV training (`--evs trained`, 252 attack / 252 Spe) measured the same
@@ -301,13 +301,13 @@ boss's max level (14 = Roark). ~85 s/episode.
    one-slot swaps over the ranked pool at hard fights, accepted at n=8 and
    n=16 by the risk query, persisting in `Mon.chosen`): 404.2 / 392.7 / 6.1
    / 20% with the League opener, 404.4 / 354.1 / 5.1 / 40% without it
-   (`logs/plan_tms_moves{,_noblock}.log`); Cynthia 8 / 6 losses vs 2.
+   (`results/plan_tms_moves{,_noblock}.log`); Cynthia 8 / 6 losses vs 2.
    Negative: the calc bot picks moves for the calc bot, search play needs
    the ones it drops (set-up). Off by default.** **E9 held items (2026-09-26,
    default on, `--no-items`; `data/bdsp/items.json` from
    `scripts/build_items.py` — Serebii, since Bulbapedia is behind Cloudflare;
    `gauntlet.assign_items` greedy by a multiplier model): 404.8 / 402.8 / 4.3
-   / 80% clears (`logs/plan_tms_items.log`); one pre-League death in ten
+   / 80% clears (`results/plan_tms_items.log`); one pre-League death in ten
    runs, E4 6 deaths per 10 runs (was 12), Cynthia 36 deaths / 2 losses
    (flat). That is the benchmark table now.** **2026-10-09: a 20-episode replicate of
    that table gave 55% clears / 9 Cynthia losses (README → League test); the

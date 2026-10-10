@@ -1,0 +1,9 @@
+search k=3 r=8 h=0: 10/60 pairs  win 45.0%  deaths/mon 0.62  turns 11.5  0.77s/pair
+search k=3 r=8 h=0: 20/60 pairs  win 30.0%  deaths/mon 0.78  turns 12.6  0.84s/pair
+search k=3 r=8 h=0: 30/60 pairs  win 28.3%  deaths/mon 0.77  turns 11.2  0.73s/pair
+search k=3 r=8 h=0: 40/60 pairs  win 26.2%  deaths/mon 0.78  turns 11.7  0.73s/pair
+search k=3 r=8 h=0: 50/60 pairs  win 27.0%  deaths/mon 0.78  turns 11.0  0.68s/pair
+search k=3 r=8 h=0: 60/60 pairs  win 25.0%  deaths/mon 0.79  turns 11.4  0.70s/pair
+choices 2885: rejected by sim 1.25%, forced default 0.62%, brain default 0.00%
+      36  rejected: [Invalid choice] Can't switch: You can't switch to an active Pokémon
+searched 1275/1428 decisions

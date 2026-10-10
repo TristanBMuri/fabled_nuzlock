@@ -1,0 +1,685 @@
+SimBattleRunner: rebuild after AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+ep   0: cleared 158  no-death 50  deaths 7    (260s/ep)
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner: rebuild after AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+ep   1: cleared 158  no-death 32  deaths 5    (246s/ep)
+ep   2: cleared 118  no-death 36  deaths 12    (260s/ep)
+SimBattleRunner: rebuild after AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+ep   3: cleared 158  no-death 32  deaths 10    (254s/ep)
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner: rebuild after AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+ep   4: cleared 158  no-death 32  deaths 3    (258s/ep)
+SimBattleRunner: rebuild after AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+ep   5: cleared 158  no-death 50  deaths 11    (260s/ep)
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner: rebuild after AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+ep   6: cleared 158  no-death 139  deaths 2    (268s/ep)
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner: rebuild after AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+ep   7: cleared 158  no-death 136  deaths 1    (278s/ep)
+SimBattleRunner: rebuild after AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+ep   8: cleared 158  no-death 50  deaths 8    (276s/ep)
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner.estimate failed: AssertionError: 
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/abstract_battle.py", line 290, in get_pokemon
+    assert len(matches) < 2
+           ^^^^^^^^^^^^^^^^
+AssertionError
+
+SimBattleRunner: rebuild after AssertionError: 
+SimBattleRunner: rebuild after AssertionError: 
+ep   9: cleared 158  no-death 50  deaths 2    (278s/ep)
+
+10 episodes | slice 186 | battler=models/game_policy_cap186.pt search=(3, 8) (all) lam=1.0 level_rule=cap margin=0
+  trainers cleared        154.00
+  cleared without a death 60.70
+  deaths per run          6.10
+  slice clear rate        0%
+  deadliest trainers (deaths / lost battles over all episodes):
+    #139 Collector Edwin        none       deaths  16  lost  0  [Sudowoodo@19, Sudowoodo@19, Sudowoodo@19]
+    #50 Gym Leader Roark       gym_leader deaths   6  lost  0  [Geodude@12, Onix@12, Cranidos@14]
+    #32 Hiker Daniel           none       deaths   4  lost  0  [Geodude@11, Machop@11, Geodude@11, Bidoof@11]
+    #136 Gentleman Jeremy       none       deaths   3  lost  0  [Chatot@19]
+    #144 Scientist Shaun        none       deaths   3  lost  0  [Abra@19, Kadabra@19]
+    #114 Ruin Maniac Karl       none       deaths   2  lost  0  [Geodude@16, Geodude@17, Bronzor@18]
+    #147 Ranchers Beth          none       deaths   2  lost  0  [Ponyta@19]
+    #118 Police Officer Dylan   none       deaths   2  lost  1  [Hoothoot@18, Meditite@18]

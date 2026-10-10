@@ -1,0 +1,27 @@
+ep seed  305: cleared 405  no-death 403  deaths  5  CLEAR  (1636s/ep)
+ep seed  306: cleared 403  no-death 397  deaths  7    (1646s/ep)
+ep seed  308: cleared 405  no-death 166  deaths  4  CLEAR  (1659s/ep)
+ep seed  307: cleared 405  no-death 355  deaths  6  CLEAR  (1692s/ep)
+ep seed  309: cleared 405  no-death 404  deaths  4  CLEAR  (1698s/ep)
+ep seed  302: cleared 405  no-death 250  deaths  7  CLEAR  (1706s/ep)
+ep seed  301: cleared 405  no-death 403  deaths  5  CLEAR  (1715s/ep)
+ep seed  304: cleared 405  no-death 404  deaths  2  CLEAR  (1740s/ep)
+ep seed  300: cleared 404  no-death 400  deaths  6    (1759s/ep)
+ep seed  303: cleared 404  no-death 404  deaths  6    (1767s/ep)
+
+10 episodes | slice 405 | battler=calc search=9,8 (all) deep=9,16 parties=swap league=0 lam=1.0 | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True | 10 workers, 29 min
+  trainers cleared        404.60
+  cleared without a death 358.60
+  deaths per run          5.20
+  slice clear rate        70%
+  deep-search fights      13.8 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #404 Champion Cynthia       champion   deaths  34  lost  2  [Spiritomb@61, Roserade@60, Gastrodon@60, Lucario@63, Milotic@63, Garchomp@66]
+    #403 Elite Four Lucian      elite_four deaths   7  lost  1  [Mr. Mime@59, Girafarig@59, Medicham@60, Alakazam@60, Bronzong@63]
+    #355 Gym Leader Volkner     gym_leader deaths   2  lost  0  [Raichu@46, Ambipom@47, Octillery@47, Luxray@49]
+    #401 Elite Four Bertha      elite_four deaths   2  lost  0  [Quagsire@55, Sudowoodo@56, Golem@56, Whiscash@55, Hippowdon@59]
+    #402 Elite Four Flint       elite_four deaths   2  lost  0  [Rapidash@58, Steelix@57, Drifblim@58, Lopunny@57, Infernape@61]
+    #400 Elite Four Aaron       elite_four deaths   1  lost  0  [Dustox@53, Beautifly@53, Vespiquen@54, Heracross@54, Drapion@57]
+    #250 Gym Leader Byron       gym_leader deaths   1  lost  0  [Bronzor@36, Steelix@36, Bastiodon@39]
+    #398 Pokémon Trainer Cedric none       deaths   1  lost  0  [Staraptor@49, Floatzel@49, Heracross@51, Roserade@49, Snorlax@52, Infernape@55]
+  deaths by species: gyarados 8, bibarel 7, luxray 6, staraptor 6, kricketune 4, crobat 4, infernape 3, graveler 3, torterra 2, garchomp 2, machoke 1, empoleon 1

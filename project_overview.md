@@ -339,7 +339,7 @@ interface end to end, and it needs no training run to produce a number.
 - [x] **2q. Owed measurements** (2026-09-16). 51-slice default with evolution
       and encounters v2, 20 eps: 51.0 / 36.75 / 3.75 deaths / 100% (was 2.40;
       Roark 33 deaths in 20 runs, two fewer pre-Roark catches). 186 table at
-      20 eps: `logs/plan_cap186v3_deep20.log` (README → Status).
+      20 eps: `results/plan_cap186v3_deep20.log` (README → Status).
 
 Not in step 2: move events, builds, new gauntlets. Metric stays
 "trainers cleared without a death"; report on the training slice only
@@ -376,7 +376,7 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
 - [x] **E1. Game folder** (2026-09-16; `learnsets.json` holds full
       level-up lists, the last-four rule is derived at load and was checked
       equal to the old table on all 3300 cells; acceptance table
-      `logs/plan_cap186v3_deep20_e3e.log` = base2 inside noise). `data/bdsp/` holds everything the env knows
+      `results/plan_cap186v3_deep20_e3e.log` = base2 inside noise). `data/bdsp/` holds everything the env knows
       about the game: `trainers.json` (route order, parties with levels,
       moves, abilities, items), `encounters.json` (areas in route order:
       gate, species/level/weight table), `learnsets.json` (all level-up
@@ -422,7 +422,7 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       in the wrong direction; kept as the standard rule. **New baseline
       with both defaults (base2): 183.15 / 60.95 / 16.25 / 60%** — cleared
       +4.5 and clear rate +20 points over the 12-box config, outside the
-      noise floor; `logs/plan_cap186v3_deep20_base2.log`.
+      noise floor; `results/plan_cap186v3_deep20_base2.log`.
 - [x] **E4. Movesets: `best4`** (2026-09-16). Rule + OOD loop (harvest
       → 153k pairs → `game_policy_best4.pt`) → **185.95 cleared / 101.8
       no-death / 6.30 deaths / 95% clears** vs base2 183.15 / 60.95 / 16.25

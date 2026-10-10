@@ -1,0 +1,21 @@
+prior: 10/200 pairs  win 56.7%  deaths/mon 0.46  turns 9.6  0.06s/pair
+prior: 20/200 pairs  win 56.7%  deaths/mon 0.49  turns 11.2  0.05s/pair
+prior: 30/200 pairs  win 53.3%  deaths/mon 0.48  turns 9.9  0.04s/pair
+prior: 40/200 pairs  win 53.3%  deaths/mon 0.49  turns 9.9  0.04s/pair
+prior: 50/200 pairs  win 54.7%  deaths/mon 0.48  turns 9.5  0.04s/pair
+prior: 60/200 pairs  win 56.7%  deaths/mon 0.46  turns 9.7  0.03s/pair
+prior: 70/200 pairs  win 55.7%  deaths/mon 0.47  turns 9.8  0.03s/pair
+prior: 80/200 pairs  win 55.8%  deaths/mon 0.46  turns 9.8  0.03s/pair
+prior: 90/200 pairs  win 55.2%  deaths/mon 0.47  turns 9.6  0.03s/pair
+prior: 100/200 pairs  win 53.3%  deaths/mon 0.49  turns 9.8  0.03s/pair
+prior: 110/200 pairs  win 53.0%  deaths/mon 0.50  turns 9.9  0.03s/pair
+prior: 120/200 pairs  win 54.2%  deaths/mon 0.49  turns 9.8  0.03s/pair
+prior: 130/200 pairs  win 54.6%  deaths/mon 0.48  turns 9.7  0.03s/pair
+prior: 140/200 pairs  win 55.7%  deaths/mon 0.47  turns 9.8  0.03s/pair
+prior: 150/200 pairs  win 55.8%  deaths/mon 0.47  turns 9.8  0.03s/pair
+prior: 160/200 pairs  win 56.9%  deaths/mon 0.46  turns 9.7  0.03s/pair
+prior: 170/200 pairs  win 57.3%  deaths/mon 0.46  turns 9.6  0.03s/pair
+prior: 180/200 pairs  win 58.3%  deaths/mon 0.45  turns 9.6  0.03s/pair
+prior: 190/200 pairs  win 58.8%  deaths/mon 0.45  turns 9.5  0.03s/pair
+prior: 200/200 pairs  win 59.2%  deaths/mon 0.44  turns 9.6  0.03s/pair
+choices 12259: rejected by sim 0.00%, forced default 0.00%, brain default 0.00%

@@ -5,15 +5,12 @@ __pycache__/
 .pytest_cache/
 .ruff_cache/
 
-# logs & run artifacts
+# run logs (results/ holds the tables that the notebook cites)
 logs/
-showdown.log
-showdown_*.log
-runs/
-checkpoints/
 
-# showdown server: vendored clone, not our code
+# showdown: vendored clone, not our code
 pokemon-showdown/
 
-# model checkpoints (regenerable by training; 100s of MB)
+# regenerable, large: model checkpoints, BC datasets, battle harvests
 models/
+data/teams/gauntlet_harvest/

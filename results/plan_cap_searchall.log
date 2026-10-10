@@ -1,0 +1,35 @@
+ep   0: cleared 51  no-death 51  deaths 0  CLEAR  (25s/ep)
+ep   1: cleared 51  no-death 32  deaths 1  CLEAR  (34s/ep)
+ep   2: cleared 51  no-death 41  deaths 2  CLEAR  (36s/ep)
+ep   3: cleared 51  no-death 30  deaths 3  CLEAR  (41s/ep)
+ep   4: cleared 51  no-death 30  deaths 7  CLEAR  (40s/ep)
+ep   5: cleared 51  no-death 19  deaths 10  CLEAR  (47s/ep)
+ep   6: cleared 51  no-death 32  deaths 2  CLEAR  (48s/ep)
+ep   7: cleared 51  no-death 32  deaths 6  CLEAR  (47s/ep)
+ep   8: cleared 51  no-death 30  deaths 8  CLEAR  (52s/ep)
+ep   9: cleared 50  no-death 30  deaths 12    (51s/ep)
+ep  10: cleared 51  no-death 51  deaths 0  CLEAR  (49s/ep)
+ep  11: cleared 51  no-death 32  deaths 5  CLEAR  (49s/ep)
+ep  12: cleared 51  no-death 51  deaths 0  CLEAR  (47s/ep)
+ep  13: cleared 51  no-death 32  deaths 5  CLEAR  (46s/ep)
+ep  14: cleared 51  no-death 19  deaths 3  CLEAR  (46s/ep)
+ep  15: cleared 51  no-death 32  deaths 5  CLEAR  (46s/ep)
+ep  16: cleared 51  no-death 30  deaths 8  CLEAR  (47s/ep)
+ep  17: cleared 51  no-death 32  deaths 1  CLEAR  (46s/ep)
+ep  18: cleared 51  no-death 50  deaths 1  CLEAR  (45s/ep)
+ep  19: cleared 51  no-death 19  deaths 3  CLEAR  (46s/ep)
+
+20 episodes | battler=models/game_policy_cap_best.pt search=(3, 8) (all) lam=1.0 level_rule=cap margin=0
+  trainers cleared        50.95
+  cleared without a death 33.75
+  deaths per run          4.10
+  slice clear rate        95%
+  deadliest trainers (deaths / lost battles over all episodes):
+    #32 Hiker Daniel           none       deaths  30  lost  0  [Geodude@11, Machop@11, Geodude@11, Bidoof@11]
+    #50 Gym Leader Roark       gym_leader deaths  14  lost  1  [Geodude@12, Onix@12, Cranidos@14]
+    #41 Bug Catcher Phillip    none       deaths   7  lost  0  [Wurmple@9, Cascoon@11, Dustox@13]
+    #30 Youngster Jonathon     none       deaths   7  lost  0  [Geodude@10]
+    #37 Bug Catcher Donald     none       deaths   3  lost  0  [Burmy@12, Kricketune@12]
+    #36 Picnicker Siena        none       deaths   3  lost  0  [Shinx@12, Pachirisu@12]
+    #19 Youngster Darius       none       deaths   3  lost  0  [Geodude@8, Onix@8]
+    #39 Fisher Zachary         none       deaths   3  lost  0  [Magikarp@10, Goldeen@13, Magikarp@10]

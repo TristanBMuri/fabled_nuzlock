@@ -1,0 +1,33 @@
+ep seed  303: cleared 167  no-death 166  deaths  1  CLEAR  (371s/ep)
+ep seed  302: cleared 167  no-death 167  deaths  0  CLEAR  (386s/ep)
+ep seed  305: cleared 167  no-death 166  deaths  1  CLEAR  (392s/ep)
+ep seed  304: cleared 167  no-death 167  deaths  0  CLEAR  (397s/ep)
+ep seed  301: cleared 167  no-death 167  deaths  0  CLEAR  (433s/ep)
+ep seed  300: cleared 167  no-death 166  deaths  4  CLEAR  (472s/ep)
+ep seed  308: cleared 167  no-death 166  deaths  1  CLEAR  (377s/ep)
+ep seed  309: cleared 167  no-death 166  deaths  1  CLEAR  (383s/ep)
+ep seed  311: cleared 167  no-death 166  deaths  2  CLEAR  (393s/ep)
+ep seed  310: cleared 167  no-death 166  deaths  1  CLEAR  (408s/ep)
+ep seed  307: cleared 167  no-death 117  deaths  1  CLEAR  (413s/ep)
+ep seed  306: cleared 167  no-death 166  deaths  1  CLEAR  (431s/ep)
+ep seed  315: cleared 167  no-death  58  deaths  2  CLEAR  (374s/ep)
+ep seed  314: cleared 167  no-death 166  deaths  2  CLEAR  (381s/ep)
+ep seed  317: cleared 167  no-death 165  deaths  3  CLEAR  (396s/ep)
+ep seed  316: cleared 167  no-death 166  deaths  1  CLEAR  (397s/ep)
+ep seed  313: cleared 167  no-death 166  deaths  1  CLEAR  (410s/ep)
+ep seed  312: cleared 167  no-death 166  deaths  1  CLEAR  (422s/ep)
+ep seed  319: cleared 167  no-death 166  deaths  1  CLEAR  (384s/ep)
+ep seed  318: cleared 167  no-death 155  deaths  1  CLEAR  (396s/ep)
+
+20 episodes | slice 167 | battler=models/game_policy_route.pt search=3,8 (all) deep=4,16 parties=swap lam=1.0 | rules: level_rule=cap margin=0 box=30 dupes=True moveset=best4 | 6 workers, 26 min
+  trainers cleared        167.00
+  cleared without a death 157.70
+  deaths per run          1.25
+  slice clear rate        100%
+  deep-search fights      3.8 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #166 Gym Leader Maylene     gym_leader deaths  20  lost  0  [Meditite@27, Machoke@27, Lucario@30]
+    #58 Gym Leader Gardenia    gym_leader deaths   2  lost  0  [Cherubi@19, Turtwig@19, Roserade@22]
+    #155 Black Belt Gregory     none       deaths   1  lost  0  [Meditite@23, Machop@22, Meditite@21]
+    #117 Fisher Juan            none       deaths   1  lost  0  [Gyarados@21]
+    #165 Black Belt Colby       none       deaths   1  lost  0  [Machoke@25, Machoke@25, Machoke@25]

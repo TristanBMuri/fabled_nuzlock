@@ -1,0 +1,26 @@
+ep seed  305: cleared 402  no-death 401  deaths  6    (1859s/ep)
+ep seed  306: cleared 402  no-death 317  deaths  8    (1959s/ep)
+ep seed  309: cleared 403  no-death 401  deaths  6    (1966s/ep)
+ep seed  303: cleared 402  no-death 400  deaths  6    (2049s/ep)
+ep seed  302: cleared 404  no-death 166  deaths  7    (2111s/ep)
+ep seed  307: cleared 404  no-death 346  deaths  7    (2124s/ep)
+ep seed  300: cleared 402  no-death 346  deaths  7    (2127s/ep)
+ep seed  308: cleared 401  no-death 242  deaths 10    (2147s/ep)
+ep seed  304: cleared 404  no-death 399  deaths  7    (2155s/ep)
+ep seed  301: cleared 405  no-death 404  deaths  3  CLEAR  (2158s/ep)
+
+10 episodes | slice 405 | battler=calc search=9,8 (all) deep=9,16 parties=swap lam=1.0 | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 | 10 workers, 36 min
+  trainers cleared        402.90
+  cleared without a death 342.20
+  deaths per run          6.70
+  slice clear rate        10%
+  deep-search fights      13.2 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #401 Elite Four Bertha      elite_four deaths  23  lost  1  [Quagsire@55, Sudowoodo@56, Golem@56, Whiscash@55, Hippowdon@59]
+    #404 Champion Cynthia       champion   deaths  12  lost  3  [Spiritomb@61, Roserade@60, Gastrodon@60, Lucario@63, Milotic@63, Garchomp@66]
+    #402 Elite Four Flint       elite_four deaths  10  lost  4  [Rapidash@58, Steelix@57, Drifblim@58, Lopunny@57, Infernape@61]
+    #403 Elite Four Lucian      elite_four deaths  10  lost  1  [Mr. Mime@59, Girafarig@59, Medicham@60, Alakazam@60, Bronzong@63]
+    #317 Gym Leader Candice     gym_leader deaths   3  lost  0  [Snover@38, Sneasel@38, Medicham@40, Abomasnow@42]
+    #346 Team Galactic Boss Cyrus none       deaths   2  lost  0  [Honchkrow@45, Crobat@46, Gyarados@45, Weavile@48]
+    #400 Elite Four Aaron       elite_four deaths   2  lost  0  [Dustox@53, Beautifly@53, Vespiquen@54, Heracross@54, Drapion@57]
+    #399 Pokémon Trainer Cedric none       deaths   2  lost  0  [Staraptor@49, Roserade@49, Heracross@51, Rapidash@49, Snorlax@52, Empoleon@55]

@@ -1,0 +1,36 @@
+ep seed  304: cleared 171  no-death  32  deaths 16    (449s/ep)
+ep seed  300: cleared 169  no-death 139  deaths 14    (616s/ep)
+ep seed  301: cleared 186  no-death  32  deaths  8  CLEAR  (781s/ep)
+ep seed  302: cleared 186  no-death  87  deaths  7  CLEAR  (1034s/ep)
+ep seed  305: cleared 139  no-death  32  deaths  9    (559s/ep)
+ep seed  303: cleared 165  no-death  32  deaths 22    (1129s/ep)
+ep seed  309: cleared 185  no-death  32  deaths 19    (622s/ep)
+ep seed  306: cleared 186  no-death 134  deaths 14  CLEAR  (735s/ep)
+ep seed  308: cleared 186  no-death  32  deaths  9  CLEAR  (800s/ep)
+ep seed  307: cleared 171  no-death  36  deaths 16    (829s/ep)
+ep seed  310: cleared 185  no-death  84  deaths 14    (622s/ep)
+ep seed  314: cleared 186  no-death  50  deaths  5  CLEAR  (629s/ep)
+ep seed  311: cleared 174  no-death  36  deaths 17    (642s/ep)
+ep seed  313: cleared 171  no-death  87  deaths 17    (748s/ep)
+ep seed  312: cleared 185  no-death  36  deaths 16    (781s/ep)
+ep seed  315: cleared 186  no-death  32  deaths 10  CLEAR  (607s/ep)
+ep seed  319: cleared 186  no-death 133  deaths 11  CLEAR  (620s/ep)
+ep seed  316: cleared 184  no-death  36  deaths 19    (624s/ep)
+ep seed  318: cleared 185  no-death 134  deaths 15    (706s/ep)
+ep seed  317: cleared 186  no-death  32  deaths 10  CLEAR  (709s/ep)
+
+20 episodes | slice 186 | battler=models/game_policy_cap186v3.pt search=3,8 (all) deep=4,16 refine=off lam=1.0 level_rule=cap margin=0 | 5 workers, 47 min
+  trainers cleared        178.60
+  cleared without a death 62.40
+  deaths per run          13.40
+  slice clear rate        40%
+  deep-search fights      24.9 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #139 Collector Edwin        none       deaths  42  lost  1  [Sudowoodo@19, Sudowoodo@19, Sudowoodo@19]
+    #169 Fisher Juan            none       deaths  18  lost  1  [Gyarados@21]
+    #164 Pokémon Trainer Cedric none       deaths  16  lost  0  [Starly@19, Buizel@20, Ponyta@20, Grotle@21]
+    #163 Jogger Craig           none       deaths  15  lost  0  [Luxio@19, Staravia@21, Ponyta@20]
+    #166 Pokémon Trainer Cedric none       deaths  15  lost  0  [Starly@19, Roselia@20, Ponyta@20, Prinplup@21]
+    #184 Fisher Kenneth         none       deaths  14  lost  1  [Magikarp@19, Remoraid@19, Gyarados@22]
+    #165 Pokémon Trainer Cedric none       deaths  13  lost  1  [Starly@19, Buizel@20, Roselia@20, Monferno@21]
+    #32 Hiker Daniel           none       deaths  11  lost  0  [Geodude@11, Machop@11, Geodude@11, Bidoof@11]

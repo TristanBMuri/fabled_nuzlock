@@ -1,0 +1,36 @@
+ep seed  305: cleared 186  no-death  36  deaths  4  CLEAR  (683s/ep)
+ep seed  308: cleared 186  no-death 134  deaths  4  CLEAR  (717s/ep)
+ep seed  309: cleared 186  no-death  50  deaths  5  CLEAR  (719s/ep)
+ep seed  302: cleared 186  no-death  50  deaths  8  CLEAR  (742s/ep)
+ep seed  303: cleared 186  no-death 139  deaths  3  CLEAR  (750s/ep)
+ep seed  300: cleared 186  no-death  50  deaths  8  CLEAR  (761s/ep)
+ep seed  304: cleared 186  no-death  50  deaths 15  CLEAR  (767s/ep)
+ep seed  306: cleared 186  no-death 136  deaths  3  CLEAR  (796s/ep)
+ep seed  301: cleared 186  no-death  50  deaths  8  CLEAR  (838s/ep)
+ep seed  307: cleared 186  no-death 158  deaths  7  CLEAR  (903s/ep)
+ep seed  315: cleared 186  no-death 139  deaths  2  CLEAR  (724s/ep)
+ep seed  318: cleared 186  no-death 134  deaths  2  CLEAR  (752s/ep)
+ep seed  316: cleared 186  no-death  50  deaths  4  CLEAR  (765s/ep)
+ep seed  310: cleared 186  no-death 118  deaths  5  CLEAR  (778s/ep)
+ep seed  319: cleared 186  no-death 136  deaths  4  CLEAR  (789s/ep)
+ep seed  313: cleared 186  no-death 169  deaths  3  CLEAR  (792s/ep)
+ep seed  312: cleared 186  no-death 129  deaths  5  CLEAR  (810s/ep)
+ep seed  314: cleared 185  no-death 124  deaths 22    (811s/ep)
+ep seed  311: cleared 186  no-death  55  deaths  7  CLEAR  (815s/ep)
+ep seed  317: cleared 186  no-death 129  deaths  7  CLEAR  (872s/ep)
+
+20 episodes | slice 186 | battler=models/game_policy_best4.pt search=3,8 (all) deep=4,16 parties=swap roster=30 dupes=True moveset=best4 lam=1.0 level_rule=cap margin=0 | 10 workers, 29 min
+  trainers cleared        185.95
+  cleared without a death 101.80
+  deaths per run          6.30
+  slice clear rate        95%
+  deep-search fights      20.9 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #184 Fisher Kenneth         none       deaths  24  lost  0  [Magikarp@19, Remoraid@19, Gyarados@22]
+    #139 Collector Edwin        none       deaths  16  lost  0  [Sudowoodo@19, Sudowoodo@19, Sudowoodo@19]
+    #166 Pokémon Trainer Cedric none       deaths   8  lost  0  [Starly@19, Roselia@20, Ponyta@20, Prinplup@21]
+    #50 Gym Leader Roark       gym_leader deaths   7  lost  0  [Geodude@12, Onix@12, Cranidos@14]
+    #163 Jogger Craig           none       deaths   7  lost  0  [Luxio@19, Staravia@21, Ponyta@20]
+    #170 Pokémon Ranger Taylor  none       deaths   5  lost  0  [Luxio@21, Buizel@21]
+    #169 Fisher Juan            none       deaths   5  lost  0  [Gyarados@21]
+    #164 Pokémon Trainer Cedric none       deaths   5  lost  0  [Starly@19, Buizel@20, Ponyta@20, Grotle@21]

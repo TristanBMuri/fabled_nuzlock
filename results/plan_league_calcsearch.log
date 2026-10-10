@@ -1,0 +1,26 @@
+ep seed  309: cleared 402  no-death 243  deaths  7    (2545s/ep)
+ep seed  305: cleared 402  no-death 399  deaths  7    (2558s/ep)
+ep seed  304: cleared 402  no-death 362  deaths  7    (2561s/ep)
+ep seed  308: cleared 401  no-death 400  deaths  6    (2564s/ep)
+ep seed  302: cleared 402  no-death 400  deaths  6    (2576s/ep)
+ep seed  307: cleared 402  no-death 400  deaths  6    (2632s/ep)
+ep seed  301: cleared 402  no-death 401  deaths  6    (2656s/ep)
+ep seed  306: cleared 402  no-death 250  deaths  7    (2656s/ep)
+ep seed  303: cleared 402  no-death 299  deaths  8    (2660s/ep)
+ep seed  300: cleared 403  no-death 299  deaths  7    (2815s/ep)
+
+10 episodes | slice 405 | battler=calc search=9,8 (all) deep=9,16 parties=swap lam=1.0 | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 | 10 workers, 47 min
+  trainers cleared        402.00
+  cleared without a death 345.30
+  deaths per run          6.70
+  slice clear rate        0%
+  deep-search fights      12.1 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #402 Elite Four Flint       elite_four deaths  27  lost  8  [Rapidash@58, Steelix@57, Drifblim@58, Lopunny@57, Infernape@61]
+    #401 Elite Four Bertha      elite_four deaths  25  lost  1  [Quagsire@55, Sudowoodo@56, Golem@56, Whiscash@55, Hippowdon@59]
+    #400 Elite Four Aaron       elite_four deaths   5  lost  0  [Dustox@53, Beautifly@53, Vespiquen@54, Heracross@54, Drapion@57]
+    #403 Elite Four Lucian      elite_four deaths   3  lost  1  [Mr. Mime@59, Girafarig@59, Medicham@60, Alakazam@60, Bronzong@63]
+    #299 Skier Bradley          none       deaths   2  lost  0  [Geodude@35, Graveler@35, Snover@35]
+    #346 Team Galactic Boss Cyrus none       deaths   1  lost  0  [Honchkrow@45, Crobat@46, Gyarados@45, Weavile@48]
+    #362 Fisher Alec            none       deaths   1  lost  0  [Magikarp@40, Gyarados@42]
+    #399 Pokémon Trainer Cedric none       deaths   1  lost  0  [Staraptor@49, Roserade@49, Heracross@51, Rapidash@49, Snorlax@52, Empoleon@55]

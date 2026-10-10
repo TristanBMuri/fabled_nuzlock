@@ -7,9 +7,9 @@ box-to-box spread drops out of the comparison (--vs pairs by snapshot).
 Takes the planner's flags; rules flags (--no-items, --evs ...) apply from the
 opener on, the box itself is what the saved run caught.
 
-  uv run python scripts/league_test.py --snapshots data/league/tms_items --replays 4 \\
-      --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 10 --out logs/league_base.jsonl
-  ... --league 10 --out logs/league_e8.jsonl --vs logs/league_base.jsonl
+  uv run python scripts/league_test.py --snapshots results/league_snapshots --replays 4 \\
+      --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 10 --out results/league_base.jsonl
+  ... --league 10 --out results/league_e8.jsonl --vs results/league_base.jsonl
 """
 
 import json

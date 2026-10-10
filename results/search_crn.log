@@ -1,0 +1,22 @@
+search k=3 r=8: 10/200 pairs  win 70.0%  deaths/mon 0.35  turns 9.9  5.12s/pair
+search k=3 r=8: 20/200 pairs  win 68.3%  deaths/mon 0.37  turns 10.8  5.67s/pair
+search k=3 r=8: 30/200 pairs  win 63.3%  deaths/mon 0.38  turns 9.4  4.50s/pair
+search k=3 r=8: 40/200 pairs  win 59.2%  deaths/mon 0.42  turns 9.6  4.43s/pair
+search k=3 r=8: 50/200 pairs  win 61.3%  deaths/mon 0.39  turns 9.4  4.19s/pair
+search k=3 r=8: 60/200 pairs  win 62.8%  deaths/mon 0.38  turns 9.6  4.21s/pair
+search k=3 r=8: 70/200 pairs  win 62.9%  deaths/mon 0.37  turns 9.6  4.28s/pair
+search k=3 r=8: 80/200 pairs  win 63.3%  deaths/mon 0.37  turns 9.6  4.33s/pair
+search k=3 r=8: 90/200 pairs  win 63.0%  deaths/mon 0.38  turns 9.4  4.17s/pair
+search k=3 r=8: 100/200 pairs  win 63.3%  deaths/mon 0.38  turns 9.6  4.41s/pair
+search k=3 r=8: 110/200 pairs  win 62.7%  deaths/mon 0.40  turns 9.7  4.56s/pair
+search k=3 r=8: 120/200 pairs  win 63.9%  deaths/mon 0.39  turns 9.6  4.49s/pair
+search k=3 r=8: 130/200 pairs  win 64.6%  deaths/mon 0.38  turns 9.6  4.45s/pair
+search k=3 r=8: 140/200 pairs  win 64.5%  deaths/mon 0.38  turns 9.6  4.47s/pair
+search k=3 r=8: 150/200 pairs  win 65.1%  deaths/mon 0.37  turns 9.6  4.46s/pair
+search k=3 r=8: 160/200 pairs  win 66.0%  deaths/mon 0.37  turns 9.5  4.43s/pair
+search k=3 r=8: 170/200 pairs  win 65.1%  deaths/mon 0.37  turns 9.4  4.34s/pair
+search k=3 r=8: 180/200 pairs  win 66.3%  deaths/mon 0.36  turns 9.5  4.43s/pair
+search k=3 r=8: 190/200 pairs  win 66.5%  deaths/mon 0.36  turns 9.4  4.37s/pair
+search k=3 r=8: 200/200 pairs  win 67.2%  deaths/mon 0.35  turns 9.4  4.39s/pair
+choices 12002: rejected by sim 0.00%, forced default 0.00%, brain default 0.00%
+searched 5321/5806 decisions

@@ -514,14 +514,14 @@ project_overview.md # the plan / roadmap
   **Combined default (risk-based parties + search-all)**, 20 episodes
   seed 300: **51.0 cleared / 33.8 no-death / 2.65 deaths / 100% clear**,
   0 lost battles anywhere (Roark 20 deaths, Hiker Daniel 11), ~90
-  s/episode (`logs/plan_cap_full.log`). This is the run config to beat.
+  s/episode (`results/plan_cap_full.log`). This is the run config to beat.
   **2l. Value estimate (2026-09-15, evening).** Benchmark: the match-rule
   holdout (`models/gauntlet_holdout.json`, 200 pairs x3, seed 7) — the cap
   prior is OOD there (59.2% win / 0.44 deaths per mon), which leaves room
   for search to matter; the cap holdout saturates at 99%.
     prior:                                59.2% / 0.44
-    search k=3 r=8, fresh RNG per rollout: 63.7% / 0.37   (`logs/search_nocrn.log`)
-    search k=3 r=8, common random numbers: 67.2% / 0.35   (`logs/search_crn.log`)
+    search k=3 r=8, fresh RNG per rollout: 63.7% / 0.37   (`results/search_nocrn.log`)
+    search k=3 r=8, common random numbers: 67.2% / 0.35   (`results/search_crn.log`)
   **Common random numbers** (same engine seed for rollout j of every
   candidate; `SimBattle.fork(seed=)`, Searcher default) is free and worth
   +3.5 pts / −0.02 deaths per mon; 600 battles so ~2 pts is noise. Default now.
@@ -543,7 +543,7 @@ project_overview.md # the plan / roadmap
   rollouts see. Kept the code paths (off by default) for one more attempt
   with more leaf data / a bigger critic; delete them if that is also flat.
   Gauntlet default re-measured with CRN (20 eps, seed 300,
-  `logs/plan_cap_crn.log`): **51.0 cleared / 36.25 no-death / 2.40 deaths /
+  `results/plan_cap_crn.log`): **51.0 cleared / 36.25 no-death / 2.40 deaths /
   100% clear**, 0 lost battles (was 33.8 / 2.65; Roark 20 deaths again,
   Hiker Daniel 13). Same direction as the holdout, within 20-episode noise.
   **2m. Evolution + slice parameter (2026-09-15, night).** Level-up
@@ -582,7 +582,7 @@ project_overview.md # the plan / roadmap
   looked like impossible trainers. Fix: `gauntlet.species_name` (pokedex
   display name + forme resolution) + regression test.
   **186-slice after the fixes** (cap186 prior + search-all + risk parties,
-  10 eps, seed 300, ~300 s/ep, `logs/plan_cap186_search2.log`):
+  10 eps, seed 300, ~300 s/ep, `results/plan_cap186_search2.log`):
     **162.9 cleared / 63.5 no-death / 12.0 deaths / 0% clears**
   Every run ends by roster wipe (12 = MAX_ROSTER) between #154 and #170.
   Deaths: Collector Edwin #139 (3x Sudowoodo@19) 22, Jogger Craig #163 12,
@@ -628,7 +628,7 @@ project_overview.md # the plan / roadmap
     prior v3                   86.7% / 0.51
     prior v3 + search k3 r8    **92.2% / 0.39**  (above the teacher)
   Same lesson as attempt #3: "the prior can't do X" was undertraining on X.
-  **186-slice with v3** (10 eps, seed 300, `logs/plan_cap186v3_search.log`):
+  **186-slice with v3** (10 eps, seed 300, `results/plan_cap186v3_search.log`):
     **168.2 cleared / 44.8 no-death / 16.2 deaths / 10% clears** — first
     run through Gardenia. (v2: 160.2 / 48.7 / 18.8 / 0%.) Edwin 28 → 16
     deaths; the rival trio #164–166 is now the top killer (47 deaths, 3
@@ -655,7 +655,7 @@ project_overview.md # the plan / roadmap
   Also seen: 4/2908 choices rejected at k4 r16 ("can't switch to an active
   Pokémon") — a stale-mask corner in the search, 0.14%, harmless (sim default).
   **1b. Compute dial per trainer (2026-09-16).** v3 prior, search-all k3 r8,
-  `--deep 4,16`, 10 eps, seed 300 (`logs/plan_cap186v3_deep.log`):
+  `--deep 4,16`, 10 eps, seed 300 (`results/plan_cap186v3_deep.log`):
     **175.4 cleared / 63.7 no-death / 15.7 deaths / 20% clears**, 21 deep
     fights per run, 440 s/ep (v3 without deep: 168.2 / 44.8 / 16.2 / 10%, 260 s/ep)
   The rival trio dropped out of the killers (47 deaths → Cedric #166 10, the
@@ -668,14 +668,14 @@ project_overview.md # the plan / roadmap
   episodes in parallel processes for that: one env + one sim each, ~1.1 GB
   and one core per worker (Python and the Node sim alternate).
   **2q. Owed 51-slice table** (cap_best prior, search-all k3 r8, evolution +
-  encounters v2, 20 eps, seed 300, 5 workers, 7 min; `logs/plan_cap51_evo_v2.log`):
+  encounters v2, 20 eps, seed 300, 5 workers, 7 min; `results/plan_cap51_evo_v2.log`):
     **51.0 cleared / 36.75 no-death / 3.75 deaths / 100% clears**
   (stale table: 51.0 / 36.25 / 2.40 / 100%). Deaths up by ~1.3 per run:
   Roark 33 (was 20), Hiker Daniel 16 (13), Picnicker Siena #36 14 (new).
   Two fewer pre-Roark encounters (10 vs 12) means fewer swap candidates at
   Roark; evolution at 14 does not compensate. Still 0 lost battles.
   **Deep search confirmed at 20 episodes** (v3, search-all k3 r8, deep 4,16,
-  seeds 300–319, 5 workers, 47 min; `logs/plan_cap186v3_deep20.log`):
+  seeds 300–319, 5 workers, 47 min; `results/plan_cap186v3_deep20.log`):
     **178.6 cleared / 62.4 no-death / 13.4 deaths / 40% clears**, 24.9 deep
     fights per run (10-ep table: 175.4 / 63.7 / 15.7 / 20%; v3 without deep,
     10 eps: 168.2 / 44.8 / 16.2 / 10%)
@@ -689,7 +689,7 @@ project_overview.md # the plan / roadmap
   Gyarados fights.
   **`--refine 32` is null, and the 20-episode noise floor is measured.** Same
   seeds, deep 4,16 + top-3 parties re-queried at n=32, run twice by accident
-  (10 workers each, in parallel, 38 min; `logs/plan_cap186v3_deep20_refine.log`
+  (10 workers each, in parallel, 38 min; `results/plan_cap186v3_deep20_refine.log`
   holds replicate B, replicate A's summary is in the notebook only):
     A: 175.85 cleared / 57.9 no-death / 15.8 deaths / 15% clears
     B: 177.85 / 55.4 / 13.95 / 30%          (no refine: 178.6 / 62.4 / 13.4 / 40%)
@@ -701,7 +701,7 @@ project_overview.md # the plan / roadmap
   the candidate set, not the estimate, is the limit.
   **`--climb` (one extra round of single swaps from the best party when it is
   still hard) is null on the headline** (same seeds, 10 workers, 28 min;
-  `logs/plan_cap186v3_deep20_climb.log`):
+  `results/plan_cap186v3_deep20_climb.log`):
     178.55 cleared / 70.7 no-death / 13.4 deaths / 40% clears (no climb: 178.6 / 62.4 / 13.4 / 40%)
   Edwin's deaths halved (42 → 24) and reappeared one wall later: Fisher Juan's
   Gyarados #169 went 18 → 45 deaths with 4 losses. Deaths move, they do not
@@ -763,7 +763,7 @@ project_overview.md # the plan / roadmap
   offers, catches and drops. `tests/test_nuzlocke_env.py`.
   **Lifted box** (`--roster 30` ≥ starter + 21 areas = unbounded on this
   slice; 12-box code otherwise identical, no dupes clause; 5 workers, 59 min;
-  `logs/plan_cap186v3_deep20_roster30.log`):
+  `results/plan_cap186v3_deep20_roster30.log`):
     180.15 cleared / 58.0 no-death / 16.35 deaths / 45% clears (12-box: 178.6 / 62.4 / 13.4 / 40%)
   Cleared, no-death and clear rate are inside the noise floor. Deaths per
   run is **not comparable across box sizes**: 10 of the 20 runs end with
@@ -776,17 +776,17 @@ project_overview.md # the plan / roadmap
   every table from now on says so in its header. Expect E4 (movesets) to
   be where the extra catches start to matter.
   **Dupes clause** (12-box, otherwise the baseline config; 10 workers, 28 min;
-  `logs/plan_cap186v3_deep20_dupes.log`):
+  `results/plan_cap186v3_deep20_dupes.log`):
     176.25 cleared / 61.5 no-death / 14.0 deaths / 25% clears (no clause: 178.6 / 62.4 / 13.4 / 40%)
   At the edge of the noise floor in the wrong direction (−2.3 cleared, −15
   points, +0.6 deaths). Kept on anyway: it is the standard rule, and with
   the box unbounded it is purely a variety rule (a dupe is no longer a
   free body that costs a slot). The first table with both new defaults
-  (unbounded box + dupes clause, `logs/plan_cap186v3_deep20_base2.log`) is
+  (unbounded box + dupes clause, `results/plan_cap186v3_deep20_base2.log`) is
   the new baseline every later env change is measured against.
   **New baseline, base2** (unbounded box + dupes clause, no ability slots
   yet; otherwise the default config; 10 workers, 33 min;
-  `logs/plan_cap186v3_deep20_base2.log`):
+  `results/plan_cap186v3_deep20_base2.log`):
     **183.15 cleared / 60.95 no-death / 16.25 deaths / 60% clears**, 21.6 deep fights
   (12-box baseline 178.6 / 62.4 / 13.4 / 40%; lifted box alone 180.15 / 45%;
   dupes clause alone on the 12-box 176.25 / 25%). Cleared +4.5 and clear
@@ -806,7 +806,7 @@ project_overview.md # the plan / roadmap
   derived at load (`encounter_moves`) and checked equal to the old
   per-level table on all 3300 (species, level) cells. A second game is a
   second folder. Acceptance table (game folder + E3e ability slots,
-  otherwise the base2 config; 10 workers, 34 min; `logs/plan_cap186v3_deep20_e3e.log`):
+  otherwise the base2 config; 10 workers, 34 min; `results/plan_cap186v3_deep20_e3e.log`):
     184.0 cleared / 49.0 no-death / 15.5 deaths / 60% clears (base2: 183.15 / 60.95 / 16.25 / 60%)
   Inside the noise floor on every headline: E1 preserved behaviour, and the
   ability-slot roll is neutral at this slice (no-death 49 vs 61 is the
@@ -831,7 +831,7 @@ project_overview.md # the plan / roadmap
   harvest, 12-box: 127.2 / 33.3 / 17.7 / 0%) — confounded by the box and
   the clause, so only a sanity number.
   **best4 on the current (last4-trained) prior** (10 workers, 39 min;
-  `logs/plan_cap186v3_deep20_best4.log`):
+  `results/plan_cap186v3_deep20_best4.log`):
     180.2 cleared / 60.8 no-death / 19.2 deaths / 25% clears (base2: 183.15 / 60.95 / 16.25 / 60%)
   Worse, outside the floor on clear rate and deaths. Two causes, one fixed:
   (1) the rule handed Geodude Selfdestruct as its strongest attack (200
@@ -846,7 +846,7 @@ project_overview.md # the plan / roadmap
   (`bc_game_20260916_205924`, `_205946`), 20 epochs → `models/game_policy_best4.pt`, val CE 0.146, acc
   95%, switch acc 69% (v3: 0.149 / 61%).
   **E4 verdict: best4 movesets + the best4 prior** (10 workers, 29 min;
-  `logs/plan_cap186_best4prior.log`):
+  `results/plan_cap186_best4prior.log`):
     **185.95 cleared / 101.8 no-death / 6.30 deaths / 95% clears**, 20.9 deep fights
     (base2, last4 + v3 prior: 183.15 / 60.95 / 16.25 / 60%)
   Deaths per run 16.25 → 6.30, clear rate 60% → 95% (19 of 20 runs), no
@@ -864,7 +864,7 @@ project_overview.md # the plan / roadmap
   ability and moves at the end of a `--verbose` episode. The env plan (2¾)
   is complete except E6 (variable-roster obs, only for a learned run layer).
   Acceptance table on the finished code, all defaults (10 workers, 29 min;
-  `logs/plan_cap186_final.log`):
+  `results/plan_cap186_final.log`):
     184.6 cleared / 97.95 no-death / 7.05 deaths / 85% clears (E4 table: 185.95 / 101.8 / 6.30 / 95%)
   Inside the floor: the refactor preserved behaviour. Treat the pair as the
   reference (≈185 cleared, ≈6.7 deaths, ≈90% clears). Walls: Fisher
@@ -934,7 +934,7 @@ project_overview.md # the plan / roadmap
   pairs 1 min; pretrain val CE 0.061 -> `models/game_policy_route.pt`):**
     fast heuristic harvest (300)         167 / 73.7  / 3.80 / 100%
     heuristic + risk parties (20, 12 min) 167 / 143.8 / 2.20 / 100%
-    prior + search 3,8 all, deep 4,16 (20, 26 min) 167 / 157.7 / 1.25 / 100%   (`logs/plan_route167_*.log`)
+    prior + search 3,8 all, deep 4,16 (20, 26 min) 167 / 157.7 / 1.25 / 100%   (`results/plan_route167_*.log`)
   Maylene's Lucario takes exactly one mon per run under every brain (20/20);
   the rest is noise. The slice through Maylene is solved; the benchmark is
   the full game now.
@@ -983,11 +983,11 @@ project_overview.md # the plan / roadmap
   Gyarados in the box. The first full-game tables (harvest
   `battles_route405.jsonl`, prior `game_policy_route405.pt`, val CE 0.232)
   ran on the env *before* these fixes: heuristic table
-  `logs/plan_route405_heuristic.log`, the search table was stopped at 8/20
+  `results/plan_route405_heuristic.log`, the search table was stopped at 8/20
   episodes (superseded). Regeneration on the fixed env: `*_route405b*`.
   **First full-game table (old env: three rivals, walking encounters, box
   30; heuristic + risk parties, 20 eps, 5 workers, 90 min,
-  `logs/plan_route405_heuristic.log`):**
+  `results/plan_route405_heuristic.log`):**
     402.5 cleared / 149.9 no-death / 32.45 deaths / 5% clears
   Deaths sit where a Nuzlocke's do: Cynthia 55 deaths + 11 wipes / 20 runs,
   the League rival 52-53 per variant, Flint 48, Aaron 36, Lucian 36,
@@ -996,7 +996,7 @@ project_overview.md # the plan / roadmap
   **Fixed env (one rival, water / gifts, box 50), harvest 200 fast eps
   (394.6 / 76.7 / 36.0), collect 95.6k pairs, `game_policy_route405b.pt`
   val CE 0.219. Prior + search 3,8 all, deep 4,16 (10 eps, 10 workers, 67
-  min, `logs/plan_route405b_search.log`):**
+  min, `results/plan_route405b_search.log`):**
     403.4 cleared / 184.8 no-death / 27.6 deaths / 0% clears, 20 deep fights per run
   Cynthia 48 deaths and 8 wipes in 10 runs, Flint 38, Bertha 22, Lucian
   21, Aaron 19, the League rival 18, Volkner 13, Maylene 11. Search moves
@@ -1006,7 +1006,7 @@ project_overview.md # the plan / roadmap
   are still played on full heals. This is where the calc-bot teacher, the
   League-healing rule and the BDSP mod get measured.
   Heuristic + risk parties on the same env (20 eps, 5 workers,
-  `logs/plan_route405b_heuristic.log`): **403.05 / 139.2 / 31.95 / 10%**
+  `results/plan_route405b_heuristic.log`): **403.05 / 139.2 / 31.95 / 10%**
   (2 of 20 runs beat Cynthia). Search buys ~45 trainers of first death and
   ~4 deaths per run; neither line beats the League reliably.
   **Calc-bot teacher (2026-09-19, roadmap 1a).** `ai_util/calc_bot.py`
@@ -1025,7 +1025,7 @@ project_overview.md # the plan / roadmap
   arithmetic does not clone into a 256x256 MLP from 94k pairs); heuristic
   clone on the new encoder 0.213 / 93% / 37% (= yesterday's 0.219: the new
   features are neutral for it). **Calc prior + search 3,8 all, deep 4,16
-  (10 eps, 10 workers, 62 min, `logs/plan_route405b_calcprior_search.log`):**
+  (10 eps, 10 workers, 62 min, `results/plan_route405b_calcprior_search.log`):**
     385.5 cleared / 196.1 no-death / 17.9 deaths / **30% clears** (3 of 10 beat Cynthia)
   vs the heuristic prior + search 403.4 / 184.8 / 27.6 / 0%. Cynthia 47
   deaths + 6 wipes (was 48 + 8), Flint 18 (38), Lucian 16 (21), Aaron 14
@@ -1043,14 +1043,14 @@ project_overview.md # the plan / roadmap
   notebook's 0.14% rejections at k4 r16 were this). Every duplicate now
   gets a suffix (Staravia1, Staravia2); rejections 0.00%.
   **Calc bot alone, full game (20 eps, 5 workers, 109 min,
-  `logs/plan_route405b_calcbot.log`):** 404 / 222.65 / 15.9 deaths / 15%
+  `results/plan_route405b_calcbot.log`):** 404 / 222.65 / 15.9 deaths / 15%
   clears. Every run reaches the League; Cynthia 95 deaths + 15 wipes / 20,
   Lucian 38, Bertha 37, Flint 29, Candice 16, Aaron 13, Byron 10, Volkner
   9. Fewer deaths than any prior line (heur+search 27.6, calc prior+search
   17.9) at zero search cost; the clone + search wins on clears (30% vs 15%)
   by trading route deaths for League deaths.
   **Encoder control:** the heuristic clone on the new encoder + search, same
-  matchups (10 eps, `logs/plan_route405b_heurprior_search.log`): 403.3 /
+  matchups (10 eps, `results/plan_route405b_heurprior_search.log`): 403.3 /
   176.8 / 28.3 / 0% — yesterday's 27.6 on the old encoder. Level + real
   stats change nothing for the heuristic clone; the teacher is the lever.
   **Search over the calc bot, candidate order.** With no prior, switch
@@ -1074,7 +1074,7 @@ project_overview.md # the plan / roadmap
   fight use it, the planner steps through with `env.party_locked`. A fast
   calc-bot episode: Aaron costs 2, the four survivors enter Bertha at
   58 / 147 / 119 / 204 HP and wipe — every earlier League number was on
-  full heals. Tables under the rule: `logs/plan_league_*.log`.
+  full heals. Tables under the rule: `results/plan_league_*.log`.
   **Party for the whole block.** At the fight that opens a no-heal block
   (Aaron), `env.risk()` scores a candidate party by
   `SimBattleRunner.estimate_block`: n samples of the five fights in a row
@@ -1093,7 +1093,7 @@ project_overview.md # the plan / roadmap
   (Found on the way: killing a planner by its main PID orphaned its workers
   and their sim bridges; 15 of them ran for 90 min. Kill the tree.)
   **League with items between fights, calc + search 9,8 (10 eps, 36 min,
-  `logs/plan_league2_calcsearch.log`):** 402.9 / 342.2 / 6.7 deaths / 10%
+  `results/plan_league2_calcsearch.log`):** 402.9 / 342.2 / 6.7 deaths / 10%
   clears. Route ~1 death per run; the block: Bertha 23 deaths (1 wipe),
   Cynthia 12 (3 wipes), Flint 10 (4 wipes), Lucian 10 (1), Aaron 2. Runs
   end at 401 / 402x4 / 403 / 404x3, one clear. Full heals moved the wipes
@@ -1109,13 +1109,13 @@ project_overview.md # the plan / roadmap
   before Aaron** (the standard hardcore convention for the E4). The
   summary also prints deaths by species from here.
   **Block cap 66 + items between fights, calc + search 9,8 (10 eps, 38 min,
-  `logs/plan_league3_calcsearch.log`):** 403.7 / 371.8 / 5.9 deaths / 0%
+  `results/plan_league3_calcsearch.log`):** 403.7 / 371.8 / 5.9 deaths / 0%
   clears. Bertha 3, Flint 5, Lucian 16, **Cynthia 30 deaths + 8 wipes / 10**;
   route ~1. Deaths by species: Bibarel 13, Gyarados 9, Staraptor 7, Luxray
   5, Infernape 5. The E4 is handled at 66; Cynthia is the wall, and the
   party that reaches her carries filler (Bibarel is top-6-by-level tie-break
   material). Next: a Cynthia matchup probe from the harvest's League parties.
-  Calc bot alone, same rules (10 eps, 49 min, `logs/plan_league3_calcbot.log`):
+  Calc bot alone, same rules (10 eps, 49 min, `results/plan_league3_calcbot.log`):
   402.6 / 259.9 / 10.0 / 0% — dies at Flint (5) and Lucian (4); search halves
   the League cost (5.9) and gets 8 of 10 runs to Cynthia.
   **Cynthia probe (`models/cynthia66_pairs.json`):** 150 six-mon parties the
@@ -1141,7 +1141,7 @@ project_overview.md # the plan / roadmap
   single-use TMs in BDSP), held items, and party building for the League
   from the whole box (both need the run layer to plan for #404 from far out).
   Calc + search 9,8 on the first 50 of those parties (n=2,
-  `logs/probe_cynthia66_calcsearch.log`): **18.0% wins / 0.94 deaths per
+  `results/probe_cynthia66_calcsearch.log`): **18.0% wins / 0.94 deaths per
   mon** (calc alone on the same 150: 2.7% / 0.99). Search lifts the win
   rate sixfold but a win still costs ~5 of 6 mons: no deathless line exists
   for these parties. The box and the movesets are the lever, not the play. Roadmap: E8 League
@@ -1176,7 +1176,7 @@ project_overview.md # the plan / roadmap
   mean P(death) at n=32 0.76 vs 0.92 for the best swap (progress 0.63 vs
   0.69). ~2.5 min per episode at the opener. Table: swap vs E8 on the fixed
   env, calc + search 9,8 / deep 9,16, seeds 300–309, 10 workers each
-  (`logs/plan_league4_{swap,e8}.log`, 38 / 40 min, no rebuilds in either):
+  (`results/plan_league4_{swap,e8}.log`, 38 / 40 min, no rebuilds in either):
     swap (`--league 0`): 403.80 cleared / 368.0 no-death / 5.90 deaths / **20% clears**
       Cynthia 35 deaths, 6 losses; Flint 8, Bertha 8, Lucian 4; routes ~1
     E8 (`--league 10`):  404.00 / 325.6 / 6.40 / 10%
@@ -1227,10 +1227,10 @@ project_overview.md # the plan / roadmap
   Ice Beam. The status slot is often Rest (the calc bot never uses it).
   Tables (calc + search 9,8 / deep 9,16, seeds 300–309, 10 workers each,
   29 min each, no rebuilds):
-    best4 v2, level-up only (`logs/plan_best4v2.log`):
+    best4 v2, level-up only (`results/plan_best4v2.log`):
       404.20 cleared / 337.4 no-death / 6.20 deaths / 20% clears
       Cynthia 34 deaths, 8 losses; Lucian 11, Flint 4, Bertha 4
-    best4 v2 + TMs (`logs/plan_best4v2_tms.log`):
+    best4 v2 + TMs (`results/plan_best4v2_tms.log`):
       **404.60 / 358.6 / 5.20 / 70% clears**
       Cynthia 34 deaths, **2 losses**; Lucian 7, Bertha 2, Flint 2, Aaron 1
   **TMs are the first lever that moves Cynthia**: the rule change alone
@@ -1246,7 +1246,7 @@ project_overview.md # the plan / roadmap
   **Player EV training (2026-09-23, `--evs trained`, `Rules.evs`):** 252
   in the better attacking stat (base atk vs spa), 252 Spe, 4 HP — the
   probe's best legal spread — on top of TMs, same seeds and config
-  (`logs/plan_tms_evs.log`, 31 min): 404.50 / 375.9 / 5.80 / **50%
+  (`results/plan_tms_evs.log`, 31 min): 404.50 / 375.9 / 5.80 / **50%
   clears**; Cynthia 40 deaths, 5 losses; Flint 8, Bertha 2, Aaron 2,
   Lucian 1. Against the TM line (70%, Cynthia 34 / 2) that is −20 points
   at a ±15 noise floor: null at best, likely negative — the probe's
@@ -1270,7 +1270,7 @@ project_overview.md # the plan / roadmap
   found the first version scoring the unchanged set: `risk()` runs the
   level rule, which rewrites `m.moves` from the rule — variants go through
   `m.chosen`. Table, same seeds and config as the TM line
-  (`logs/plan_tms_moves.log`, 35 min, 4.0 sets changed per run):
+  (`results/plan_tms_moves.log`, 35 min, 4.0 sets changed per run):
     404.20 / 392.7 / 6.10 / **20% clears**; Cynthia 42 deaths, **8 losses**;
     Lucian 7, Cedric 4, Flint 3 (TM line 404.6 / 358.6 / 5.2 / 70%, Cynthia 34 / 2).
   Two effects pull apart: before the League the run is safer (no-death 358.6
@@ -1281,7 +1281,7 @@ project_overview.md # the plan / roadmap
   brain; the ordering is how far it gets through Aaron–Lucian, and a move
   that helps there is bought at Garchomp). Second table: the same rule with
   the League opener excluded (`env._block()`), so only route and gym
-  choices are made and carried in (`logs/plan_tms_moves_noblock.log`, 36 min,
+  choices are made and carried in (`results/plan_tms_moves_noblock.log`, 36 min,
   2.8 sets changed per run):
     404.40 / 354.1 / 5.10 / **40% clears**; Cynthia 36 deaths, **6 losses**; Lucian 7.
   Still −30 points and 6 vs 2 Cynthia losses on the same seeds, with only
@@ -1320,7 +1320,7 @@ project_overview.md # the plan / roadmap
   Gyarados / Luxray / Staraptor / Torterra / Lapras / Golduck party holds
   Splash Plate / Zap Plate / Sky Plate / Soft Sand / Wave Incense / Choice
   Specs (+ Leftovers on the first by sort). Table, same seeds and config as
-  the TM line (`logs/plan_tms_items.log`, 31 min):
+  the TM line (`results/plan_tms_items.log`, 31 min):
     **404.80 / 402.8 / 4.30 / 80% clears**; Cynthia 36 deaths, 2 losses; Lucian 5,
     Bertha 1, Cedric 1 (TM line 404.6 / 358.6 / 5.2 / 70%; Cynthia 34 / 2; E4 12).
   One death before the League in ten runs (was ~10), the E4 halved (12 → 6),
@@ -1333,7 +1333,7 @@ project_overview.md # the plan / roadmap
   model) or the run layer bringing a different box.
   **The League test (2026-10-09, `scripts/league_test.py`).** A 20-episode
   replicate of the benchmark on unchanged code (seeds 300-319, `--save-league
-  models/league_tms_items`, `logs/plan_league_snapshots.log`, 63 min):
+  results/league_snapshots`, `results/plan_league_snapshots.log`, 63 min):
     404.55 / 382.1 / 3.85 / **55% clears**; Cynthia 59 deaths, **9 losses**; Lucian 7.
   The 10-episode table said 80% / 2 losses. 25 points between identical configs
   is past the ±15 floor quoted above: every League verdict since 2026-09-19
@@ -1342,7 +1342,7 @@ project_overview.md # the plan / roadmap
   the League party is chosen); `league_test.py` replays the block from every
   opener R times with the planner's flags and pairs variants by box (`--vs`).
   ~4 min per block vs ~28 min per full episode. Baseline, 20 boxes x 4 replays
-  (`logs/league_base.{log,jsonl}`, 32 min):
+  (`results/league_base.{log,jsonl}`, 32 min):
     **block clear 0.70 ± 0.07 / 3.69 ± 0.25 deaths per block / 3.12 ± 0.20 at
     Cynthia**; Aaron, Bertha, Flint, Lucian 80/80 won, Cynthia 56/80.
   (± = standard error over boxes.) Per box: 7 boxes clear 4/4, 6 clear 3/4,
@@ -1364,10 +1364,10 @@ project_overview.md # the plan / roadmap
   disagree by up to 0.5 deaths. `plan_gauntlet.py --parties beam|all` (replaces
   `--climb`/`--refine`, both null) widens the candidate set only when the best
   swap is still flagged hard. Tables:
-    beam (5 workers, 68 min, `logs/plan_cap186v3_deep20_beam.log`):
+    beam (5 workers, 68 min, `results/plan_cap186v3_deep20_beam.log`):
       178.15 cleared / 58.9 no-death / 13.75 deaths / 35% clears, 17.1 deep fights
       (baseline 178.6 / 62.4 / 13.4 / 40%; climb 178.55 / 70.7 / 13.4 / 40%)
-    all (10 workers, 106 min, `logs/plan_cap186v3_deep20_all.log`):
+    all (10 workers, 106 min, `results/plan_cap186v3_deep20_all.log`):
       178.95 cleared / 79.8 no-death / 13.05 deaths / 30% clears, 16.4 deep fights
   Both are null on cleared, deaths and clear rate. `all`'s no-death mean is
   +17, but that metric is the first-death trainer and jumps between a few

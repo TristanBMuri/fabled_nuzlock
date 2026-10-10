@@ -1,0 +1,35 @@
+ep seed  300: cleared  51  no-death  36  deaths  3  CLEAR  (69s/ep)
+ep seed  302: cleared  51  no-death  51  deaths  0  CLEAR  (71s/ep)
+ep seed  304: cleared  51  no-death  32  deaths  7  CLEAR  (80s/ep)
+ep seed  301: cleared  51  no-death  32  deaths  8  CLEAR  (106s/ep)
+ep seed  307: cleared  51  no-death  36  deaths  4  CLEAR  (63s/ep)
+ep seed  305: cleared  51  no-death  32  deaths  4  CLEAR  (77s/ep)
+ep seed  309: cleared  51  no-death  32  deaths  7  CLEAR  (86s/ep)
+ep seed  306: cleared  51  no-death  51  deaths  0  CLEAR  (94s/ep)
+ep seed  303: cleared  51  no-death  32  deaths  7  CLEAR  (191s/ep)
+ep seed  310: cleared  51  no-death  36  deaths  2  CLEAR  (72s/ep)
+ep seed  312: cleared  51  no-death  50  deaths  2  CLEAR  (80s/ep)
+ep seed  314: cleared  51  no-death  32  deaths  2  CLEAR  (82s/ep)
+ep seed  311: cleared  51  no-death  32  deaths  2  CLEAR  (84s/ep)
+ep seed  308: cleared  51  no-death  32  deaths  4  CLEAR  (140s/ep)
+ep seed  317: cleared  51  no-death  32  deaths  2  CLEAR  (77s/ep)
+ep seed  315: cleared  51  no-death  32  deaths  4  CLEAR  (78s/ep)
+ep seed  319: cleared  51  no-death  51  deaths  0  CLEAR  (83s/ep)
+ep seed  316: cleared  51  no-death  32  deaths  6  CLEAR  (87s/ep)
+ep seed  313: cleared  51  no-death  36  deaths  6  CLEAR  (117s/ep)
+ep seed  318: cleared  51  no-death  36  deaths  5  CLEAR  (107s/ep)
+
+20 episodes | slice 51 | battler=models/game_policy_cap_best.pt search=3,8 (all) deep=None refine=off lam=1.0 level_rule=cap margin=0 | 5 workers, 7 min
+  trainers cleared        51.00
+  cleared without a death 36.75
+  deaths per run          3.75
+  slice clear rate        100%
+  deadliest trainers (deaths / lost battles over all episodes):
+    #50 Gym Leader Roark       gym_leader deaths  33  lost  0  [Geodude@12, Onix@12, Cranidos@14]
+    #32 Hiker Daniel           none       deaths  16  lost  0  [Geodude@11, Machop@11, Geodude@11, Bidoof@11]
+    #36 Picnicker Siena        none       deaths  14  lost  0  [Shinx@12, Pachirisu@12]
+    #45 Pokémon Trainer Lucas  none       deaths   5  lost  0  [Chimchar@13]
+    #48 Pokémon Trainer Dawn   none       deaths   3  lost  0  [Chimchar@13]
+    #37 Bug Catcher Donald     none       deaths   2  lost  0  [Burmy@12, Kricketune@12]
+    #41 Bug Catcher Phillip    none       deaths   1  lost  0  [Wurmple@9, Cascoon@11, Dustox@13]
+    #39 Fisher Zachary         none       deaths   1  lost  0  [Magikarp@10, Goldeen@13, Magikarp@10]

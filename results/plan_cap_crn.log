@@ -1,0 +1,35 @@
+ep   0: cleared 51  no-death 50  deaths 2  CLEAR  (79s/ep)
+ep   1: cleared 51  no-death 32  deaths 2  CLEAR  (98s/ep)
+ep   2: cleared 51  no-death 41  deaths 2  CLEAR  (91s/ep)
+ep   3: cleared 51  no-death 30  deaths 1  CLEAR  (83s/ep)
+ep   4: cleared 51  no-death 30  deaths 3  CLEAR  (76s/ep)
+ep   5: cleared 51  no-death 30  deaths 5  CLEAR  (84s/ep)
+ep   6: cleared 51  no-death 32  deaths 3  CLEAR  (87s/ep)
+ep   7: cleared 51  no-death 51  deaths 0  CLEAR  (87s/ep)
+ep   8: cleared 51  no-death 30  deaths 3  CLEAR  (84s/ep)
+ep   9: cleared 51  no-death 30  deaths 6  CLEAR  (82s/ep)
+ep  10: cleared 51  no-death 51  deaths 0  CLEAR  (82s/ep)
+ep  11: cleared 51  no-death 32  deaths 1  CLEAR  (82s/ep)
+ep  12: cleared 51  no-death 51  deaths 0  CLEAR  (82s/ep)
+ep  13: cleared 51  no-death 50  deaths 1  CLEAR  (82s/ep)
+ep  14: cleared 51  no-death 19  deaths 2  CLEAR  (80s/ep)
+ep  15: cleared 51  no-death 32  deaths 6  CLEAR  (81s/ep)
+ep  16: cleared 51  no-death 19  deaths 6  CLEAR  (80s/ep)
+ep  17: cleared 51  no-death 32  deaths 2  CLEAR  (80s/ep)
+ep  18: cleared 51  no-death 51  deaths 0  CLEAR  (82s/ep)
+ep  19: cleared 51  no-death 32  deaths 3  CLEAR  (84s/ep)
+
+20 episodes | battler=models/game_policy_cap_best.pt search=(3, 8) (all) lam=1.0 level_rule=cap margin=0
+  trainers cleared        51.00
+  cleared without a death 36.25
+  deaths per run          2.40
+  slice clear rate        100%
+  deadliest trainers (deaths / lost battles over all episodes):
+    #50 Gym Leader Roark       gym_leader deaths  20  lost  0  [Geodude@12, Onix@12, Cranidos@14]
+    #32 Hiker Daniel           none       deaths  13  lost  0  [Geodude@11, Machop@11, Geodude@11, Bidoof@11]
+    #30 Youngster Jonathon     none       deaths   7  lost  0  [Geodude@10]
+    #48 Pokémon Trainer Dawn   none       deaths   2  lost  0  [Chimchar@13]
+    #19 Youngster Darius       none       deaths   2  lost  0  [Geodude@8, Onix@8]
+    #41 Bug Catcher Phillip    none       deaths   1  lost  0  [Wurmple@9, Cascoon@11, Dustox@13]
+    #39 Fisher Zachary         none       deaths   1  lost  0  [Magikarp@10, Goldeen@13, Magikarp@10]
+    #45 Pokémon Trainer Lucas  none       deaths   1  lost  0  [Chimchar@13]

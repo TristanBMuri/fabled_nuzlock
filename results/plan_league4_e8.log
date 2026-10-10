@@ -1,0 +1,27 @@
+ep seed  306: cleared 404  no-death 402  deaths  6    (2249s/ep)
+ep seed  305: cleared 404  no-death 401  deaths  6    (2252s/ep)
+ep seed  308: cleared 404  no-death 281  deaths  8    (2270s/ep)
+ep seed  301: cleared 403  no-death 401  deaths  6    (2295s/ep)
+ep seed  304: cleared 405  no-death 403  deaths  4  CLEAR  (2362s/ep)
+ep seed  302: cleared 404  no-death 403  deaths  6    (2364s/ep)
+ep seed  309: cleared 404  no-death 163  deaths  7    (2375s/ep)
+ep seed  303: cleared 404  no-death 281  deaths  7    (2378s/ep)
+ep seed  307: cleared 404  no-death 317  deaths  7    (2380s/ep)
+ep seed  300: cleared 404  no-death 204  deaths  7    (2405s/ep)
+
+10 episodes | slice 405 | battler=calc search=9,8 (all) deep=9,16 parties=swap league=10 lam=1.0 | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 | 10 workers, 40 min
+  trainers cleared        404.00
+  cleared without a death 325.60
+  deaths per run          6.40
+  slice clear rate        10%
+  deep-search fights      14.1 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #404 Champion Cynthia       champion   deaths  34  lost  8  [Spiritomb@61, Roserade@60, Gastrodon@60, Lucario@63, Milotic@63, Garchomp@66]
+    #403 Elite Four Lucian      elite_four deaths  12  lost  1  [Mr. Mime@59, Girafarig@59, Medicham@60, Alakazam@60, Bronzong@63]
+    #401 Elite Four Bertha      elite_four deaths   6  lost  0  [Quagsire@55, Sudowoodo@56, Golem@56, Whiscash@55, Hippowdon@59]
+    #402 Elite Four Flint       elite_four deaths   6  lost  0  [Rapidash@58, Steelix@57, Drifblim@58, Lopunny@57, Infernape@61]
+    #281 Sailor Paul            none       deaths   2  lost  0  [Gyarados@31, Machop@31]
+    #204 Gym Leader Wake        gym_leader deaths   1  lost  0  [Gyarados@27, Quagsire@27, Floatzel@30]
+    #317 Gym Leader Candice     gym_leader deaths   1  lost  0  [Snover@38, Sneasel@38, Medicham@40, Abomasnow@42]
+    #399 Pokémon Trainer Cedric none       deaths   1  lost  0  [Staraptor@49, Roserade@49, Heracross@51, Rapidash@49, Snorlax@52, Empoleon@55]
+  deaths by species: bibarel 8, crobat 7, graveler 5, staraptor 4, gyarados 4, machoke 4, lapras 4, roserade 4, kricketune 3, luxray 3, infernape 3, torterra 2

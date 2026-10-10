@@ -1,0 +1,25 @@
+ep   0: cleared 170  no-death 50  deaths 12    (341s/ep)
+ep   1: cleared 158  no-death 32  deaths 12    (313s/ep)
+ep   2: cleared 160  no-death 50  deaths 12    (314s/ep)
+ep   3: cleared 154  no-death 32  deaths 12    (280s/ep)
+ep   4: cleared 163  no-death 32  deaths 12    (285s/ep)
+ep   5: cleared 167  no-death 116  deaths 12    (303s/ep)
+ep   6: cleared 164  no-death 139  deaths 12    (312s/ep)
+ep   7: cleared 165  no-death 50  deaths 12    (317s/ep)
+ep   8: cleared 163  no-death 84  deaths 12    (317s/ep)
+ep   9: cleared 165  no-death 50  deaths 12    (318s/ep)
+
+10 episodes | slice 186 | battler=models/game_policy_cap186.pt search=(3, 8) (all) lam=1.0 level_rule=cap margin=0
+  trainers cleared        162.90
+  cleared without a death 63.50
+  deaths per run          12.00
+  slice clear rate        0%
+  deadliest trainers (deaths / lost battles over all episodes):
+    #139 Collector Edwin        none       deaths  22  lost  0  [Sudowoodo@19, Sudowoodo@19, Sudowoodo@19]
+    #163 Jogger Craig           none       deaths  12  lost  2  [Luxio@19, Staravia@21, Ponyta@20]
+    #159 Commander Jupiter      none       deaths  11  lost  0  [Zubat@18, Skuntank@20]
+    #165 Pokémon Trainer Cedric none       deaths  10  lost  2  [Starly@19, Buizel@20, Roselia@20, Monferno@21]
+    #158 Collector Fernando     none       deaths  10  lost  1  [Mr. Mime@17, Mr. Mime@20, Mr. Mime@20]
+    #50 Gym Leader Roark       gym_leader deaths   6  lost  0  [Geodude@12, Onix@12, Cranidos@14]
+    #164 Pokémon Trainer Cedric none       deaths   6  lost  1  [Starly@19, Buizel@20, Ponyta@20, Grotle@21]
+    #166 Pokémon Trainer Cedric none       deaths   4  lost  0  [Starly@19, Roselia@20, Ponyta@20, Prinplup@21]

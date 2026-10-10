@@ -1,0 +1,35 @@
+ep seed  301: cleared 404  no-death  58  deaths 42    (1099s/ep)
+ep seed  304: cleared 404  no-death 165  deaths 41    (1221s/ep)
+ep seed  303: cleared 398  no-death 165  deaths 22    (1231s/ep)
+ep seed  300: cleared 402  no-death 158  deaths 33    (1246s/ep)
+ep seed  302: cleared 404  no-death 166  deaths 42    (1350s/ep)
+ep seed  306: cleared 398  no-death  20  deaths 23    (1173s/ep)
+ep seed  308: cleared 401  no-death 155  deaths 40    (1179s/ep)
+ep seed  309: cleared 403  no-death 158  deaths 34    (1223s/ep)
+ep seed  305: cleared 404  no-death 204  deaths 38    (1262s/ep)
+ep seed  307: cleared 399  no-death 166  deaths 25    (1293s/ep)
+ep seed  313: cleared 404  no-death 162  deaths 28    (1175s/ep)
+ep seed  311: cleared 404  no-death 166  deaths 33    (1185s/ep)
+ep seed  314: cleared 404  no-death 166  deaths 30    (1256s/ep)
+ep seed  310: cleared 404  no-death 164  deaths 31    (1276s/ep)
+ep seed  312: cleared 404  no-death 166  deaths 36    (1308s/ep)
+ep seed  316: cleared 401  no-death 166  deaths 29    (1218s/ep)
+ep seed  319: cleared 404  no-death 165  deaths 35    (1255s/ep)
+ep seed  318: cleared 405  no-death 204  deaths 28  CLEAR  (1283s/ep)
+ep seed  315: cleared 399  no-death 166  deaths 27    (1312s/ep)
+ep seed  317: cleared 404  no-death  58  deaths 32    (1356s/ep)
+
+20 episodes | slice 405 | battler=SimpleHeuristics search=None deep=None parties=swap lam=1.0 | rules: level_rule=cap margin=0 box=30 dupes=True moveset=best4 | 5 workers, 90 min
+  trainers cleared        402.50
+  cleared without a death 149.90
+  deaths per run          32.45
+  slice clear rate        5%
+  deadliest trainers (deaths / lost battles over all episodes):
+    #404 Champion Cynthia       champion   deaths  55  lost 11  [Spiritomb@61, Roserade@60, Gastrodon@60, Lucario@63, Milotic@63, Garchomp@66]
+    #399 Pokémon Trainer Cedric none       deaths  53  lost  2  [Staraptor@49, Roserade@49, Heracross@51, Rapidash@49, Snorlax@52, Empoleon@55]
+    #398 Pokémon Trainer Cedric none       deaths  52  lost  2  [Staraptor@49, Floatzel@49, Heracross@51, Roserade@49, Snorlax@52, Infernape@55]
+    #402 Elite Four Flint       elite_four deaths  48  lost  1  [Rapidash@58, Steelix@57, Drifblim@58, Lopunny@57, Infernape@61]
+    #400 Elite Four Aaron       elite_four deaths  36  lost  0  [Dustox@53, Beautifly@53, Vespiquen@54, Heracross@54, Drapion@57]
+    #403 Elite Four Lucian      elite_four deaths  36  lost  1  [Mr. Mime@59, Girafarig@59, Medicham@60, Alakazam@60, Bronzong@63]
+    #401 Elite Four Bertha      elite_four deaths  31  lost  2  [Quagsire@55, Sudowoodo@56, Golem@56, Whiscash@55, Hippowdon@59]
+    #355 Gym Leader Volkner     gym_leader deaths  28  lost  0  [Raichu@46, Ambipom@47, Octillery@47, Luxray@49]
