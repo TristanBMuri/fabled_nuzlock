@@ -26,6 +26,8 @@ from poke_env.battle.weather import Weather
 from poke_env.player.battle_order import BattleOrder, DefaultBattleOrder
 from poke_env.player.player import Player
 
+from ai_util.calc_bot import effectiveness
+
 # CFRU starts every legal move at 100. Dumped moves go to 0.
 BASE_SCORE = 100
 KO_BONUS = 30
@@ -155,7 +157,7 @@ class RadicalRedAI(Player):
             return 0
 
         if move.category != MoveCategory.STATUS:
-            if opponent.damage_multiplier(move) == 0:
+            if effectiveness(move, opponent) == 0:
                 return 0
         else:
             if self._status_fails(battle, active, opponent, move):
@@ -211,9 +213,9 @@ class RadicalRedAI(Player):
                     bonus += 4
             else:
                 bonus += int(min(dmg / hp_left, 1.5) * 18)
-            if opponent.damage_multiplier(move) > 1:
+            if effectiveness(move, opponent) > 1:
                 bonus += 4
-            elif 0 < opponent.damage_multiplier(move) < 1:
+            elif 0 < effectiveness(move, opponent) < 1:
                 bonus -= 4
             if move.recoil > 0:
                 bonus -= 2
@@ -393,7 +395,7 @@ class RadicalRedAI(Player):
         level = attacker.level or 100
         base = ((2 * level / 5 + 2) * power * ratio) / 50 + 2
         stab = attacker.stab_multiplier if move.type in attacker.types else 1.0
-        typ = defender.damage_multiplier(move)
+        typ = effectiveness(move, defender)
         weather_mult = self._weather_mult(battle, move)
         acc = move.accuracy if move.accuracy else 1.0
         dmg = base * stab * typ * weather_mult * acc
@@ -491,7 +493,7 @@ class RadicalRedAI(Player):
             return False
         if active.tera_type is None:
             return False
-        return opponent.damage_multiplier(move) >= 2
+        return effectiveness(move, opponent) >= 2
 
 
 RadicalRedPlayer = RadicalRedAI

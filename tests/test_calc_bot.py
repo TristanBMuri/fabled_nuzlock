@@ -63,7 +63,8 @@ def test_full_info_gives_the_bot_the_enemy_set():
         assert opp.item == "sitrusberry" and opp.ability == "sandveil" and opp.level == 66
         assert {k: stat(opp, k, own=False) for k in real["stats"]} == real["stats"]
         assert max_hp(opp, own=False) == real["maxhp"]
-        assert len(sb.mirrors["p1"].opponent_team) == 2 and len(sb.mirrors["p2"].opponent_team) == 1  # p2 stays blind
+        assert len(sb.mirrors["p1"].opponent_team) == 2 and len(sb.mirrors["p2"].opponent_team) == 1  # both ways
+        assert set(sb.mirrors["p2"].opponent_team["p1: Bidoof"].moves) == {"tackle"}
         f = sb.fork(seed=[1, 2, 3, 4])
         assert set(f.mirrors["p1"].opponent_active_pokemon.moves) == set(opp.moves)
         from ai_util.calc_bot import calc_brain
@@ -74,3 +75,15 @@ def test_full_info_gives_the_bot_the_enemy_set():
         sb.close()
     finally:
         bridge.close()
+
+
+def test_ability_immunities_void_a_move():
+    """Dry Skin voids Water, Levitate voids Ground: both bots must see zero, not the type chart."""
+    from ai_util.calc_bot import effectiveness
+    from poke_env.battle import Move, Pokemon
+    jynx = Pokemon(gen=9, species="jynx"); jynx._ability = "dryskin"
+    gastly = Pokemon(gen=9, species="gastly"); gastly._ability = "levitate"
+    scald, quake, psychic = Move("scald", gen=9), Move("earthquake", gen=9), Move("psychic", gen=9)
+    assert jynx.damage_multiplier(scald) == 1.0 and effectiveness(scald, jynx) == 0.0
+    assert effectiveness(quake, gastly) == 0.0 and effectiveness(psychic, gastly) == 2.0
+    assert effectiveness(psychic, jynx) == 0.5

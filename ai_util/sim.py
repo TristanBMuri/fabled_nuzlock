@@ -98,8 +98,8 @@ class SimBattle:
                  full_info: bool = False):
         """Packed teams; None lets the format's generator build one (randombattle).
         carry: per p1 mon {hp, status, pp} to start from (no heal since the last fight).
-        full_info: p1's mirror knows p2's whole team from turn one (sets, levels,
-        items, abilities, real stats) — the full-docs regime; p2 stays as it was."""
+        full_info: each mirror knows the other side's whole team from turn one (sets,
+        levels, items, abilities, real stats) — the full-docs regime, both ways."""
         self.bridge, self.fmt, self.full_info = bridge, fmt, full_info
         self.gen = GenData.from_format(fmt).gen
         self.id = f"b{next(_IDS)}"
@@ -134,9 +134,10 @@ class SimBattle:
                 name = m.nickname or m.species
                 b._team[f"{side}: {name}"] = Pokemon(gen=self.gen, teambuilder=m, name=name)
         opp = "p2" if side == "p1" else "p1"
-        if self.full_info and side == "p1" and self.teams[opp]:
-            # the enemy's sets are known (the env built them): moves, item, ability,
-            # level and the real stats, keyed as the protocol will name them
+        if self.full_info and self.teams[opp]:
+            # both sides know the other's sets (the env built them; the game's trainer AI
+            # knows the player's team too): moves, item, ability, level and the real
+            # stats, keyed as the protocol will name them
             data = GenData.from_gen(self.gen)
             for m in Teambuilder.parse_packed_team(self.teams[opp]):
                 m.nickname, m.species = m.nickname or None, m.species or None

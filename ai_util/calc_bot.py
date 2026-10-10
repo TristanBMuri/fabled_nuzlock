@@ -43,6 +43,28 @@ def max_hp(mon, own: bool) -> int:
     return ((2 * mon.base_stats["hp"] + ENEMY_IV + ENEMY_EV // 4) * mon.level) // 100 + mon.level + 10
 
 
+# abilities that void a move: by the move's type, or by a move flag (sound, bullet)
+ABILITY_IMMUNE_TYPE = {"levitate": "Ground", "eartheater": "Ground",
+                       "waterabsorb": "Water", "dryskin": "Water", "stormdrain": "Water",
+                       "voltabsorb": "Electric", "lightningrod": "Electric", "motordrive": "Electric",
+                       "flashfire": "Fire", "wellbakedbody": "Fire", "sapsipper": "Grass"}
+ABILITY_IMMUNE_FLAG = {"soundproof": "sound", "bulletproof": "bullet"}
+
+
+def effectiveness(move, dfn) -> float:
+    """Type multiplier of `move` on `dfn`, zero when dfn's ability voids it (known under
+    full info; the game's AI never clicks Scald into Dry Skin, so neither may the model of it)."""
+    mult = dfn.damage_multiplier(move)
+    ab = (dfn.ability or "").replace(" ", "").lower()
+    if ab in ABILITY_IMMUNE_TYPE and move.type is not None and move.type.name.capitalize() == ABILITY_IMMUNE_TYPE[ab]:
+        return 0.0
+    if ab in ABILITY_IMMUNE_FLAG and (move.entry.get("flags") or {}).get(ABILITY_IMMUNE_FLAG[ab]):
+        return 0.0
+    if ab == "wonderguard" and mult < 2:
+        return 0.0
+    return mult
+
+
 def dmg_frac(att, dfn, move, att_own: bool) -> float:
     """Expected fraction of dfn's max HP one use of move removes (accuracy included)."""
     if move.category == MoveCategory.STATUS:
@@ -57,7 +79,7 @@ def dmg_frac(att, dfn, move, att_own: bool) -> float:
     a = stat(att, "atk" if phys else "spa", att_own)
     d = stat(dfn, "def" if phys else "spd", not att_own)
     base = ((2 * att.level / 5 + 2) * move.base_power * a / d) / 50 + 2
-    mod = ROLL * (1.5 if move.type in att.types else 1.0) * dfn.damage_multiplier(move)
+    mod = ROLL * (1.5 if move.type in att.types else 1.0) * effectiveness(move, dfn)
     mod *= getattr(move, "expected_hits", 1) or 1
     if att.status == Status.BRN and phys:
         mod *= 0.5
