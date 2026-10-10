@@ -1,0 +1,4632 @@
+{
+ "0x0": {
+  "rr_name": "{PK}{MN} Trainer",
+  "fr_const": "TRAINER_NONE",
+  "maps": []
+ },
+ "0x1": {
+  "rr_name": "{PK}{MN} Trainer",
+  "fr_const": "TRAINER_AQUA_LEADER",
+  "maps": []
+ },
+ "0x2": {
+  "rr_name": "Ace Trainer Andrew",
+  "fr_const": "TRAINER_AQUA_GRUNT_M",
+  "maps": []
+ },
+ "0x3": {
+  "rr_name": "{PK}{MN} Trainer Red",
+  "fr_const": "TRAINER_AQUA_GRUNT_F",
+  "maps": []
+ },
+ "0x4": {
+  "rr_name": "Lass Anne",
+  "fr_const": "TRAINER_RS_AROMA_LADY",
+  "maps": []
+ },
+ "0x5": {
+  "rr_name": "Gentleman Komodo",
+  "fr_const": "TRAINER_RS_RUIN_MANIAC",
+  "maps": []
+ },
+ "0x6": {
+  "rr_name": "Friendly {PK}{MN}Maniac",
+  "fr_const": "TRAINER_INTERVIEWER",
+  "maps": []
+ },
+ "0x7": {
+  "rr_name": "Friendly Teacher",
+  "fr_const": "TRAINER_RS_TUBER_F",
+  "maps": []
+ },
+ "0x8": {
+  "rr_name": "Leader Bugsy",
+  "fr_const": "TRAINER_RS_TUBER_M",
+  "maps": []
+ },
+ "0x9": {
+  "rr_name": "Friendly Coach",
+  "fr_const": "TRAINER_RS_COOLTRAINER_M",
+  "maps": []
+ },
+ "0xa": {
+  "rr_name": "Friendly Coach",
+  "fr_const": "TRAINER_RS_COOLTRAINER_F",
+  "maps": []
+ },
+ "0xb": {
+  "rr_name": "Friendly Coach",
+  "fr_const": "TRAINER_HEX_MANIAC",
+  "maps": []
+ },
+ "0xc": {
+  "rr_name": "Friendly Coach",
+  "fr_const": "TRAINER_RS_LADY",
+  "maps": []
+ },
+ "0xd": {
+  "rr_name": "Friendly Coach",
+  "fr_const": "TRAINER_RS_BEAUTY",
+  "maps": []
+ },
+ "0xe": {
+  "rr_name": "Dumbass Gambler",
+  "fr_const": "TRAINER_RICH_BOY",
+  "maps": []
+ },
+ "0xf": {
+  "rr_name": "{PK}{MN} Trainer Haley",
+  "fr_const": "TRAINER_RS_POKEMANIAC",
+  "maps": []
+ },
+ "0x10": {
+  "rr_name": "{PK}{MN} Trainer Sam",
+  "fr_const": "TRAINER_RS_SWIMMER_M",
+  "maps": []
+ },
+ "0x11": {
+  "rr_name": "{PK}{MN} Trainer Shelly",
+  "fr_const": "TRAINER_RS_BLACK_BELT",
+  "maps": []
+ },
+ "0x12": {
+  "rr_name": "{PK}{MN} Trainer Cole",
+  "fr_const": "TRAINER_GUITARIST",
+  "maps": []
+ },
+ "0x13": {
+  "rr_name": "{PK}{MN} Trainer Ketchup",
+  "fr_const": "TRAINER_KINDLER",
+  "maps": []
+ },
+ "0x14": {
+  "rr_name": "{PK}{MN} Trainer Ketchup",
+  "fr_const": "TRAINER_RS_CAMPER",
+  "maps": []
+ },
+ "0x15": {
+  "rr_name": "Ace Trainer Nelle",
+  "fr_const": "TRAINER_BUG_MANIAC",
+  "maps": []
+ },
+ "0x16": {
+  "rr_name": "Friendly Thug",
+  "fr_const": "TRAINER_RS_PSYCHIC_M",
+  "maps": []
+ },
+ "0x17": {
+  "rr_name": "Boss Thug",
+  "fr_const": "TRAINER_RS_PSYCHIC_F",
+  "maps": []
+ },
+ "0x18": {
+  "rr_name": "Dumbass Creator",
+  "fr_const": "TRAINER_RS_GENTLEMAN",
+  "maps": []
+ },
+ "0x19": {
+  "rr_name": "Dumbass Kid",
+  "fr_const": "TRAINER_ELITE_FOUR_SIDNEY",
+  "maps": []
+ },
+ "0x1a": {
+  "rr_name": "{PK}{MN} Trainer Brendan",
+  "fr_const": "TRAINER_ELITE_FOUR_PHOEBE",
+  "maps": []
+ },
+ "0x1b": {
+  "rr_name": "Friendly Coach",
+  "fr_const": "TRAINER_LEADER_ROXANNE",
+  "maps": []
+ },
+ "0x1c": {
+  "rr_name": "Leader Morty",
+  "fr_const": "TRAINER_LEADER_BRAWLY",
+  "maps": []
+ },
+ "0x1d": {
+  "rr_name": "Leader Jasmine",
+  "fr_const": "TRAINER_LEADER_TATE_LIZA",
+  "maps": []
+ },
+ "0x1e": {
+  "rr_name": "{PK}{MN} Prof. Aide",
+  "fr_const": "TRAINER_SCHOOL_KID_M",
+  "maps": []
+ },
+ "0x1f": {
+  "rr_name": "School Kid BrunoRe",
+  "fr_const": "TRAINER_SCHOOL_KID_F",
+  "maps": []
+ },
+ "0x20": {
+  "rr_name": "Leader Misty",
+  "fr_const": "TRAINER_SR_AND_JR",
+  "maps": []
+ },
+ "0x21": {
+  "rr_name": "Pok\u00e9fan AgathaRe",
+  "fr_const": "TRAINER_POKEFAN_M",
+  "maps": []
+ },
+ "0x22": {
+  "rr_name": "Pok\u00e9fan AgathaRe",
+  "fr_const": "TRAINER_POKEFAN_F",
+  "maps": []
+ },
+ "0x23": {
+  "rr_name": "Dumbass Gian",
+  "fr_const": "TRAINER_EXPERT_M",
+  "maps": []
+ },
+ "0x24": {
+  "rr_name": "Elite Four LanceRe",
+  "fr_const": "TRAINER_EXPERT_F",
+  "maps": []
+ },
+ "0x25": {
+  "rr_name": "Elite Four LanceRe",
+  "fr_const": "TRAINER_RS_YOUNGSTER",
+  "maps": []
+ },
+ "0x26": {
+  "rr_name": "Leader Clair",
+  "fr_const": "TRAINER_RS_CHAMPION",
+  "maps": []
+ },
+ "0x27": {
+  "rr_name": "Champion Lance",
+  "fr_const": "TRAINER_RS_FISHERMAN",
+  "maps": []
+ },
+ "0x28": {
+  "rr_name": "Dumbass Jojo Fan",
+  "fr_const": "TRAINER_CYCLING_TRIATHLETE_M",
+  "maps": []
+ },
+ "0x29": {
+  "rr_name": "Rocket Admin Ariana",
+  "fr_const": "TRAINER_CYCLING_TRIATHLETE_F",
+  "maps": []
+ },
+ "0x2a": {
+  "rr_name": "Rocket Admin Archer",
+  "fr_const": "TRAINER_RUNNING_TRIATHLETE_M",
+  "maps": []
+ },
+ "0x2b": {
+  "rr_name": "Leader Falkner",
+  "fr_const": "TRAINER_RUNNING_TRIATHLETE_F",
+  "maps": []
+ },
+ "0x2c": {
+  "rr_name": "{PK}{MN} Trainer Brendan",
+  "fr_const": "TRAINER_SWIMMING_TRIATHLETE_M",
+  "maps": []
+ },
+ "0x2d": {
+  "rr_name": "Leader Falkner",
+  "fr_const": "TRAINER_SWIMMING_TRIATHLETE_F",
+  "maps": []
+ },
+ "0x2e": {
+  "rr_name": "Rocket Admin Archer",
+  "fr_const": "TRAINER_DRAGON_TAMER",
+  "maps": []
+ },
+ "0x2f": {
+  "rr_name": "Leader Bugsy",
+  "fr_const": "TRAINER_RS_BIRD_KEEPER",
+  "maps": []
+ },
+ "0x30": {
+  "rr_name": "Leader Misty",
+  "fr_const": "TRAINER_NINJA_BOY",
+  "maps": []
+ },
+ "0x31": {
+  "rr_name": "Leader Whitney",
+  "fr_const": "TRAINER_BATTLE_GIRL",
+  "maps": []
+ },
+ "0x32": {
+  "rr_name": "{PK}{MN} Trainer Brendan",
+  "fr_const": "TRAINER_PARASOL_LADY",
+  "maps": []
+ },
+ "0x33": {
+  "rr_name": "Leader Lt. Surge",
+  "fr_const": "TRAINER_RS_SWIMMER_F",
+  "maps": []
+ },
+ "0x34": {
+  "rr_name": "Leader Morty",
+  "fr_const": "TRAINER_RS_PICNICKER",
+  "maps": []
+ },
+ "0x35": {
+  "rr_name": "Rocket Admin Archer",
+  "fr_const": "TRAINER_RS_TWINS",
+  "maps": []
+ },
+ "0x36": {
+  "rr_name": "Rocket Admin Ariana",
+  "fr_const": "TRAINER_RS_SAILOR",
+  "maps": []
+ },
+ "0x37": {
+  "rr_name": "{PK}{MN} Trainer Brendan",
+  "fr_const": "TRAINER_BOARDER_M",
+  "maps": []
+ },
+ "0x38": {
+  "rr_name": "Leader Brock",
+  "fr_const": "TRAINER_BOARDER_F",
+  "maps": []
+ },
+ "0x39": {
+  "rr_name": "{PK}{MN} Trainer Brendan",
+  "fr_const": "TRAINER_COLLECTOR",
+  "maps": []
+ },
+ "0x3a": {
+  "rr_name": "Leader Pryce",
+  "fr_const": "TRAINER_WALLY",
+  "maps": []
+ },
+ "0x3b": {
+  "rr_name": "Leader Pryce",
+  "fr_const": "TRAINER_BRENDAN",
+  "maps": []
+ },
+ "0x3c": {
+  "rr_name": "Leader Pryce",
+  "fr_const": "TRAINER_BRENDAN_2",
+  "maps": []
+ },
+ "0x3d": {
+  "rr_name": "{PK}{MN} Trainer May",
+  "fr_const": "TRAINER_BRENDAN_3",
+  "maps": []
+ },
+ "0x3e": {
+  "rr_name": "Leader Jasmine",
+  "fr_const": "TRAINER_MAY",
+  "maps": []
+ },
+ "0x3f": {
+  "rr_name": "Leader Jasmine",
+  "fr_const": "TRAINER_MAY_2",
+  "maps": []
+ },
+ "0x40": {
+  "rr_name": "Leader Jasmine",
+  "fr_const": "TRAINER_MAY_3",
+  "maps": []
+ },
+ "0x41": {
+  "rr_name": "Leader Erika",
+  "fr_const": "TRAINER_RS_PKMN_BREEDER_M",
+  "maps": []
+ },
+ "0x42": {
+  "rr_name": "Dumbass Jojo Fan",
+  "fr_const": "TRAINER_RS_PKMN_BREEDER_F",
+  "maps": []
+ },
+ "0x43": {
+  "rr_name": "Rocket Admin Archer",
+  "fr_const": "TRAINER_RS_PKMN_RANGER_M",
+  "maps": []
+ },
+ "0x44": {
+  "rr_name": "Rocket Admin Ariana",
+  "fr_const": "TRAINER_RS_PKMN_RANGER_F",
+  "maps": []
+ },
+ "0x45": {
+  "rr_name": "Boss Giovanni",
+  "fr_const": "TRAINER_MAGMA_LEADER",
+  "maps": []
+ },
+ "0x46": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_MAGMA_GRUNT_M",
+  "maps": []
+ },
+ "0x47": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_MAMGA_GRUNT_F",
+  "maps": []
+ },
+ "0x48": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_RS_LASS",
+  "maps": []
+ },
+ "0x49": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_RS_BUG_CATCHER",
+  "maps": []
+ },
+ "0x4a": {
+  "rr_name": "Leader Clair",
+  "fr_const": "TRAINER_RS_HIKER",
+  "maps": []
+ },
+ "0x4b": {
+  "rr_name": "Leader Bugsy",
+  "fr_const": "TRAINER_RS_YOUNG_COUPLE",
+  "maps": []
+ },
+ "0x4c": {
+  "rr_name": "Leader Whitney",
+  "fr_const": "TRAINER_OLD_COUPLE",
+  "maps": []
+ },
+ "0x4d": {
+  "rr_name": "Elite Four Lorelei",
+  "fr_const": "TRAINER_RS_SIS_AND_BRO",
+  "maps": []
+ },
+ "0x4e": {
+  "rr_name": "Elite Four Lorelei",
+  "fr_const": "TRAINER_AQUA_ADMIN_MATT",
+  "maps": []
+ },
+ "0x4f": {
+  "rr_name": "Leader Pryce",
+  "fr_const": "TRAINER_AQUA_ADMIN_SHELLY",
+  "maps": []
+ },
+ "0x50": {
+  "rr_name": "Elite Four Bruno",
+  "fr_const": "TRAINER_MAGMA_ADMIN_TABITHA",
+  "maps": []
+ },
+ "0x51": {
+  "rr_name": "Elite Four Bruno",
+  "fr_const": "TRAINER_MAGMA_ADMIN_COURTNEY",
+  "maps": []
+ },
+ "0x52": {
+  "rr_name": "Ace Trainer Samantha",
+  "fr_const": "TRAINER_LEADER_WATTSON",
+  "maps": []
+ },
+ "0x53": {
+  "rr_name": "Elite Four Agatha",
+  "fr_const": "TRAINER_LEADER_FLANNERY",
+  "maps": []
+ },
+ "0x54": {
+  "rr_name": "Elite Four Agatha",
+  "fr_const": "TRAINER_LEADER_NORMAN",
+  "maps": []
+ },
+ "0x55": {
+  "rr_name": "Ace Trainer Nick",
+  "fr_const": "TRAINER_LEADER_WINONA",
+  "maps": []
+ },
+ "0x56": {
+  "rr_name": "Elite Four Lance",
+  "fr_const": "TRAINER_LEADER_WALLACE",
+  "maps": []
+ },
+ "0x57": {
+  "rr_name": "Elite Four Lance",
+  "fr_const": "TRAINER_ELITE_FOUR_GLACIA",
+  "maps": []
+ },
+ "0x58": {
+  "rr_name": "Ace Trainer Barry",
+  "fr_const": "TRAINER_ELITE_FOUR_DRAKE",
+  "maps": []
+ },
+ "0x59": {
+  "rr_name": "Youngster Ben",
+  "fr_const": "TRAINER_YOUNGSTER_BEN",
+  "maps": [
+   "Route3"
+  ]
+ },
+ "0x5a": {
+  "rr_name": "Youngster Calvin",
+  "fr_const": "TRAINER_YOUNGSTER_CALVIN",
+  "maps": [
+   "Route3"
+  ]
+ },
+ "0x5b": {
+  "rr_name": "Youngster Josh",
+  "fr_const": "TRAINER_YOUNGSTER_JOSH",
+  "maps": [
+   "MtMoon_1F"
+  ]
+ },
+ "0x5c": {
+  "rr_name": "Youngster Timmy",
+  "fr_const": "TRAINER_YOUNGSTER_TIMMY",
+  "maps": [
+   "Route24"
+  ]
+ },
+ "0x5d": {
+  "rr_name": "Youngster Joey",
+  "fr_const": "TRAINER_YOUNGSTER_JOEY",
+  "maps": [
+   "Route25"
+  ]
+ },
+ "0x5e": {
+  "rr_name": "Youngster Dan",
+  "fr_const": "TRAINER_YOUNGSTER_DAN",
+  "maps": [
+   "Route25"
+  ]
+ },
+ "0x5f": {
+  "rr_name": "Youngster Chad",
+  "fr_const": "TRAINER_YOUNGSTER_CHAD",
+  "maps": [
+   "Route25"
+  ]
+ },
+ "0x60": {
+  "rr_name": "Youngster Tyler",
+  "fr_const": "TRAINER_YOUNGSTER_TYLER",
+  "maps": [
+   "SSAnne_1F_Room2"
+  ]
+ },
+ "0x61": {
+  "rr_name": "Youngster Eddie",
+  "fr_const": "TRAINER_YOUNGSTER_EDDIE",
+  "maps": [
+   "Route11"
+  ]
+ },
+ "0x62": {
+  "rr_name": "Youngster Dillon",
+  "fr_const": "TRAINER_YOUNGSTER_DILLON",
+  "maps": [
+   "Route11"
+  ]
+ },
+ "0x63": {
+  "rr_name": "Youngster Yasu",
+  "fr_const": "TRAINER_YOUNGSTER_YASU",
+  "maps": [
+   "Route11"
+  ]
+ },
+ "0x64": {
+  "rr_name": "Youngster Dave",
+  "fr_const": "TRAINER_YOUNGSTER_DAVE",
+  "maps": [
+   "Route11"
+  ]
+ },
+ "0x65": {
+  "rr_name": "Youngster Ben",
+  "fr_const": "TRAINER_YOUNGSTER_BEN_2",
+  "maps": []
+ },
+ "0x66": {
+  "rr_name": "Bug Catcher Rick",
+  "fr_const": "TRAINER_BUG_CATCHER_RICK",
+  "maps": [
+   "ViridianForest"
+  ]
+ },
+ "0x67": {
+  "rr_name": "Bug Catcher Doug",
+  "fr_const": "TRAINER_BUG_CATCHER_DOUG",
+  "maps": [
+   "ViridianForest"
+  ]
+ },
+ "0x68": {
+  "rr_name": "Bug Catcher Sammy",
+  "fr_const": "TRAINER_BUG_CATCHER_SAMMY",
+  "maps": [
+   "ViridianForest"
+  ]
+ },
+ "0x69": {
+  "rr_name": "Bug Catcher Colton",
+  "fr_const": "TRAINER_BUG_CATCHER_COLTON",
+  "maps": [
+   "Route3"
+  ]
+ },
+ "0x6a": {
+  "rr_name": "Bug Catcher Greg",
+  "fr_const": "TRAINER_BUG_CATCHER_GREG",
+  "maps": [
+   "Route3"
+  ]
+ },
+ "0x6b": {
+  "rr_name": "Bug Catcher James",
+  "fr_const": "TRAINER_BUG_CATCHER_JAMES",
+  "maps": [
+   "Route3"
+  ]
+ },
+ "0x6c": {
+  "rr_name": "Bug Catcher Kent",
+  "fr_const": "TRAINER_BUG_CATCHER_KENT",
+  "maps": [
+   "MtMoon_1F"
+  ]
+ },
+ "0x6d": {
+  "rr_name": "Bug Catcher Robby",
+  "fr_const": "TRAINER_BUG_CATCHER_ROBBY",
+  "maps": [
+   "MtMoon_1F"
+  ]
+ },
+ "0x6e": {
+  "rr_name": "Bug Catcher Cale",
+  "fr_const": "TRAINER_BUG_CATCHER_CALE",
+  "maps": [
+   "Route24"
+  ]
+ },
+ "0x6f": {
+  "rr_name": "Bug Catcher Keigo",
+  "fr_const": "TRAINER_BUG_CATCHER_KEIGO",
+  "maps": [
+   "Route6"
+  ]
+ },
+ "0x70": {
+  "rr_name": "Bug Catcher Elijah",
+  "fr_const": "TRAINER_BUG_CATCHER_ELIJAH",
+  "maps": [
+   "Route6"
+  ]
+ },
+ "0x71": {
+  "rr_name": "Ace Trainer Symes",
+  "fr_const": "TRAINER_BUG_CATCHER_2",
+  "maps": []
+ },
+ "0x72": {
+  "rr_name": "Bug Catcher Brent",
+  "fr_const": "TRAINER_BUG_CATCHER_BRENT",
+  "maps": [
+   "Route9"
+  ]
+ },
+ "0x73": {
+  "rr_name": "Bug Catcher Conner",
+  "fr_const": "TRAINER_BUG_CATCHER_CONNER",
+  "maps": [
+   "Route9"
+  ]
+ },
+ "0x74": {
+  "rr_name": "Lass Janice",
+  "fr_const": "TRAINER_LASS_JANICE",
+  "maps": [
+   "Route3"
+  ]
+ },
+ "0x75": {
+  "rr_name": "Lass Sally",
+  "fr_const": "TRAINER_LASS_SALLY",
+  "maps": [
+   "Route3"
+  ]
+ },
+ "0x76": {
+  "rr_name": "Lass Robin",
+  "fr_const": "TRAINER_LASS_ROBIN",
+  "maps": [
+   "Route3"
+  ]
+ },
+ "0x77": {
+  "rr_name": "Lass Crissy",
+  "fr_const": "TRAINER_LASS_CRISSY",
+  "maps": [
+   "Route4"
+  ]
+ },
+ "0x78": {
+  "rr_name": "Lass Miriam",
+  "fr_const": "TRAINER_LASS_MIRIAM",
+  "maps": [
+   "MtMoon_1F"
+  ]
+ },
+ "0x79": {
+  "rr_name": "Lass Iris",
+  "fr_const": "TRAINER_LASS_IRIS",
+  "maps": [
+   "MtMoon_1F"
+  ]
+ },
+ "0x7a": {
+  "rr_name": "Lass Reli",
+  "fr_const": "TRAINER_LASS_RELI",
+  "maps": [
+   "Route24"
+  ]
+ },
+ "0x7b": {
+  "rr_name": "Lass Ali",
+  "fr_const": "TRAINER_LASS_ALI",
+  "maps": [
+   "Route24"
+  ]
+ },
+ "0x7c": {
+  "rr_name": "Ace Trainer Runan",
+  "fr_const": "TRAINER_LASS_2",
+  "maps": []
+ },
+ "0x7d": {
+  "rr_name": "Lass Haley",
+  "fr_const": "TRAINER_LASS_HALEY",
+  "maps": [
+   "Route25"
+  ]
+ },
+ "0x7e": {
+  "rr_name": "Lass Ann",
+  "fr_const": "TRAINER_LASS_ANN",
+  "maps": [
+   "SSAnne_1F_Room2"
+  ]
+ },
+ "0x7f": {
+  "rr_name": "Lass Dawn",
+  "fr_const": "TRAINER_LASS_DAWN",
+  "maps": [
+   "SSAnne_2F_Room4"
+  ]
+ },
+ "0x80": {
+  "rr_name": "Lass Paige",
+  "fr_const": "TRAINER_LASS_PAIGE",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0x81": {
+  "rr_name": "Lass Andrea",
+  "fr_const": "TRAINER_LASS_ANDREA",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0x82": {
+  "rr_name": "Lass Megan",
+  "fr_const": "TRAINER_LASS_MEGAN",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0x83": {
+  "rr_name": "Lass Julia",
+  "fr_const": "TRAINER_LASS_JULIA",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0x84": {
+  "rr_name": "Lass Kay",
+  "fr_const": "TRAINER_LASS_KAY",
+  "maps": [
+   "CeladonCity_Gym"
+  ]
+ },
+ "0x85": {
+  "rr_name": "Lass Lisa",
+  "fr_const": "TRAINER_LASS_LISA",
+  "maps": [
+   "CeladonCity_Gym"
+  ]
+ },
+ "0x86": {
+  "rr_name": "Sailor Edmond",
+  "fr_const": "TRAINER_SAILOR_EDMOND",
+  "maps": [
+   "SSAnne_Deck"
+  ]
+ },
+ "0x87": {
+  "rr_name": "Sailor Trevor",
+  "fr_const": "TRAINER_SAILOR_TREVOR",
+  "maps": [
+   "SSAnne_Deck"
+  ]
+ },
+ "0x88": {
+  "rr_name": "Sailor Leonard",
+  "fr_const": "TRAINER_SAILOR_LEONARD",
+  "maps": [
+   "SSAnne_B1F_Room4"
+  ]
+ },
+ "0x89": {
+  "rr_name": "Sailor Duncan",
+  "fr_const": "TRAINER_SAILOR_DUNCAN",
+  "maps": [
+   "SSAnne_B1F_Room4"
+  ]
+ },
+ "0x8a": {
+  "rr_name": "Sailor Huey",
+  "fr_const": "TRAINER_SAILOR_HUEY",
+  "maps": [
+   "SSAnne_B1F_Room2"
+  ]
+ },
+ "0x8b": {
+  "rr_name": "Sailor Dylan",
+  "fr_const": "TRAINER_SAILOR_DYLAN",
+  "maps": [
+   "SSAnne_B1F_Room3"
+  ]
+ },
+ "0x8c": {
+  "rr_name": "Sailor Phillip",
+  "fr_const": "TRAINER_SAILOR_PHILLIP",
+  "maps": [
+   "SSAnne_B1F_Room1"
+  ]
+ },
+ "0x8d": {
+  "rr_name": "Sailor Dwayne",
+  "fr_const": "TRAINER_SAILOR_DWAYNE",
+  "maps": [
+   "VermilionCity_Gym"
+  ]
+ },
+ "0x8e": {
+  "rr_name": "Camper Liam",
+  "fr_const": "TRAINER_CAMPER_LIAM",
+  "maps": [
+   "PewterCity_Gym"
+  ]
+ },
+ "0x8f": {
+  "rr_name": "Camper Shane",
+  "fr_const": "TRAINER_CAMPER_SHANE",
+  "maps": [
+   "Route24"
+  ]
+ },
+ "0x90": {
+  "rr_name": "Camper Ethan",
+  "fr_const": "TRAINER_CAMPER_ETHAN",
+  "maps": [
+   "Route24"
+  ]
+ },
+ "0x91": {
+  "rr_name": "Camper Ricky",
+  "fr_const": "TRAINER_CAMPER_RICKY",
+  "maps": [
+   "Route6"
+  ]
+ },
+ "0x92": {
+  "rr_name": "Camper Jeff",
+  "fr_const": "TRAINER_CAMPER_JEFF",
+  "maps": [
+   "Route6"
+  ]
+ },
+ "0x93": {
+  "rr_name": "Channeler Rachel",
+  "fr_const": "TRAINER_CAMPER_2",
+  "maps": []
+ },
+ "0x94": {
+  "rr_name": "Camper Chris",
+  "fr_const": "TRAINER_CAMPER_CHRIS",
+  "maps": [
+   "Route9"
+  ]
+ },
+ "0x95": {
+  "rr_name": "Camper Drew",
+  "fr_const": "TRAINER_CAMPER_DREW",
+  "maps": [
+   "Route9"
+  ]
+ },
+ "0x96": {
+  "rr_name": "Picnicker Diana",
+  "fr_const": "TRAINER_PICNICKER_DIANA",
+  "maps": [
+   "CeruleanCity_Gym"
+  ]
+ },
+ "0x97": {
+  "rr_name": "Picnicker Nancy",
+  "fr_const": "TRAINER_PICNICKER_NANCY",
+  "maps": [
+   "Route6"
+  ]
+ },
+ "0x98": {
+  "rr_name": "Picnicker Isabelle",
+  "fr_const": "TRAINER_PICNICKER_ISABELLE",
+  "maps": [
+   "Route6"
+  ]
+ },
+ "0x99": {
+  "rr_name": "Picnicker Kelsey",
+  "fr_const": "TRAINER_PICNICKER_KELSEY",
+  "maps": [
+   "Route25"
+  ]
+ },
+ "0x9a": {
+  "rr_name": "Picnicker Alicia",
+  "fr_const": "TRAINER_PICNICKER_ALICIA",
+  "maps": [
+   "Route9"
+  ]
+ },
+ "0x9b": {
+  "rr_name": "Picnicker Caitlin",
+  "fr_const": "TRAINER_PICNICKER_CAITLIN",
+  "maps": [
+   "Route9"
+  ]
+ },
+ "0x9c": {
+  "rr_name": "Picnicker Heidi",
+  "fr_const": "TRAINER_PICNICKER_HEIDI",
+  "maps": [
+   "Route10"
+  ]
+ },
+ "0x9d": {
+  "rr_name": "Picnicker Carol",
+  "fr_const": "TRAINER_PICNICKER_CAROL",
+  "maps": [
+   "Route10"
+  ]
+ },
+ "0x9e": {
+  "rr_name": "Picnicker Sofia",
+  "fr_const": "TRAINER_PICNICKER_SOFIA",
+  "maps": [
+   "RockTunnel_B1F"
+  ]
+ },
+ "0x9f": {
+  "rr_name": "Picnicker Martha",
+  "fr_const": "TRAINER_PICNICKER_MARTHA",
+  "maps": [
+   "RockTunnel_B1F"
+  ]
+ },
+ "0xa0": {
+  "rr_name": "Picnicker Tina",
+  "fr_const": "TRAINER_PICNICKER_TINA",
+  "maps": [
+   "CeladonCity_Gym"
+  ]
+ },
+ "0xa1": {
+  "rr_name": "Picnicker Hannah",
+  "fr_const": "TRAINER_PICNICKER_HANNAH",
+  "maps": []
+ },
+ "0xa2": {
+  "rr_name": "Pok\u00e9maniac Mark",
+  "fr_const": "TRAINER_POKEMANIAC_MARK",
+  "maps": [
+   "Route10"
+  ]
+ },
+ "0xa3": {
+  "rr_name": "Pok\u00e9maniac Herman",
+  "fr_const": "TRAINER_POKEMANIAC_HERMAN",
+  "maps": [
+   "Route10"
+  ]
+ },
+ "0xa4": {
+  "rr_name": "Pok\u00e9maniac Cooprt",
+  "fr_const": "TRAINER_POKEMANIAC_COOPER",
+  "maps": [
+   "RockTunnel_B1F"
+  ]
+ },
+ "0xa5": {
+  "rr_name": "Pok\u00e9maniac Steve",
+  "fr_const": "TRAINER_POKEMANIAC_STEVE",
+  "maps": [
+   "RockTunnel_B1F"
+  ]
+ },
+ "0xa6": {
+  "rr_name": "Pok\u00e9maniac Winston",
+  "fr_const": "TRAINER_POKEMANIAC_WINSTON",
+  "maps": [
+   "RockTunnel_B1F"
+  ]
+ },
+ "0xa7": {
+  "rr_name": "Pok\u00e9maniac Dawson",
+  "fr_const": "TRAINER_POKEMANIAC_DAWSON",
+  "maps": [
+   "VictoryRoad_2F"
+  ]
+ },
+ "0xa8": {
+  "rr_name": "Pok\u00e9maniac Ashton",
+  "fr_const": "TRAINER_POKEMANIAC_ASHTON",
+  "maps": [
+   "RockTunnel_1F"
+  ]
+ },
+ "0xa9": {
+  "rr_name": "Super Nerd Jovan",
+  "fr_const": "TRAINER_SUPER_NERD_JOVAN",
+  "maps": [
+   "MtMoon_1F"
+  ]
+ },
+ "0xaa": {
+  "rr_name": "Super Nerd Miguel",
+  "fr_const": "TRAINER_SUPER_NERD_MIGUEL",
+  "maps": [
+   "MtMoon_B2F"
+  ]
+ },
+ "0xab": {
+  "rr_name": "Super Nerd Aidan",
+  "fr_const": "TRAINER_SUPER_NERD_AIDAN",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0xac": {
+  "rr_name": "Super Nerd Glenn",
+  "fr_const": "TRAINER_SUPER_NERD_GLENN",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0xad": {
+  "rr_name": "Super Nerd Leslie",
+  "fr_const": "TRAINER_SUPER_NERD_LESLIE",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0xae": {
+  "rr_name": "Ace Trainer Sharon",
+  "fr_const": "TRAINER_SUPER_NERD_1",
+  "maps": []
+ },
+ "0xaf": {
+  "rr_name": "Ace Trainer Janny",
+  "fr_const": "TRAINER_SUPER_NERD_2",
+  "maps": []
+ },
+ "0xb0": {
+  "rr_name": "Gatekeeper Owen",
+  "fr_const": "TRAINER_SUPER_NERD_3",
+  "maps": []
+ },
+ "0xb1": {
+  "rr_name": "Super Nerd Erik",
+  "fr_const": "TRAINER_SUPER_NERD_ERIK",
+  "maps": [
+   "CinnabarIsland_Gym"
+  ]
+ },
+ "0xb2": {
+  "rr_name": "Super Nerd Aavery",
+  "fr_const": "TRAINER_SUPER_NERD_AVERY",
+  "maps": [
+   "CinnabarIsland_Gym"
+  ]
+ },
+ "0xb3": {
+  "rr_name": "Ace Trainer Derek",
+  "fr_const": "TRAINER_SUPER_NERD_DEREK",
+  "maps": [
+   "CinnabarIsland_Gym"
+  ]
+ },
+ "0xb4": {
+  "rr_name": "Ace Trainer Zac",
+  "fr_const": "TRAINER_SUPER_NERD_ZAC",
+  "maps": [
+   "CinnabarIsland_Gym"
+  ]
+ },
+ "0xb5": {
+  "rr_name": "Hiker Marcos",
+  "fr_const": "TRAINER_HIKER_MARCOS",
+  "maps": [
+   "MtMoon_1F"
+  ]
+ },
+ "0xb6": {
+  "rr_name": "Hiker Franklin",
+  "fr_const": "TRAINER_HIKER_FRANKLIN",
+  "maps": [
+   "Route25"
+  ]
+ },
+ "0xb7": {
+  "rr_name": "Hiker Nob",
+  "fr_const": "TRAINER_HIKER_NOB",
+  "maps": [
+   "Route25"
+  ]
+ },
+ "0xb8": {
+  "rr_name": "Hiker Wayne",
+  "fr_const": "TRAINER_HIKER_WAYNE",
+  "maps": [
+   "Route25"
+  ]
+ },
+ "0xb9": {
+  "rr_name": "Hiker Alan",
+  "fr_const": "TRAINER_HIKER_ALAN",
+  "maps": [
+   "Route9"
+  ]
+ },
+ "0xba": {
+  "rr_name": "Hiker Brice",
+  "fr_const": "TRAINER_HIKER_BRICE",
+  "maps": [
+   "Route9"
+  ]
+ },
+ "0xbb": {
+  "rr_name": "Hiker Clark",
+  "fr_const": "TRAINER_HIKER_CLARK",
+  "maps": [
+   "Route10"
+  ]
+ },
+ "0xbc": {
+  "rr_name": "Hiker Trent",
+  "fr_const": "TRAINER_HIKER_TRENT",
+  "maps": [
+   "Route10"
+  ]
+ },
+ "0xbd": {
+  "rr_name": "Hiker Dudley",
+  "fr_const": "TRAINER_HIKER_DUDLEY",
+  "maps": [
+   "RockTunnel_B1F"
+  ]
+ },
+ "0xbe": {
+  "rr_name": "Hiker Allen",
+  "fr_const": "TRAINER_HIKER_ALLEN",
+  "maps": [
+   "RockTunnel_B1F"
+  ]
+ },
+ "0xbf": {
+  "rr_name": "Hiker Eric",
+  "fr_const": "TRAINER_HIKER_ERIC",
+  "maps": [
+   "RockTunnel_B1F"
+  ]
+ },
+ "0xc0": {
+  "rr_name": "Hiker Lenny",
+  "fr_const": "TRAINER_HIKER_LENNY",
+  "maps": [
+   "RockTunnel_1F"
+  ]
+ },
+ "0xc1": {
+  "rr_name": "Hiker Oliver",
+  "fr_const": "TRAINER_HIKER_OLIVER",
+  "maps": [
+   "RockTunnel_1F"
+  ]
+ },
+ "0xc2": {
+  "rr_name": "Hiker Lucas",
+  "fr_const": "TRAINER_HIKER_LUCAS",
+  "maps": [
+   "RockTunnel_1F"
+  ]
+ },
+ "0xc3": {
+  "rr_name": "Biker Jared",
+  "fr_const": "TRAINER_BIKER_JARED",
+  "maps": [
+   "Route13"
+  ]
+ },
+ "0xc4": {
+  "rr_name": "Biker Malik",
+  "fr_const": "TRAINER_BIKER_MALIK",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0xc5": {
+  "rr_name": "Biker Ernest",
+  "fr_const": "TRAINER_BIKER_ERNEST",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0xc6": {
+  "rr_name": "Biker Alex",
+  "fr_const": "TRAINER_BIKER_ALEX",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0xc7": {
+  "rr_name": "Biker Lao",
+  "fr_const": "TRAINER_BIKER_LAO",
+  "maps": [
+   "Route16"
+  ]
+ },
+ "0xc8": {
+  "rr_name": "Professor Oak",
+  "fr_const": "TRAINER_BIKER_1",
+  "maps": []
+ },
+ "0xc9": {
+  "rr_name": "Biker Hideo",
+  "fr_const": "TRAINER_BIKER_HIDEO",
+  "maps": [
+   "Route16"
+  ]
+ },
+ "0xca": {
+  "rr_name": "Biker Ruben",
+  "fr_const": "TRAINER_BIKER_RUBEN",
+  "maps": [
+   "Route16"
+  ]
+ },
+ "0xcb": {
+  "rr_name": "Biker Billy",
+  "fr_const": "TRAINER_BIKER_BILLY",
+  "maps": [
+   "Route17"
+  ]
+ },
+ "0xcc": {
+  "rr_name": "Biker Nikolas",
+  "fr_const": "TRAINER_BIKER_NIKOLAS",
+  "maps": [
+   "Route17"
+  ]
+ },
+ "0xcd": {
+  "rr_name": "Biker Jaxon",
+  "fr_const": "TRAINER_BIKER_JAXON",
+  "maps": [
+   "Route17"
+  ]
+ },
+ "0xce": {
+  "rr_name": "Biker William",
+  "fr_const": "TRAINER_BIKER_WILLIAM",
+  "maps": [
+   "Route17"
+  ]
+ },
+ "0xcf": {
+  "rr_name": "Biker Lukas",
+  "fr_const": "TRAINER_BIKER_LUKAS",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0xd0": {
+  "rr_name": "Biker Isaac",
+  "fr_const": "TRAINER_BIKER_ISAAC",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0xd1": {
+  "rr_name": "Biker Gerald",
+  "fr_const": "TRAINER_BIKER_GERALD",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0xd2": {
+  "rr_name": "Professor Oak",
+  "fr_const": "TRAINER_BURGLAR_1",
+  "maps": []
+ },
+ "0xd3": {
+  "rr_name": "Burglar",
+  "fr_const": "TRAINER_BURGLAR_2",
+  "maps": []
+ },
+ "0xd4": {
+  "rr_name": "Burglar",
+  "fr_const": "TRAINER_BURGLAR_3",
+  "maps": []
+ },
+ "0xd5": {
+  "rr_name": "Burglar Quinn",
+  "fr_const": "TRAINER_BURGLAR_QUINN",
+  "maps": [
+   "CinnabarIsland_Gym"
+  ]
+ },
+ "0xd6": {
+  "rr_name": "Burglar Ramon",
+  "fr_const": "TRAINER_BURGLAR_RAMON",
+  "maps": [
+   "CinnabarIsland_Gym"
+  ]
+ },
+ "0xd7": {
+  "rr_name": "Ace Trainer Lucy",
+  "fr_const": "TRAINER_BURGLAR_DUSTY",
+  "maps": [
+   "CinnabarIsland_Gym"
+  ]
+ },
+ "0xd8": {
+  "rr_name": "Burglar Arnie",
+  "fr_const": "TRAINER_BURGLAR_ARNIE",
+  "maps": [
+   "PokemonMansion_2F"
+  ]
+ },
+ "0xd9": {
+  "rr_name": "Burglar",
+  "fr_const": "TRAINER_BURGLAR_4",
+  "maps": []
+ },
+ "0xda": {
+  "rr_name": "Burglar Simon",
+  "fr_const": "TRAINER_BURGLAR_SIMON",
+  "maps": [
+   "PokemonMansion_3F"
+  ]
+ },
+ "0xdb": {
+  "rr_name": "Burglar Lewis",
+  "fr_const": "TRAINER_BURGLAR_LEWIS",
+  "maps": [
+   "PokemonMansion_B1F"
+  ]
+ },
+ "0xdc": {
+  "rr_name": "Engineer Baily",
+  "fr_const": "TRAINER_ENGINEER_BAILY",
+  "maps": [
+   "VermilionCity_Gym"
+  ]
+ },
+ "0xdd": {
+  "rr_name": "Engineer Braxton",
+  "fr_const": "TRAINER_ENGINEER_BRAXTON",
+  "maps": [
+   "Route11"
+  ]
+ },
+ "0xde": {
+  "rr_name": "Engineer Bernie",
+  "fr_const": "TRAINER_ENGINEER_BERNIE",
+  "maps": [
+   "Route11"
+  ]
+ },
+ "0xdf": {
+  "rr_name": "Fisherman Dale",
+  "fr_const": "TRAINER_FISHERMAN_DALE",
+  "maps": [
+   "SSAnne_2F_Room2"
+  ]
+ },
+ "0xe0": {
+  "rr_name": "Fisherman Barny",
+  "fr_const": "TRAINER_FISHERMAN_BARNY",
+  "maps": [
+   "SSAnne_B1F_Room1"
+  ]
+ },
+ "0xe1": {
+  "rr_name": "Fisherman Ned",
+  "fr_const": "TRAINER_FISHERMAN_NED",
+  "maps": [
+   "Route12"
+  ]
+ },
+ "0xe2": {
+  "rr_name": "Fisherman Chip",
+  "fr_const": "TRAINER_FISHERMAN_CHIP",
+  "maps": [
+   "Route12"
+  ]
+ },
+ "0xe3": {
+  "rr_name": "Fisherman Hank",
+  "fr_const": "TRAINER_FISHERMAN_HANK",
+  "maps": [
+   "Route12"
+  ]
+ },
+ "0xe4": {
+  "rr_name": "Fisherman Elliot",
+  "fr_const": "TRAINER_FISHERMAN_ELLIOT",
+  "maps": [
+   "Route12"
+  ]
+ },
+ "0xe5": {
+  "rr_name": "Fisherman Ronald",
+  "fr_const": "TRAINER_FISHERMAN_RONALD",
+  "maps": [
+   "Route21"
+  ]
+ },
+ "0xe6": {
+  "rr_name": "Fisherman Claude",
+  "fr_const": "TRAINER_FISHERMAN_CLAUDE",
+  "maps": [
+   "Route21"
+  ]
+ },
+ "0xe7": {
+  "rr_name": "Fisherman Wade",
+  "fr_const": "TRAINER_FISHERMAN_WADE",
+  "maps": [
+   "Route21"
+  ]
+ },
+ "0xe8": {
+  "rr_name": "Fisherman Nolan",
+  "fr_const": "TRAINER_FISHERMAN_NOLAN",
+  "maps": [
+   "Route21"
+  ]
+ },
+ "0xe9": {
+  "rr_name": "Fisherman Andrew",
+  "fr_const": "TRAINER_FISHERMAN_ANDREW",
+  "maps": [
+   "Route12"
+  ]
+ },
+ "0xea": {
+  "rr_name": "Swimmer\u2642 Luis",
+  "fr_const": "TRAINER_SWIMMER_MALE_LUIS",
+  "maps": [
+   "CeruleanCity_Gym"
+  ]
+ },
+ "0xeb": {
+  "rr_name": "Swimmer\u2642 Richard",
+  "fr_const": "TRAINER_SWIMMER_MALE_RICHARD",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0xec": {
+  "rr_name": "Swimmer\u2642 Reece",
+  "fr_const": "TRAINER_SWIMMER_MALE_REECE",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0xed": {
+  "rr_name": "Swimmer\u2642 Matthew",
+  "fr_const": "TRAINER_SWIMMER_MALE_MATTHEW",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0xee": {
+  "rr_name": "Swimmer\u2642 Douglas",
+  "fr_const": "TRAINER_SWIMMER_MALE_DOUGLAS",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0xef": {
+  "rr_name": "Swimmer\u2642 David",
+  "fr_const": "TRAINER_SWIMMER_MALE_DAVID",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0xf0": {
+  "rr_name": "Swimmer\u2642 Tony",
+  "fr_const": "TRAINER_SWIMMER_MALE_TONY",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0xf1": {
+  "rr_name": "Swimmer\u2642 Axle",
+  "fr_const": "TRAINER_SWIMMER_MALE_AXLE",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0xf2": {
+  "rr_name": "Swimmer\u2642 Barry",
+  "fr_const": "TRAINER_SWIMMER_MALE_BARRY",
+  "maps": [
+   "Route20"
+  ]
+ },
+ "0xf3": {
+  "rr_name": "Swimmer\u2642 Dean",
+  "fr_const": "TRAINER_SWIMMER_MALE_DEAN",
+  "maps": [
+   "Route20"
+  ]
+ },
+ "0xf4": {
+  "rr_name": "Swimmer\u2642 Darrin",
+  "fr_const": "TRAINER_SWIMMER_MALE_DARRIN",
+  "maps": [
+   "Route20"
+  ]
+ },
+ "0xf5": {
+  "rr_name": "Swimmer\u2642 Spencer",
+  "fr_const": "TRAINER_SWIMMER_MALE_SPENCER",
+  "maps": [
+   "Route21"
+  ]
+ },
+ "0xf6": {
+  "rr_name": "Swimmer\u2642 Jack",
+  "fr_const": "TRAINER_SWIMMER_MALE_JACK",
+  "maps": [
+   "Route21"
+  ]
+ },
+ "0xf7": {
+  "rr_name": "Swimmer\u2642 Jerome",
+  "fr_const": "TRAINER_SWIMMER_MALE_JEROME",
+  "maps": [
+   "Route21"
+  ]
+ },
+ "0xf8": {
+  "rr_name": "Swimmer\u2642 Roland",
+  "fr_const": "TRAINER_SWIMMER_MALE_ROLAND",
+  "maps": [
+   "Route21"
+  ]
+ },
+ "0xf9": {
+  "rr_name": "Cue Ball Koji",
+  "fr_const": "TRAINER_CUE_BALL_KOJI",
+  "maps": [
+   "Route16"
+  ]
+ },
+ "0xfa": {
+  "rr_name": "Cue Ball Luke",
+  "fr_const": "TRAINER_CUE_BALL_LUKE",
+  "maps": [
+   "Route16"
+  ]
+ },
+ "0xfb": {
+  "rr_name": "Cue Ball Camron",
+  "fr_const": "TRAINER_CUE_BALL_CAMRON",
+  "maps": [
+   "Route16"
+  ]
+ },
+ "0xfc": {
+  "rr_name": "Cue Ball Raul",
+  "fr_const": "TRAINER_CUE_BALL_RAUL",
+  "maps": [
+   "Route17"
+  ]
+ },
+ "0xfd": {
+  "rr_name": "Cue Ball Isaiah",
+  "fr_const": "TRAINER_CUE_BALL_ISAIAH",
+  "maps": [
+   "Route17"
+  ]
+ },
+ "0xfe": {
+  "rr_name": "Cue Ball Zeek",
+  "fr_const": "TRAINER_CUE_BALL_ZEEK",
+  "maps": [
+   "Route17"
+  ]
+ },
+ "0xff": {
+  "rr_name": "Cue Ball Jamal",
+  "fr_const": "TRAINER_CUE_BALL_JAMAL",
+  "maps": [
+   "Route17"
+  ]
+ },
+ "0x100": {
+  "rr_name": "Cue Ball Corey",
+  "fr_const": "TRAINER_CUE_BALL_COREY",
+  "maps": [
+   "Route17"
+  ]
+ },
+ "0x101": {
+  "rr_name": "Cue Ball Chase",
+  "fr_const": "TRAINER_CUE_BALL_CHASE",
+  "maps": []
+ },
+ "0x102": {
+  "rr_name": "Gambler Hugo",
+  "fr_const": "TRAINER_GAMER_HUGO",
+  "maps": [
+   "Route11"
+  ]
+ },
+ "0x103": {
+  "rr_name": "Gambler Jasper",
+  "fr_const": "TRAINER_GAMER_JASPER",
+  "maps": [
+   "Route11"
+  ]
+ },
+ "0x104": {
+  "rr_name": "Gambler Dirk",
+  "fr_const": "TRAINER_GAMER_DIRK",
+  "maps": [
+   "Route11"
+  ]
+ },
+ "0x105": {
+  "rr_name": "Gambler Darian",
+  "fr_const": "TRAINER_GAMER_DARIAN",
+  "maps": [
+   "Route11"
+  ]
+ },
+ "0x106": {
+  "rr_name": "Gambler Stan",
+  "fr_const": "TRAINER_GAMER_STAN",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0x107": {
+  "rr_name": "Gambler",
+  "fr_const": "TRAINER_GAMER_1",
+  "maps": []
+ },
+ "0x108": {
+  "rr_name": "Gambler Rich",
+  "fr_const": "TRAINER_GAMER_RICH",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0x109": {
+  "rr_name": "Beauty Bridget",
+  "fr_const": "TRAINER_BEAUTY_BRIDGET",
+  "maps": [
+   "CeladonCity_Gym"
+  ]
+ },
+ "0x10a": {
+  "rr_name": "Beauty Tamia",
+  "fr_const": "TRAINER_BEAUTY_TAMIA",
+  "maps": [
+   "CeladonCity_Gym"
+  ]
+ },
+ "0x10b": {
+  "rr_name": "Beauty Lori",
+  "fr_const": "TRAINER_BEAUTY_LORI",
+  "maps": [
+   "CeladonCity_Gym"
+  ]
+ },
+ "0x10c": {
+  "rr_name": "Beauty Lola",
+  "fr_const": "TRAINER_BEAUTY_LOLA",
+  "maps": [
+   "Route13"
+  ]
+ },
+ "0x10d": {
+  "rr_name": "Beauty Sheila",
+  "fr_const": "TRAINER_BEAUTY_SHEILA",
+  "maps": [
+   "Route13"
+  ]
+ },
+ "0x10e": {
+  "rr_name": "Swimmer\u2640 Tiffany",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_TIFFANY",
+  "maps": [
+   "Route20"
+  ]
+ },
+ "0x10f": {
+  "rr_name": "Swimmer\u2640 Nora",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_NORA",
+  "maps": [
+   "Route20"
+  ]
+ },
+ "0x110": {
+  "rr_name": "Swimmer\u2640 Melissa",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_MELISSA",
+  "maps": [
+   "Route20"
+  ]
+ },
+ "0x111": {
+  "rr_name": "Beauty Grace",
+  "fr_const": "TRAINER_BEAUTY_GRACE",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0x112": {
+  "rr_name": "Beauty Olivia",
+  "fr_const": "TRAINER_BEAUTY_OLIVIA",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0x113": {
+  "rr_name": "Beauty Lauren",
+  "fr_const": "TRAINER_BEAUTY_LAUREN",
+  "maps": []
+ },
+ "0x114": {
+  "rr_name": "Swimmer\u2640 Anya",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_ANYA",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0x115": {
+  "rr_name": "Swimmer\u2640 Alice",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_ALICE",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0x116": {
+  "rr_name": "Swimmer\u2640 Connie",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_CONNIE",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0x117": {
+  "rr_name": "Swimmer\u2640 Shirley",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_SHIRLEY",
+  "maps": [
+   "Route20"
+  ]
+ },
+ "0x118": {
+  "rr_name": "Psychic Johan",
+  "fr_const": "TRAINER_PSYCHIC_JOHAN",
+  "maps": [
+   "SaffronCity_Gym"
+  ]
+ },
+ "0x119": {
+  "rr_name": "Psychic Tyron",
+  "fr_const": "TRAINER_PSYCHIC_TYRON",
+  "maps": [
+   "SaffronCity_Gym"
+  ]
+ },
+ "0x11a": {
+  "rr_name": "Psychic Cameron",
+  "fr_const": "TRAINER_PSYCHIC_CAMERON",
+  "maps": [
+   "SaffronCity_Gym"
+  ]
+ },
+ "0x11b": {
+  "rr_name": "Psychic Preston",
+  "fr_const": "TRAINER_PSYCHIC_PRESTON",
+  "maps": [
+   "SaffronCity_Gym"
+  ]
+ },
+ "0x11c": {
+  "rr_name": "Rocker Randall",
+  "fr_const": "TRAINER_ROCKER_RANDALL",
+  "maps": []
+ },
+ "0x11d": {
+  "rr_name": "Rocker Luca",
+  "fr_const": "TRAINER_ROCKER_LUCA",
+  "maps": [
+   "Route12"
+  ]
+ },
+ "0x11e": {
+  "rr_name": "Juggler Dalton",
+  "fr_const": "TRAINER_JUGGLER_DALTON",
+  "maps": [
+   "SilphCo_5F"
+  ]
+ },
+ "0x11f": {
+  "rr_name": "Juggler Nelson",
+  "fr_const": "TRAINER_JUGGLER_NELSON",
+  "maps": [
+   "VictoryRoad_2F"
+  ]
+ },
+ "0x120": {
+  "rr_name": "Juggler Kirk",
+  "fr_const": "TRAINER_JUGGLER_KIRK",
+  "maps": [
+   "FuchsiaCity_Gym"
+  ]
+ },
+ "0x121": {
+  "rr_name": "Juggler Shawn",
+  "fr_const": "TRAINER_JUGGLER_SHAWN",
+  "maps": [
+   "FuchsiaCity_Gym"
+  ]
+ },
+ "0x122": {
+  "rr_name": "Juggler Gregory",
+  "fr_const": "TRAINER_JUGGLER_GREGORY",
+  "maps": [
+   "VictoryRoad_2F"
+  ]
+ },
+ "0x123": {
+  "rr_name": "Juggler Edward",
+  "fr_const": "TRAINER_JUGGLER_EDWARD",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x124": {
+  "rr_name": "Juggler Kayden",
+  "fr_const": "TRAINER_JUGGLER_KAYDEN",
+  "maps": [
+   "FuchsiaCity_Gym"
+  ]
+ },
+ "0x125": {
+  "rr_name": "Juggler Nate",
+  "fr_const": "TRAINER_JUGGLER_NATE",
+  "maps": [
+   "FuchsiaCity_Gym"
+  ]
+ },
+ "0x126": {
+  "rr_name": "Tamer Phil",
+  "fr_const": "TRAINER_TAMER_PHIL",
+  "maps": [
+   "FuchsiaCity_Gym"
+  ]
+ },
+ "0x127": {
+  "rr_name": "Tamer Edgar",
+  "fr_const": "TRAINER_TAMER_EDGAR",
+  "maps": [
+   "FuchsiaCity_Gym"
+  ]
+ },
+ "0x128": {
+  "rr_name": "Tamer Jason",
+  "fr_const": "TRAINER_TAMER_JASON",
+  "maps": [
+   "ViridianCity_Gym"
+  ]
+ },
+ "0x129": {
+  "rr_name": "Tamer Cole",
+  "fr_const": "TRAINER_TAMER_COLE",
+  "maps": [
+   "ViridianCity_Gym"
+  ]
+ },
+ "0x12a": {
+  "rr_name": "Tamer Vincent",
+  "fr_const": "TRAINER_TAMER_VINCENT",
+  "maps": [
+   "VictoryRoad_2F"
+  ]
+ },
+ "0x12b": {
+  "rr_name": "Tamer John",
+  "fr_const": "TRAINER_TAMER_JOHN",
+  "maps": []
+ },
+ "0x12c": {
+  "rr_name": "Bird Keeper Sebastian",
+  "fr_const": "TRAINER_BIRD_KEEPER_SEBASTIAN",
+  "maps": [
+   "Route13"
+  ]
+ },
+ "0x12d": {
+  "rr_name": "Bird Keeper Perry",
+  "fr_const": "TRAINER_BIRD_KEEPER_PERRY",
+  "maps": [
+   "Route13"
+  ]
+ },
+ "0x12e": {
+  "rr_name": "Bird Keeper Robert",
+  "fr_const": "TRAINER_BIRD_KEEPER_ROBERT",
+  "maps": [
+   "Route13"
+  ]
+ },
+ "0x12f": {
+  "rr_name": "Bird Keeper Donald",
+  "fr_const": "TRAINER_BIRD_KEEPER_DONALD",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0x130": {
+  "rr_name": "Bird Keeper Benny",
+  "fr_const": "TRAINER_BIRD_KEEPER_BENNY",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0x131": {
+  "rr_name": "Bird Keeper Edwin",
+  "fr_const": "TRAINER_BIRD_KEEPER_EDWIN",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0x132": {
+  "rr_name": "Bird Keeper Chester",
+  "fr_const": "TRAINER_BIRD_KEEPER_CHESTER",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0x133": {
+  "rr_name": "Ace Trainer Wilton",
+  "fr_const": "TRAINER_BIRD_KEEPER_WILTON",
+  "maps": [
+   "Route18"
+  ]
+ },
+ "0x134": {
+  "rr_name": "Dragon Tamer Ramiro",
+  "fr_const": "TRAINER_BIRD_KEEPER_RAMIRO",
+  "maps": [
+   "Route18"
+  ]
+ },
+ "0x135": {
+  "rr_name": "Bird Keeper Jacob",
+  "fr_const": "TRAINER_BIRD_KEEPER_JACOB",
+  "maps": [
+   "Route18"
+  ]
+ },
+ "0x136": {
+  "rr_name": "Bird Keeper Roger",
+  "fr_const": "TRAINER_BIRD_KEEPER_ROGER",
+  "maps": [
+   "Route20"
+  ]
+ },
+ "0x137": {
+  "rr_name": "Bird Keeper Reed",
+  "fr_const": "TRAINER_BIRD_KEEPER_REED",
+  "maps": []
+ },
+ "0x138": {
+  "rr_name": "Bird Keeper Keith",
+  "fr_const": "TRAINER_BIRD_KEEPER_KEITH",
+  "maps": []
+ },
+ "0x139": {
+  "rr_name": "Bird Keeper Carter",
+  "fr_const": "TRAINER_BIRD_KEEPER_CARTER",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0x13a": {
+  "rr_name": "Bird Keeper Mitch",
+  "fr_const": "TRAINER_BIRD_KEEPER_MITCH",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0x13b": {
+  "rr_name": "Bird Keeper Beck",
+  "fr_const": "TRAINER_BIRD_KEEPER_BECK",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0x13c": {
+  "rr_name": "Bird Keeper Marlon",
+  "fr_const": "TRAINER_BIRD_KEEPER_MARLON",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0x13d": {
+  "rr_name": "Leader Chuck",
+  "fr_const": "TRAINER_BLACK_BELT_KOICHI",
+  "maps": [
+   "SaffronCity_Dojo"
+  ]
+ },
+ "0x13e": {
+  "rr_name": "Black Belt Mike",
+  "fr_const": "TRAINER_BLACK_BELT_MIKE",
+  "maps": [
+   "SaffronCity_Dojo"
+  ]
+ },
+ "0x13f": {
+  "rr_name": "Black Belt Hideki",
+  "fr_const": "TRAINER_BLACK_BELT_HIDEKI",
+  "maps": [
+   "SaffronCity_Dojo"
+  ]
+ },
+ "0x140": {
+  "rr_name": "Black Belt Aaron",
+  "fr_const": "TRAINER_BLACK_BELT_AARON",
+  "maps": [
+   "SaffronCity_Dojo"
+  ]
+ },
+ "0x141": {
+  "rr_name": "Black Belt Hitoshi",
+  "fr_const": "TRAINER_BLACK_BELT_HITOSHI",
+  "maps": [
+   "SaffronCity_Dojo"
+  ]
+ },
+ "0x142": {
+  "rr_name": "Black Belt Atsushi",
+  "fr_const": "TRAINER_BLACK_BELT_ATSUSHI",
+  "maps": [
+   "ViridianCity_Gym"
+  ]
+ },
+ "0x143": {
+  "rr_name": "Black Belt Kiyo",
+  "fr_const": "TRAINER_BLACK_BELT_KIYO",
+  "maps": [
+   "ViridianCity_Gym"
+  ]
+ },
+ "0x144": {
+  "rr_name": "Black Belt Takashi",
+  "fr_const": "TRAINER_BLACK_BELT_TAKASHI",
+  "maps": [
+   "ViridianCity_Gym"
+  ]
+ },
+ "0x145": {
+  "rr_name": "Black Belt Daisuke",
+  "fr_const": "TRAINER_BLACK_BELT_DAISUKE",
+  "maps": [
+   "VictoryRoad_2F"
+  ]
+ },
+ "0x146": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_OAKS_LAB_SQUIRTLE",
+  "maps": [
+   "PalletTown_ProfessorOaksLab"
+  ]
+ },
+ "0x147": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_OAKS_LAB_BULBASAUR",
+  "maps": [
+   "PalletTown_ProfessorOaksLab"
+  ]
+ },
+ "0x148": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_OAKS_LAB_CHARMANDER",
+  "maps": [
+   "PalletTown_ProfessorOaksLab"
+  ]
+ },
+ "0x149": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_ROUTE22_EARLY_SQUIRTLE",
+  "maps": [
+   "Route22"
+  ]
+ },
+ "0x14a": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_ROUTE22_EARLY_BULBASAUR",
+  "maps": [
+   "Route22"
+  ]
+ },
+ "0x14b": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_ROUTE22_EARLY_CHARMANDER",
+  "maps": [
+   "Route22"
+  ]
+ },
+ "0x14c": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_CERULEAN_SQUIRTLE",
+  "maps": [
+   "CeruleanCity"
+  ]
+ },
+ "0x14d": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_CERULEAN_BULBASAUR",
+  "maps": [
+   "CeruleanCity"
+  ]
+ },
+ "0x14e": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_CERULEAN_CHARMANDER",
+  "maps": [
+   "CeruleanCity"
+  ]
+ },
+ "0x14f": {
+  "rr_name": "Scientist Ted",
+  "fr_const": "TRAINER_SCIENTIST_TED",
+  "maps": [
+   "PokemonMansion_1F"
+  ]
+ },
+ "0x150": {
+  "rr_name": "Scientist Connor",
+  "fr_const": "TRAINER_SCIENTIST_CONNOR",
+  "maps": [
+   "SilphCo_2F"
+  ]
+ },
+ "0x151": {
+  "rr_name": "Scientist Jerry",
+  "fr_const": "TRAINER_SCIENTIST_JERRY",
+  "maps": [
+   "SilphCo_2F"
+  ]
+ },
+ "0x152": {
+  "rr_name": "Scientist Jose",
+  "fr_const": "TRAINER_SCIENTIST_JOSE",
+  "maps": [
+   "SilphCo_3F"
+  ]
+ },
+ "0x153": {
+  "rr_name": "Scientist Rodney",
+  "fr_const": "TRAINER_SCIENTIST_RODNEY",
+  "maps": [
+   "SilphCo_4F"
+  ]
+ },
+ "0x154": {
+  "rr_name": "Scientist Beau",
+  "fr_const": "TRAINER_SCIENTIST_BEAU",
+  "maps": [
+   "SilphCo_5F"
+  ]
+ },
+ "0x155": {
+  "rr_name": "Scientist Taylor",
+  "fr_const": "TRAINER_SCIENTIST_TAYLOR",
+  "maps": [
+   "SilphCo_6F"
+  ]
+ },
+ "0x156": {
+  "rr_name": "Scientist Joshua",
+  "fr_const": "TRAINER_SCIENTIST_JOSHUA",
+  "maps": [
+   "SilphCo_7F"
+  ]
+ },
+ "0x157": {
+  "rr_name": "Scientist Parkker",
+  "fr_const": "TRAINER_SCIENTIST_PARKER",
+  "maps": [
+   "SilphCo_8F"
+  ]
+ },
+ "0x158": {
+  "rr_name": "Scientist Ed",
+  "fr_const": "TRAINER_SCIENTIST_ED",
+  "maps": [
+   "SilphCo_9F"
+  ]
+ },
+ "0x159": {
+  "rr_name": "Scientist Travis",
+  "fr_const": "TRAINER_SCIENTIST_TRAVIS",
+  "maps": [
+   "SilphCo_10F"
+  ]
+ },
+ "0x15a": {
+  "rr_name": "Scientist Braydon",
+  "fr_const": "TRAINER_SCIENTIST_BRAYDON",
+  "maps": [
+   "PokemonMansion_3F"
+  ]
+ },
+ "0x15b": {
+  "rr_name": "Scientist Ivan",
+  "fr_const": "TRAINER_SCIENTIST_IVAN",
+  "maps": [
+   "PokemonMansion_B1F"
+  ]
+ },
+ "0x15c": {
+  "rr_name": "Boss Giovanni",
+  "fr_const": "TRAINER_BOSS_GIOVANNI",
+  "maps": [
+   "RocketHideout_B4F"
+  ]
+ },
+ "0x15d": {
+  "rr_name": "Boss Giovanni",
+  "fr_const": "TRAINER_BOSS_GIOVANNI_2",
+  "maps": [
+   "SilphCo_11F"
+  ]
+ },
+ "0x15e": {
+  "rr_name": "Leader Giovanni",
+  "fr_const": "TRAINER_LEADER_GIOVANNI",
+  "maps": [
+   "ViridianCity_Gym"
+  ]
+ },
+ "0x15f": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT",
+  "maps": [
+   "MtMoon_B2F"
+  ]
+ },
+ "0x160": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_2",
+  "maps": [
+   "MtMoon_B2F"
+  ]
+ },
+ "0x161": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_3",
+  "maps": [
+   "MtMoon_B2F"
+  ]
+ },
+ "0x162": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_4",
+  "maps": [
+   "MtMoon_B2F"
+  ]
+ },
+ "0x163": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_5",
+  "maps": [
+   "CeruleanCity"
+  ]
+ },
+ "0x164": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_6",
+  "maps": [
+   "Route24"
+  ]
+ },
+ "0x165": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_7",
+  "maps": [
+   "CeladonCity_GameCorner"
+  ]
+ },
+ "0x166": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_8",
+  "maps": [
+   "RocketHideout_B1F"
+  ]
+ },
+ "0x167": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_9",
+  "maps": [
+   "RocketHideout_B1F"
+  ]
+ },
+ "0x168": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_10",
+  "maps": [
+   "RocketHideout_B1F"
+  ]
+ },
+ "0x169": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_11",
+  "maps": [
+   "RocketHideout_B1F"
+  ]
+ },
+ "0x16a": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_12",
+  "maps": [
+   "RocketHideout_B1F"
+  ]
+ },
+ "0x16b": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_13",
+  "maps": [
+   "RocketHideout_B2F"
+  ]
+ },
+ "0x16c": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_14",
+  "maps": [
+   "RocketHideout_B3F"
+  ]
+ },
+ "0x16d": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_15",
+  "maps": [
+   "RocketHideout_B3F"
+  ]
+ },
+ "0x16e": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_16",
+  "maps": [
+   "RocketHideout_B4F"
+  ]
+ },
+ "0x16f": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_17",
+  "maps": [
+   "RocketHideout_B4F"
+  ]
+ },
+ "0x170": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_18",
+  "maps": [
+   "RocketHideout_B4F"
+  ]
+ },
+ "0x171": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_19",
+  "maps": [
+   "PokemonTower_7F"
+  ]
+ },
+ "0x172": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_20",
+  "maps": [
+   "PokemonTower_7F"
+  ]
+ },
+ "0x173": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_21",
+  "maps": [
+   "PokemonTower_7F"
+  ]
+ },
+ "0x174": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_22",
+  "maps": []
+ },
+ "0x175": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_23",
+  "maps": [
+   "SilphCo_2F"
+  ]
+ },
+ "0x176": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_24",
+  "maps": [
+   "SilphCo_2F"
+  ]
+ },
+ "0x177": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_25",
+  "maps": [
+   "SilphCo_3F"
+  ]
+ },
+ "0x178": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_26",
+  "maps": [
+   "SilphCo_4F"
+  ]
+ },
+ "0x179": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_27",
+  "maps": [
+   "SilphCo_4F"
+  ]
+ },
+ "0x17a": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_28",
+  "maps": [
+   "SilphCo_5F"
+  ]
+ },
+ "0x17b": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_29",
+  "maps": [
+   "SilphCo_5F"
+  ]
+ },
+ "0x17c": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_30",
+  "maps": [
+   "SilphCo_6F"
+  ]
+ },
+ "0x17d": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_31",
+  "maps": [
+   "SilphCo_6F"
+  ]
+ },
+ "0x17e": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_32",
+  "maps": [
+   "SilphCo_8F"
+  ]
+ },
+ "0x17f": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_33",
+  "maps": [
+   "SilphCo_7F"
+  ]
+ },
+ "0x180": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_34",
+  "maps": [
+   "SilphCo_7F"
+  ]
+ },
+ "0x181": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_35",
+  "maps": [
+   "SilphCo_7F"
+  ]
+ },
+ "0x182": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_36",
+  "maps": [
+   "SilphCo_8F"
+  ]
+ },
+ "0x183": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_37",
+  "maps": [
+   "SilphCo_9F"
+  ]
+ },
+ "0x184": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_38",
+  "maps": [
+   "SilphCo_9F"
+  ]
+ },
+ "0x185": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_39",
+  "maps": [
+   "SilphCo_10F"
+  ]
+ },
+ "0x186": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_40",
+  "maps": [
+   "SilphCo_11F"
+  ]
+ },
+ "0x187": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_41",
+  "maps": [
+   "SilphCo_11F"
+  ]
+ },
+ "0x188": {
+  "rr_name": "Ace Trainer Samuel",
+  "fr_const": "TRAINER_COOLTRAINER_SAMUEL",
+  "maps": [
+   "ViridianCity_Gym"
+  ]
+ },
+ "0x189": {
+  "rr_name": "Ace Trainer George",
+  "fr_const": "TRAINER_COOLTRAINER_GEORGE",
+  "maps": [
+   "VictoryRoad_3F"
+  ]
+ },
+ "0x18a": {
+  "rr_name": "Ace Trainer Colby",
+  "fr_const": "TRAINER_COOLTRAINER_COLBY",
+  "maps": [
+   "VictoryRoad_3F"
+  ]
+ },
+ "0x18b": {
+  "rr_name": "Ace Trainer Paul",
+  "fr_const": "TRAINER_COOLTRAINER_PAUL",
+  "maps": []
+ },
+ "0x18c": {
+  "rr_name": "Ace Trainer Rolando",
+  "fr_const": "TRAINER_COOLTRAINER_ROLANDO",
+  "maps": [
+   "VictoryRoad_1F"
+  ]
+ },
+ "0x18d": {
+  "rr_name": "Ace Trainer Gilbert",
+  "fr_const": "TRAINER_COOLTRAINER_GILBERT",
+  "maps": []
+ },
+ "0x18e": {
+  "rr_name": "Ace Trainer Owen",
+  "fr_const": "TRAINER_COOLTRAINER_OWEN",
+  "maps": []
+ },
+ "0x18f": {
+  "rr_name": "Ace Trainer Berke",
+  "fr_const": "TRAINER_COOLTRAINER_BERKE",
+  "maps": []
+ },
+ "0x190": {
+  "rr_name": "Ace Trainer Yuji",
+  "fr_const": "TRAINER_COOLTRAINER_YUJI",
+  "maps": [
+   "ViridianCity_Gym"
+  ]
+ },
+ "0x191": {
+  "rr_name": "Ace Trainer Warren",
+  "fr_const": "TRAINER_COOLTRAINER_WARREN",
+  "maps": [
+   "ViridianCity_Gym"
+  ]
+ },
+ "0x192": {
+  "rr_name": "Ace Trainer Mary",
+  "fr_const": "TRAINER_COOLTRAINER_MARY",
+  "maps": [
+   "CeladonCity_Gym"
+  ]
+ },
+ "0x193": {
+  "rr_name": "Ace Trainer Caroline",
+  "fr_const": "TRAINER_COOLTRAINER_CAROLINE",
+  "maps": [
+   "VictoryRoad_3F"
+  ]
+ },
+ "0x194": {
+  "rr_name": "Ace Trainer Alexa",
+  "fr_const": "TRAINER_COOLTRAINER_ALEXA",
+  "maps": [
+   "VictoryRoad_3F"
+  ]
+ },
+ "0x195": {
+  "rr_name": "Ace Trainer Shannon",
+  "fr_const": "TRAINER_COOLTRAINER_SHANNON",
+  "maps": []
+ },
+ "0x196": {
+  "rr_name": "Ace Trainer Naomi",
+  "fr_const": "TRAINER_COOLTRAINER_NAOMI",
+  "maps": [
+   "VictoryRoad_1F"
+  ]
+ },
+ "0x197": {
+  "rr_name": "Ace Trainer Brooke",
+  "fr_const": "TRAINER_COOLTRAINER_BROOKE",
+  "maps": []
+ },
+ "0x198": {
+  "rr_name": "Ace Trainer Austina",
+  "fr_const": "TRAINER_COOLTRAINER_AUSTINA",
+  "maps": []
+ },
+ "0x199": {
+  "rr_name": "Ace Trainer Julie",
+  "fr_const": "TRAINER_COOLTRAINER_JULIE",
+  "maps": []
+ },
+ "0x19a": {
+  "rr_name": "Elite Four Lorelei",
+  "fr_const": "TRAINER_ELITE_FOUR_LORELEI",
+  "maps": [
+   "PokemonLeague_LoreleisRoom"
+  ]
+ },
+ "0x19b": {
+  "rr_name": "Elite Four Bruno",
+  "fr_const": "TRAINER_ELITE_FOUR_BRUNO",
+  "maps": [
+   "PokemonLeague_BrunosRoom"
+  ]
+ },
+ "0x19c": {
+  "rr_name": "Elite Four Agatha",
+  "fr_const": "TRAINER_ELITE_FOUR_AGATHA",
+  "maps": [
+   "PokemonLeague_AgathasRoom"
+  ]
+ },
+ "0x19d": {
+  "rr_name": "Elite Four Lance",
+  "fr_const": "TRAINER_ELITE_FOUR_LANCE",
+  "maps": [
+   "PokemonLeague_LancesRoom"
+  ]
+ },
+ "0x19e": {
+  "rr_name": "Leader Brock",
+  "fr_const": "TRAINER_LEADER_BROCK",
+  "maps": [
+   "PewterCity_Gym"
+  ]
+ },
+ "0x19f": {
+  "rr_name": "Leader Misty",
+  "fr_const": "TRAINER_LEADER_MISTY",
+  "maps": [
+   "CeruleanCity_Gym"
+  ]
+ },
+ "0x1a0": {
+  "rr_name": "Leader Lt. Surge",
+  "fr_const": "TRAINER_LEADER_LT_SURGE",
+  "maps": [
+   "VermilionCity_Gym"
+  ]
+ },
+ "0x1a1": {
+  "rr_name": "Leader Erika",
+  "fr_const": "TRAINER_LEADER_ERIKA",
+  "maps": [
+   "CeladonCity_Gym"
+  ]
+ },
+ "0x1a2": {
+  "rr_name": "Leader Koga",
+  "fr_const": "TRAINER_LEADER_KOGA",
+  "maps": [
+   "FuchsiaCity_Gym"
+  ]
+ },
+ "0x1a3": {
+  "rr_name": "Leader Blaine",
+  "fr_const": "TRAINER_LEADER_BLAINE",
+  "maps": [
+   "CinnabarIsland_Gym"
+  ]
+ },
+ "0x1a4": {
+  "rr_name": "Leader Sabrina",
+  "fr_const": "TRAINER_LEADER_SABRINA",
+  "maps": [
+   "SaffronCity_Gym"
+  ]
+ },
+ "0x1a5": {
+  "rr_name": "Gentleman Thomas",
+  "fr_const": "TRAINER_GENTLEMAN_THOMAS",
+  "maps": [
+   "SSAnne_1F_Room7"
+  ]
+ },
+ "0x1a6": {
+  "rr_name": "Gentleman Arthur",
+  "fr_const": "TRAINER_GENTLEMAN_ARTHUR",
+  "maps": [
+   "SSAnne_1F_Room5"
+  ]
+ },
+ "0x1a7": {
+  "rr_name": "Gentleman Tucker",
+  "fr_const": "TRAINER_GENTLEMAN_TUCKER",
+  "maps": [
+   "VermilionCity_Gym"
+  ]
+ },
+ "0x1a8": {
+  "rr_name": "Gentleman Norton",
+  "fr_const": "TRAINER_GENTLEMAN_NORTON",
+  "maps": []
+ },
+ "0x1a9": {
+  "rr_name": "Gentleman Walter",
+  "fr_const": "TRAINER_GENTLEMAN_WALTER",
+  "maps": []
+ },
+ "0x1aa": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_SS_ANNE_SQUIRTLE",
+  "maps": [
+   "SSAnne_2F_Corridor"
+  ]
+ },
+ "0x1ab": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_SS_ANNE_BULBASAUR",
+  "maps": [
+   "SSAnne_2F_Corridor"
+  ]
+ },
+ "0x1ac": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_SS_ANNE_CHARMANDER",
+  "maps": [
+   "SSAnne_2F_Corridor"
+  ]
+ },
+ "0x1ad": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_POKEMON_TOWER_SQUIRTLE",
+  "maps": [
+   "PokemonTower_2F"
+  ]
+ },
+ "0x1ae": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_POKEMON_TOWER_BULBASAUR",
+  "maps": [
+   "PokemonTower_2F"
+  ]
+ },
+ "0x1af": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_POKEMON_TOWER_CHARMANDER",
+  "maps": [
+   "PokemonTower_2F"
+  ]
+ },
+ "0x1b0": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_SILPH_SQUIRTLE",
+  "maps": [
+   "SilphCo_7F"
+  ]
+ },
+ "0x1b1": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_SILPH_BULBASAUR",
+  "maps": [
+   "SilphCo_7F"
+  ]
+ },
+ "0x1b2": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_SILPH_CHARMANDER",
+  "maps": [
+   "SilphCo_7F"
+  ]
+ },
+ "0x1b3": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_ROUTE22_LATE_SQUIRTLE",
+  "maps": [
+   "Route22"
+  ]
+ },
+ "0x1b4": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_ROUTE22_LATE_BULBASAUR",
+  "maps": [
+   "Route22"
+  ]
+ },
+ "0x1b5": {
+  "rr_name": "Rival Terry",
+  "fr_const": "TRAINER_RIVAL_ROUTE22_LATE_CHARMANDER",
+  "maps": [
+   "Route22"
+  ]
+ },
+ "0x1b6": {
+  "rr_name": "Champion Terry",
+  "fr_const": "TRAINER_CHAMPION_FIRST_SQUIRTLE",
+  "maps": [
+   "PokemonLeague_ChampionsRoom"
+  ]
+ },
+ "0x1b7": {
+  "rr_name": "Champion Terry",
+  "fr_const": "TRAINER_CHAMPION_FIRST_BULBASAUR",
+  "maps": [
+   "PokemonLeague_ChampionsRoom"
+  ]
+ },
+ "0x1b8": {
+  "rr_name": "Champion Terry",
+  "fr_const": "TRAINER_CHAMPION_FIRST_CHARMANDER",
+  "maps": [
+   "PokemonLeague_ChampionsRoom"
+  ]
+ },
+ "0x1b9": {
+  "rr_name": "Channeler Patricia",
+  "fr_const": "TRAINER_CHANNELER_PATRICIA",
+  "maps": [
+   "PokemonTower_3F"
+  ]
+ },
+ "0x1ba": {
+  "rr_name": "Channeler Carly",
+  "fr_const": "TRAINER_CHANNELER_CARLY",
+  "maps": [
+   "PokemonTower_3F"
+  ]
+ },
+ "0x1bb": {
+  "rr_name": "Channeler Hope",
+  "fr_const": "TRAINER_CHANNELER_HOPE",
+  "maps": [
+   "PokemonTower_3F"
+  ]
+ },
+ "0x1bc": {
+  "rr_name": "Channeler Paula",
+  "fr_const": "TRAINER_CHANNELER_PAULA",
+  "maps": [
+   "PokemonTower_4F"
+  ]
+ },
+ "0x1bd": {
+  "rr_name": "Channeler Laurel",
+  "fr_const": "TRAINER_CHANNELER_LAUREL",
+  "maps": [
+   "PokemonTower_4F"
+  ]
+ },
+ "0x1be": {
+  "rr_name": "Channeler Jody",
+  "fr_const": "TRAINER_CHANNELER_JODY",
+  "maps": [
+   "PokemonTower_4F"
+  ]
+ },
+ "0x1bf": {
+  "rr_name": "Channeler Tammy",
+  "fr_const": "TRAINER_CHANNELER_TAMMY",
+  "maps": [
+   "PokemonTower_5F"
+  ]
+ },
+ "0x1c0": {
+  "rr_name": "Channeler Ruth",
+  "fr_const": "TRAINER_CHANNELER_RUTH",
+  "maps": [
+   "PokemonTower_5F"
+  ]
+ },
+ "0x1c1": {
+  "rr_name": "Channeler Karina",
+  "fr_const": "TRAINER_CHANNELER_KARINA",
+  "maps": [
+   "PokemonTower_5F"
+  ]
+ },
+ "0x1c2": {
+  "rr_name": "Channeler Janae",
+  "fr_const": "TRAINER_CHANNELER_JANAE",
+  "maps": [
+   "PokemonTower_5F"
+  ]
+ },
+ "0x1c3": {
+  "rr_name": "Channeler Angelica",
+  "fr_const": "TRAINER_CHANNELER_ANGELICA",
+  "maps": [
+   "PokemonTower_6F"
+  ]
+ },
+ "0x1c4": {
+  "rr_name": "Channeler Emilia",
+  "fr_const": "TRAINER_CHANNELER_EMILIA",
+  "maps": [
+   "PokemonTower_6F"
+  ]
+ },
+ "0x1c5": {
+  "rr_name": "Channeler Jennifer",
+  "fr_const": "TRAINER_CHANNELER_JENNIFER",
+  "maps": [
+   "PokemonTower_6F"
+  ]
+ },
+ "0x1c6": {
+  "rr_name": "Burglar Max",
+  "fr_const": "TRAINER_CHANNELER_1",
+  "maps": []
+ },
+ "0x1c7": {
+  "rr_name": "Burglar Anson",
+  "fr_const": "TRAINER_CHANNELER_2",
+  "maps": []
+ },
+ "0x1c8": {
+  "rr_name": "Channeler",
+  "fr_const": "TRAINER_CHANNELER_3",
+  "maps": []
+ },
+ "0x1c9": {
+  "rr_name": "Channeler",
+  "fr_const": "TRAINER_CHANNELER_4",
+  "maps": []
+ },
+ "0x1ca": {
+  "rr_name": "Channeler",
+  "fr_const": "TRAINER_CHANNELER_5",
+  "maps": []
+ },
+ "0x1cb": {
+  "rr_name": "Channeler",
+  "fr_const": "TRAINER_CHANNELER_6",
+  "maps": []
+ },
+ "0x1cc": {
+  "rr_name": "Channeler",
+  "fr_const": "TRAINER_CHANNELER_7",
+  "maps": []
+ },
+ "0x1cd": {
+  "rr_name": "Channeler",
+  "fr_const": "TRAINER_CHANNELER_8",
+  "maps": []
+ },
+ "0x1ce": {
+  "rr_name": "Channeler Amanda",
+  "fr_const": "TRAINER_CHANNELER_AMANDA",
+  "maps": [
+   "SaffronCity_Gym"
+  ]
+ },
+ "0x1cf": {
+  "rr_name": "Channeler Stacy",
+  "fr_const": "TRAINER_CHANNELER_STACY",
+  "maps": [
+   "SaffronCity_Gym"
+  ]
+ },
+ "0x1d0": {
+  "rr_name": "Channeler Tasha",
+  "fr_const": "TRAINER_CHANNELER_TASHA",
+  "maps": [
+   "SaffronCity_Gym"
+  ]
+ },
+ "0x1d1": {
+  "rr_name": "Hiker Jeremy",
+  "fr_const": "TRAINER_HIKER_JEREMY",
+  "maps": [
+   "Route9"
+  ]
+ },
+ "0x1d2": {
+  "rr_name": "Picnicker Alma",
+  "fr_const": "TRAINER_PICNICKER_ALMA",
+  "maps": [
+   "Route13"
+  ]
+ },
+ "0x1d3": {
+  "rr_name": "Picnicker Susie",
+  "fr_const": "TRAINER_PICNICKER_SUSIE",
+  "maps": [
+   "Route13"
+  ]
+ },
+ "0x1d4": {
+  "rr_name": "Picnicker Valerie",
+  "fr_const": "TRAINER_PICNICKER_VALERIE",
+  "maps": [
+   "Route13"
+  ]
+ },
+ "0x1d5": {
+  "rr_name": "Picnicker Gwen",
+  "fr_const": "TRAINER_PICNICKER_GWEN",
+  "maps": [
+   "Route13"
+  ]
+ },
+ "0x1d6": {
+  "rr_name": "Biker Virgil",
+  "fr_const": "TRAINER_BIKER_VIRGIL",
+  "maps": [
+   "Route17"
+  ]
+ },
+ "0x1d7": {
+  "rr_name": "Camper Flint",
+  "fr_const": "TRAINER_CAMPER_FLINT",
+  "maps": [
+   "Route25"
+  ]
+ },
+ "0x1d8": {
+  "rr_name": "Picnicker Missy",
+  "fr_const": "TRAINER_PICNICKER_MISSY",
+  "maps": [
+   "Route20"
+  ]
+ },
+ "0x1d9": {
+  "rr_name": "Picnicker Irene",
+  "fr_const": "TRAINER_PICNICKER_IRENE",
+  "maps": [
+   "Route20"
+  ]
+ },
+ "0x1da": {
+  "rr_name": "Picnicker Dana",
+  "fr_const": "TRAINER_PICNICKER_DANA",
+  "maps": [
+   "RockTunnel_1F"
+  ]
+ },
+ "0x1db": {
+  "rr_name": "Picnicker Ariana",
+  "fr_const": "TRAINER_PICNICKER_ARIANA",
+  "maps": [
+   "RockTunnel_1F"
+  ]
+ },
+ "0x1dc": {
+  "rr_name": "Picnicker Leah",
+  "fr_const": "TRAINER_PICNICKER_LEAH",
+  "maps": [
+   "RockTunnel_1F"
+  ]
+ },
+ "0x1dd": {
+  "rr_name": "Camper Justin",
+  "fr_const": "TRAINER_CAMPER_JUSTIN",
+  "maps": [
+   "Route12"
+  ]
+ },
+ "0x1de": {
+  "rr_name": "Picnicker Yazmin",
+  "fr_const": "TRAINER_PICNICKER_YAZMIN",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0x1df": {
+  "rr_name": "Picnicker Kindra",
+  "fr_const": "TRAINER_PICNICKER_KINDRA",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0x1e0": {
+  "rr_name": "Picnicker Becky",
+  "fr_const": "TRAINER_PICNICKER_BECKY",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0x1e1": {
+  "rr_name": "Picnicker Celia",
+  "fr_const": "TRAINER_PICNICKER_CELIA",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0x1e2": {
+  "rr_name": "Gentleman Brooks",
+  "fr_const": "TRAINER_GENTLEMAN_BROOKS",
+  "maps": [
+   "SSAnne_2F_Room2"
+  ]
+ },
+ "0x1e3": {
+  "rr_name": "Gentleman Lamar",
+  "fr_const": "TRAINER_GENTLEMAN_LAMAR",
+  "maps": [
+   "SSAnne_2F_Room4"
+  ]
+ },
+ "0x1e4": {
+  "rr_name": "Twins Eli & Anne",
+  "fr_const": "TRAINER_TWINS_ELI_ANNE",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0x1e5": {
+  "rr_name": "Cool Couple Ray & Tyra",
+  "fr_const": "TRAINER_COOL_COUPLE_RAY_TYRA",
+  "maps": [
+   "VictoryRoad_3F"
+  ]
+ },
+ "0x1e6": {
+  "rr_name": "Young Couple Gia & Jes",
+  "fr_const": "TRAINER_YOUNG_COUPLE_GIA_JES",
+  "maps": [
+   "Route12"
+  ]
+ },
+ "0x1e7": {
+  "rr_name": "Twins Kiri & Jan",
+  "fr_const": "TRAINER_TWINS_KIRI_JAN",
+  "maps": [
+   "Route14"
+  ]
+ },
+ "0x1e8": {
+  "rr_name": "Crush Kin Ron & Mya",
+  "fr_const": "TRAINER_CRUSH_KIN_RON_MYA",
+  "maps": [
+   "Route15"
+  ]
+ },
+ "0x1e9": {
+  "rr_name": "Young Couple Lea & Jed",
+  "fr_const": "TRAINER_YOUNG_COUPLE_LEA_JED",
+  "maps": [
+   "Route16"
+  ]
+ },
+ "0x1ea": {
+  "rr_name": "Sis And Bro Lia & Luc",
+  "fr_const": "TRAINER_SIS_AND_BRO_LIA_LUC",
+  "maps": [
+   "Route19"
+  ]
+ },
+ "0x1eb": {
+  "rr_name": "Sis And Bro Lil & Ian",
+  "fr_const": "TRAINER_SIS_AND_BRO_LIL_IAN",
+  "maps": [
+   "Route21"
+  ]
+ },
+ "0x1ec": {
+  "rr_name": "Bug Catcher",
+  "fr_const": "TRAINER_BUG_CATCHER_3",
+  "maps": []
+ },
+ "0x1ed": {
+  "rr_name": "Bug Catcher",
+  "fr_const": "TRAINER_BUG_CATCHER_4",
+  "maps": []
+ },
+ "0x1ee": {
+  "rr_name": "Bug Catcher",
+  "fr_const": "TRAINER_BUG_CATCHER_5",
+  "maps": []
+ },
+ "0x1ef": {
+  "rr_name": "Bug Catcher",
+  "fr_const": "TRAINER_BUG_CATCHER_6",
+  "maps": []
+ },
+ "0x1f0": {
+  "rr_name": "Bug Catcher",
+  "fr_const": "TRAINER_BUG_CATCHER_7",
+  "maps": []
+ },
+ "0x1f1": {
+  "rr_name": "Bug Catcher",
+  "fr_const": "TRAINER_BUG_CATCHER_8",
+  "maps": []
+ },
+ "0x1f2": {
+  "rr_name": "Youngster Ben",
+  "fr_const": "TRAINER_YOUNGSTER_BEN_3",
+  "maps": []
+ },
+ "0x1f3": {
+  "rr_name": "Youngster Ben",
+  "fr_const": "TRAINER_YOUNGSTER_BEN_4",
+  "maps": []
+ },
+ "0x1f4": {
+  "rr_name": "Youngster Chad",
+  "fr_const": "TRAINER_YOUNGSTER_CHAD_2",
+  "maps": []
+ },
+ "0x1f5": {
+  "rr_name": "Lass Reli",
+  "fr_const": "TRAINER_LASS_RELI_2",
+  "maps": []
+ },
+ "0x1f6": {
+  "rr_name": "Lass Reli",
+  "fr_const": "TRAINER_LASS_RELI_3",
+  "maps": []
+ },
+ "0x1f7": {
+  "rr_name": "Youngster Timmy",
+  "fr_const": "TRAINER_YOUNGSTER_TIMMY_2",
+  "maps": []
+ },
+ "0x1f8": {
+  "rr_name": "Youngster Timmy",
+  "fr_const": "TRAINER_YOUNGSTER_TIMMY_3",
+  "maps": []
+ },
+ "0x1f9": {
+  "rr_name": "Youngster Timmy",
+  "fr_const": "TRAINER_YOUNGSTER_TIMMY_4",
+  "maps": []
+ },
+ "0x1fa": {
+  "rr_name": "Youngster Chad",
+  "fr_const": "TRAINER_YOUNGSTER_CHAD_3",
+  "maps": []
+ },
+ "0x1fb": {
+  "rr_name": "Lass Janice",
+  "fr_const": "TRAINER_LASS_JANICE_2",
+  "maps": []
+ },
+ "0x1fc": {
+  "rr_name": "Lass Janice",
+  "fr_const": "TRAINER_LASS_JANICE_3",
+  "maps": []
+ },
+ "0x1fd": {
+  "rr_name": "Youngster Chad",
+  "fr_const": "TRAINER_YOUNGSTER_CHAD_4",
+  "maps": []
+ },
+ "0x1fe": {
+  "rr_name": "Hiker Franklin",
+  "fr_const": "TRAINER_HIKER_FRANKLIN_2",
+  "maps": []
+ },
+ "0x1ff": {
+  "rr_name": "{PK}{MN} Prof. Prof. Oak",
+  "fr_const": "TRAINER_PKMN_PROF_PROF_OAK",
+  "maps": []
+ },
+ "0x200": {
+  "rr_name": "Player Brendan",
+  "fr_const": "TRAINER_PLAYER_BRENDAN",
+  "maps": []
+ },
+ "0x201": {
+  "rr_name": "Player May",
+  "fr_const": "TRAINER_PLAYER_MAY",
+  "maps": []
+ },
+ "0x202": {
+  "rr_name": "Player Red",
+  "fr_const": "TRAINER_PLAYER_RED",
+  "maps": []
+ },
+ "0x203": {
+  "rr_name": "Player Leaf",
+  "fr_const": "TRAINER_PLAYER_LEAF",
+  "maps": []
+ },
+ "0x204": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_42",
+  "maps": [
+   "FiveIsland_RocketWarehouse"
+  ]
+ },
+ "0x205": {
+  "rr_name": "Psychic Jaclyn",
+  "fr_const": "TRAINER_PSYCHIC_JACLYN",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x206": {
+  "rr_name": "Crush Girl Sharon",
+  "fr_const": "TRAINER_CRUSH_GIRL_SHARON",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x207": {
+  "rr_name": "Tuber Amira",
+  "fr_const": "TRAINER_TUBER_AMIRA",
+  "maps": [
+   "ThreeIsland"
+  ]
+ },
+ "0x208": {
+  "rr_name": "{PK}{MN} Breeder Alize",
+  "fr_const": "TRAINER_PKMN_BREEDER_ALIZE",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x209": {
+  "rr_name": "{PK}{MN} Ranger Nicolas",
+  "fr_const": "TRAINER_PKMN_RANGER_NICOLAS",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x20a": {
+  "rr_name": "{PK}{MN} Ranger Madeline",
+  "fr_const": "TRAINER_PKMN_RANGER_MADELINE",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x20b": {
+  "rr_name": "Aroma Lady Nikki",
+  "fr_const": "TRAINER_AROMA_LADY_NIKKI",
+  "maps": [
+   "ThreeIsland"
+  ]
+ },
+ "0x20c": {
+  "rr_name": "Ruin Mamoac Stanly",
+  "fr_const": "TRAINER_RUIN_MANIAC_STANLY",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x20d": {
+  "rr_name": "Lady Jacki",
+  "fr_const": "TRAINER_LADY_JACKI",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x20e": {
+  "rr_name": "Painter Daisy",
+  "fr_const": "TRAINER_PAINTER_DAISY",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x20f": {
+  "rr_name": "Biker Goon",
+  "fr_const": "TRAINER_BIKER_GOON",
+  "maps": [
+   "ThreeIsland"
+  ]
+ },
+ "0x210": {
+  "rr_name": "Biker Goon",
+  "fr_const": "TRAINER_BIKER_GOON_2",
+  "maps": [
+   "ThreeIsland"
+  ]
+ },
+ "0x211": {
+  "rr_name": "Biker Goon",
+  "fr_const": "TRAINER_BIKER_GOON_3",
+  "maps": [
+   "ThreeIsland"
+  ]
+ },
+ "0x212": {
+  "rr_name": "Biker",
+  "fr_const": "TRAINER_BIKER_2",
+  "maps": []
+ },
+ "0x213": {
+  "rr_name": "Bug Catcher Anthony",
+  "fr_const": "TRAINER_BUG_CATCHER_ANTHONY",
+  "maps": [
+   "ViridianForest"
+  ]
+ },
+ "0x214": {
+  "rr_name": "Bug Catcher Charlie",
+  "fr_const": "TRAINER_BUG_CATCHER_CHARLIE",
+  "maps": [
+   "ViridianForest"
+  ]
+ },
+ "0x215": {
+  "rr_name": "Twins Eli & Anne",
+  "fr_const": "TRAINER_TWINS_ELI_ANNE_2",
+  "maps": []
+ },
+ "0x216": {
+  "rr_name": "Youngster Johnson",
+  "fr_const": "TRAINER_YOUNGSTER_JOHNSON",
+  "maps": [
+   "PokemonMansion_1F"
+  ]
+ },
+ "0x217": {
+  "rr_name": "Biker Ricardo",
+  "fr_const": "TRAINER_BIKER_RICARDO",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0x218": {
+  "rr_name": "Biker Jaren",
+  "fr_const": "TRAINER_BIKER_JAREN",
+  "maps": [
+   "Route8"
+  ]
+ },
+ "0x219": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_43",
+  "maps": [
+   "MtEmber_Exterior"
+  ]
+ },
+ "0x21a": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_44",
+  "maps": [
+   "MtEmber_Exterior"
+  ]
+ },
+ "0x21b": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_45",
+  "maps": [
+   "FourIsland_IcefallCave_Back"
+  ]
+ },
+ "0x21c": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_46",
+  "maps": [
+   "SixIsland_OutcastIsland"
+  ]
+ },
+ "0x21d": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_47",
+  "maps": [
+   "FiveIsland_RocketWarehouse"
+  ]
+ },
+ "0x21e": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_48",
+  "maps": [
+   "FiveIsland_RocketWarehouse"
+  ]
+ },
+ "0x21f": {
+  "rr_name": "Team Rocket Admin",
+  "fr_const": "TRAINER_TEAM_ROCKET_ADMIN",
+  "maps": [
+   "FiveIsland_RocketWarehouse"
+  ]
+ },
+ "0x220": {
+  "rr_name": "Team Rocket Admin",
+  "fr_const": "TRAINER_TEAM_ROCKET_ADMIN_2",
+  "maps": [
+   "FiveIsland_RocketWarehouse"
+  ]
+ },
+ "0x221": {
+  "rr_name": "Scientist Gideon",
+  "fr_const": "TRAINER_SCIENTIST_GIDEON",
+  "maps": [
+   "FiveIsland_RocketWarehouse"
+  ]
+ },
+ "0x222": {
+  "rr_name": "Swimmer\u2640 Amara",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_AMARA",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x223": {
+  "rr_name": "Swimmer\u2640 Maria",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_MARIA",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x224": {
+  "rr_name": "Swimmer\u2640 Abigail",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_ABIGAIL",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x225": {
+  "rr_name": "Swimmer\u2642 Finn",
+  "fr_const": "TRAINER_SWIMMER_MALE_FINN",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x226": {
+  "rr_name": "Swimmer\u2642 Garrett",
+  "fr_const": "TRAINER_SWIMMER_MALE_GARRETT",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x227": {
+  "rr_name": "Fisherman Tommy",
+  "fr_const": "TRAINER_FISHERMAN_TOMMY",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x228": {
+  "rr_name": "Crush Girl Tanya",
+  "fr_const": "TRAINER_CRUSH_GIRL_TANYA",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x229": {
+  "rr_name": "Black Belt Shea",
+  "fr_const": "TRAINER_BLACK_BELT_SHEA",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x22a": {
+  "rr_name": "Black Belt Hugh",
+  "fr_const": "TRAINER_BLACK_BELT_HUGH",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x22b": {
+  "rr_name": "Camper Bryce",
+  "fr_const": "TRAINER_CAMPER_BRYCE",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x22c": {
+  "rr_name": "Picnicker Claire",
+  "fr_const": "TRAINER_PICNICKER_CLAIRE",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x22d": {
+  "rr_name": "Crush Kin Mik & Kia",
+  "fr_const": "TRAINER_CRUSH_KIN_MIK_KIA",
+  "maps": [
+   "OneIsland"
+  ]
+ },
+ "0x22e": {
+  "rr_name": "Aroma Lady Violet",
+  "fr_const": "TRAINER_AROMA_LADY_VIOLET",
+  "maps": [
+   "ThreeIsland"
+  ]
+ },
+ "0x22f": {
+  "rr_name": "Tuber Alexis",
+  "fr_const": "TRAINER_TUBER_ALEXIS",
+  "maps": [
+   "ThreeIsland"
+  ]
+ },
+ "0x230": {
+  "rr_name": "Twins Joy & Meg",
+  "fr_const": "TRAINER_TWINS_JOY_MEG",
+  "maps": [
+   "ThreeIsland"
+  ]
+ },
+ "0x231": {
+  "rr_name": "Swimmer\u2640 Tisha",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_TISHA",
+  "maps": [
+   "ThreeIsland"
+  ]
+ },
+ "0x232": {
+  "rr_name": "Painter Celina",
+  "fr_const": "TRAINER_PAINTER_CELINA",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x233": {
+  "rr_name": "Painter Rayna",
+  "fr_const": "TRAINER_PAINTER_RAYNA",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x234": {
+  "rr_name": "Lady Gillian",
+  "fr_const": "TRAINER_LADY_GILLIAN",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x235": {
+  "rr_name": "Youngster Destin",
+  "fr_const": "TRAINER_YOUNGSTER_DESTIN",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x236": {
+  "rr_name": "Swimmer\u2642 Toby",
+  "fr_const": "TRAINER_SWIMMER_MALE_TOBY",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x237": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_49",
+  "maps": [
+   "FiveIsland_Meadow"
+  ]
+ },
+ "0x238": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_50",
+  "maps": [
+   "FiveIsland_Meadow"
+  ]
+ },
+ "0x239": {
+  "rr_name": "Team Rocket Grunt",
+  "fr_const": "TRAINER_TEAM_ROCKET_GRUNT_51",
+  "maps": [
+   "FiveIsland_Meadow"
+  ]
+ },
+ "0x23a": {
+  "rr_name": "Bird Keeper Milo",
+  "fr_const": "TRAINER_BIRD_KEEPER_MILO",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x23b": {
+  "rr_name": "Bird Keeper Chaz",
+  "fr_const": "TRAINER_BIRD_KEEPER_CHAZ",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x23c": {
+  "rr_name": "Bird Keeper Harold",
+  "fr_const": "TRAINER_BIRD_KEEPER_HAROLD",
+  "maps": [
+   "FiveIsland"
+  ]
+ },
+ "0x23d": {
+  "rr_name": "Fisherman Tylor",
+  "fr_const": "TRAINER_FISHERMAN_TYLOR",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x23e": {
+  "rr_name": "Swimmer\u2642 Mymo",
+  "fr_const": "TRAINER_SWIMMER_MALE_MYMO",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x23f": {
+  "rr_name": "Swimmer\u2640 Nicole",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_NICOLE",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x240": {
+  "rr_name": "Sis And Bro Ava & Geb",
+  "fr_const": "TRAINER_SIS_AND_BRO_AVA_GEB",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x241": {
+  "rr_name": "Aroma Lady Rose",
+  "fr_const": "TRAINER_AROMA_LADY_ROSE",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x242": {
+  "rr_name": "Swimmer\u2642 Samir",
+  "fr_const": "TRAINER_SWIMMER_MALE_SAMIR",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x243": {
+  "rr_name": "Swimmer\u2640 Denise",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_DENISE",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x244": {
+  "rr_name": "Twins Miu & Mia",
+  "fr_const": "TRAINER_TWINS_MIU_MIA",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x245": {
+  "rr_name": "Hiker Earl",
+  "fr_const": "TRAINER_HIKER_EARL",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x246": {
+  "rr_name": "Ruin Mamoac Foster",
+  "fr_const": "TRAINER_RUIN_MANIAC_FOSTER",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x247": {
+  "rr_name": "Ruin Mamoac Larry",
+  "fr_const": "TRAINER_RUIN_MANIAC_LARRY",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x248": {
+  "rr_name": "Hiker Daryl",
+  "fr_const": "TRAINER_HIKER_DARYL",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x249": {
+  "rr_name": "Pok\u00e9maniac Hector",
+  "fr_const": "TRAINER_POKEMANIAC_HECTOR",
+  "maps": [
+   "SixIsland"
+  ]
+ },
+ "0x24a": {
+  "rr_name": "Psychic Dario",
+  "fr_const": "TRAINER_PSYCHIC_DARIO",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x24b": {
+  "rr_name": "Psychic Rodette",
+  "fr_const": "TRAINER_PSYCHIC_RODETTE",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x24c": {
+  "rr_name": "Aroma Lady Miah",
+  "fr_const": "TRAINER_AROMA_LADY_MIAH",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x24d": {
+  "rr_name": "Young Couple Eve & Jon",
+  "fr_const": "TRAINER_YOUNG_COUPLE_EVE_JON",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x24e": {
+  "rr_name": "Juggler Mason",
+  "fr_const": "TRAINER_JUGGLER_MASON",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x24f": {
+  "rr_name": "Crush Girl Cyndy",
+  "fr_const": "TRAINER_CRUSH_GIRL_CYNDY",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x250": {
+  "rr_name": "Crush Girl Jocelyn",
+  "fr_const": "TRAINER_CRUSH_GIRL_JOCELYN",
+  "maps": [
+   "MtEmber_Exterior"
+  ]
+ },
+ "0x251": {
+  "rr_name": "Tamer Evan",
+  "fr_const": "TRAINER_TAMER_EVAN",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x252": {
+  "rr_name": "Pok\u00e9maniac Mark",
+  "fr_const": "TRAINER_POKEMANIAC_MARK_2",
+  "maps": []
+ },
+ "0x253": {
+  "rr_name": "Gatekeeper Logan",
+  "fr_const": "TRAINER_PKMN_RANGER_LOGAN",
+  "maps": [
+   "MtEmber_Exterior"
+  ]
+ },
+ "0x254": {
+  "rr_name": "{PK}{MN} Ranger Jackson",
+  "fr_const": "TRAINER_PKMN_RANGER_JACKSON",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x255": {
+  "rr_name": "{PK}{MN} Ranger Beth",
+  "fr_const": "TRAINER_PKMN_RANGER_BETH",
+  "maps": [
+   "MtEmber_Exterior"
+  ]
+ },
+ "0x256": {
+  "rr_name": "{PK}{MN} Ranger Katelyn",
+  "fr_const": "TRAINER_PKMN_RANGER_KATELYN",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x257": {
+  "rr_name": "Ace Trainer Leroy",
+  "fr_const": "TRAINER_COOLTRAINER_LEROY",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x258": {
+  "rr_name": "Ace Trainer Michelle",
+  "fr_const": "TRAINER_COOLTRAINER_MICHELLE",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x259": {
+  "rr_name": "Cool Couple Lex & Nya",
+  "fr_const": "TRAINER_COOL_COUPLE_LEX_NYA",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x25a": {
+  "rr_name": "Ruin Mamoac Brandon",
+  "fr_const": "TRAINER_RUIN_MANIAC_BRANDON",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x25b": {
+  "rr_name": "Ruin Mamoac Benjamin",
+  "fr_const": "TRAINER_RUIN_MANIAC_BENJAMIN",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x25c": {
+  "rr_name": "Painter Edna",
+  "fr_const": "TRAINER_PAINTER_EDNA",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x25d": {
+  "rr_name": "Gentleman Clifford",
+  "fr_const": "TRAINER_GENTLEMAN_CLIFFORD",
+  "maps": [
+   "SevenIsland"
+  ]
+ },
+ "0x25e": {
+  "rr_name": "Lady Selphy",
+  "fr_const": "TRAINER_LADY_SELPHY",
+  "maps": [
+   "FiveIsland_LostCave_Room10"
+  ]
+ },
+ "0x25f": {
+  "rr_name": "Ruin Mamoac Lawson",
+  "fr_const": "TRAINER_RUIN_MANIAC_LAWSON",
+  "maps": [
+   "FiveIsland_LostCave_Room1"
+  ]
+ },
+ "0x260": {
+  "rr_name": "Psychic Laura",
+  "fr_const": "TRAINER_PSYCHIC_LAURA",
+  "maps": [
+   "FiveIsland_LostCave_Room4"
+  ]
+ },
+ "0x261": {
+  "rr_name": "{PK}{MN} Breeder Bethany",
+  "fr_const": "TRAINER_PKMN_BREEDER_BETHANY",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x262": {
+  "rr_name": "{PK}{MN} Breeder Allison",
+  "fr_const": "TRAINER_PKMN_BREEDER_ALLISON",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x263": {
+  "rr_name": "Bug Catcher Garret",
+  "fr_const": "TRAINER_BUG_CATCHER_GARRET",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x264": {
+  "rr_name": "Bug Catcher Jonah",
+  "fr_const": "TRAINER_BUG_CATCHER_JONAH",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x265": {
+  "rr_name": "Bug Catcher Vance",
+  "fr_const": "TRAINER_BUG_CATCHER_VANCE",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x266": {
+  "rr_name": "Youngster Nash",
+  "fr_const": "TRAINER_YOUNGSTER_NASH",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x267": {
+  "rr_name": "Youngster Cordell",
+  "fr_const": "TRAINER_YOUNGSTER_CORDELL",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x268": {
+  "rr_name": "Lass Dalia",
+  "fr_const": "TRAINER_LASS_DALIA",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x269": {
+  "rr_name": "Lass Joana",
+  "fr_const": "TRAINER_LASS_JOANA",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x26a": {
+  "rr_name": "Camper Riley",
+  "fr_const": "TRAINER_CAMPER_RILEY",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x26b": {
+  "rr_name": "Picnicker Marcy",
+  "fr_const": "TRAINER_PICNICKER_MARCY",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x26c": {
+  "rr_name": "Ruin Mamoac Layton",
+  "fr_const": "TRAINER_RUIN_MANIAC_LAYTON",
+  "maps": [
+   "SixIsland_PatternBush"
+  ]
+ },
+ "0x26d": {
+  "rr_name": "Picnicker Kelsey",
+  "fr_const": "TRAINER_PICNICKER_KELSEY_2",
+  "maps": []
+ },
+ "0x26e": {
+  "rr_name": "Picnicker Kelsey",
+  "fr_const": "TRAINER_PICNICKER_KELSEY_3",
+  "maps": []
+ },
+ "0x26f": {
+  "rr_name": "Picnicker Kelsey",
+  "fr_const": "TRAINER_PICNICKER_KELSEY_4",
+  "maps": []
+ },
+ "0x270": {
+  "rr_name": "Camper Ricky",
+  "fr_const": "TRAINER_CAMPER_RICKY_2",
+  "maps": []
+ },
+ "0x271": {
+  "rr_name": "Camper Ricky",
+  "fr_const": "TRAINER_CAMPER_RICKY_3",
+  "maps": []
+ },
+ "0x272": {
+  "rr_name": "Camper Ricky",
+  "fr_const": "TRAINER_CAMPER_RICKY_4",
+  "maps": []
+ },
+ "0x273": {
+  "rr_name": "Camper Jeff",
+  "fr_const": "TRAINER_CAMPER_JEFF_2",
+  "maps": []
+ },
+ "0x274": {
+  "rr_name": "Camper Jeff",
+  "fr_const": "TRAINER_CAMPER_JEFF_3",
+  "maps": []
+ },
+ "0x275": {
+  "rr_name": "Camper Jeff",
+  "fr_const": "TRAINER_CAMPER_JEFF_4",
+  "maps": []
+ },
+ "0x276": {
+  "rr_name": "Picnicker Isabelle",
+  "fr_const": "TRAINER_PICNICKER_ISABELLE_2",
+  "maps": []
+ },
+ "0x277": {
+  "rr_name": "Picnicker Isabelle",
+  "fr_const": "TRAINER_PICNICKER_ISABELLE_3",
+  "maps": []
+ },
+ "0x278": {
+  "rr_name": "Picnicker Isabelle",
+  "fr_const": "TRAINER_PICNICKER_ISABELLE_4",
+  "maps": []
+ },
+ "0x279": {
+  "rr_name": "Youngster Yasu",
+  "fr_const": "TRAINER_YOUNGSTER_YASU_2",
+  "maps": []
+ },
+ "0x27a": {
+  "rr_name": "Youngster Yasu",
+  "fr_const": "TRAINER_YOUNGSTER_YASU_3",
+  "maps": []
+ },
+ "0x27b": {
+  "rr_name": "Engineer Bernie",
+  "fr_const": "TRAINER_ENGINEER_BERNIE_2",
+  "maps": []
+ },
+ "0x27c": {
+  "rr_name": "Gambler Darian",
+  "fr_const": "TRAINER_GAMER_DARIAN_2",
+  "maps": []
+ },
+ "0x27d": {
+  "rr_name": "Camper Chris",
+  "fr_const": "TRAINER_CAMPER_CHRIS_2",
+  "maps": []
+ },
+ "0x27e": {
+  "rr_name": "Camper Chris",
+  "fr_const": "TRAINER_CAMPER_CHRIS_3",
+  "maps": []
+ },
+ "0x27f": {
+  "rr_name": "Camper Chris",
+  "fr_const": "TRAINER_CAMPER_CHRIS_4",
+  "maps": []
+ },
+ "0x280": {
+  "rr_name": "Picnicker Alicia",
+  "fr_const": "TRAINER_PICNICKER_ALICIA_2",
+  "maps": []
+ },
+ "0x281": {
+  "rr_name": "Picnicker Alicia",
+  "fr_const": "TRAINER_PICNICKER_ALICIA_3",
+  "maps": []
+ },
+ "0x282": {
+  "rr_name": "Picnicker Alicia",
+  "fr_const": "TRAINER_PICNICKER_ALICIA_4",
+  "maps": []
+ },
+ "0x283": {
+  "rr_name": "Hiker Jeremy",
+  "fr_const": "TRAINER_HIKER_JEREMY_2",
+  "maps": []
+ },
+ "0x284": {
+  "rr_name": "Pok\u00e9maniac Mark",
+  "fr_const": "TRAINER_POKEMANIAC_MARK_3",
+  "maps": []
+ },
+ "0x285": {
+  "rr_name": "Pok\u00e9maniac Herman",
+  "fr_const": "TRAINER_POKEMANIAC_HERMAN_2",
+  "maps": []
+ },
+ "0x286": {
+  "rr_name": "Pok\u00e9maniac Herman",
+  "fr_const": "TRAINER_POKEMANIAC_HERMAN_3",
+  "maps": []
+ },
+ "0x287": {
+  "rr_name": "Hiker Trent",
+  "fr_const": "TRAINER_HIKER_TRENT_2",
+  "maps": []
+ },
+ "0x288": {
+  "rr_name": "Lass Megan",
+  "fr_const": "TRAINER_LASS_MEGAN_2",
+  "maps": []
+ },
+ "0x289": {
+  "rr_name": "Lass Megan",
+  "fr_const": "TRAINER_LASS_MEGAN_3",
+  "maps": []
+ },
+ "0x28a": {
+  "rr_name": "Super Nerd Glenn",
+  "fr_const": "TRAINER_SUPER_NERD_GLENN_2",
+  "maps": []
+ },
+ "0x28b": {
+  "rr_name": "Gambler Rich",
+  "fr_const": "TRAINER_GAMER_RICH_2",
+  "maps": []
+ },
+ "0x28c": {
+  "rr_name": "Biker Jaren",
+  "fr_const": "TRAINER_BIKER_JAREN_2",
+  "maps": []
+ },
+ "0x28d": {
+  "rr_name": "Fisherman Elliot",
+  "fr_const": "TRAINER_FISHERMAN_ELLIOT_2",
+  "maps": []
+ },
+ "0x28e": {
+  "rr_name": "Rocker Luca",
+  "fr_const": "TRAINER_ROCKER_LUCA_2",
+  "maps": []
+ },
+ "0x28f": {
+  "rr_name": "Beauty Sheila",
+  "fr_const": "TRAINER_BEAUTY_SHEILA_2",
+  "maps": []
+ },
+ "0x290": {
+  "rr_name": "Bird Keeper Robert",
+  "fr_const": "TRAINER_BIRD_KEEPER_ROBERT_2",
+  "maps": []
+ },
+ "0x291": {
+  "rr_name": "Bird Keeper Robert",
+  "fr_const": "TRAINER_BIRD_KEEPER_ROBERT_3",
+  "maps": []
+ },
+ "0x292": {
+  "rr_name": "Picnicker Susie",
+  "fr_const": "TRAINER_PICNICKER_SUSIE_2",
+  "maps": []
+ },
+ "0x293": {
+  "rr_name": "Picnicker Susie",
+  "fr_const": "TRAINER_PICNICKER_SUSIE_3",
+  "maps": []
+ },
+ "0x294": {
+  "rr_name": "Picnicker Susie",
+  "fr_const": "TRAINER_PICNICKER_SUSIE_4",
+  "maps": []
+ },
+ "0x295": {
+  "rr_name": "Biker Lukas",
+  "fr_const": "TRAINER_BIKER_LUKAS_2",
+  "maps": []
+ },
+ "0x296": {
+  "rr_name": "Bird Keeper Benny",
+  "fr_const": "TRAINER_BIRD_KEEPER_BENNY_2",
+  "maps": []
+ },
+ "0x297": {
+  "rr_name": "Bird Keeper Benny",
+  "fr_const": "TRAINER_BIRD_KEEPER_BENNY_3",
+  "maps": []
+ },
+ "0x298": {
+  "rr_name": "Bird Keeper Marlon",
+  "fr_const": "TRAINER_BIRD_KEEPER_MARLON_2",
+  "maps": []
+ },
+ "0x299": {
+  "rr_name": "Bird Keeper Marlon",
+  "fr_const": "TRAINER_BIRD_KEEPER_MARLON_3",
+  "maps": []
+ },
+ "0x29a": {
+  "rr_name": "Beauty Grace",
+  "fr_const": "TRAINER_BEAUTY_GRACE_2",
+  "maps": []
+ },
+ "0x29b": {
+  "rr_name": "Bird Keeper Chester",
+  "fr_const": "TRAINER_BIRD_KEEPER_CHESTER_2",
+  "maps": []
+ },
+ "0x29c": {
+  "rr_name": "Bird Keeper Chester",
+  "fr_const": "TRAINER_BIRD_KEEPER_CHESTER_3",
+  "maps": []
+ },
+ "0x29d": {
+  "rr_name": "Picnicker Becky",
+  "fr_const": "TRAINER_PICNICKER_BECKY_2",
+  "maps": []
+ },
+ "0x29e": {
+  "rr_name": "Picnicker Becky",
+  "fr_const": "TRAINER_PICNICKER_BECKY_3",
+  "maps": []
+ },
+ "0x29f": {
+  "rr_name": "Picnicker Becky",
+  "fr_const": "TRAINER_PICNICKER_BECKY_4",
+  "maps": []
+ },
+ "0x2a0": {
+  "rr_name": "Crush Kin Ron & Mya",
+  "fr_const": "TRAINER_CRUSH_KIN_RON_MYA_2",
+  "maps": []
+ },
+ "0x2a1": {
+  "rr_name": "Crush Kin Ron & Mya",
+  "fr_const": "TRAINER_CRUSH_KIN_RON_MYA_3",
+  "maps": []
+ },
+ "0x2a2": {
+  "rr_name": "Crush Kin Ron & Mya",
+  "fr_const": "TRAINER_CRUSH_KIN_RON_MYA_4",
+  "maps": []
+ },
+ "0x2a3": {
+  "rr_name": "Biker Ruben",
+  "fr_const": "TRAINER_BIKER_RUBEN_2",
+  "maps": []
+ },
+ "0x2a4": {
+  "rr_name": "Cue Ball Camron",
+  "fr_const": "TRAINER_CUE_BALL_CAMRON_2",
+  "maps": []
+ },
+ "0x2a5": {
+  "rr_name": "Biker Jaxon",
+  "fr_const": "TRAINER_BIKER_JAXON_2",
+  "maps": []
+ },
+ "0x2a6": {
+  "rr_name": "Cue Ball Isaiah",
+  "fr_const": "TRAINER_CUE_BALL_ISAIAH_2",
+  "maps": []
+ },
+ "0x2a7": {
+  "rr_name": "Cue Ball Corey",
+  "fr_const": "TRAINER_CUE_BALL_COREY_2",
+  "maps": []
+ },
+ "0x2a8": {
+  "rr_name": "Bird Keeper Jacob",
+  "fr_const": "TRAINER_BIRD_KEEPER_JACOB_2",
+  "maps": []
+ },
+ "0x2a9": {
+  "rr_name": "Bird Keeper Jacob",
+  "fr_const": "TRAINER_BIRD_KEEPER_JACOB_3",
+  "maps": []
+ },
+ "0x2aa": {
+  "rr_name": "Swimmer\u2640 Alice",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_ALICE_2",
+  "maps": []
+ },
+ "0x2ab": {
+  "rr_name": "Swimmer\u2642 Darrin",
+  "fr_const": "TRAINER_SWIMMER_MALE_DARRIN_2",
+  "maps": []
+ },
+ "0x2ac": {
+  "rr_name": "Picnicker Missy",
+  "fr_const": "TRAINER_PICNICKER_MISSY_2",
+  "maps": []
+ },
+ "0x2ad": {
+  "rr_name": "Picnicker Missy",
+  "fr_const": "TRAINER_PICNICKER_MISSY_3",
+  "maps": []
+ },
+ "0x2ae": {
+  "rr_name": "Fisherman Wade",
+  "fr_const": "TRAINER_FISHERMAN_WADE_2",
+  "maps": []
+ },
+ "0x2af": {
+  "rr_name": "Swimmer\u2642 Jack",
+  "fr_const": "TRAINER_SWIMMER_MALE_JACK_2",
+  "maps": []
+ },
+ "0x2b0": {
+  "rr_name": "Sis And Bro Lil & Ian",
+  "fr_const": "TRAINER_SIS_AND_BRO_LIL_IAN_2",
+  "maps": []
+ },
+ "0x2b1": {
+  "rr_name": "Sis And Bro Lil & Ian",
+  "fr_const": "TRAINER_SIS_AND_BRO_LIL_IAN_3",
+  "maps": []
+ },
+ "0x2b2": {
+  "rr_name": "Swimmer\u2642 Finn",
+  "fr_const": "TRAINER_SWIMMER_MALE_FINN_2",
+  "maps": []
+ },
+ "0x2b3": {
+  "rr_name": "Crush Girl Sharon",
+  "fr_const": "TRAINER_CRUSH_GIRL_SHARON_2",
+  "maps": []
+ },
+ "0x2b4": {
+  "rr_name": "Crush Girl Sharon",
+  "fr_const": "TRAINER_CRUSH_GIRL_SHARON_3",
+  "maps": []
+ },
+ "0x2b5": {
+  "rr_name": "Crush Girl Tanya",
+  "fr_const": "TRAINER_CRUSH_GIRL_TANYA_2",
+  "maps": []
+ },
+ "0x2b6": {
+  "rr_name": "Crush Girl Tanya",
+  "fr_const": "TRAINER_CRUSH_GIRL_TANYA_3",
+  "maps": []
+ },
+ "0x2b7": {
+  "rr_name": "Black Belt Shea",
+  "fr_const": "TRAINER_BLACK_BELT_SHEA_2",
+  "maps": []
+ },
+ "0x2b8": {
+  "rr_name": "Black Belt Shea",
+  "fr_const": "TRAINER_BLACK_BELT_SHEA_3",
+  "maps": []
+ },
+ "0x2b9": {
+  "rr_name": "Black Belt Hugh",
+  "fr_const": "TRAINER_BLACK_BELT_HUGH_2",
+  "maps": []
+ },
+ "0x2ba": {
+  "rr_name": "Black Belt Hugh",
+  "fr_const": "TRAINER_BLACK_BELT_HUGH_3",
+  "maps": []
+ },
+ "0x2bb": {
+  "rr_name": "Crush Kin Mik & Kia",
+  "fr_const": "TRAINER_CRUSH_KIN_MIK_KIA_2",
+  "maps": []
+ },
+ "0x2bc": {
+  "rr_name": "Crush Kin Mik & Kia",
+  "fr_const": "TRAINER_CRUSH_KIN_MIK_KIA_3",
+  "maps": []
+ },
+ "0x2bd": {
+  "rr_name": "Tuber Amira",
+  "fr_const": "TRAINER_TUBER_AMIRA_2",
+  "maps": []
+ },
+ "0x2be": {
+  "rr_name": "Twins Joy & Meg",
+  "fr_const": "TRAINER_TWINS_JOY_MEG_2",
+  "maps": []
+ },
+ "0x2bf": {
+  "rr_name": "Painter Rayna",
+  "fr_const": "TRAINER_PAINTER_RAYNA_2",
+  "maps": []
+ },
+ "0x2c0": {
+  "rr_name": "Youngster Destin",
+  "fr_const": "TRAINER_YOUNGSTER_DESTIN_2",
+  "maps": []
+ },
+ "0x2c1": {
+  "rr_name": "{PK}{MN} Breeder Alize",
+  "fr_const": "TRAINER_PKMN_BREEDER_ALIZE_2",
+  "maps": []
+ },
+ "0x2c2": {
+  "rr_name": "Young Couple Gia & Jes",
+  "fr_const": "TRAINER_YOUNG_COUPLE_GIA_JES_2",
+  "maps": []
+ },
+ "0x2c3": {
+  "rr_name": "Young Couple Gia & Jes",
+  "fr_const": "TRAINER_YOUNG_COUPLE_GIA_JES_3",
+  "maps": []
+ },
+ "0x2c4": {
+  "rr_name": "Bird Keeper Milo",
+  "fr_const": "TRAINER_BIRD_KEEPER_MILO_2",
+  "maps": []
+ },
+ "0x2c5": {
+  "rr_name": "Bird Keeper Chaz",
+  "fr_const": "TRAINER_BIRD_KEEPER_CHAZ_2",
+  "maps": []
+ },
+ "0x2c6": {
+  "rr_name": "Bird Keeper Harold",
+  "fr_const": "TRAINER_BIRD_KEEPER_HAROLD_2",
+  "maps": []
+ },
+ "0x2c7": {
+  "rr_name": "Swimmer\u2640 Nicole",
+  "fr_const": "TRAINER_SWIMMER_FEMALE_NICOLE_2",
+  "maps": []
+ },
+ "0x2c8": {
+  "rr_name": "Psychic Jaclyn",
+  "fr_const": "TRAINER_PSYCHIC_JACLYN_2",
+  "maps": []
+ },
+ "0x2c9": {
+  "rr_name": "Swimmer\u2642 Samir",
+  "fr_const": "TRAINER_SWIMMER_MALE_SAMIR_2",
+  "maps": []
+ },
+ "0x2ca": {
+  "rr_name": "Hiker Earl",
+  "fr_const": "TRAINER_HIKER_EARL_2",
+  "maps": []
+ },
+ "0x2cb": {
+  "rr_name": "Ruin Mamoac Larry",
+  "fr_const": "TRAINER_RUIN_MANIAC_LARRY_2",
+  "maps": []
+ },
+ "0x2cc": {
+  "rr_name": "Pok\u00e9maniac Hector",
+  "fr_const": "TRAINER_POKEMANIAC_HECTOR_2",
+  "maps": []
+ },
+ "0x2cd": {
+  "rr_name": "Psychic Dario",
+  "fr_const": "TRAINER_PSYCHIC_DARIO_2",
+  "maps": []
+ },
+ "0x2ce": {
+  "rr_name": "Psychic Rodette",
+  "fr_const": "TRAINER_PSYCHIC_RODETTE_2",
+  "maps": []
+ },
+ "0x2cf": {
+  "rr_name": "Juggler Mason",
+  "fr_const": "TRAINER_JUGGLER_MASON_2",
+  "maps": []
+ },
+ "0x2d0": {
+  "rr_name": "{PK}{MN} Ranger Nicolas",
+  "fr_const": "TRAINER_PKMN_RANGER_NICOLAS_2",
+  "maps": []
+ },
+ "0x2d1": {
+  "rr_name": "{PK}{MN} Ranger Madeline",
+  "fr_const": "TRAINER_PKMN_RANGER_MADELINE_2",
+  "maps": []
+ },
+ "0x2d2": {
+  "rr_name": "Crush Girl Cyndy",
+  "fr_const": "TRAINER_CRUSH_GIRL_CYNDY_2",
+  "maps": []
+ },
+ "0x2d3": {
+  "rr_name": "Tamer Evan",
+  "fr_const": "TRAINER_TAMER_EVAN_2",
+  "maps": []
+ },
+ "0x2d4": {
+  "rr_name": "{PK}{MN} Ranger Jackson",
+  "fr_const": "TRAINER_PKMN_RANGER_JACKSON_2",
+  "maps": []
+ },
+ "0x2d5": {
+  "rr_name": "{PK}{MN} Ranger Katelyn",
+  "fr_const": "TRAINER_PKMN_RANGER_KATELYN_2",
+  "maps": []
+ },
+ "0x2d6": {
+  "rr_name": "Ace Trainer Leroy",
+  "fr_const": "TRAINER_COOLTRAINER_LEROY_2",
+  "maps": []
+ },
+ "0x2d7": {
+  "rr_name": "Ace Trainer Michelle",
+  "fr_const": "TRAINER_COOLTRAINER_MICHELLE_2",
+  "maps": []
+ },
+ "0x2d8": {
+  "rr_name": "Cool Couple Lex & Nya",
+  "fr_const": "TRAINER_COOL_COUPLE_LEX_NYA_2",
+  "maps": []
+ },
+ "0x2d9": {
+  "rr_name": "Bug Catcher Colton",
+  "fr_const": "TRAINER_BUG_CATCHER_COLTON_2",
+  "maps": []
+ },
+ "0x2da": {
+  "rr_name": "Bug Catcher Colton",
+  "fr_const": "TRAINER_BUG_CATCHER_COLTON_3",
+  "maps": []
+ },
+ "0x2db": {
+  "rr_name": "Bug Catcher Colton",
+  "fr_const": "TRAINER_BUG_CATCHER_COLTON_4",
+  "maps": []
+ },
+ "0x2dc": {
+  "rr_name": "Swimmer\u2642 Matthew",
+  "fr_const": "TRAINER_SWIMMER_MALE_MATTHEW_2",
+  "maps": []
+ },
+ "0x2dd": {
+  "rr_name": "Swimmer\u2642 Tony",
+  "fr_const": "TRAINER_SWIMMER_MALE_TONY_2",
+  "maps": []
+ },
+ "0x2e0": {
+  "rr_name": "Elite Four Bruno",
+  "fr_const": "TRAINER_ELITE_FOUR_BRUNO_2",
+  "maps": [
+   "PokemonLeague_BrunosRoom"
+  ]
+ },
+ "0x2e1": {
+  "rr_name": "Elite Four Agatha",
+  "fr_const": "TRAINER_ELITE_FOUR_AGATHA_2",
+  "maps": [
+   "PokemonLeague_AgathasRoom"
+  ]
+ },
+ "0x2e4": {
+  "rr_name": "Champion Terry",
+  "fr_const": "TRAINER_CHAMPION_REMATCH_BULBASAUR",
+  "maps": [
+   "PokemonLeague_ChampionsRoom"
+  ]
+ },
+ "0x2e5": {
+  "rr_name": "Champion Terry",
+  "fr_const": "TRAINER_CHAMPION_REMATCH_CHARMANDER",
+  "maps": [
+   "PokemonLeague_ChampionsRoom"
+  ]
+ }
+}

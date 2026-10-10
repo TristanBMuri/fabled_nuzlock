@@ -355,6 +355,15 @@ in the pool" probe — and the gym field effects, which only make it harder.
 Pieces: `pokemon-showdown-rr/` (ignored; clone + `node build` +
 `config/custom-formats.ts` as README → Setup for the main clone),
 `scripts/build_rr.py` → `data/rr/`, `scripts/rr_probe.py`, `ai_util/rr_ai.py`.
+**Data for the full run is collected (2026-10-10 evening): `data/rr/README.md`**
+— the three official 4.1 sheets (`data/rr/sheets/`), the hardcore rules as
+JSON (no EVs for anyone, 31 IVs, 82 banned player moves, ability swaps, 18
+caps), the ROM dump mapped to FireRed maps (`fr_slots.json`), and the item
+timeline (care packages). It also lists what the probes got wrong (enemy EVs
+252 → 0, Eviolite/Life Orb not available early, no EV training exists) and
+the gaps in order: doubles (Sabrina, Lorelei, ~20 fights), permanent arena
+effects, trainer/encounter order by segment, player legality.
+`HUMAN_TODO.md` 7–12 are the run-specific questions only the user can answer.
 
 ## Environment gotchas
 
