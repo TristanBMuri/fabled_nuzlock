@@ -68,7 +68,7 @@ def species_name(species: str) -> str:
     'eastsea' (KeyError at order 162). Formes in the source data are
     'Base (Forme Words)'; Showdown ids are base + forme, or base + first word."""
     from poke_env.data import GenData, to_id_str
-    dex = GenData.from_gen(8).pokedex
+    dex = GenData.from_gen(9).pokedex  # a superset of gen 8's (Radical Red adds gen 9 species)
     m = re.fullmatch(r"\s*(.+?)\s*\((.+?)\)\s*", species)
     candidates = ([m.group(1) + m.group(2), m.group(1) + m.group(2).split()[0], m.group(1)]
                   if m else [species])
@@ -76,6 +76,17 @@ def species_name(species: str) -> str:
         if to_id_str(c) in dex:
             return dex[to_id_str(c)]["name"]
     return species.capitalize()
+
+
+def base_name(species: str) -> str:
+    """The base species' display name ('Raticate' for 'Raticate-Alola'): what Showdown
+    makes the nickname of a forme anyway, and never over the 18-character limit a
+    long forme name ('Dudunsparce-Three-Segment') would break."""
+    from poke_env.data import GenData, to_id_str
+    dex = GenData.from_gen(9).pokedex
+    name = species_name(species)
+    base = to_id_str(dex.get(to_id_str(name), {}).get("baseSpecies", name))
+    return dex.get(base, {}).get("name", name)
 
 
 STATS = ("hp", "atk", "def", "spa", "spd", "spe")
@@ -114,9 +125,11 @@ class Mon:
     def pack(self) -> str:
         """Showdown packed string (nick|species|item|ability|moves|nature|evs|gender|
         ivs|shiny|level|happiness). Written directly: poke-env's text roundtrip
-        drops an all-zero EV spread, which the validator then fills with 252s."""
+        drops an all-zero EV spread, which the validator then fills with 252s.
+        The nickname is the base species (what Showdown names a forme anyway)."""
         spread = lambda d: ",".join(str(d[k]) for k in STATS)
-        return "|".join([species_name(self.species), "", to_id_str(self.item or ""),
+        name, nick = species_name(self.species), base_name(self.species)
+        return "|".join([nick, name if name != nick else "", to_id_str(self.item or ""),
                          to_id_str(self.ability or ""), ",".join(to_id_str(m) for m in self.moves),
                          self.nature or "Serious", spread(self.evs or PLAYER_EVS), "M",
                          spread(self.ivs or PLAYER_IVS), "", str(self.level), ""])

@@ -78,6 +78,9 @@ def guess_evs(nature: str, cats: list[str]) -> dict:
     return ev
 
 
+ITEM_ALIASES = {"Charzardite X": "Charizardite X", "Charzardite Y": "Charizardite Y"}  # typos in the dump
+
+
 def parse_dump(moves: dict) -> None:
     """data/rr/trainers_hardcore.json from the ROM dump: every trainer with its mons
     (species, item, ability, level, nature, moves, IVs, assumed EVs) and a packed team."""
@@ -94,8 +97,9 @@ def parse_dump(moves: dict) -> None:
             hm = lines and re.match(r"(.+?)(?: \((M|F|Gender unknown)\))?(?: @ (.+))?$", lines[0])
             if not hm:
                 continue
+            item = (hm.group(3) or "").strip()
             d = {"species": hm.group(1).strip(), "gender": {"M": "M", "F": "F"}.get(hm.group(2) or "", ""),
-                 "item": (hm.group(3) or "").strip(), "ability": "", "level": None, "nature": "Serious", "moves": [],
+                 "item": ITEM_ALIASES.get(item, item), "ability": "", "level": None, "nature": "Serious", "moves": [],
                  "ivs": dict.fromkeys(STATS, 31)}
             for l in lines[1:]:
                 if l.startswith("Ability: "):
@@ -124,6 +128,21 @@ def parse_dump(moves: dict) -> None:
                     "mons": mons, "packed": packed})
     (RR / "trainers_hardcore.json").write_text(json.dumps(out))
     print(f"data/rr/trainers_hardcore.json: {len(out)} trainers from the dump")
+    mod = json.loads(subprocess.run(["node", "-e", "const {Dex}=require(process.argv[1]+'/dist/sim');const d=Dex.mod('gen9rr');"
+                                     "console.log(JSON.stringify({items:d.items.all().map(x=>x.id),moves:d.moves.all().map(x=>x.id),species:d.species.all().map(x=>x.id)}))",
+                                     str(FORK)], capture_output=True, text=True, check=True).stdout)
+    known = {k: set(v) for k, v in mod.items()}
+    bad = {"items": set(), "moves": set(), "species": set()}
+    for tr in out:
+        for d in tr["mons"]:
+            if d["item"] and to_id_str(d["item"]) not in known["items"]:
+                bad["items"].add(d["item"])
+            bad["moves"] |= {m for m in d["moves"] if to_id_str(m) not in known["moves"]}
+            if to_id_str(d["species"]) not in known["species"]:
+                bad["species"].add(d["species"])
+    for k, v in bad.items():
+        if v:
+            print(f"  dump {k} unknown to the mod ({len(v)}): {sorted(v)[:15]}")
 
 
 def main() -> None:
@@ -151,6 +170,14 @@ def main() -> None:
                                            "const o={};for(const m of d.moves.all())o[m.id]={category:m.category};console.log(JSON.stringify(o))",
                                            str(FORK)], capture_output=True, text=True, check=True).stdout)
     parse_dump(all_moves)
+    # the mod's full tables, for rr_probe.inject_mod_data (poke-env's mirrors must know the mod's own moves / species)
+    dump = subprocess.run(["node", "-e", """
+const {Dex} = require(process.argv[1] + '/dist/sim'); const d = Dex.mod('gen9rr'); const out = {};
+for (const [t, all] of [['moves', d.moves.all()], ['species', d.species.all()], ['items', d.items.all()], ['abilities', d.abilities.all()]]) {
+  out[t] = {}; for (const x of all) { const o = {}; for (const k of Object.keys(x)) if (typeof x[k] !== 'function') o[k] = x[k]; out[t][x.id] = o; } }
+console.log(JSON.stringify(out));""", str(FORK)], capture_output=True, text=True, check=True).stdout
+    (RR / "mod_data.json").write_text(dump)
+    print("data/rr/mod_data.json: the mod's moves / species / items / abilities")
 
 
 if __name__ == "__main__":

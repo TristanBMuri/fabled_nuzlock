@@ -31,6 +31,25 @@ gauntlet.GAME = "rr"
 from gauntlet import Mon, encounter_moves, evolve, load_game, pack_team  # noqa: E402
 from poke_env.data import GenData, to_id_str  # noqa: E402
 
+
+def inject_mod_data() -> dict:
+    """poke-env's gen 9 tables gain the mod's own moves, species, items and abilities
+    (data/rr/mod_data.json, dumped from the fork by scripts/build_rr.py), so the battle
+    mirrors can hold what the engine plays (Dark Hole, Centiskorch-Sevii, ...).
+    Entries poke-env already has keep poke-env's version. Returns the counts added."""
+    mod = json.load(open(ROOT / "data" / "rr" / "mod_data.json"))
+    g = GenData.from_gen(9)
+    added = {}
+    for table, mine in (("moves", g.moves), ("pokedex", g.pokedex)):
+        src = mod["moves" if table == "moves" else "species"]
+        new = {k: v for k, v in src.items() if k not in mine}
+        mine.update(new)
+        added[table] = len(new)
+    return added
+
+
+MOD_ADDED = inject_mod_data()
+
 FMT = "gen9rrcustomgamenogimmicks"
 FORK = ROOT / "pokemon-showdown-rr"
 RR = ROOT / "data" / "rr"
@@ -125,6 +144,15 @@ def player_party(pool: list[str], cap: int, rng: random.Random, known: dict, tms
 
 
 def run_boss(args, name: str, tms: bool) -> dict:
+    try:
+        return _run_boss(args, name, tms)
+    except Exception as e:  # the pool would only raise at the end, with every other job's output lost
+        import traceback
+        print(f"{name} tms={tms} FAILED: {type(e).__name__}: {e}\n{traceback.format_exc()[-600:]}", flush=True)
+        return {"rows": []}
+
+
+def _run_boss(args, name: str, tms: bool) -> dict:
     from ai_util.calc_bot import calc_brain
     from ai_util.evaluate import Searcher, evaluate
     from ai_util.rr_ai import RadicalRedAI
