@@ -12,7 +12,7 @@ state machine (no Gym, no obs, no reward; the level rule runs on entering
 PRE_BATTLE so `risk()` is read-only), the measured-null planner options are
 gone, `Mon` compares by identity. Behaviour-preserving: the paired League
 replay against `results/league_base.jsonl` is the acceptance check
-(`logs/league_cleanup.log`). Open: `HUMAN_TODO.md`.
+(`results/league_cleanup.log`: +0.00 ± 0.07 block clears, +0.00 ± 0.28 deaths, paired over 20 boxes, 0 errors). Open: `HUMAN_TODO.md`.
 
 ## One paragraph
 
