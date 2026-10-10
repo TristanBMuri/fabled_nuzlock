@@ -55,35 +55,22 @@ console.log(JSON.stringify({learnsets, evos, species, moves}));
 
 
 STATS = ("hp", "atk", "def", "spa", "spd", "spe")
-PLUS = {"Lonely": "atk", "Brave": "atk", "Adamant": "atk", "Naughty": "atk", "Bold": "def", "Relaxed": "def", "Impish": "def",
-        "Lax": "def", "Timid": "spe", "Hasty": "spe", "Jolly": "spe", "Naive": "spe", "Modest": "spa", "Mild": "spa",
-        "Quiet": "spa", "Rash": "spa", "Calm": "spd", "Gentle": "spd", "Sassy": "spd", "Careful": "spd"}
-
-
-def guess_evs(nature: str, cats: list[str]) -> dict:
-    """The dump strips EVs; hardcore bosses are fully trained (docs). Assume a competitive
-    252/252/4 from the nature: a speed nature pairs with the attacking stat the set uses, an
-    attacking nature with Spe, a defensive nature with HP; neutral: attacking stat + Spe."""
-    plus = PLUS.get(nature)
-    atk = "atk" if cats.count("Physical") >= cats.count("Special") else "spa"
-    ev = dict.fromkeys(STATS, 0)
-    if plus == "spe":
-        ev["spe"], ev[atk], ev["hp"] = 252, 252, 4
-    elif plus in ("atk", "spa"):
-        ev[plus], ev["spe"], ev["hp"] = 252, 252, 4
-    elif plus in ("def", "spd"):
-        ev[plus], ev["hp"], ev[atk] = 252, 252, 4
-    else:
-        ev[atk], ev["spe"], ev["hp"] = 252, 252, 4
-    return ev
-
-
 ITEM_ALIASES = {"Charzardite X": "Charizardite X", "Charzardite Y": "Charizardite Y"}  # typos in the dump
 
 
-def parse_dump(moves: dict) -> None:
+def trainer_evs(trainer: str) -> dict:
+    """Hardcore auto-enables Minimal Grinding Mode: no trainer has EVs (official sheet, Main
+    tab; its speed stats match EV 0 for 84/92 boss mons, 252 for none). The one exception the
+    sheet names is the Ghost Marowak with 252 HP. (Until 2026-10-10 this guessed 252/252/4.)"""
+    ev = dict.fromkeys(STATS, 0)
+    if trainer.startswith("Ghost"):
+        ev["hp"] = 252
+    return ev
+
+
+def parse_dump() -> None:
     """data/rr/trainers_hardcore.json from the ROM dump: every trainer with its mons
-    (species, item, ability, level, nature, moves, IVs, assumed EVs) and a packed team."""
+    (species, item, ability, level, nature, moves, IVs, EVs 0) and a packed team."""
     import re
     txt = open(RR / "rr41_hardcore_trainers.txt", encoding="utf-8").read()
     out = []
@@ -116,7 +103,7 @@ def parse_dump(moves: dict) -> None:
                         d["ivs"][{"HP": "hp", "Atk": "atk", "Def": "def", "SpA": "spa", "SpD": "spd", "Spe": "spe"}[k]] = int(v)
             if d["level"] is None or not d["moves"]:
                 continue
-            d["evs"] = guess_evs(d["nature"], [moves.get(to_id_str(x), {}).get("category", "Status") for x in d["moves"]])
+            d["evs"] = trainer_evs(m[1])
             mons.append(d)
         if not mons:
             continue
@@ -166,10 +153,7 @@ def main() -> None:
     (RR / "order.json").write_text(json.dumps({"entries": []}))
     (RR / "encounters.json").write_text(json.dumps({"starter": [], "routes": []}))
     print(f"data/rr: {len(data['species'])} species, {len(data['moves'])} moves; {len(missing)} ids unknown to the mod: {missing[:30]}")
-    all_moves = json.loads(subprocess.run(["node", "-e", "const {Dex}=require(process.argv[1]+'/dist/sim');const d=Dex.mod('gen9rr');"
-                                           "const o={};for(const m of d.moves.all())o[m.id]={category:m.category};console.log(JSON.stringify(o))",
-                                           str(FORK)], capture_output=True, text=True, check=True).stdout)
-    parse_dump(all_moves)
+    parse_dump()
     # the mod's full tables, for rr_probe.inject_mod_data (poke-env's mirrors must know the mod's own moves / species)
     dump = subprocess.run(["node", "-e", """
 const {Dex} = require(process.argv[1] + '/dist/sim'); const d = Dex.mod('gen9rr'); const out = {};

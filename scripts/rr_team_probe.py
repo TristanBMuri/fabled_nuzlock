@@ -6,11 +6,15 @@ evolved at the cap with best4 movesets over every TM, fights the boss solo
 under the calc bot (n battles) — the progress it makes is its score; (B) the
 SHORT best are combined: a greedy build plus random six-subsets, each team
 scored by the calc bot's progress (n battles); (C) the TOP teams are played
-with calc + search under four player variants — items (Eviolite for an
-unevolved mon, else Life Orb) or none, flat or trained EVs (252 attacking /
-252 Spe) — and the best team per variant is reported with its search-play
-win rate and deaths per mon. Full enemy information; enemy = the RR AI port.
-Not modelled: the gyms' permanent field effects (favours the player), natures.
+with calc + search and the best team is reported with its search-play win
+rate and deaths per mon. Hardcore = Minimal Grinding Mode: nobody has EVs
+(player 0, enemy 0 from the dump), no items (Eviolite / Life Orb are single
+late copies). `--legal` removes the 82 moves hardcore bans for the player
+(data/rr/hardcore_rules.json) from every moveset in stages A-C; without it the
+player has every move (the 2026-10-10 afternoon run also gave the enemy
+252/252 EVs and the player items / trained EVs — see NOTEBOOK.md). Full enemy
+information; enemy = the RR AI port. Not modelled: the gyms' permanent field
+effects (favours the player), natures, the player's ability swaps.
 
   uv run python scripts/rr_team_probe.py --bosses "MISTY,LT. SURGE,ERIKA" --workers 3 --out logs/rr_team_probe.jsonl
 """
@@ -26,8 +30,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
+from poke_env.data import to_id_str  # noqa: E402
 import rr_probe as rp  # noqa: E402  (sets gauntlet.GAME = "rr", injects the mod data)
-from gauntlet import Mon, encounter_moves, evolve, load_game, pack_team, player_evs  # noqa: E402
+import gauntlet  # noqa: E402
+from gauntlet import STATS, Mon, encounter_moves, evolve, pack_team  # noqa: E402
 
 SHORT, TOP = 24, 6
 GREEDY_N, SUBSETS = 4, 150
@@ -43,17 +49,15 @@ def progress(st: dict) -> float:
     return done
 
 
-def build_mon(species: str, cap: int, known: dict, items: bool, evs: str) -> Mon | None:
+def build_mon(species: str, cap: int, known: dict) -> Mon | None:
+    """Evolved at the cap, best4 moves over every TM (minus gauntlet.BANNED_MOVES), ability
+    slot 0, no item, no EVs (Minimal Grinding Mode)."""
     ev = evolve(species, cap, None, caught_level=5, trainer_idx=None)
     moves = encounter_moves(ev, cap, "best4", progress=0)
     if not moves or ev not in known:
         return None
-    slots = known[ev].get("abilities", {})
-    item = None
-    if items:
-        item = "Eviolite" if load_game("rr")["evolutions"].get(ev) else "Life Orb"
-    m = Mon(ev, cap, moves, ability=slots.get("0"), item=item, caught_level=5)
-    m.evs = player_evs(ev, evs)
+    m = Mon(ev, cap, moves, ability=known[ev].get("abilities", {}).get("0"), item=None, caught_level=5)
+    m.evs = dict.fromkeys(STATS, 0)
     return m
 
 
@@ -88,6 +92,8 @@ def _run_boss(args, name: str) -> dict:
     from ai_util.sim import SimBridge, player_brain
     by, known = rp.pools()
     _, cap, pool = by[name]
+    if args.legal:
+        gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(rp.RR / "hardcore_rules.json"))["banned_moves"]}
     enemy_packed, dump_cap, enemy_species = rp.boss_team(name)
     cap = max(cap, dump_cap)
     bridge = SimBridge(showdown=str(rp.FORK))
@@ -95,10 +101,10 @@ def _run_boss(args, name: str) -> dict:
     calc = calc_brain()
     rng = random.Random(f"{name}-team-{args.seed}")
     t0 = time.time()
-    # A: solo scores (no items, flat EVs: the ranking, not the final strength)
+    # A: solo scores (the ranking, not the final strength)
     solo = []
     for sp in pool:
-        m = build_mon(sp, cap, known, items=False, evs="flat")
+        m = build_mon(sp, cap, known)
         if m is None:
             continue
         _, _, pr = play(bridge, calc, enemy, [m], enemy_packed, args.n_solo)
@@ -107,8 +113,8 @@ def _run_boss(args, name: str) -> dict:
     short = [sp for _, sp in solo[:SHORT]]
     print(f"{name}: A solo scores for {len(solo)} species in {time.time() - t0:.0f}s; top: "
           + ", ".join(f"{sp} {pr:.2f}" for pr, sp in solo[:8]), flush=True)
-    # B: teams from the shortlist, scored by the calc bot (no items, flat EVs)
-    mons = {sp: build_mon(sp, cap, known, False, "flat") for sp in short}
+    # B: teams from the shortlist, scored by the calc bot
+    mons = {sp: build_mon(sp, cap, known) for sp in short}
     team_score = {}
 
     def score(team: tuple) -> float:
@@ -125,24 +131,20 @@ def _run_boss(args, name: str) -> dict:
     print(f"{name}: B {len(team_score)} teams scored in {time.time() - t0:.0f}s; greedy {team} "
           f"({team_score[team]:.2f}); best fast {ranked[0]} ({team_score[ranked[0]]:.2f})", flush=True)
     top = list(dict.fromkeys([team] + ranked))[:TOP]
-    # C: the top teams under search, four player variants
+    # C: the top teams under search
     width = tuple(int(x) for x in args.search.split(","))
     searcher = Searcher(None, enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed)
-    rows = []
-    for items in (False, True):
-        for evs in ("flat", "trained"):
-            results = []
-            for t in top:
-                party = [build_mon(s, cap, known, items, evs) for s in t]
-                w, d, pr = play(bridge, calc, enemy, party, enemy_packed, args.n_search, search=searcher)
-                results.append((w, -d, t, d))
-            results.sort(reverse=True)
-            w, _, t, d = results[0]
-            rows.append({"boss": name, "cap": cap, "items": items, "evs": evs, "best_team": list(t), "win": w,
-                         "deaths_per_mon": d, "n": args.n_search, "all": [(list(t_), w_, d_) for w_, _, t_, d_ in results],
-                         "enemy": enemy_species, "pool": len(pool), "shortlist": short})
-            print(f"{name:<10} items={items!s:<5} evs={evs:<7} best team under search: win {w:5.0%} deaths/mon {d:.2f} "
-                  f"{list(t)}  (others: {', '.join(f'{w_:.0%}' for w_, _, _, _ in results[1:])})  ({time.time() - t0:.0f}s)", flush=True)
+    results = []
+    for t in top:
+        w, d, pr = play(bridge, calc, enemy, [mons[s] for s in t], enemy_packed, args.n_search, search=searcher)
+        results.append((w, -d, t, d))
+    results.sort(reverse=True)
+    w, _, t, d = results[0]
+    rows = [{"boss": name, "cap": cap, "legal": args.legal, "best_team": list(t), "win": w, "deaths_per_mon": d,
+             "n": args.n_search, "all": [(list(t_), w_, d_) for w_, _, t_, d_ in results],
+             "enemy": enemy_species, "pool": len(pool), "shortlist": short}]
+    print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} "
+          f"{list(t)}  (others: {', '.join(f'{w_:.0%}' for w_, _, _, _ in results[1:])})  ({time.time() - t0:.0f}s)", flush=True)
     bridge.close()
     return {"rows": rows}
 
@@ -156,6 +158,7 @@ def main() -> None:
     ap.add_argument("--search", default="9,8")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--workers", type=int, default=6)
+    ap.add_argument("--legal", action="store_true", help="drop the moves hardcore bans for the player")
     ap.add_argument("--out")
     args = ap.parse_args()
     names = [b.strip() for b in args.bosses.split(",")]
@@ -168,11 +171,11 @@ def main() -> None:
     rows = [r for p in parts for r in p["rows"]]
     if args.out:
         Path(args.out).write_text("".join(json.dumps(r) + "\n" for r in rows))
-    print(f"\nRadical Red best-six probe | shortlist {SHORT}, top {TOP} teams, search {args.search} x n={args.n_search} "
-          f"| enemy = RR AI, full info | {(time.time() - t0) / 60:.0f} min")
-    print(f"  {'boss':<10} {'cap':>3} {'items':<6} {'evs':<8} {'win':>5} {'deaths/mon':>10}  best team")
-    for r in sorted(rows, key=lambda r: (r["cap"], r["items"], r["evs"])):
-        print(f"  {r['boss']:<10} {r['cap']:>3} {str(r['items']):<6} {r['evs']:<8} {r['win']:5.0%} {r['deaths_per_mon']:10.2f}  {', '.join(r['best_team'])}")
+    print(f"\nRadical Red best-six probe | legal moves only: {args.legal} | shortlist {SHORT}, top {TOP} teams, "
+          f"search {args.search} x n={args.n_search} | no EVs, no items | enemy = RR AI, full info | {(time.time() - t0) / 60:.0f} min")
+    print(f"  {'boss':<10} {'cap':>3} {'win':>5} {'deaths/mon':>10}  best team")
+    for r in sorted(rows, key=lambda r: r["cap"]):
+        print(f"  {r['boss']:<10} {r['cap']:>3} {r['win']:5.0%} {r['deaths_per_mon']:10.2f}  {', '.join(r['best_team'])}")
 
 
 if __name__ == "__main__":
