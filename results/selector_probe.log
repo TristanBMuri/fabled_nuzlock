@@ -1,0 +1,319 @@
+seed306 r0: 181 candidates scored in 119s, playing ranks [0, 1, 2, 22, 45, 90, 135, 179]
+seed308 r0: 187 candidates scored in 127s, playing ranks [0, 1, 2, 23, 46, 93, 139, 185]
+seed300 r0: 199 candidates scored in 128s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed302 r0: 199 candidates scored in 132s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed305 r0: 199 candidates scored in 135s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed303 r0: 205 candidates scored in 136s, playing ranks [0, 1, 2, 25, 51, 102, 153, 203]
+seed309 r0: 199 candidates scored in 137s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed307 r0: 199 candidates scored in 140s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed301 r0: 199 candidates scored in 145s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed304 r0: 199 candidates scored in 147s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed305 r0 rank   0: fast -0.84 -> reached #404 deaths 6  (78s)
+seed300 r0 rank   0: fast -0.85 -> reached #405 deaths 4 CLEAR (95s)
+seed309 r0 rank   0: fast -0.64 -> reached #405 deaths 2 CLEAR (94s)
+seed307 r0 rank   0: fast -0.84 -> reached #405 deaths 4 CLEAR (116s)
+seed304 r0 rank   0: fast -0.67 -> reached #405 deaths 2 CLEAR (108s)
+seed308 r0 rank   0: fast -0.84 -> reached #404 deaths 6  (153s)
+seed303 r0 rank   0: fast -0.83 -> reached #405 deaths 4 CLEAR (144s)
+seed302 r0 rank   0: fast -0.85 -> reached #405 deaths 2 CLEAR (165s)
+seed309 r0 rank   1: fast -0.83 -> reached #405 deaths 5 CLEAR (74s)
+seed301 r0 rank   0: fast -0.63 -> reached #405 deaths 4 CLEAR (211s)
+seed306 r0 rank   0: fast -0.84 -> reached #404 deaths 6  (237s)
+seed305 r0 rank   1: fast -0.84 -> reached #405 deaths 2 CLEAR (147s)
+seed302 r0 rank   1: fast -0.86 -> reached #404 deaths 6  (70s)
+seed304 r0 rank   1: fast -0.69 -> reached #404 deaths 6  (112s)
+seed308 r0 rank   1: fast -0.85 -> reached #404 deaths 6  (97s)
+seed307 r0 rank   1: fast -0.84 -> reached #404 deaths 6  (132s)
+seed303 r0 rank   1: fast -0.84 -> reached #405 deaths 2 CLEAR (120s)
+seed309 r0 rank   2: fast -0.83 -> reached #405 deaths 4 CLEAR (96s)
+seed300 r0 rank   1: fast -0.86 -> reached #404 deaths 6  (184s)
+seed300 r0 rank   2: fast -0.87 -> reached #404 deaths 6  (73s)
+seed305 r0 rank   2: fast -0.85 -> reached #405 deaths 2 CLEAR (122s)
+seed309 r0 rank  24: fast -0.84 -> reached #405 deaths 5 CLEAR (88s)
+seed307 r0 rank   2: fast -0.84 -> reached #405 deaths 3 CLEAR (102s)
+seed304 r0 rank   2: fast -0.82 -> reached #405 deaths 2 CLEAR (123s)
+seed301 r0 rank   1: fast -0.83 -> reached #405 deaths 3 CLEAR (138s)
+seed308 r0 rank   2: fast -0.85 -> reached #405 deaths 3 CLEAR (128s)
+seed306 r0 rank   1: fast -0.84 -> reached #404 deaths 6  (153s)
+seed303 r0 rank   2: fast -0.84 -> reached #405 deaths 2 CLEAR (123s)
+seed302 r0 rank   2: fast -0.87 -> reached #405 deaths 0 CLEAR (166s)
+seed307 r0 rank  24: fast -0.85 -> reached #404 deaths 6  (71s)
+seed306 r0 rank   2: fast -0.85 -> reached #404 deaths 6  (64s)
+seed305 r0 rank  24: fast -0.86 -> reached #404 deaths 6  (113s)
+seed309 r0 rank  49: fast -0.85 -> reached #405 deaths 3 CLEAR (116s)
+seed308 r0 rank  23: fast -0.86 -> reached #404 deaths 6  (113s)
+seed300 r0 rank  24: fast -0.89 -> reached #404 deaths 6  (141s)
+seed304 r0 rank  24: fast -0.84 -> reached #405 deaths 3 CLEAR (135s)
+seed301 r0 rank   2: fast -0.84 -> reached #405 deaths 5 CLEAR (138s)
+seed302 r0 rank  24: fast -0.89 -> reached #405 deaths 4 CLEAR (115s)
+seed305 r0 rank  49: fast -0.86 -> reached #404 deaths 6  (61s)
+seed306 r0 rank  22: fast -0.88 -> reached #405 deaths 3 CLEAR (100s)
+seed303 r0 rank  25: fast -0.86 -> reached #405 deaths 4 CLEAR (185s)
+seed309 r0 rank  99: fast -0.87 -> reached #405 deaths 3 CLEAR (129s)
+seed304 r0 rank  49: fast -0.84 -> reached #405 deaths 3 CLEAR (127s)
+seed301 r0 rank  24: fast -0.87 -> reached #405 deaths 3 CLEAR (124s)
+seed306 r0 rank  45: fast -0.89 -> reached #404 deaths 6  (88s)
+seed308 r0 rank  46: fast -0.86 -> reached #404 deaths 6  (156s)
+seed305 r0 rank  99: fast -0.88 -> reached #405 deaths 2 CLEAR (127s)
+seed309 r0 rank 148: fast -0.88 -> reached #404 deaths 6  (75s)
+seed304 r0 rank  99: fast -0.85 -> reached #404 deaths 6  (66s)
+seed300 r0 rank  49: fast -0.90 -> reached #405 deaths 3 CLEAR (204s)
+seed303 r0 rank  51: fast -0.88 -> reached #404 deaths 6  (137s)
+seed306 r0 rank  90: fast -0.90 -> reached #404 deaths 6  (109s)
+seed302 r0 rank  49: fast -0.90 -> reached #405 deaths 1 CLEAR (229s)
+seed305 r0 rank 148: fast -0.89 -> reached #405 deaths 3 CLEAR (104s)
+seed301 r0 rank  49: fast -0.88 -> reached #405 deaths 3 CLEAR (131s)
+seed300 r0 rank  99: fast -0.91 -> reached #405 deaths 3 CLEAR (106s)
+seed309 r0 rank 197: fast -0.90 -> reached #405 deaths 4 CLEAR (121s)
+seed303 r0 rank 102: fast -0.89 -> reached #405 deaths 5 CLEAR (101s)
+seed306 r0 rank 135: fast -0.92 -> reached #404 deaths 6  (111s)
+seed302 r0 rank  99: fast -0.91 -> reached #404 deaths 6  (107s)
+seed300 r0 rank 148: fast -0.92 -> reached #404 deaths 6  (82s)
+seed301 r0 rank  99: fast -0.89 -> reached #405 deaths 1 CLEAR (128s)
+seed305 r0 rank 197: fast -0.93 -> reached #405 deaths 5 CLEAR (135s)
+seed319 r0: 187 candidates scored in 99s, playing ranks [0, 1, 2, 23, 46, 93, 139, 185]
+seed303 r0 rank 153: fast -0.90 -> reached #404 deaths 6  (86s)
+seed301 r0 rank 148: fast -0.91 -> reached #404 deaths 6  (68s)
+seed300 r0 rank 197: fast -0.95 -> reached #404 deaths 6  (94s)
+seed303 r0 rank 203: fast -0.94 -> reached #404 deaths 6  (89s)
+seed315 r0: 199 candidates scored in 118s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed319 r0 rank   0: fast -0.84 -> reached #405 deaths 5 CLEAR (116s)
+seed302 r0 rank 148: fast -0.92 -> reached #404 deaths 6  (161s)
+seed310 r0: 193 candidates scored in 114s, playing ranks [0, 1, 2, 24, 48, 96, 144, 191]
+seed313 r0: 199 candidates scored in 113s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed319 r0 rank   1: fast -0.84 -> reached #405 deaths 4 CLEAR (120s)
+seed302 r0 rank 197: fast -0.95 -> reached #404 deaths 6  (135s)
+seed315 r0 rank   0: fast -0.83 -> reached #405 deaths 5 CLEAR (150s)
+seed313 r0 rank   0: fast -0.84 -> reached #405 deaths 3 CLEAR (86s)
+seed310 r0 rank   0: fast -0.82 -> reached #404 deaths 6  (103s)
+seed319 r0 rank   2: fast -0.84 -> reached #405 deaths 5 CLEAR (111s)
+seed312 r0: 193 candidates scored in 114s, playing ranks [0, 1, 2, 24, 48, 96, 144, 191]
+seed315 r0 rank   1: fast -0.84 -> reached #405 deaths 3 CLEAR (128s)
+seed313 r0 rank   1: fast -0.84 -> reached #404 deaths 6  (110s)
+seed310 r0 rank   1: fast -0.82 -> reached #404 deaths 6  (123s)
+seed319 r0 rank  23: fast -0.85 -> reached #405 deaths 3 CLEAR (101s)
+seed312 r0 rank   0: fast -0.83 -> reached #404 deaths 6  (92s)
+seed313 r0 rank   2: fast -0.84 -> reached #404 deaths 6  (68s)
+seed310 r0 rank   2: fast -0.84 -> reached #405 deaths 5 CLEAR (103s)
+seed315 r0 rank   2: fast -0.85 -> reached #405 deaths 2 CLEAR (158s)
+seed319 r0 rank  46: fast -0.86 -> reached #405 deaths 4 CLEAR (127s)
+seed312 r0 rank   1: fast -0.85 -> reached #404 deaths 6  (125s)
+seed313 r0 rank  24: fast -0.86 -> reached #405 deaths 0 CLEAR (135s)
+seed310 r0 rank  24: fast -0.88 -> reached #404 deaths 6  (101s)
+seed319 r0 rank  93: fast -0.88 -> reached #404 deaths 6  (93s)
+seed315 r0 rank  24: fast -0.87 -> reached #405 deaths 3 CLEAR (138s)
+seed313 r0 rank  49: fast -0.86 -> reached #405 deaths 5 CLEAR (154s)
+seed310 r0 rank  48: fast -0.90 -> reached #405 deaths 5 CLEAR (138s)
+seed315 r0 rank  49: fast -0.88 -> reached #404 deaths 6  (84s)
+seed313 r0 rank  99: fast -0.87 -> reached #405 deaths 2 CLEAR (90s)
+seed310 r0 rank  96: fast -0.91 -> reached #404 deaths 6  (92s)
+seed315 r0 rank  99: fast -0.90 -> reached #405 deaths 0 CLEAR (145s)
+seed313 r0 rank 148: fast -0.88 -> reached #405 deaths 5 CLEAR (111s)
+seed310 r0 rank 144: fast -0.92 -> reached #404 deaths 6  (149s)
+seed315 r0 rank 148: fast -0.91 -> reached #404 deaths 6  (109s)
+seed313 r0 rank 197: fast -0.91 -> reached #404 deaths 6  (64s)
+seed310 r0 rank 191: fast -0.94 -> reached #404 deaths 6  (75s)
+seed315 r0 rank 197: fast -0.93 -> reached #405 deaths 2 CLEAR (170s)
+multiprocessing.pool.RemoteTraceback: 
+"""
+Traceback (most recent call last):
+  File "/var/home/tristan/.local/share/uv/python/cpython-3.13.9-linux-x86_64-gnu/lib/python3.13/multiprocessing/pool.py", line 125, in worker
+    result = (True, func(*args, **kwds))
+                    ~~~~^^^^^^^^^^^^^^^
+  File "/var/home/tristan/.local/share/uv/python/cpython-3.13.9-linux-x86_64-gnu/lib/python3.13/multiprocessing/pool.py", line 51, in starmapstar
+    return list(itertools.starmap(args[0], args[1]))
+  File "/home/tristan/CodingProjects/nuzlock_rl/scripts/selector_probe.py", line 55, in run_jobs
+    p_win, p_death, progress = env.risk(tuple(party))  # cached from the scoring pass
+                               ~~~~~~~~^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/scripts/nuzlocke_env.py", line 257, in risk
+    pp, ep, _ = self._packed_matchup(party_idx)
+                ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/scripts/nuzlocke_env.py", line 232, in _packed_matchup
+    party = [self.roster[i] for i in party_idx]
+             ~~~~~~~~~~~^^^
+IndexError: list index out of range
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/tristan/CodingProjects/nuzlock_rl/scripts/selector_probe.py", line 160, in <module>
+    main()
+    ~~~~^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/scripts/selector_probe.py", line 147, in main
+    parts = pool.starmap(run_jobs, [(args, jobs[i::args.workers])
+                                    for i in range(args.workers) if jobs[i::args.workers]])
+  File "/var/home/tristan/.local/share/uv/python/cpython-3.13.9-linux-x86_64-gnu/lib/python3.13/multiprocessing/pool.py", line 375, in starmap
+    return self._map_async(func, iterable, starmapstar, chunksize).get()
+           ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+  File "/var/home/tristan/.local/share/uv/python/cpython-3.13.9-linux-x86_64-gnu/lib/python3.13/multiprocessing/pool.py", line 774, in get
+    raise self._value
+IndexError: list index out of range
+seed306 r0: 181 candidates scored in 126s, playing ranks [0, 1, 2, 22, 45, 90, 135, 179]
+seed319 r0: 187 candidates scored in 132s, playing ranks [0, 1, 2, 23, 46, 93, 139, 185]
+seed308 r0: 187 candidates scored in 137s, playing ranks [0, 1, 2, 23, 46, 93, 139, 185]
+seed312 r0: 193 candidates scored in 139s, playing ranks [0, 1, 2, 24, 48, 96, 144, 191]
+seed307 r0: 199 candidates scored in 146s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed301 r0: 199 candidates scored in 153s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed304 r0: 199 candidates scored in 156s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed308 r0 rank   0: fast -0.84 -> reached #404 deaths 6  (71s)
+seed306 r0 rank   0: fast -0.81 -> reached #404 deaths 6  (127s)
+seed307 r0 rank   0: fast -0.65 -> reached #405 deaths 1 CLEAR (108s)
+seed301 r0 rank   0: fast -0.83 -> reached #404 deaths 6  (109s)
+seed319 r0 rank   0: fast -0.83 -> reached #405 deaths 0 CLEAR (135s)
+seed304 r0 rank   0: fast -0.53 -> reached #405 deaths 0 CLEAR (128s)
+seed312 r0 rank   0: fast -0.85 -> reached #405 deaths 3 CLEAR (157s)
+seed308 r0 rank   1: fast -0.85 -> reached #405 deaths 3 CLEAR (152s)
+seed319 r0 rank   1: fast -0.83 -> reached #405 deaths 4 CLEAR (111s)
+seed307 r0 rank   1: fast -0.71 -> reached #405 deaths 0 CLEAR (128s)
+seed304 r0 rank   1: fast -0.54 -> reached #405 deaths 2 CLEAR (116s)
+seed301 r0 rank   1: fast -0.84 -> reached #405 deaths 4 CLEAR (145s)
+seed312 r0 rank   1: fast -0.85 -> reached #405 deaths 2 CLEAR (147s)
+seed308 r0 rank   2: fast -0.85 -> reached #405 deaths 2 CLEAR (121s)
+seed307 r0 rank   2: fast -0.84 -> reached #405 deaths 3 CLEAR (106s)
+seed319 r0 rank   2: fast -0.84 -> reached #404 deaths 6  (111s)
+seed306 r0 rank   1: fast -0.84 -> reached #404 deaths 6  (258s)
+seed312 r0 rank   2: fast -0.86 -> reached #404 deaths 6  (86s)
+seed301 r0 rank   2: fast -0.84 -> reached #405 deaths 4 CLEAR (136s)
+seed304 r0 rank   2: fast -0.66 -> reached #405 deaths 3 CLEAR (143s)
+seed319 r0 rank  23: fast -0.85 -> reached #404 deaths 6  (75s)
+seed307 r0 rank  24: fast -0.85 -> reached #404 deaths 6  (114s)
+seed306 r0 rank   2: fast -0.86 -> reached #405 deaths 2 CLEAR (118s)
+seed308 r0 rank  23: fast -0.85 -> reached #405 deaths 1 CLEAR (153s)
+seed304 r0 rank  24: fast -0.84 -> reached #405 deaths 4 CLEAR (105s)
+seed319 r0 rank  46: fast -0.86 -> reached #404 deaths 6  (121s)
+seed306 r0 rank  22: fast -0.88 -> reached #404 deaths 6  (99s)
+seed312 r0 rank  24: fast -0.89 -> reached #405 deaths 1 CLEAR (205s)
+seed304 r0 rank  49: fast -0.84 -> reached #404 deaths 6  (92s)
+seed301 r0 rank  24: fast -0.87 -> reached #404 deaths 6  (205s)
+seed307 r0 rank  49: fast -0.86 -> reached #405 deaths 3 CLEAR (147s)
+seed308 r0 rank  46: fast -0.86 -> reached #405 deaths 2 CLEAR (132s)
+seed319 r0 rank  93: fast -0.87 -> reached #404 deaths 6  (140s)
+seed306 r0 rank  45: fast -0.89 -> reached #404 deaths 6  (134s)
+seed304 r0 rank  99: fast -0.85 -> reached #405 deaths 5 CLEAR (136s)
+seed307 r0 rank  99: fast -0.87 -> reached #405 deaths 4 CLEAR (130s)
+seed308 r0 rank  93: fast -0.87 -> reached #404 deaths 6  (135s)
+seed319 r0 rank 139: fast -0.89 -> reached #404 deaths 6  (83s)
+seed301 r0 rank  49: fast -0.88 -> reached #405 deaths 3 CLEAR (166s)
+seed312 r0 rank  48: fast -0.90 -> reached #405 deaths 2 CLEAR (185s)
+seed306 r0 rank  90: fast -0.90 -> reached #404 deaths 6  (132s)
+seed304 r0 rank 148: fast -0.87 -> reached #405 deaths 5 CLEAR (125s)
+seed319 r0 rank 185: fast -0.93 -> reached #404 deaths 6  (119s)
+seed301 r0 rank  99: fast -0.89 -> reached #404 deaths 6  (117s)
+seed312 r0 rank  96: fast -0.91 -> reached #405 deaths 2 CLEAR (120s)
+seed307 r0 rank 148: fast -0.88 -> reached #405 deaths 1 CLEAR (173s)
+seed308 r0 rank 139: fast -0.89 -> reached #405 deaths 3 CLEAR (159s)
+seed304 r0 rank 197: fast -0.90 -> reached #404 deaths 6  (138s)
+seed306 r0 rank 135: fast -0.92 -> reached #405 deaths 3 CLEAR (157s)
+seed307 r0 rank 197: fast -0.94 -> reached #404 deaths 6  (111s)
+seed301 r0 rank 148: fast -0.91 -> reached #404 deaths 6  (137s)
+seed312 r0 rank 144: fast -0.92 -> reached #404 deaths 6  (154s)
+seed308 r0 rank 185: fast -0.93 -> reached #404 deaths 6  (137s)
+seed306 r0 rank 179: fast -0.96 -> reached #404 deaths 6  (85s)
+seed312 r0 rank 191: fast -0.94 -> reached #405 deaths 2 CLEAR (88s)
+seed301 r0 rank 197: fast -0.93 -> reached #404 deaths 6  (122s)
+
+battler=calc search=9,8 (all) deep=9,16 full_info=False | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True evs=flat items=True | 7 workers, 22 min
+
+56 (box, candidate) plays over 7 boxes
+  Spearman(fast score, search-play deaths) pooled: -0.30   (fast score, clear): +0.31
+  within-box Spearman(fast score, deaths): mean -0.36 ± 0.15 over 7 boxes (negative = the fast score orders parties the way search play does)
+  by sampled rank (0 = what the planner fields):
+    rank   0: fast -0.76  deaths 3.14  clear 57%  (n=7)
+    rank   1: fast -0.78  deaths 3.00  clear 86%  (n=7)
+    rank   2: fast -0.82  deaths 3.71  clear 71%  (n=7)
+    rank  22: fast -0.88  deaths 6.00  clear 0%  (n=1)
+    rank  23: fast -0.85  deaths 3.50  clear 50%  (n=2)
+    rank  24: fast -0.86  deaths 4.25  clear 50%  (n=4)
+    rank  45: fast -0.89  deaths 6.00  clear 0%  (n=1)
+    rank  46: fast -0.86  deaths 4.00  clear 50%  (n=2)
+    rank  48: fast -0.90  deaths 2.00  clear 100%  (n=1)
+    rank  49: fast -0.86  deaths 4.00  clear 67%  (n=3)
+    rank  90: fast -0.90  deaths 6.00  clear 0%  (n=1)
+    rank  93: fast -0.87  deaths 6.00  clear 0%  (n=2)
+    rank  96: fast -0.91  deaths 2.00  clear 100%  (n=1)
+    rank  99: fast -0.87  deaths 5.00  clear 67%  (n=3)
+    rank 135: fast -0.92  deaths 3.00  clear 100%  (n=1)
+    rank 139: fast -0.89  deaths 4.50  clear 50%  (n=2)
+    rank 144: fast -0.92  deaths 6.00  clear 0%  (n=1)
+    rank 148: fast -0.89  deaths 4.00  clear 67%  (n=3)
+    rank 179: fast -0.96  deaths 6.00  clear 0%  (n=1)
+    rank 185: fast -0.93  deaths 6.00  clear 0%  (n=2)
+    rank 191: fast -0.94  deaths 2.00  clear 100%  (n=1)
+    rank 197: fast -0.92  deaths 6.00  clear 0%  (n=3)
+  regret of the fast winner: 2.14 ± 0.74 deaths vs the best sampled party; the fast winner was (tied) best in 2/7 boxes; best sampled rank median 2
+seed316 r0: 187 candidates scored in 141s, playing ranks [0, 1, 2, 23, 46, 93, 139, 185]
+seed318 r0: 205 candidates scored in 147s, playing ranks [0, 1, 2, 25, 51, 102, 153, 203]
+seed317 r0: 193 candidates scored in 155s, playing ranks [0, 1, 2, 24, 48, 96, 144, 191]
+seed314 r0: 199 candidates scored in 156s, playing ranks [0, 1, 2, 24, 49, 99, 148, 197]
+seed311 r0: 205 candidates scored in 161s, playing ranks [0, 1, 2, 25, 51, 102, 153, 203]
+seed314 r0 rank   0: fast -0.83 -> reached #405 deaths 4 CLEAR (104s)
+seed318 r0 rank   0: fast -0.86 -> reached #404 deaths 6  (125s)
+seed316 r0 rank   0: fast -0.83 -> reached #405 deaths 1 CLEAR (136s)
+seed317 r0 rank   0: fast -0.84 -> reached #405 deaths 5 CLEAR (151s)
+seed314 r0 rank   1: fast -0.83 -> reached #405 deaths 5 CLEAR (116s)
+seed316 r0 rank   1: fast -0.84 -> reached #405 deaths 5 CLEAR (122s)
+seed317 r0 rank   1: fast -0.85 -> reached #405 deaths 2 CLEAR (126s)
+seed318 r0 rank   1: fast -0.87 -> reached #405 deaths 1 CLEAR (171s)
+seed311 r0 rank   0: fast -0.68 -> reached #405 deaths 3 CLEAR (293s)
+seed314 r0 rank   2: fast -0.83 -> reached #405 deaths 2 CLEAR (131s)
+seed317 r0 rank   2: fast -0.85 -> reached #404 deaths 6  (78s)
+seed316 r0 rank   2: fast -0.84 -> reached #405 deaths 3 CLEAR (132s)
+seed318 r0 rank   2: fast -0.87 -> reached #405 deaths 0 CLEAR (106s)
+seed311 r0 rank   1: fast -0.84 -> reached #405 deaths 3 CLEAR (141s)
+seed314 r0 rank  24: fast -0.84 -> reached #405 deaths 4 CLEAR (102s)
+seed317 r0 rank  24: fast -0.87 -> reached #404 deaths 6  (122s)
+seed316 r0 rank  23: fast -0.86 -> reached #405 deaths 2 CLEAR (140s)
+seed314 r0 rank  49: fast -0.85 -> reached #404 deaths 6  (102s)
+seed311 r0 rank   2: fast -0.84 -> reached #405 deaths 5 CLEAR (158s)
+seed318 r0 rank  25: fast -0.89 -> reached #405 deaths 1 CLEAR (215s)
+seed317 r0 rank  48: fast -0.88 -> reached #404 deaths 6  (154s)
+seed316 r0 rank  46: fast -0.87 -> reached #405 deaths 3 CLEAR (147s)
+seed314 r0 rank  99: fast -0.86 -> reached #404 deaths 6  (121s)
+seed316 r0 rank  93: fast -0.88 -> reached #404 deaths 6  (100s)
+seed311 r0 rank  25: fast -0.87 -> reached #405 deaths 2 CLEAR (186s)
+seed317 r0 rank  96: fast -0.90 -> reached #404 deaths 6  (164s)
+seed314 r0 rank 148: fast -0.87 -> reached #405 deaths 3 CLEAR (118s)
+seed318 r0 rank  51: fast -0.90 -> reached #404 deaths 6  (201s)
+seed311 r0 rank  51: fast -0.88 -> reached #404 deaths 6  (86s)
+seed316 r0 rank 139: fast -0.89 -> reached #404 deaths 6  (123s)
+seed314 r0 rank 197: fast -0.90 -> reached #404 deaths 6  (96s)
+seed317 r0 rank 144: fast -0.91 -> reached #405 deaths 2 CLEAR (121s)
+seed318 r0 rank 102: fast -0.91 -> reached #404 deaths 6  (192s)
+seed311 r0 rank 102: fast -0.89 -> reached #404 deaths 6  (165s)
+seed316 r0 rank 185: fast -0.92 -> reached #405 deaths 5 CLEAR (149s)
+seed317 r0 rank 191: fast -0.93 -> reached #405 deaths 3 CLEAR (164s)
+seed318 r0 rank 153: fast -0.92 -> reached #404 deaths 6  (82s)
+seed311 r0 rank 153: fast -0.91 -> reached #405 deaths 4 CLEAR (117s)
+seed318 r0 rank 203: fast -0.94 -> reached #404 deaths 6  (83s)
+seed311 r0 rank 203: fast -0.93 -> reached #404 deaths 6  (69s)
+
+battler=calc search=9,8 (all) deep=9,16 full_info=False | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True evs=flat items=True | 5 workers, 23 min
+
+40 (box, candidate) plays over 5 boxes
+  Spearman(fast score, search-play deaths) pooled: -0.36   (fast score, clear): +0.47
+  within-box Spearman(fast score, deaths): mean -0.42 ± 0.14 over 5 boxes (negative = the fast score orders parties the way search play does)
+  by sampled rank (0 = what the planner fields):
+    rank   0: fast -0.81  deaths 3.80  clear 80%  (n=5)
+    rank   1: fast -0.85  deaths 3.20  clear 100%  (n=5)
+    rank   2: fast -0.85  deaths 3.20  clear 80%  (n=5)
+    rank  23: fast -0.86  deaths 2.00  clear 100%  (n=1)
+    rank  24: fast -0.86  deaths 5.00  clear 50%  (n=2)
+    rank  25: fast -0.88  deaths 1.50  clear 100%  (n=2)
+    rank  46: fast -0.87  deaths 3.00  clear 100%  (n=1)
+    rank  48: fast -0.88  deaths 6.00  clear 0%  (n=1)
+    rank  49: fast -0.85  deaths 6.00  clear 0%  (n=1)
+    rank  51: fast -0.89  deaths 6.00  clear 0%  (n=2)
+    rank  93: fast -0.88  deaths 6.00  clear 0%  (n=1)
+    rank  96: fast -0.90  deaths 6.00  clear 0%  (n=1)
+    rank  99: fast -0.86  deaths 6.00  clear 0%  (n=1)
+    rank 102: fast -0.90  deaths 6.00  clear 0%  (n=2)
+    rank 139: fast -0.89  deaths 6.00  clear 0%  (n=1)
+    rank 144: fast -0.91  deaths 2.00  clear 100%  (n=1)
+    rank 148: fast -0.87  deaths 3.00  clear 100%  (n=1)
+    rank 153: fast -0.91  deaths 5.00  clear 50%  (n=2)
+    rank 185: fast -0.92  deaths 5.00  clear 100%  (n=1)
+    rank 191: fast -0.93  deaths 3.00  clear 100%  (n=1)
+    rank 197: fast -0.90  deaths 6.00  clear 0%  (n=1)
+    rank 203: fast -0.94  deaths 6.00  clear 0%  (n=2)
+  regret of the fast winner: 2.40 ± 1.03 deaths vs the best sampled party; the fast winner was (tied) best in 1/5 boxes; best sampled rank median 2

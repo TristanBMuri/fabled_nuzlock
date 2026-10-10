@@ -320,6 +320,15 @@ right; default off, the flag stays (`results/league_fullinfo.log`). The
 information is wasted on the calc bot's rules; a scorer / search that uses it
 is the open question, not the information itself.
 
+**Selector transfer diagnostic (2026-10-10, `scripts/selector_probe.py`,
+`results/selector_probe.log`):** the fast party score orders League parties
+only coarsely (within-box Spearman -0.31 ± 0.08 vs search-play deaths; the
+bottom of the ranking costs +1.6 deaths) and cannot separate the top: ranks
+0 / 1 / 2 are tied (3.65 / 3.65 / 3.45 deaths), rank ~24 within a death. The
+planner's pick is a coin flip among the top few dozen — the mechanism behind
+E8 / EVs / E7d. Next lever: shortlist by the fast score, decide among the top K
+by search-played blocks (K=4, R=2 ≈ 15 min per opener; test on the League test).
+
 Not to retry (measured, NOTEBOOK.md): `--refine`, `--climb`, `--parties
 beam|all`, lead order, a switch-out-after-a-hit wrapper, wider search at a
 wall, a learned value head as the rollout leaf, more rival teacher data,

@@ -39,6 +39,16 @@ def restore(env, path: str, tag: str):
 def run_jobs(args, jobs: list[tuple[str, int]]) -> list[dict]:
     env, rows = pg.make_env(args), []
     for path, j in jobs:
+        try:
+            rows += run_job(env, args, path, j)
+        except Exception as e:  # keep the finished plays; the summary says how many boxes
+            print(f"{Path(path).stem} r{j} FAILED: {type(e).__name__}: {e}", flush=True)
+    return rows
+
+
+def run_job(env, args, path: str, j: int) -> list[dict]:
+    rows = []
+    if True:
         tag, stem = f"{Path(path).stem}-{j}", Path(path).stem
         t0 = time.time()
         restore(env, path, tag)
@@ -46,15 +56,16 @@ def run_jobs(args, jobs: list[tuple[str, int]]) -> list[dict]:
         alive = [i for i, m in enumerate(env.roster) if m.alive]
         base = sorted(alive, key=lambda i: -env.roster[i].level)[:MAX_PARTY]
         cands = pg.swaps(base, alive)
-        scored = sorted(((pg.party_score(env, p, args.lam), p) for p in cands), key=lambda x: -x[0])
+        # the estimate is read here, on the scoring copy: a played block leaves the roster shorter
+        scored = sorted(((pg.party_score(env, p, args.lam), p, env.risk(tuple(p))) for p in cands), key=lambda x: -x[0])
         n = len(scored)
         ranks = sorted({min(int(r * (n - 1)) if isinstance(r, float) else r, n - 1) for r in args.ranks})
         print(f"{stem} r{j}: {n} candidates scored in {time.time() - t0:.0f}s, playing ranks {ranks}", flush=True)
         for rank in ranks:
-            score, party = scored[rank]
-            p_win, p_death, progress = env.risk(tuple(party))  # cached from the scoring pass
+            score, party, (p_win, p_death, progress) = scored[rank]
             t1 = time.time()
             restore(env, path, tag)
+            species = [env.roster[i].species for i in party]
             before = sum(m.alive for m in env.roster)
             for i in party:
                 env.step(1 + i)
@@ -64,7 +75,7 @@ def run_jobs(args, jobs: list[tuple[str, int]]) -> list[dict]:
             deaths = before - sum(m.alive for m in env.roster)
             row = {"snapshot": stem, "replay": j, "rank": rank, "n_candidates": n, "fast_score": score,
                    "fast_p_win": p_win, "fast_p_death": float(np.mean(p_death)), "fast_progress": progress,
-                   "party": [env.roster[i].species if i < len(env.roster) else "?" for i in party],
+                   "party": species,
                    "reached": env.trainer_idx, "clear": env.trainer_idx >= env.slice_len, "deaths": deaths}
             rows.append(row)
             print(f"{stem} r{j} rank {rank:3d}: fast {score:+.2f} -> reached #{row['reached']} deaths {deaths} "
@@ -104,14 +115,17 @@ def report(rows: list[dict]) -> None:
     within = [w for w in within if not np.isnan(w)]
     print(f"  within-box Spearman(fast score, deaths): mean {np.mean(within):+.2f} ± {np.std(within, ddof=1) / np.sqrt(len(within)):.2f} "
           f"over {len(within)} boxes (negative = the fast score orders parties the way search play does)")
-    print("  by sampled rank (0 = what the planner fields):")
-    by_rank: dict[int, list] = {}
-    for r in rows:
-        by_rank.setdefault(r["rank"], []).append(r)
-    for k in sorted(by_rank):
-        v = by_rank[k]
-        print(f"    rank {k:3d}: fast {np.mean([r['fast_score'] for r in v]):+.2f}  "
-              f"deaths {np.mean([r['deaths'] for r in v]):.2f}  clear {np.mean([r['clear'] for r in v]):.0%}  (n={len(v)})")
+    print("  by sampled slot (slot 0 = rank 0 = what the planner fields; later slots = deeper in the fast ranking):")
+    by_slot: dict[int, list] = {}
+    for v in by_box.values():
+        for slot, r in enumerate(sorted(v, key=lambda r: r["rank"])):
+            by_slot.setdefault(slot, []).append(r)
+    for k in sorted(by_slot):
+        v = by_slot[k]
+        ranks = sorted({r["rank"] for r in v})
+        print(f"    slot {k}: ranks {ranks[0]}..{ranks[-1]:<3d} fast {np.mean([r['fast_score'] for r in v]):+.2f}  "
+              f"deaths {np.mean([r['deaths'] for r in v]):.2f} ± {np.std([r['deaths'] for r in v], ddof=1) / np.sqrt(len(v)):.2f}  "
+              f"clear {np.mean([r['clear'] for r in v]):.0%}  (n={len(v)})")
     regret, beat, best_rank = [], 0, []
     for v in by_box.values():
         top = [r for r in v if r["rank"] == 0]

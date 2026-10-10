@@ -1426,3 +1426,42 @@ a typical party. The cleaned-tree replay the same day
 What the information would still buy is a scorer that uses it: the party
 selector still ranks by the fast bot's blind estimate. Not retried: more
 replays to resolve +0.05 (160 blocks for ± 0.04; ~85 min).
+
+## Selector transfer diagnostic (2026-10-10, `scripts/selector_probe.py`)
+
+Question: does the fast-brain party score (the block estimate under the calc
+bot, n=8: what the planner ranks League candidates by) order parties the way
+search play does? Method: for each of the 20 saved openers, rank the planner's
+whole candidate set (base + single swaps, ~200 parties) by its own score, then
+play the candidates at ranks 0, 1, 2 and at 1/8, 1/4, 1/2, 3/4 and the end of
+the ranking through the whole block with the benchmark search settings
+(calc + search 9,8 / deep 9,16), once each: 160 blocks
+(`results/selector_probe.{log,jsonl}`; the first run crashed on a probe bug
+after 101 plays — the next candidate's estimate was read from the played-out
+roster — and the 12 affected boxes were rerun with the fix).
+
+  within-box Spearman(fast score, search-play deaths): -0.31 ± 0.08 over 20 boxes (pooled -0.29)
+  slot 0 (rank 0, what the planner fields):  3.65 ± 0.47 deaths, 70% clears
+  slot 1 (rank 1):                           3.65 ± 0.42, 75%
+  slot 2 (rank 2):                           3.45 ± 0.44, 75%
+  ranks ~24:                                 3.95 ± 0.47, 60%
+  ranks ~48:                                 4.50 ± 0.39, 50%
+  ranks ~96:                                 4.60 ± 0.43, 45%
+  ranks ~144:                                4.75 ± 0.37, 45%
+  ranks ~190 (the end):                      5.25 ± 0.31, 30%
+  best sampled party: median rank 2; the fast winner was (tied) best in 4/20 boxes;
+  min-of-8 "regret" 2.25 ± 0.41 deaths (inflated by selecting the luckiest of 8 single plays)
+
+Reading: the fast score is a usable coarse filter (the bottom of the ranking
+costs 1.6 deaths more than the top, and the correlation has the right sign)
+but it cannot separate the top of the ranking — ranks 0, 1 and 2 are tied
+within noise and rank ~24 is within a death. The planner's pick is a coin flip
+among the top few dozen candidates. This is the mechanism behind the three
+transfer failures (E8, EVs, E7d): every one of them optimised the fast score
+deeper into a region where the fast score has no resolution. Consequence for
+the selector: keep the fast score as the shortlist (it is cheap and it does
+prune), and decide the final pick among the top K with the search brain
+itself (K x R block plays at the opener: K=4, R=2 ≈ 8 blocks ≈ 15 min per
+episode at the League — affordable on the League test, 2 h for 80 blocks,
+not for a full-game table). Not built yet. A fairer regret would replay the
+top-3 more times; the slot table is the unbiased view.
