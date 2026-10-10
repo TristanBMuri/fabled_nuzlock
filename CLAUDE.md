@@ -12,8 +12,8 @@ The prior attempt lives at `~/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_
 
 ## Workflow
 
-- Read `HANDOFF.md` first, then `project_overview.md` roadmap; `README.md`
-  Status is the full notebook.
+- Read `HANDOFF.md` first, then `project_overview.md` roadmap; `NOTEBOOK.md`
+  is the full notebook, `results/` the logs behind every table.
 - Everything runs in-process through `ai_util/sim*` — no Showdown server
   unless you are cross-checking the sim against it.
 - The battler (BC prior + search) must return trustworthy win/death
@@ -29,21 +29,25 @@ The prior attempt lives at `~/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_
 ## Commands
 
 ```bash
-uv sync                                            # deps
-uv run python scripts/smoke_test.py                # bot-vs-bot sanity check
-node pokemon-showdown start --no-security --port 8020 &   # battle server
-uv run pytest -q                                   # tests (when they exist)
+uv sync                                            # deps; the Showdown clone: README → Setup
+uv run pytest -q                                   # 22 tests, ~2 s (node + built Showdown)
+# the benchmark table (~30 min, 10 workers x ~1 GB; check free -g first)
+uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 10
+# League levers: paired replay from the saved openers (~30 min)
+uv run python scripts/league_test.py --snapshots results/league_snapshots --replays 4 --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 10 --out logs/league_x.jsonl --vs results/league_base.jsonl
 ```
 
-Port 8020 is this project's server. **Ports 8000-8007 belong to the old project**
-— never kill or bind them.
+No Showdown server is needed for anything. **Ports 8000-8007 belong to the old
+project** — never kill or bind them.
 
 ## Environment
 
-- Showdown server must be running before any poke-env script.
-- `poke-env` 0.15: `battle_against` is async (wrap in `asyncio.run`); players
-  connect via `ServerConfiguration(websocket_url=..., authentication_url=...)`.
-- `--no-security` server flag = no login needed for bots.
+- Everything runs in-process through `ai_util/sim*` (Node bridge per process).
+  `poke-env` 0.15 is used for its Battle mirrors and SimpleHeuristics only.
+- One heavy job at a time: a planner worker is ~1 GB + one core; kill a planner
+  by its process group (the main PID alone orphans workers and node bridges).
+- Runs are stochastic across invocations even with the same seed; compare
+  20-episode tables, League levers on `league_test.py --vs`.
 
 ## Hard-won lessons from attempt #3 (do not relearn these)
 

@@ -7,7 +7,7 @@ switch -> best bench mon; a KO in hand -> the most accurate KO move (priority
 first if slower) unless we are slower and die first; the next hit kills us
 and a bench mon survives it -> switch; safe -> set up; else the strongest
 expected hit. Beats SimpleHeuristics and the search line on the Edwin /
-rival probes (README -> Status); the teacher for the next prior.
+rival probes (NOTEBOOK.md); the teacher for the next prior.
 """
 
 from poke_env.battle import MoveCategory, Status

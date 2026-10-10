@@ -6,7 +6,7 @@ clear it with as few deaths as possible. Battles run on a local Pokémon
 Showdown + poke-env; no ROM, no emulator. One fixed mechanic set
 (`gen8customgamenogimmicks`); ROM-hack mechanics are a later mod problem.
 
-Reframed 2026-09-15 after the battler experiments (README → Status). What
+Reframed 2026-09-15 after the battler experiments (NOTEBOOK.md). What
 changed: the battler is no longer "a policy that beats Showdown heuristics".
 It is a learned prior plus search over the real engine, with a risk objective.
 The run layer queries it for death probabilities instead of handing it a
@@ -14,6 +14,14 @@ party. Generality is a first-class constraint, not a stretch goal.
 
 Side goal (unchanged): better Pokémon decision logic than Showdown's built-in
 heuristics, both as opponent AI and as a teacher.
+
+**2026-10-10:** nothing learned is on the path. The battler is the scripted
+damage-calc bot with rollout search over the engine; the run layer is the
+scripted planner. Every learned component was measured and retired (PPO from
+scratch, BC prior, RL finetune, expert iteration, value leaf, learned run
+layer). This is a simulation-based planner; learning returns only when a
+measured gap demands it. The layer descriptions below are kept as the design
+history; the roadmap items reflect the decision.
 
 ---
 
@@ -97,7 +105,7 @@ weights only carry the prior and search heuristics, not the answers.
 
 ## 4. Architecture: four layers
 
-Only layers 2 and 3 get learning.
+Only layers 2 and 3 were designed to get learning; as of 2026-10-10 neither does (see the header).
 
 1. **Engine as model (not learned).** Showdown computes exact damage, speed,
    rolls. A battle is deterministic given seed + choice sequence, so a
@@ -191,7 +199,7 @@ Roster ≤ 12, party ≤ 6. See `scripts/nuzlocke_env.py`.
 
 Keep as simple as possible. Add complexity only on concrete failure.
 
-### 0. Done (details in README → Status)
+### 0. Done (details in NOTEBOOK.md)
 - [x] Showdown + poke-env, smoke test, single-file PPO, TensorBoard
 - [x] BDSP gauntlet env with real trainer order + encounters; meta-policy
       trains (~2.1 trainers cleared, forced-full-party mask fixed alignment)
@@ -229,7 +237,7 @@ Keep as simple as possible. Add complexity only on concrete failure.
       effort goes to the run layer and data. Decision criterion: if (i)
       does not beat the search line on the Edwin/rival probes and the 186
       table within one round, take (ii) and delete the EI/value-head code.
-      **Measured 2026-09-18 (README → Status):** depth-2 search null at 6x
+      **Measured 2026-09-18 (NOTEBOOK.md):** depth-2 search null at 6x
       compute; a scripted damage-calc bot (real damage formula, KO check,
       switch out of a lethal hit) beats the teacher and every search line
       on the rival probe (0.08 vs 0.20 deaths/mon) with no search. The
@@ -288,7 +296,7 @@ interface end to end, and it needs no training run to produce a number.
       null twice (teacher-outcome data 22.7%, on-policy search-leaf data
       41.2% — both below the prior alone). Rollouts over the engine remain
       the value estimate. Gauntlet default with CRN: 100% / 2.40 deaths /
-      36.25 no-death (was 2.65 / 33.8). Details in README → Status 2l.
+      36.25 no-death (was 2.65 / 33.8). Details in NOTEBOOK.md 2l.
 - [x] **2m. Evolution.** Level-up evolutions from Showdown species data
       (`data/evolutions.json`, applied in `_apply_level_rule`); move table
       to L50. `--slice 186` reaches Gardenia. OOD loop rerun there
@@ -303,20 +311,21 @@ interface end to end, and it needs no training run to produce a number.
       Targeted teacher data on the 9 deadliest teams (44k pairs) →
       `game_policy_cap186v3.pt`: **168.2 cleared / 16.2 deaths / 10% clears**;
       Edwin probe 71% → 92% with search. Next levers in HANDOFF next-steps 2.
-- [ ] **2e. Learned run layer vs scripted.** Retrain `train_nuzlocke.py` on
-      the sim backend with the 2b features. Success = beats the 2c table on
-      trainers cleared without a death; otherwise the scripted planner *is*
-      the run layer and effort goes to the battler. The 186 slice has the
-      headroom (10% clears); the PPO obs/action layout must be rebuilt for
-      it (see 2p) before training.
-- [ ] **2o. Candidate parties.** The risk query sees 0 deaths in 8 battles
+- [x] **2e. Learned run layer vs scripted — closed 2026-10-10 without a
+      run.** Under the cap rule every mon sits at the same level, encounters
+      are always caught, and the decisions left are the encounter method and
+      six of the box; the scripted planner *is* the run layer. The meta-policy
+      trainer and the env's obs / reward are deleted. Was: retrain
+      `train_nuzlocke.py` on the sim backend with the 2b features; success =
+      beats the 2c table on trainers cleared without a death.
+- [x] **2o. Candidate parties** (closed 2026-10-10: `beam|all` deleted). The risk query sees 0 deaths in 8 battles
       for almost every candidate, but the estimate is not the limit: adaptive
       n (`--refine 32`) and one extra swap round (`--climb`) are null on the
       20-episode table (noise floor: 2 cleared / 1.9 deaths / 15 points of
       clear rate between identical runs). What is the limit at a wall is the
       candidate *set*: at Edwin #139 an exhaustive search over every 6-of-
       roster party cuts real deaths from 2.0 to 0.76 per fight (probe,
-      2026-09-16, README → Status), with parties three changes from the base.
+      2026-09-16, NOTEBOOK.md), with parties three changes from the base.
       `plan_gauntlet.py --parties beam|all` widens the set only when the best
       swap is still flagged hard (beam ~10 s, all ~2 min at 12 mons). Both
       are **null on the 20-episode table** (beam 178.15 / 13.75 / 35%, all
@@ -331,7 +340,7 @@ interface end to end, and it needs no training run to produce a number.
       the same level, so "top-6-by-level" is catch order; the candidate
       search does the choosing. Lead order (packed order = party order) is a
       free variable the planner never sets; probe pending.
-- [ ] **2p. Roster cap and obs layout.** MAX_ROSTER=12 exists only because
+- [x] **2p. Roster cap and obs layout** (moot 2026-10-10: the obs is gone; the box is `Rules.box`). MAX_ROSTER=12 exists only because
       the meta-policy obs is fixed-size; the graveyard hides it now but a
       real box is unbounded. When 2e rebuilds the obs, make the roster a
       set (per-mon features + attention or a pooled summary) and drop the
@@ -339,14 +348,14 @@ interface end to end, and it needs no training run to produce a number.
 - [x] **2q. Owed measurements** (2026-09-16). 51-slice default with evolution
       and encounters v2, 20 eps: 51.0 / 36.75 / 3.75 deaths / 100% (was 2.40;
       Roark 33 deaths in 20 runs, two fewer pre-Roark catches). 186 table at
-      20 eps: `results/plan_cap186v3_deep20.log` (README → Status).
+      20 eps: `results/plan_cap186v3_deep20.log` (NOTEBOOK.md).
 
 Not in step 2: move events, builds, new gauntlets. Metric stays
 "trainers cleared without a death"; report on the training slice only
 until step 3 adds held-out gauntlets.
 
 ### 2½. Deletion pass (do before step 3; CLAUDE.md says prefer deleting code)
-- [ ] Off-path code, about a third of the Python: `ai_util/battler_env.py`,
+- [x] (2026-10-10) Off-path code, about a third of the Python: `ai_util/battler_env.py`,
       `ai_util/self_play.py`, `ai_util/train_battler.py`, `ai_util/battler_eval.py`,
       `scripts/train.py`, `scripts/battle_env.py` (keep `SPECIES` if the
       vocab still needs it), `scripts/ppo.py` if 2e does not reuse it, the
@@ -358,11 +367,10 @@ until step 3 adds held-out gauntlets.
       iteration) and `order_bylevel.json` are gone (−150 lines). Left with
       the BC pipeline: `pretrain_bc --value-only/--value-coef`, the `value`
       column, `temp/diag_value.py`.
-- [ ] Housekeeping: cache `encounter_moves`/`evolve` tables (re-read from
-      disk per call), move the README Status notebook out of a code fence
-      into a `NOTEBOOK.md` with headings per finding, delete `temp/` or
-      promote what docs reference, drop the `checkpoints/`, `runs/`,
-      `test.py`, `no_AI_code_here` leftovers if unused.
+- [x] Housekeeping (2026-10-10): `NOTEBOOK.md` with headings per entry,
+      `results/` for the logs the notebook cites, `temp/` / `checkpoints/` /
+      `runs/` / `test.py` gone, harvests untracked. (`load_game` is cached;
+      the "re-read per call" note was stale.) `no_AI_code_here`: HUMAN_TODO 6.
 
 ### 2¾. Environment upgrade (plan written 2026-09-16; do before step 3)
 
@@ -441,8 +449,7 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       graveyard with level, ability, moves, dropped offers) printed at the
       end of every `--verbose` episode, which also traces offers / catches /
       drops and the party per trainer. The scratch replay script is gone.
-- [ ] **E6. Variable-roster obs/action (2p).** Only when 2e is attempted;
-      the scripted planner never reads the obs. Do not build now.
+- [x] **E6. Variable-roster obs/action (2p).** Moot: 2e is closed and the obs is deleted (2026-10-10).
 - [x] **E7. TM movesets (decided 2026-09-19; (a)–(c) built 2026-09-23:
       `scripts/build_tms.py` → `data/bdsp/tms.json`, 92 TMs gated on the
       route order from fixed sources only; default on, `--no-tms`; best4 v2
@@ -454,7 +461,7 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       re-picks each party mon's set at hard fights by the risk query, one
       slot swap at a time — 20% clears with the League opener, 40% without
       it (TM line 70%; Cynthia 8 / 6 losses vs 2). The fast brain values
-      moves for its own play, not for search over it (README → Status);
+      moves for its own play, not for search over it (NOTEBOOK.md);
       off by default. (e) is moot until the scoring brain changes.** `best4` over
       level-up moves is the stopgap. **Decision: TMs are reusable** (as in
       every game after BDSP; BDSP's single-use TMs would make this a budget
@@ -474,7 +481,7 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       built 2026-09-23: `--league K`, every 6-subset of a K-mon shortlist on
       the block, top 8 re-scored at n=32; `estimate_block` scores progress
       through the block since every party wipes under the fast brain; table
-      in README → Status 2026-09-23: **null**, 404.0 / 325.6 / 6.4 / 10% vs
+      in NOTEBOOK.md 2026-09-23: **null**, 404.0 / 325.6 / 6.4 / 10% vs
       swap 403.8 / 368.0 / 5.9 / 20%; default off). Three env defects found on the way
       (dupes clause one step deep, offers rolled before the previous answer,
       League party rebuilt by value equality → 7-mon parties → crashes),
@@ -492,7 +499,7 @@ money (the cap rule stays), shops, TMs/tutors, held items, in-battle AI.
       consumables; `gauntlet.assign_items` greedy by a multiplier model at every
       fielding; `Rules.items`, `--no-items`). Table 404.8 / 402.8 / 4.3 / 80%
       vs 404.6 / 358.6 / 5.2 / 70%: one pre-League death in ten runs, the E4
-      halved, Cynthia flat (README → Status). Default on; the benchmark now.**
+      halved, Cynthia flat (NOTEBOOK.md). Default on; the benchmark now.**
       Was: Leftovers, Choice items, Focus Sash: data (where obtainable) + an
       assignment rule. Smaller lever pre-League. In-battle items stay out
       (hardcore rule).
@@ -582,7 +589,7 @@ table (2026-09-16, pending) is E3c's measurement.
 ## Hard-won lessons (attempts 1–3, do not relearn)
 
 - **Scope bloat kills.** Attempts 1–2 died of validation suites, curricula,
-  Ray + MLflow. This repo: ~4.5k lines total.
+  Ray + MLflow. This repo: ~3.9k lines after the 2026-10-10 clean-up (7.2k before).
 - **Entropy management is the #1 from-scratch issue.** ent_coef 0.05 pinned
   entropy at 1.2; 0.01 let it sharpen. Neither reached the teacher.
 - **Reward horizon.** gamma 0.95 × 40-turn episodes made the +30 win worth

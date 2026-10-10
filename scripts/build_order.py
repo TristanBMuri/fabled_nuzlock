@@ -10,7 +10,7 @@ are inserted by trainer_id from trainers.json. `mandatory` is per location for
 the Galactic plot fights and per record for story battles; route trainers are
 marked optional because the tables do not say who blocks the path.
 """
-import json, os, re, subprocess, sys
+import json, re, subprocess
 from collections import Counter
 from pathlib import Path
 

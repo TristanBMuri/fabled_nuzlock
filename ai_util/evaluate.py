@@ -80,7 +80,7 @@ class Searcher:
     policy=None: every legal action is a candidate (up to k) and `rollout`
     (a scripted brain such as the calc bot) plays the rollouts — no network.
     Rollouts play to the end and the outcome is the value: a learned leaf
-    value (twice) and a second ply (depth 2) were null (README -> Status)."""
+    value (twice) and a second ply (depth 2) were null (NOTEBOOK.md)."""
 
     def __init__(self, policy, enemy: Brain, k: int = 3, rollouts: int = 8,
                  max_turns: int = 100, importance: list[float] | None = None,

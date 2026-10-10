@@ -1,8 +1,18 @@
-# HANDOFF — state of the project as of 2026-09-26
+# HANDOFF — state of the project as of 2026-10-10
 
-Read this first. `project_overview.md` is the plan, `README.md` → Status is the
-full lab notebook (chronological, with every number). This file is the
-compressed version: what exists, what was learned, what to do next.
+Read this first. `project_overview.md` is the plan, `NOTEBOOK.md` is the
+full lab notebook (chronological, with every number), `results/` holds the
+logs every table cites. This file is the compressed version: what exists,
+what was learned, what to do next.
+
+**2026-10-10 clean-up** (tag `pre-cleanup` = the tree before it): the legacy
+PPO / self-play / server code is deleted (7.2k → 3.9k lines), `gauntlet.py` is
+split (game logic / `runner.py` / `build_dex.py`), `NuzlockeEnv` is a plain
+state machine (no Gym, no obs, no reward; the level rule runs on entering
+PRE_BATTLE so `risk()` is read-only), the measured-null planner options are
+gone, `Mon` compares by identity. Behaviour-preserving: the paired League
+replay against `results/league_base.jsonl` is the acceptance check
+(`logs/league_cleanup.log`). Open: `HUMAN_TODO.md`.
 
 ## One paragraph
 
@@ -39,7 +49,7 @@ trainer EVs/IVs/natures exist in the sheet and are dropped by `Mon.pack`
 (the sim plays every enemy at 252 EVs / 31 IVs); fix before regenerating.
 The teacher-ceiling round (1a) is decided: depth-2 search is null, a
 scripted **damage-calc bot** beats the teacher and search on the probes;
-the next prior is a clone of it. Details in README → Status (2026-09-18).
+the next prior is a clone of it. Details in NOTEBOOK.md (2026-09-18).
 Later the same day: trainer EVs/IVs/natures are in (`Mon.pack` writes packed
 strings directly), the encounter tables cover the whole game from
 Bulbapedia (43 areas), evolutions carry every method behind progression
@@ -61,73 +71,55 @@ carried through the sim bridge) — tables before this are on full heals.
 ## Architecture (what each file is)
 
 ```
-ai_util/sim_bridge.js   Node: Showdown's simulator over JSON lines. new / choose /
+ai_util/sim_bridge.js   Node: Showdown's simulator over JSON lines. new (+carry) / choose /
                         fork (+reseed or fixed seed) / forcelose / state / close.
                         Teams go through the TeamValidator like the server (252-EV fill).
 ai_util/sim.py          SimBridge (process), SimBattle (one battle + two poke-env
                         Battle mirrors fed from the per-side protocol stream),
                         dedupe_nicknames, player_brain. Fork replays history;
                         fork(seed=) gives reproducible chance events; play(until=).
-ai_util/evaluate.py     evaluate(): P(win), P(death_i), risk for one matchup.
-                        Searcher: top-k rollout search over the prior, common
-                        random numbers across candidates (default). outcome_value
-                        is the objective. --horizon/--value paths = null result (README 2l).
-ai_util/battler_policy.py  MaskedActorCriticPolicy, PolicyPlayer, load_policy,
-                        action_mask / order_to_action (identity-based; poke-env's
-                        are species-based and wrong with duplicate species).
-ai_util/battler_obs.py  1098-dim observation encoder (2026-09-19: + level and real stats per mon).
+ai_util/evaluate.py     evaluate(): P(win), P(death_i), risk, HP left for one matchup.
+                        Searcher: top-k rollout search (all legal actions up to k under
+                        the calc bot; the prior's top-k with a BC policy), common random
+                        numbers across candidates. outcome_value is the objective.
 ai_util/calc_bot.py     CalcPlayer: the damage-formula battler (KO check, switch out of a
-                        lethal hit, set up when safe); collect --teacher calc, plan --policy calc.
-ai_util/collect_game.py collect (sim, BC pairs from harvest matchups, + battle
-                        outcome per decision as `value`), collect_search
-                        (search-labelled pairs + search-leaf outcomes `leaves.npz`),
-                        synth (late harvest parties x given trainers' teams ->
-                        harvest-shaped jsonl: the targeted-data step), holdout, baseline.
-ai_util/pretrain_bc.py  masked-CE pretrain; multiple --data; sim-based eval;
-                        --init/--value-only/--value-coef train the critic on `value`.
-ai_util/diff_sets.py    sim-vs-server team-setup diff (found the EV bug).
+                        lethal hit, set up when safe). The player brain: plan --policy calc.
+ai_util/battler_policy.py / battler_obs.py / collect_game.py / pretrain_bc.py
+                        the BC prior pipeline (identity-based action_mask lives in
+                        battler_policy). Off the path since the calc bot; HUMAN_TODO 5.
 data/bdsp/              the game folder: trainers.json, order.json (route order,
-                        location + mandatory per entry), encounters.json (gates =
-                        first trainer of the location), learnsets (levelup + tm per
-                        species) / evolutions / species / moves, tms.json (TM gates),
-                        items.json (held items: gate, copies, effect).
-scripts/build_items.py  rebuilds items.json from Serebii's BDSP item list (Bulbapedia is
-                        behind a Cloudflare challenge since 2026-09-26): fixed pre-League
-                        sources only (no Grand Underground / Battle Park / shops / wild
-                        holders / consumables); effect model = the ITEMS table in the script.
-scripts/build_tms.py    rebuilds tms.json from each TM's Bulbapedia page: move -> TM number,
-                        before_trainer (earliest fixed source on the route order), source.
-scripts/build_order.py  rebuilds order.json + encounters.json from Bulbapedia (trainer
-                        tables and Generation VIII catch tables per story visit; level
-                        bands for twice-visited locations, story battles by trainer_id).
-                        Then `gauntlet.py --build-moves` and `--build-species`.
-scripts/gauntlet.py     load_game() (cached, the only reader of the folder), Mon/
-                        pack_team, encounter_moves (best4 / last4; k=None = ranked pool),
-                        assign_items (E9: greedy by item_value at fielding), evolve(), ability
-                        slots, BattleRunner (server, legacy), SimBattleRunner
-                        (default): run(boss=, search=(k,r)), estimate(), one Searcher
-                        per width. --build-moves / --build-species regenerate the
-                        folder's dex-derived files.
-scripts/nuzlocke_env.py NuzlockeEnv: slice_len trainers (51 default), encounters
-                        (data/bdsp/encounters.json v2: 22 areas gated by level band
-                        over the 186 order), roster ≤12 living + graveyard, party
-                        ≤6, permadeath, level_rule cap with evolution, risk(n=)
-                        query, risk features in obs, search_all, deep=(k,r) width
-                        at breakpoints and risk-flagged hard fights (DEEP_HP),
-                        rules=Rules(level_rule, margin, box, dupes_clause, moveset),
-                        pending offers queue, dropped list, tracker().
-scripts/plan_gauntlet.py Scripted planner + evaluation harness + death histogram;
-                        --slice N, --deep k,r, --parties swap|beam|all, --roster N,
-                        --no-dupes, --moves sim (E7d: the sim re-picks moves at hard
-                        fights, Mon.chosen), --workers N, --verbose (encounter trace).
-                        --save-league DIR pickles each run's state at the League opener.
-scripts/league_test.py  The League alone (2026-10-09): replays Aaron .. Cynthia from saved
-                        openers R times each, same planner flags; --vs pairs two variants by
-                        snapshot (same boxes). ~4 min per block vs ~28 min per full episode.
-tests/test_nuzlocke_env.py  env rules: queued offers, dupes clause, box cap.
-scripts/train_nuzlocke.py PPO meta-policy trainer (sim backend; NOT retrained yet
-                        on the new obs — old checkpoint is skipped on resume).
-tests/test_sim.py       bridge: play, mirror, fork. `uv run pytest -q`.
+                        location + mandatory + no_heal per entry), encounters.json (gates =
+                        first trainer of the location; per-method tables), learnsets
+                        (levelup + tm per species) / evolutions / species / moves,
+                        tms.json (TM gates), items.json (held items: gate, copies, effect).
+scripts/build_order.py  rebuilds order.json + encounters.json from Bulbapedia.
+scripts/build_tms.py    rebuilds tms.json (move -> TM, before_trainer, source) from Bulbapedia.
+scripts/build_items.py  rebuilds items.json from Serebii (fixed pre-League sources only).
+scripts/build_dex.py    rebuilds learnsets / evolutions / moves / species from the Showdown
+                        dex (--build-moves, --build-species); --check validates the folder.
+scripts/gauntlet.py     load_game() (cached, the only reader of the folder), Mon (eq=False:
+                        identity) / pack_team, encounter_moves (best4 / last4 over level-up
+                        moves + TMs in hand), assign_items (greedy by item_value at
+                        fielding), evolve() with progression gates, ability slots.
+scripts/runner.py       SimBattleRunner: run(boss=, search=(k,r), carry=) -> (won, alive,
+                        per-mon state), estimate() / estimate_block() = the risk queries,
+                        one Searcher per width; GAUNTLET_HARVEST recording.
+scripts/nuzlocke_env.py NuzlockeEnv: the run as a state machine. ENCOUNTER answers queued
+                        offers (one per method), PRE_BATTLE builds the party and fights;
+                        permadeath, graveyard, dupes clause, box cap, level rule applied on
+                        entering PRE_BATTLE (evolution, moves, EVs), the League as a no-heal
+                        block (party locked, PP carried), risk(n=) read-only and cached,
+                        deep=(k,r) at breakpoints and risk-flagged fights, Rules, tracker().
+scripts/plan_gauntlet.py The scripted planner + the table: top-6-by-level + single swaps
+                        scored by risk(); --slice, --policy, --search, --deep, --workers,
+                        --verbose, --harvest, --save-league DIR (pickles the opener state).
+scripts/league_test.py  The League alone: replays Aaron .. Cynthia from saved openers R
+                        times each, same flags; --vs pairs two variants by snapshot.
+tests/                  env rules (queue, dupes, box, League identity, level rule timing,
+                        snapshot round trip), the bridge (play, mirror, fork, seeds), the
+                        calc bot's stat model vs the engine. `uv run pytest -q`.
+results/                the logs behind every table; league_base.{log,jsonl} and
+                        league_snapshots/ (20 openers, seeds 300-319) = the paired baseline.
 ```
 
 ## The default run config (what "a run" is now)
@@ -318,13 +310,10 @@ boss's max level (14 = Roark). ~85 s/episode.
    mons each per fight. Next, on the roadmap only (2026-09-19, not started):
    E8 League party building from the whole box, then E7 TM movesets with
    **reusable TMs** (decided), then E9 held items.
-5. **Deletion pass (2½)**, 2026-09-23: `evaluate.py --depth/--horizon`, the
-   leaf recorder and `collect_game collect_search` (expert iteration) are
-   gone, `order_bylevel.json` too. Left: `collect_game`'s BC pipeline and
-   `pretrain_bc` if the prior stays off the path (the calc bot is the
-   battler; the BC files are the fallback, ~700 lines).
+5. ~~**Deletion pass (2½)**~~ done 2026-10-10 (see the top of this file). Left:
+   the BC pipeline, pending the decision in `HUMAN_TODO.md`.
 
-Not to retry (measured, README → Status): `--refine`, `--climb`, `--parties
+Not to retry (measured, NOTEBOOK.md): `--refine`, `--climb`, `--parties
 beam|all`, lead order, a switch-out-after-a-hit wrapper, wider search at a
 wall, a learned value head as the rollout leaf, more rival teacher data,
 **depth-2 search** (2026-09-18, null at 6x), **calc-bot rollouts under
@@ -339,14 +328,15 @@ to search play — three times now: E8, EVs, moves).
 ## Environment gotchas
 
 - Ports 8000–8007 belong to the old project.
-- No Showdown server is needed for anything in the sim path. The server
-  path (`--backend server`, `collect_game.py baseline`) still exists for
-  cross-checks: `./scripts/start_showdown.sh 1 8021`.
+- No Showdown server is needed for anything; the server path is deleted
+  (2026-10-10). A server cross-check, if ever needed again, is
+  `node pokemon-showdown start --no-security --port 8020` + poke-env.
 - The Showdown clone must be built (`dist/`) and `config/custom-formats.ts`
   present (`scripts/setup_custom_formats.sh`) — the bridge requires the
   `gen8customgamenogimmicks` format.
 - Runs are stochastic across invocations even with the same `--seed` (the
-  sim seeds battles fresh); compare 40-episode tables, not single runs.
+  sim seeds battles fresh); compare 20-episode tables, League levers on
+  `league_test.py --vs`, never single runs (±25 points at 10 episodes).
 - **RAM: one heavy job at a time.** Three 186-slice gauntlet runs plus a
   harvest and collectors in parallel exhausted 60 GB and forced a reboot
   (2026-09-15). A single default-config run is ~1 GB; check `free -g`
