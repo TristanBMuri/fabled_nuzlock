@@ -6,11 +6,9 @@ gen8customgamenogimmicks with SimpleHeuristics on the player side,
 recording (obs, action_mask, action) per decision.
 
 Modes:
-  collect  harvest BC pairs from sampled matchups (in-process sim by default;
-           --backend server for the old websocket path)
+  collect  harvest BC pairs from sampled matchups in the in-process sim
   holdout  write a json of held-out (player, enemy) pairs for pretrain --eval-pairs
-  baseline play SimpleHeuristics-vs-SimpleHeuristics on holdout pairs on a server
-           (the sim equivalent is `evaluate.py --check --from-harvest`)
+  (the heuristic-vs-heuristic reference line is `evaluate.py --check --from-harvest`)
 """
 
 import sys
@@ -27,7 +25,6 @@ import multiprocessing as mp
 
 import numpy as np
 
-from ai_util.battler_env import preflight, server_conf
 from ai_util.battler_obs import embed_battle
 from ai_util.battler_policy import action_mask, order_to_action
 from poke_env.player import ForfeitBattleOrder, SimpleHeuristicsPlayer
@@ -74,48 +71,6 @@ class RecordingHeuristics(SimpleHeuristicsPlayer):
                     self._ctx["switch"] += 1
                 return order
         return super().choose_move(battle)
-
-
-def collect_worker(worker: int, pairs: list, port: int, out_dir: Path) -> None:
-    import asyncio
-
-    record, ctx, failures = [], {"n": 0, "switch": 0}, 0
-    kw = dict(battle_format=GAME_FORMAT, server_configuration=server_conf(port), log_level=40)
-
-    async def _stop(p) -> None:
-        try:
-            await asyncio.wait_for(p.ps_client.stop_listening(), timeout=10)
-        except Exception:
-            pass
-
-    async def run() -> None:
-        nonlocal failures
-        # stagger logins: a simultaneous 16-connection burst hung workers
-        await asyncio.sleep(worker * 3)
-        for i, (p_team, e_team) in enumerate(pairs):
-            me = RecordingHeuristics(team=p_team, record=record, ctx=ctx, **kw)
-            foe = SimpleHeuristicsPlayer(team=e_team, **kw)
-            try:
-                # hard cap: hung handshakes / unprogressable battles must not
-                # stall the worker forever
-                await asyncio.wait_for(me.battle_against(foe, n_battles=1), timeout=180)
-            except Exception:
-                failures += 1
-            finally:
-                await _stop(me)
-                await _stop(foe)
-            if (i + 1) % 100 == 0:
-                print(f"worker {worker}: {i + 1}/{len(pairs)} battles, {ctx['n']} pairs, "
-                      f"{failures} failures", flush=True)
-
-    asyncio.run(run())
-    np.savez_compressed(
-        out_dir / f"shard_{worker}.npz",
-        obs=np.asarray([r[0] for r in record]),
-        mask=np.asarray([r[1] for r in record]),
-        action=np.asarray([r[2] for r in record]))
-    print(f"worker {worker} done: {ctx['n']} pairs, switch={ctx['switch'] / max(ctx['n'], 1):.1%}, "
-          f"{failures} failed battles", flush=True)
 
 
 def recording_brain(record: list, ctx: dict, teacher: str = "heuristic"):
@@ -230,12 +185,8 @@ def collect(args: argparse.Namespace) -> None:
     pairs = sample_pairs(args.jsonl, args.battles, args.seed, ids)
     chunks = [pairs[i::args.workers] for i in range(args.workers)]
     ctx = mp.get_context("spawn")
-    if args.backend == "sim":
-        procs = [ctx.Process(target=collect_worker_sim, args=(w, chunks[w], out_dir, args.teacher))
-                 for w in range(args.workers)]
-    else:
-        procs = [ctx.Process(target=collect_worker, args=(w, chunks[w], args.port, out_dir))
-                 for w in range(args.workers)]
+    procs = [ctx.Process(target=collect_worker_sim, args=(w, chunks[w], out_dir, args.teacher))
+             for w in range(args.workers)]
     for p in procs:
         p.start()
     for p in procs:
@@ -248,41 +199,9 @@ def collect(args: argparse.Namespace) -> None:
     print(f"collected {len(data['action'])} pairs from {args.battles} matchups -> {out_dir / 'data.npz'}")
 
 
-def baseline(args: argparse.Namespace) -> None:
-    """SimpleHeuristics-vs-SimpleHeuristics on holdout pairs: the reference line."""
-    import asyncio
-
-    server = preflight(args.port)
-    pairs = sample_pairs(args.jsonl, args.n, args.seed)
-
-    async def run() -> None:
-        kw = dict(battle_format=GAME_FORMAT, server_configuration=server, log_level=40)
-        wins = failures = 0
-        for i, (p_team, e_team) in enumerate(pairs):
-            a = SimpleHeuristicsPlayer(team=p_team, **kw)
-            b = SimpleHeuristicsPlayer(team=e_team, **kw)
-            try:
-                await a.battle_against(b, n_battles=1)
-                wins += bool(a.n_won_battles)
-            except Exception:
-                failures += 1
-            finally:
-                for p in (a, b):
-                    try:
-                        await p.ps_client.stop_listening()
-                    except Exception:
-                        pass
-            if (i + 1) % 25 == 0:
-                print(f"{i + 1}/{len(pairs)}: {wins / (i + 1 - failures):.1%}", flush=True)
-        print(f"baseline SimpleHeuristics-vs-SimpleHeuristics: "
-              f"{wins / (len(pairs) - failures):.1%} ({failures} failures)")
-
-    asyncio.run(run())
-
-
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("mode", choices=["collect", "synth", "holdout", "baseline"])
+    p.add_argument("mode", choices=["collect", "synth", "holdout"])
     p.add_argument("--teacher", choices=["heuristic", "calc"], default="heuristic",
                    help="collect: who labels the decisions (SimpleHeuristics or ai_util.calc_bot)")
     p.add_argument("--trainers", help="comma-separated trainer_ids to restrict collect to, "
@@ -294,19 +213,15 @@ def main() -> None:
     p.add_argument("--battles", type=int, default=20000)
     p.add_argument("--n", type=int, default=100)
     p.add_argument("--workers", type=int, default=8)
-    p.add_argument("--port", type=int, default=8021)
     p.add_argument("--seed", type=int, default=0)
-    p.add_argument("--backend", choices=["sim", "server"], default="sim")
     p.add_argument("--out", help="holdout json path")
     args = p.parse_args()
     if args.mode == "collect":
         collect(args)
     elif args.mode == "synth":
         synth(args)
-    elif args.mode == "holdout":
-        holdout(args)
     else:
-        baseline(args)
+        holdout(args)
 
 
 if __name__ == "__main__":
