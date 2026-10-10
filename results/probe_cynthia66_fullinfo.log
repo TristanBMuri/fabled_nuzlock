@@ -1,0 +1,7 @@
+=== calc + search k9 r8, Cynthia probe, 20 parties x n=2  ===
+calc+search k=9 r=8: 20/20 pairs  win 20.0%  deaths/mon 0.91  turns 25.4  50.70s/pair
+totals: pairs 20 n 2 wins 4 deaths 109.5 mons 120
+=== calc + search k9 r8, Cynthia probe, 20 parties x n=2 --full-info ===
+calc+search k=9 r=8: 20/20 pairs  win 20.0%  deaths/mon 0.91  turns 25.9  56.62s/pair
+totals: pairs 20 n 2 wins 4 deaths 109.5 mons 120
+PROBE_DONE

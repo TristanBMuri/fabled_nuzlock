@@ -1394,3 +1394,35 @@ variance -0.00→0.53, approx_kl ~0.006. Eval 100 battles: Random 97%,
 MaxBasePower 72%, SimpleHeuristics 33%. TB
 `logs/tensorboard/self_play_20260827_103605`. Weights not saved —
 `self_play.py` never calls `ppo.save()`; only in-memory eval after learn().
+
+## Full enemy information for the battler (2026-10-10, `--full-info`)
+
+The player's mirror knows every enemy set from turn one (moves, item,
+ability, level, real stats from the sheet's EVs / IVs / nature;
+`SimBattle(full_info=True)`, forks keep it, the enemy side stays as it was),
+and the calc bot uses a real stat and real max HP whenever it has one instead
+of the 31 IV / 85 EV guess and the 60-power STAB guess for unrevealed moves.
+This is the full-docs regime of `project_overview.md` → 2, which the battler
+had never used. Default off; flag on the planner and the League test.
+
+Cynthia probe (`models/cynthia66_pairs.json`, the old level-up-moveset
+parties, n=2): calc bot alone 2.5% / 0.99 deaths per mon blind and 2.5% /
+0.98 with full info (40 parties); calc + search k9 r8 20.0% / 0.91 both ways
+(20 parties). Nothing moves on parties that have no line.
+
+League test, 20 boxes x 4 replays, calc + search 9,8 / deep 9,16, paired
+against `results/league_base.jsonl` (`results/league_fullinfo.{log,jsonl}`,
+42 min):
+  block clear 0.75 ± 0.05 / 3.64 ± 0.22 deaths per block / 3.09 ± 0.20 at Cynthia
+  Aaron, Bertha, Flint 80/80, Lucian 79/80, Cynthia 60/79
+  vs baseline: +0.05 ± 0.08 block clears, -0.05 ± 0.34 deaths per block (paired)
+**Null at this size** (a lever needs about +0.15 clears here; the sign is
+right, the error bar covers zero). Reading: the calc bot's rules spend the
+information on the KO check and the threat estimate only, and at Cynthia the
+problem is stat parity (her 31 / 252 spreads against flat 85s), not what the
+player knows — the 2026-09-19 probe already said no deathless line exists for
+a typical party. The cleaned-tree replay the same day
+(`results/league_cleanup.log`, +0.00 ± 0.07) is the control for the harness.
+What the information would still buy is a scorer that uses it: the party
+selector still ranks by the fast bot's blind estimate. Not retried: more
+replays to resolve +0.05 (160 blocks for ± 0.04; ~85 min).

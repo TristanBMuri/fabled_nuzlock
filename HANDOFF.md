@@ -313,6 +313,13 @@ boss's max level (14 = Roark). ~85 s/episode.
 5. ~~**Deletion pass (2½)**~~ done 2026-10-10 (see the top of this file). Left:
    the BC pipeline, pending the decision in `HUMAN_TODO.md`.
 
+**Measured 2026-10-10 (League test, paired):** full enemy information for the
+battler (`--full-info`: sets, items, abilities, real stats known from turn one)
+= +0.05 ± 0.08 block clears, -0.05 ± 0.34 deaths — null at 80 blocks, sign
+right; default off, the flag stays (`results/league_fullinfo.log`). The
+information is wasted on the calc bot's rules; a scorer / search that uses it
+is the open question, not the information itself.
+
 Not to retry (measured, NOTEBOOK.md): `--refine`, `--climb`, `--parties
 beam|all`, lead order, a switch-out-after-a-hit wrapper, wider search at a
 wall, a learned value head as the rollout leaf, more rival teacher data,
