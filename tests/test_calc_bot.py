@@ -40,3 +40,37 @@ def test_enemy_stat_estimate_matches_the_engine():
         sb.close()
     finally:
         bridge.close()
+
+
+def test_full_info_gives_the_bot_the_enemy_set():
+    """With full_info the player's mirror knows the enemy's moves, item, ability
+    and real stats from turn one; the estimate is replaced by the engine's value
+    (a 0-EV Adamant set, where the 31/85 guess is wrong), and a fork keeps it."""
+    us = pack_team([Mon("bidoof", 40, ["tackle"])])
+    chomp = Mon("garchomp", 66, ["dragonrush", "earthquake", "swordsdance", "flamethrower"], ability="Sand Veil",
+                item="Sitrus Berry", nature="Adamant", evs=dict.fromkeys(("hp", "atk", "def", "spa", "spd", "spe"), 0),
+                ivs=dict.fromkeys(("hp", "atk", "def", "spa", "spd", "spe"), 20))
+    them = pack_team([chomp, Mon("lucario", 63, ["aurasphere"])])
+    bridge = SimBridge()
+    try:
+        blind = SimBattle(bridge, FMT, us, them)
+        opp = blind.mirrors["p1"].opponent_active_pokemon
+        assert not opp.moves and stat(opp, "atk", own=False) != blind.state()["p2"][0]["stats"]["atk"]
+        blind.close()
+        sb = SimBattle(bridge, FMT, us, them, full_info=True)
+        opp, real = sb.mirrors["p1"].opponent_active_pokemon, sb.state()["p2"][0]
+        assert set(opp.moves) == {"dragonrush", "earthquake", "swordsdance", "flamethrower"}
+        assert opp.item == "sitrusberry" and opp.ability == "sandveil" and opp.level == 66
+        assert {k: stat(opp, k, own=False) for k in real["stats"]} == real["stats"]
+        assert max_hp(opp, own=False) == real["maxhp"]
+        assert len(sb.mirrors["p1"].opponent_team) == 2 and len(sb.mirrors["p2"].opponent_team) == 1  # p2 stays blind
+        f = sb.fork(seed=[1, 2, 3, 4])
+        assert set(f.mirrors["p1"].opponent_active_pokemon.moves) == set(opp.moves)
+        from ai_util.calc_bot import calc_brain
+        from ai_util.evaluate import heuristic_brain
+        f.play({"p1": calc_brain(), "p2": heuristic_brain()}, max_turns=60)
+        assert f.ended and f.stats["rejected"] == 0
+        f.close()
+        sb.close()
+    finally:
+        bridge.close()

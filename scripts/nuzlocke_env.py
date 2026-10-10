@@ -52,13 +52,14 @@ class NuzlockeEnv:
     def __init__(self, seed: int | None = None, policy: str | None = None,
                  search: tuple[int, int] | None = None, rules: Rules = Rules(),
                  search_all: bool = False, slice_len: int = SLICE_LEN,
-                 deep: tuple[int, int] | None = None):
+                 deep: tuple[int, int] | None = None, full_info: bool = False):
         """slice_len: trainers per episode (21 = through Roark, 59 = through Gardenia,
         167 = Maylene, 405 = the whole game). policy selects the battler (None =
         SimpleHeuristics, 'calc' = the damage-calc bot, a path = a BC prior);
         search=(k, r) plays boss fights with rollout search, search_all every fight.
         deep=(k, r): wider search at breakpoints and at any fight the risk query
-        flags as hard (DEEP_HP) — the compute dial per trainer. rules: see Rules."""
+        flags as hard (DEEP_HP) — the compute dial per trainer. full_info: the
+        battler knows every enemy set from turn one (the full-docs regime). rules: see Rules."""
         self.search_all = search_all
         self.deep = deep
         self.n_deep = 0  # fights played at the deep width (cost accounting)
@@ -66,7 +67,7 @@ class NuzlockeEnv:
         self.rules = rules
         self.max_roster = rules.box  # living mons the box holds
         self.rng = random.Random(seed)
-        self.runner = SimBattleRunner(policy=policy, search=search)
+        self.runner = SimBattleRunner(policy=policy, search=search, full_info=full_info)
         self.encounters = load_encounters()["routes"]
         self._reset_state()
 

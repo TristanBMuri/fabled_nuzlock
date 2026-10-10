@@ -32,8 +32,8 @@ class SimBattleRunner:
     top-k rollout search `search=(k, rollouts)` for boss fights."""
 
     def __init__(self, policy: str | None = None, search: tuple[int, int] | None = None,
-                 max_turns: int = 100):
-        self.max_turns = max_turns
+                 max_turns: int = 100, full_info: bool = False):
+        self.max_turns, self.full_info = max_turns, full_info  # full_info: the player knows the enemy's sets
         self.bridge = SimBridge()
         self.enemy = heuristic_brain()
         self.search = search  # default (k, rollouts) for boss fights; the compute dial
@@ -67,7 +67,7 @@ class SimBattleRunner:
         None on failure."""
         try:
             r = evaluate(self.bridge, player_packed, enemy_packed, self.player, self.enemy,
-                         n=n, max_turns=self.max_turns, carry=carry)
+                         n=n, max_turns=self.max_turns, carry=carry, full_info=self.full_info)
         except Exception as e:
             import traceback
             print(f"SimBattleRunner.estimate failed: {type(e).__name__}: {e}\n"
@@ -87,7 +87,8 @@ class SimBattleRunner:
             for _ in range(n):
                 carry, won, st, fights = None, True, None, 0.0
                 for enemy in enemies_packed:
-                    sb = SimBattle(self.bridge, BATTLE_FORMAT, player_packed, enemy, carry=carry)
+                    sb = SimBattle(self.bridge, BATTLE_FORMAT, player_packed, enemy, carry=carry,
+                                   full_info=self.full_info)
                     sb.play({"p1": self.player, "p2": self.enemy}, self.max_turns)
                     st = sb.state()
                     sb.close()
@@ -119,7 +120,8 @@ class SimBattleRunner:
             return None
         brain = self.searcher(search or (self.search if boss else None))
         try:
-            sb = SimBattle(self.bridge, BATTLE_FORMAT, player_packed, enemy_packed, carry=carry)
+            sb = SimBattle(self.bridge, BATTLE_FORMAT, player_packed, enemy_packed, carry=carry,
+                           full_info=self.full_info)
             sb.play({"p1": brain, "p2": self.enemy}, self.max_turns)
             st = sb.state()
             won, dead = st["winner"] == "p1", [m["fainted"] for m in st["p1"]]

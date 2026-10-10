@@ -159,7 +159,8 @@ def rules(args: argparse.Namespace) -> Rules:
 def make_env(args: argparse.Namespace) -> NuzlockeEnv:
     width = lambda s: tuple(int(x) for x in s.split(",")) if s else None
     return NuzlockeEnv(seed=args.seed, policy=args.policy, search=width(args.search), rules=rules(args),
-                       search_all=args.search_all, slice_len=args.slice, deep=width(args.deep))
+                       search_all=args.search_all, slice_len=args.slice, deep=width(args.deep),
+                       full_info=args.full_info)
 
 
 def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple:
@@ -192,6 +193,10 @@ def parser(doc: str = __doc__) -> argparse.ArgumentParser:
     ap.add_argument("--search-all", action="store_true", help="search on every trainer")
     ap.add_argument("--deep", help="k,rollouts at breakpoints and fights the risk query "
                                    "flags as hard (a loss, a death or HP < DEEP_HP at n=8), e.g. 9,16")
+    ap.add_argument("--full-info", action="store_true",
+                    help="the battler knows every enemy set, item, ability and real stat from turn one "
+                         "(the full-docs regime, project_overview.md 2); default: sets revealed in play, "
+                         "stats estimated at 31 IV / 85 EV")
     ap.add_argument("--lam", type=float, default=1.0, help="death penalty weight in the party score")
     ap.add_argument("--level-rule", choices=["match", "cap"], default="cap",
                     help="cap = next boss's max level (hardcore rule); match = max enemy seen")
@@ -250,6 +255,7 @@ def main() -> None:
     k = lambda f: np.mean([r[f] for r in rows])
     print(f"\n{args.episodes} episodes | slice {args.slice} | battler={args.policy or 'SimpleHeuristics'} "
           f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} lam={args.lam} "
+          f"full_info={args.full_info} "
           f"| rules: {rules(args)} | {args.workers} workers, {(time.time() - t0) / 60:.0f} min\n"
           f"  trainers cleared        {k('cleared'):.2f}\n"
           f"  cleared without a death {k('cleared_no_death'):.2f}\n"

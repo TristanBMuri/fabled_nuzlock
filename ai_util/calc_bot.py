@@ -1,8 +1,10 @@
 """A scripted battler that runs the real damage formula (roadmap 1a, 2026-09-18).
 
-Own stats come from the request; enemy stats are estimated from base stats
-at the enemy's level with ENEMY_IV / ENEMY_EV (a boss-safe guess: route
-trainers in BDSP have 0/0, bosses 31/510). Decisions, in order: forced
+Own stats come from the request; enemy stats and moves are known when the
+battle runs with full info (SimBattle(full_info=True): the env built the
+enemy's sets), else estimated from base stats at the enemy's level with
+ENEMY_IV / ENEMY_EV (a boss-safe guess: route trainers in BDSP have 0/0,
+bosses 31/510) and unrevealed moves guessed as a 60-power STAB. Decisions, in order: forced
 switch -> best bench mon; a KO in hand -> the most accurate KO move (priority
 first if slower) unless we are slower and die first; the next hit kills us
 and a bench mon survives it -> switch; safe -> set up; else the strongest
@@ -21,8 +23,9 @@ ENEMY_IV, ENEMY_EV = 31, 85
 
 
 def stat(mon, key: str, own: bool) -> float:
-    """Real stat for our mons, estimated for theirs, then boost stages and paralysis."""
-    v = mon.stats.get(key) if own and mon.stats else None
+    """The real stat when known (ours from the request, theirs under full info),
+    else estimated; then boost stages and paralysis."""
+    v = (mon.stats or {}).get(key)
     if not v:
         v = ((2 * mon.base_stats[key] + ENEMY_IV + ENEMY_EV // 4) * mon.level) // 100 + 5
     b = mon.boosts.get(key, 0)
@@ -35,6 +38,8 @@ def stat(mon, key: str, own: bool) -> float:
 def max_hp(mon, own: bool) -> int:
     if own and mon.max_hp and mon.stats:
         return mon.max_hp
+    if (mon.stats or {}).get("hp"):  # theirs, under full info (max_hp is a percentage for them)
+        return mon.stats["hp"]
     return ((2 * mon.base_stats["hp"] + ENEMY_IV + ENEMY_EV // 4) * mon.level) // 100 + mon.level + 10
 
 

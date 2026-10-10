@@ -156,7 +156,7 @@ class Searcher:
 def evaluate(bridge: SimBridge, party: str | None, enemy: str | None, brain: Brain,
              enemy_brain: Brain, n: int = 1, importance: list[float] | None = None,
              max_turns: int = 100, fmt: str = GAME_FORMAT, dedupe: bool = True,
-             carry: list | None = None) -> dict:
+             carry: list | None = None, full_info: bool = False) -> dict:
     """Run n fresh-seed battles of `party` (p1, driven by brain) vs `enemy`.
     Returns P(win), P(death) per party mon (packed order), importance-weighted
     risk, and hp = mean fraction of the party's HP left at the end (margin:
@@ -164,7 +164,7 @@ def evaluate(bridge: SimBridge, party: str | None, enemy: str | None, brain: Bra
     wins, deaths, turns, hp = 0, None, 0, 0.0
     stats = {}
     for _ in range(n):
-        sb = SimBattle(bridge, fmt, party, enemy, dedupe=dedupe, carry=carry)
+        sb = SimBattle(bridge, fmt, party, enemy, dedupe=dedupe, carry=carry, full_info=full_info)
         sb.play({"p1": brain, "p2": enemy_brain}, max_turns)
         st = sb.state()
         won, dead = st["winner"] == "p1", [m["fainted"] for m in st["p1"]]
@@ -204,6 +204,7 @@ def main() -> None:
     p.add_argument("--no-crn", action="store_true",
                    help="fresh RNG per rollout instead of common random numbers across candidates")
     p.add_argument("--max-turns", type=int, default=100)
+    p.add_argument("--full-info", action="store_true", help="the player knows the enemy's sets and stats")
     args = p.parse_args()
 
     if args.from_harvest:
@@ -235,7 +236,8 @@ def main() -> None:
 
     t0, wins, deaths, mons, turns, stats = time.time(), 0.0, 0.0, 0, 0.0, {}
     for i, (party, enemy_team) in enumerate(pairs):
-        r = evaluate(bridge, party, enemy_team, brain, enemy, n=args.n, max_turns=args.max_turns)
+        r = evaluate(bridge, party, enemy_team, brain, enemy, n=args.n, max_turns=args.max_turns,
+                     full_info=args.full_info)
         wins += r["p_win"]
         deaths += sum(r["p_death"])
         mons += len(r["p_death"])

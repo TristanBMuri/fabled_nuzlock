@@ -16,7 +16,8 @@ from pathlib import Path
 from typing import Callable
 
 from poke_env.battle import Battle, Pokemon
-from poke_env.data import GenData
+from poke_env.data import GenData, to_id_str
+from poke_env.stats import compute_raw_stats
 from poke_env.player import Player
 from poke_env.teambuilder import Teambuilder
 
@@ -78,10 +79,13 @@ class SimBridge:
 
 class SimBattle:
     def __init__(self, bridge: SimBridge, fmt: str, p1_team: str | None, p2_team: str | None,
-                 seed: list[int] | None = None, dedupe: bool = True, carry: list | None = None):
+                 seed: list[int] | None = None, dedupe: bool = True, carry: list | None = None,
+                 full_info: bool = False):
         """Packed teams; None lets the format's generator build one (randombattle).
-        carry: per p1 mon {hp, status, pp} to start from (no heal since the last fight)."""
-        self.bridge, self.fmt = bridge, fmt
+        carry: per p1 mon {hp, status, pp} to start from (no heal since the last fight).
+        full_info: p1's mirror knows p2's whole team from turn one (sets, levels,
+        items, abilities, real stats) — the full-docs regime; p2 stays as it was."""
+        self.bridge, self.fmt, self.full_info = bridge, fmt, full_info
         self.gen = GenData.from_format(fmt).gen
         self.id = f"b{next(_IDS)}"
         if dedupe:
@@ -114,6 +118,19 @@ class SimBattle:
                 m.nickname, m.species = m.nickname or None, m.species or None
                 name = m.nickname or m.species
                 b._team[f"{side}: {name}"] = Pokemon(gen=self.gen, teambuilder=m, name=name)
+        opp = "p2" if side == "p1" else "p1"
+        if self.full_info and side == "p1" and self.teams[opp]:
+            # the enemy's sets are known (the env built them): moves, item, ability,
+            # level and the real stats, keyed as the protocol will name them
+            data = GenData.from_gen(self.gen)
+            for m in Teambuilder.parse_packed_team(self.teams[opp]):
+                m.nickname, m.species = m.nickname or None, m.species or None
+                name = m.nickname or m.species
+                mon = Pokemon(gen=self.gen, teambuilder=m, name=name)
+                raw = compute_raw_stats(to_id_str(m.species or m.nickname), list(m.evs), list(m.ivs),
+                                        m.level or 100, (m.nature or "serious").lower(), data)
+                mon.stats = dict(zip(("hp", "atk", "def", "spa", "spd", "spe"), raw))
+                b._opponent_team[f"{opp}: {name}"] = mon
         return b
 
     def _absorb(self, reply: dict) -> None:
@@ -194,7 +211,7 @@ class SimBattle:
         two forks with the same seed replay the same chance events (common random
         numbers across search candidates); reseed=True rolls a fresh one."""
         new = SimBattle.__new__(SimBattle)
-        new.bridge, new.fmt, new.gen = self.bridge, self.fmt, self.gen
+        new.bridge, new.fmt, new.gen, new.full_info = self.bridge, self.fmt, self.gen, self.full_info
         new.id = f"b{next(_IDS)}"
         new.teams = self.teams
         new.history = {s: list(self.history[s]) for s in SIDES}

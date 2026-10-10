@@ -81,7 +81,7 @@ def main() -> None:
 
     print(f"\n{len(snaps)} snapshots x {args.replays} replays | battler={args.policy or 'SimpleHeuristics'} "
           f"search={args.search}{' (all)' if args.search_all else ''} deep={args.deep} "
-          f"| rules: {pg.rules(args)} | {args.workers} workers, "
+          f"full_info={args.full_info} | rules: {pg.rules(args)} | {args.workers} workers, "
           f"{(time.time() - t0) / 60:.0f} min")
     for f, name in [("clear", "block clear rate"), ("deaths", "deaths per block"),
                     ("champion_deaths", "deaths at the champion")]:
