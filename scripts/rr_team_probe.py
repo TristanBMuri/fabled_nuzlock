@@ -133,9 +133,10 @@ def setup(args, name: str):
     print(f"{name}: trainer #{progress}, cap {cap}, pool {len(pool)} species; arena {arena}; not modelled: {unmodelled}", flush=True)
     if args.legal:
         gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(rp.RR / "hardcore_rules.json"))["banned_moves"]}
-    if args.blind_field:
+    if args.blind_field or args.matchup:
         import ai_util.calc_bot as cb
-        cb.FIELD_AWARE = False
+        cb.FIELD_AWARE = not args.blind_field
+        cb.MATCHUP = args.matchup
     srng = random.Random(f"{name}-seeds-{args.seed}")
     seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(max(args.n_solo, args.n_team, args.n_search))]
     enemy_packed, dump_cap, enemy_species = rp.boss_team(int(name[1:]) if name.startswith("#") else name)
@@ -148,7 +149,7 @@ def setup(args, name: str):
     return SimpleNamespace(name=name, args=args, known=known, cap=cap, pool=pool, progress=progress, arena=arena,
                            unmodelled=unmodelled, enemy_packed=enemy_packed, enemy_species=enemy_species,
                            boss_types=boss_types, bridge=SimBridge(showdown=str(rp.FORK)), enemy=enemy, calc=calc,
-                           searcher=Searcher(None, enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed),
+                           searcher=Searcher(None, enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed, death_weight=args.death_weight),
                            seeds=seeds, rng=random.Random(f"{name}-team-{args.seed}"), team_score={}, mons={}, t0=time.time())
 
 
@@ -187,6 +188,16 @@ def greedy(ctx, short: list[str], start: tuple = ()) -> tuple:
         best = max((s for s in short if s not in team), key=lambda s: team_value(ctx, tuple(sorted(team + (s,)))))
         team = tuple(sorted(team + (best,)))
     return team
+
+
+def cover_team(ctx, species: list[str]) -> tuple:
+    """(B') the six by matchup cover (ai_util.matchup.cover): rows read off dummy battles."""
+    from poke_env.data import to_id_str
+    from ai_util.matchup import cover, rows_for
+    mons = {s: mon_of(ctx, s) for s in species}
+    rows = rows_for(ctx.bridge, rp.FMT, {s: m for s, m in mons.items() if m is not None}, ctx.enemy_packed, ctx.arena)
+    enemies = [to_id_str(x.split("|")[0]) for x in ctx.enemy_packed.split("]")]
+    return tuple(sorted(cover(rows, enemies, 6)))
 
 
 def searched(ctx, team: tuple):
@@ -258,6 +269,10 @@ def _run_boss(args, name: str) -> dict:
     print(f"{name}: B {len(ctx.team_score)} teams scored in {time.time() - ctx.t0:.0f}s; greedy {team} "
           f"({ctx.team_score[team]:.2f}); best fast {ranked[0]} ({ctx.team_score[ranked[0]]:.2f})", flush=True)
     top = list(dict.fromkeys([team] + ranked))[:TOP]
+    if args.chooser == "cover":
+        cteam = cover_team(ctx, short + [sp for sp in pool if sp not in short])
+        print(f"{name}: cover team {cteam}", flush=True)
+        top = list(dict.fromkeys([cteam] + top))[:TOP]
     results, attr, clean = [], {}, {}
     for t in top:
         w, d, pr, attr[t], clean[t] = searched(ctx, t)
@@ -281,7 +296,7 @@ def _run_boss(args, name: str) -> dict:
         rw, rd, _, _, rc = searched(ctx, rteam) if rteam != t else (w, d, None, None, clean[t])
         repaired = {"team": list(rteam), "win": rw, "deaths_per_mon": rd, "deathless": rc, "counters_offered": extra, "counters_taken": taken}
         print(f"{name:<10} repaired: counters offered {extra}, taken {taken}: win {rw:5.0%} deaths/mon {rd:.2f} deathless {rc:.0%} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - ctx.t0:.0f}s)", flush=True)
-    rows = [{"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "arena": ctx.arena,
+    rows = [{"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser, "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena,
              "unmodelled": ctx.unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d, "deathless": clean[t], "n": args.n_search,
              "all": [(list(t_), w_, d_, clean[t_]) for w_, _, t_, d_ in results], "threats": threats, "repaired": repaired,
              "starter": starter, "sets": sets_of(ctx, t), "enemy": ctx.enemy_species, "pool": len(pool), "progress": ctx.progress, "shortlist": short}]
@@ -301,7 +316,7 @@ def _run_boxes(args, name: str) -> dict:
     for i in range(args.boxes):
         box = rp.sample_box(random.Random(f"{name}-box-{args.seed}-{i}"), ctx.progress, ctx.known)
         species = [sp for sp, _ in box if mon_of(ctx, sp) is not None]
-        team = greedy(ctx, species)
+        team = cover_team(ctx, species) if args.chooser == "cover" else greedy(ctx, species)
         w, d, pr, attr, cl = searched(ctx, team)
         threats = threats_of(ctx, attr, ctx.pool, exclude=set(species))
         for th in threats:
@@ -312,7 +327,7 @@ def _run_boxes(args, name: str) -> dict:
               + "; ".join(f"{th['enemy']} killed {th['deaths']}, missing " + (", ".join(f"{sp} ({wh})" for sp, _, _, wh in th["counters"][:1]) or "no counter in the pool") for th in threats)
               + f"  ({time.time() - ctx.t0:.0f}s)", flush=True)
     wins = [b["win"] for b in boxes]
-    row = {"boss": name, "mode": "boxes", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "arena": ctx.arena,
+    row = {"boss": name, "mode": "boxes", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser, "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena,
            "n": args.n_search, "boxes": boxes, "mean_win": sum(wins) / len(wins), "p_clear": sum(w_ >= 0.5 for w_ in wins) / len(wins),
            "mean_deaths": sum(b["deaths_per_mon"] for b in boxes) / len(boxes), "mean_deathless": sum(b["deathless"] for b in boxes) / len(boxes),
            "missing": [(k, v) for k, v in missing.most_common(6)],
@@ -338,6 +353,9 @@ def main() -> None:
     ap.add_argument("--blind-field", action="store_true", help="the calc bot ignores weather / terrain (the pre-2026-10-11 bot)")
     ap.add_argument("--repair", action="store_true", help="offer the counters to the greedy build and play the result too")
     ap.add_argument("--boxes", type=int, default=0, help="sampled-box mode: N boxes per boss drawn by rarity, the chooser picks six from each")
+    ap.add_argument("--chooser", choices=("greedy", "cover"), default="greedy", help="six by calc-bot progress (greedy) or by matchup cover")
+    ap.add_argument("--matchup", action="store_true", help="the calc bot (and so the rollouts) switches on the matchup matrix")
+    ap.add_argument("--death-weight", type=float, default=0.5, help="search value: win +-1 minus this x the fainted fraction (6 = one death costs a win)")
     ap.add_argument("--out")
     args = ap.parse_args()
     names = [b.strip() for b in args.bosses.split(",")]
@@ -351,7 +369,7 @@ def main() -> None:
     if args.out:
         Path(args.out).write_text("".join(json.dumps(r) + "\n" for r in rows))
     mode = "boxes" if args.boxes else "pool"
-    print(f"\nRadical Red best-six probe ({mode}) | legal moves only: {args.legal} | arena effects: {args.arena} | field-aware calc bot: {not args.blind_field} | seeded | "
+    print(f"\nRadical Red best-six probe ({mode}) | legal moves only: {args.legal} | arena effects: {args.arena} | field-aware calc bot: {not args.blind_field} | chooser {args.chooser} | matchup play {args.matchup} | death weight {args.death_weight} | seeded | "
           f"search {args.search} x n={args.n_search} | no EVs, no items | enemy = RR AI, full info | {(time.time() - t0) / 60:.0f} min")
     if args.boxes:
         print(f"  {'boss':<10} {'cap':>3} {'mean win':>8} {'>=50%':>6} {'d/mon':>5} {'clean':>5}  most missed counter (vs)")

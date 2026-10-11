@@ -21,6 +21,9 @@ _CHART = GenData.from_format(GAME_FORMAT).type_chart
 ROLL = 0.925          # mean damage roll
 ENEMY_IV, ENEMY_EV = 31, 85
 FIELD_AWARE = True    # weather / terrain / Tailwind in the numbers (False = the pre-2026-10-11 bot)
+PRESERVE = False      # retreat a low or badly poisoned mon when a healthy bench mon takes the hit comfortably
+PRESERVE_HP = 0.4     # ... "low" = under this fraction (2026-10-11: every Brock / Misty death was a mon left in below half)
+MATCHUP = False       # switch on the matchup matrix (ai_util.matchup): bring the safe answer, retreat an unsafe one
 
 # field effects (2026-10-11: Radical Red's gyms fight under permanent weather / terrain)
 RAIN, SUN = {Weather.RAINDANCE, Weather.PRIMORDIALSEA}, {Weather.SUNNYDAY, Weather.DESOLATELAND}
@@ -191,6 +194,8 @@ class CalcPlayer(Player):
 
         if battle.force_switch or not battle.available_moves:
             if battle.available_switches:
+                if MATCHUP:
+                    return self.create_order(self.matchup_switch(battle, opp, battle.available_switches) or max(battle.available_switches, key=switch_score))
                 return self.create_order(max(battle.available_switches, key=switch_score))
             return self.choose_random_move(battle)
 
@@ -199,13 +204,25 @@ class CalcPlayer(Player):
         # a KO in hand: the mean roll covers the HP left; P(KO) ~ accuracy
         kos = [(mv.accuracy or 1, mv) for f, mv in scored if f / (mv.accuracy or 1) >= opp.current_hp_fraction]
         we_die = thr >= me.current_hp_fraction * ROLL  # a near-max roll kills us
+        first = bool(kos) and (faster or max(kos, key=lambda x: x[0])[1].priority > opp_prio)
         if kos:
             acc, mv = max(kos, key=lambda x: (x[1].priority > opp_prio, x[0]))
-            if faster or mv.priority > opp_prio or not we_die:
+            if first or not we_die:
                 return self.create_order(mv)
+        if MATCHUP and not first and battle.available_switches:
+            from ai_util.matchup import pair, safe
+            if not safe(pair(me, opp, battle)):
+                cand = self.matchup_switch(battle, opp, battle.available_switches)
+                if cand is not None:
+                    return self.create_order(cand)
         if we_die and not (kos and faster) and battle.available_switches:
             cand = max(battle.available_switches, key=switch_score)
             if switch_score(cand) >= 1.0:  # someone survives the hit
+                return self.create_order(cand)
+        low = me.current_hp_fraction < PRESERVE_HP or me.status == Status.TOX
+        if (PRESERVE or MATCHUP) and low and not first and battle.available_switches:
+            cand = max(battle.available_switches, key=switch_score)
+            if switch_score(cand) >= 2.0 and cand.current_hp_fraction > 0.5:  # a healthy bench mon takes the hit with room
                 return self.create_order(cand)
         if thr < 0.2 and me.current_hp_fraction > 0.6:  # safe: set up
             for mv in battle.available_moves:
@@ -213,6 +230,21 @@ class CalcPlayer(Player):
                         and max(me.boosts.get(s, 0) for s in mv.boosts) < 2:
                     return self.create_order(mv)
         return self.create_order(best_mv)
+
+    @staticmethod
+    def matchup_switch(battle, opp, switches):
+        """The bench mon that is the safe answer to `opp` (ai_util.matchup) and survives the
+        switch-in hit with room, best edge first; None when nobody qualifies. A boosted enemy
+        gets only answers that are safe against its boosted stats (pair() uses them)."""
+        from ai_util.matchup import edge, pair, safe
+        best, best_e = None, None
+        for m in switches:
+            p = pair(m, opp, battle)
+            if safe(p) and p["take"] < m.current_hp_fraction / 2:
+                e = edge(p)
+                if best is None or e > best_e:
+                    best, best_e = m, e
+        return best
 
 
 def calc_brain():

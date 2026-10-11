@@ -96,6 +96,7 @@ class Searcher:
         self.n_decisions = self.n_searched = 0
         self.last_action: int | None = None  # chosen action index
         self.searched_last = False
+        self.last_scores: dict[str, float] = {}  # choice message -> mean rollout value, last searched decision
 
     def value(self, sb: SimBattle, side: str) -> float:
         return outcome_value(sb.state(), side, self.death_weight, self.importance)
@@ -134,6 +135,7 @@ class Searcher:
         seeds = [self.rng.integers(1, 2 ** 16, 4).tolist() if self.crn else None
                  for _ in range(self.rollouts)]
         best, best_score = None, -np.inf
+        self.last_scores = {}
         for a in cands:
             msg = order_to_choice(SinglesEnv.action_to_order(np.int64(a), m))
             vals = []
@@ -148,6 +150,7 @@ class Searcher:
                 vals.append(self.value(f, side))
                 f.close()
             score = float(np.mean(vals))
+            self.last_scores[msg] = score
             if score > best_score:
                 best, best_score, self.last_action = msg, score, a
         return best
