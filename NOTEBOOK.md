@@ -1646,3 +1646,94 @@ not a Mantine answer at level 28 under rain.
 3. Starter and gifts (HUMAN_TODO 8): the pool has no starter; a Bulbasaur
    line changes Misty.
 Doubles, natures and the player's ability swaps are still out.
+
+## Radical Red: the chooser, the field, and the first milestone number (2026-10-11, `results/rr_bench_{field,blind}.*`, `results/rr_c1_report.*`, `results/rr_boxes30.*`)
+
+The plan (`~/.claude/plans/flickering-painting-valley.md`, approved 2026-10-11)
+in the order it was run. Everything below: legal moves, arenas, no EVs, no
+items, real pools and real TMs, the RR AI with full information both ways.
+
+**Step 0, measurement.** `rr_team_probe.play()` now seeds every battle
+(one engine seed per battle index, shared by every team and variant) and the
+searcher's rollouts. Found afterwards: the RR AI port breaks ties and picks
+switches with Python's global `random`, so the runs below were *not* fully
+paired across processes (two "identical" stage-A passes ranked species
+differently). Fixed after these runs (the global random is seeded per battle;
+two passes now agree exactly); the field-vs-blind table is therefore two
+independent samples, not a paired difference.
+
+**C0, the calc bot sees the field** (`calc_bot.field_mod`, `stat(..., battle)`:
+rain / sun on Water / Fire, the primal weathers, sure-hit Hurricane / Thunder /
+Blizzard, sandstorm SpD, snow Def, the three terrains x1.3 for grounded users,
+Grassy halving Earthquake, Misty halving Dragon, the weather speed abilities,
+Surge Surfer, Tailwind). n=30 per team, best of six teams, 125 / 136 min on
+4 workers:
+
+  boss       cap  field-aware calc bot   blind calc bot      (win, deaths/mon)
+  Brock       16   100%  0.39            100%  0.38
+  Misty       28    80%  0.60             43%  0.88
+  Lt. Surge   36    67%  0.69             90%  0.66
+  Erika       44   100%  0.23            100%  0.21
+
+Misty moves 37 points — the bot finally knows Scald is x1.5 and Mantine is
+fast. Surge moves the other way by 23, with different teams chosen in the two
+runs (the chooser ranks with the same calc bot, so a changed bot changes the
+box it builds); at n=30 one team is ±9 points and the best-of-six adds a
+winner's curse. The honest reading: a large gain where the arena is weather,
+noise where it is terrain, and the comparison must be rerun under the exact
+pairing that now exists.
+
+**C1, threats → counters → where.** `rr_postmortem.attribution()` names the
+enemy mon on the field at each of our deaths; the probe reports the best
+team's two top killers and, for each, the pool species that beat it with
+`rp.where()` (first open location / method / rarity). At n=30 (field-aware):
+Misty 63% / 0.72 with the chooser picking Bramblin (Wind Rider: immune to
+Hurricane) on its own — Mantine stops being the killer and **Ludicolo** takes
+74 of the deaths; Surge 87% / 0.60, killers **Electrode-Hisui** (30) and
+**Pawmot** (22). The first counter criterion (KOs minus deaths during a solo
+fight against the whole team) found "none in the pool" for every mid-team
+threat; counters are now ranked by **one-on-one duels** against the threat's
+real set under the arena (`duel()`, `--n-duel`): Pawmot → Dedenne / Stufful /
+Phanpy, Electrode-Hisui → Wimpod / Tarountula / Nincada, each with its route.
+Forcing the top counter into the greedy build was a mistake (Misty 63% → 27%
+with Rattata forced in); the repair is now unforced — counters join the
+candidates and must earn a slot.
+
+**C2, choices.** A random starter across every generation per run; gifts and
+in-game trades in the pool with their trainer index (`order.json["gifts"]`:
+Route 4 Magikarp, daycare Eevee, the Cerulean Snom → Carnivine trade, …);
+natures by the set (mints), abilities by the boss (capsules / patch:
+immunities to the boss's attack types, the gym weather's speed ability,
+Intimidate). What the chooser then fields against rain Misty reads right:
+Parasect (Dry Skin), Carnivine (Levitate), Drednaw (Swift Swim in her rain),
+Gyarados / Arbok / Granbull / Mightyena (Intimidate), mostly Adamant.
+
+**C3, the milestone number** (`--boxes 30`, `rp.sample_box`: one encounter per
+open location drawn by rarity, a random starter, the gifts; the chooser picks
+six per box; n=6 under search per box; 111 min on 3 workers):
+
+  boss       cap  mean win  boxes with a >=50% team  deaths/mon  most-missed counter (how many boxes)
+  Brock       16    70%            83%                 0.67     Sentret vs Lunatone (10), Seedot vs Archen (9)
+  Misty       28    44%            53%                 0.81     Bramblin vs Mantine (24), Rattata vs Toxicroak (10)
+  Lt. Surge   36    49%            53%                 0.80     Ekans vs Raichu-Alola (16), Yanma vs Pawmot (14)
+
+Boxes hold 9 species by Brock and 18-19 by Misty. Brock's box results:
+13 boxes at 83%, 5 at 100%, 1 at 0%. Misty's 16 winning boxes (≥50%) share a
+core — Drednaw in 12, Parasect and Carnivine in 7, Arbok 6, Gyarados 5 — and
+still lose half a party in a win. (These box counters predate the duel change.)
+
+**P1, fork.** `SimBattle.fork()` pickle-copies the mirrors instead of
+replaying the history: 1.6 → 5.8 ms (turn 5 → 30) became ~2 ms flat, read-
+identical. A search decision (k9 r8) is ~1.8-2.2 s under load and is now
+rollout steps, not forks.
+
+**Deathless.** No team won without a death across its battles; the closest
+was Brock without the sandstorm at 0.07 deaths per mon. The probe now reports
+the deathless-win rate per team and box ("clean").
+
+**Where this leaves the question.** From a real, rarity-sampled box the
+chooser beats Brock most of the time, and Misty and Surge about half the
+time, with heavy losses; from the best planned team, Misty 80% and Surge
+67-90% (bot-dependent). The next levers, in order: the paired field-vs-blind
+rerun; duel-based counters in the box report (what to route for); the
+boost-aware threat (C4); doubles (C6) before anything past Erika.

@@ -343,21 +343,25 @@ to search play — three times now: E8, EVs, moves).
 
 ## Radical Red (2026-10-10/11)
 
-The question the project exists for. Measured so far (NOTEBOOK.md → Radical
-Red entries): a random box at the cap clears Brock only; the best six in the
-reachable pool with every TM beat every gym at 100% — until the gym arenas
-(Koga's Tailwind: 17-50%) and, decisively, **real pools and real TMs**
-(`build_rr.progression()`: trainer order, encounter gates, TM/tutor
-availability by trainer index): then **Brock 100%, Misty 58%, Lt. Surge 75%,
-Erika 92%** with legal moves, no EVs, no items (n=12). Misty's rain, Mantine
-and Toxicroak are the blender (`scripts/rr_postmortem.py`). Next: a threat →
-counter step on the box (post-mortem → `risk()` over swaps → encounter
-routing) and a boost-aware rollout so search can use set-up moves.
+The question the project exists for. State (NOTEBOOK.md → Radical Red
+entries, newest last): with real pools and TMs, legal moves, arenas, no EVs /
+items, the best planned team beats **Brock 100%, Misty 80%, Lt. Surge 67-90%,
+Erika 100%** (n=30, field-aware calc bot); from a **rarity-sampled box** (the
+milestone form, `--boxes`) the chooser wins Brock 70%, Misty 44%, Surge 49%
+of fights on average, with half the party lost even in wins. The battler's
+field model (weather / terrain / Tailwind in `calc_bot`) moved Misty +37; the
+chooser names threats and counters with where to catch them
+(`rr_postmortem.attribution`, `duel()`, `rp.where`); natures, abilities, a
+random starter and gifts are in. Open, in order: the exactly paired
+field-vs-blind rerun (the RR AI's global random is seeded per battle only
+since 7a6675b), duel counters in the box report, the boost-aware threat,
+doubles. Plan: `~/.claude/plans/flickering-painting-valley.md`.
 Pieces: `pokemon-showdown-rr/` (ignored; clone + `node build` +
 `config/custom-formats.ts` as README → Setup for the main clone),
-`scripts/build_rr.py` → `data/rr/` (`order.json`, `tms.json` are the
-progression), `scripts/rr_probe.py` (`pools()`, `arena()`),
-`scripts/rr_team_probe.py` (`--legal --arena`), `scripts/rr_postmortem.py`,
+`scripts/build_rr.py` → `data/rr/` (`order.json` incl. gifts, `tms.json` are
+the progression), `scripts/rr_probe.py` (`pools()`, `sample_box()`,
+`arena()`, `where()`, `choose_nature/ability()`), `scripts/rr_team_probe.py`
+(`--legal --arena --boxes N --repair --blind-field`), `scripts/rr_postmortem.py`,
 `ai_util/rr_ai.py`, `gauntlet.BANNED_MOVES`, `SimBattle(arena=)`.
 **Data for the full run is collected (2026-10-10 evening): `data/rr/README.md`**
 — the three official 4.1 sheets (`data/rr/sheets/`), the hardcore rules as
