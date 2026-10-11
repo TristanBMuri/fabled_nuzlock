@@ -190,22 +190,44 @@ def searched(ctx, team: tuple):
                 search=ctx.searcher, arena=ctx.arena, seeds=ctx.seeds)
 
 
-def threats_of(ctx, attr, solo_vs: dict, exclude=()) -> list[dict]:
-    """The two enemy mons that killed most, each with up to three species (from solo_vs, not in
-    `exclude`) that beat it solo in stage A — KOs on it minus deaths to it — and where to catch them."""
+def duel(ctx, sp: str, enemy_mon: str, n: int) -> tuple[float, float]:
+    """One of ours against one enemy mon alone (its real set), the calc bot playing, paired
+    seeds: (win rate, mean HP fraction left on a win)."""
+    from ai_util.sim import SimBattle
+    packed = next((m for m in ctx.enemy_packed.split("]") if m.split("|")[0] == enemy_mon), None)
+    mon = mon_of(ctx, sp)
+    if packed is None or mon is None:
+        return 0.0, 0.0
+    wins, hp = 0, 0.0
+    for i in range(n):
+        sb = SimBattle(ctx.bridge, rp.FMT, pack_team([mon]), packed, full_info=True, arena=ctx.arena, seed=ctx.seeds[i % len(ctx.seeds)])
+        sb.play({"p1": ctx.calc, "p2": ctx.enemy}, 100)
+        st = sb.state()
+        if st["winner"] == "p1":
+            wins += 1
+            hp += st["p1"][0]["hp"] / max(st["p1"][0]["maxhp"], 1)
+        sb.close()
+    return wins / n, hp / max(wins, 1)
+
+
+def threats_of(ctx, attr, candidates, exclude=()) -> list[dict]:
+    """The two enemy mons that killed most, each with up to three `candidates` (not in
+    `exclude`) that beat it one on one under the arena — duel win rate, HP left — and where
+    to catch them. (Solo records against the whole team found no counters to mid-team
+    threats such as Surge's Electrode-Hisui; the duel asks the right question.)"""
     out = []
     for enemy_mon, k in attr[0].most_common(2):
-        ranked = sorted((sp for sp in solo_vs if sp not in exclude), key=lambda sp: solo_vs[sp][1][enemy_mon] - solo_vs[sp][0][enemy_mon], reverse=True)
-        ranked = [sp for sp in ranked if solo_vs[sp][1][enemy_mon] > solo_vs[sp][0][enemy_mon]][:3]
+        scored = [(duel(ctx, sp, enemy_mon, ctx.args.n_duel), sp) for sp in candidates if sp not in exclude]
+        ranked = sorted(((w, h, sp) for (w, h), sp in scored if w > 0.5), reverse=True)[:3]
         out.append({"enemy": enemy_mon, "deaths": k,
-                    "counters": [(sp, solo_vs[sp][1][enemy_mon], solo_vs[sp][0][enemy_mon], rp.where(sp, ctx.progress)) for sp in ranked]})
+                    "counters": [(sp, w, h, rp.where(sp, ctx.progress)) for w, h, sp in ranked]})
     return out
 
 
 def say_threats(ctx, threats: list[dict], tag: str = "") -> None:
     for th in threats:
         print(f"{ctx.name:<10} {tag}threat {th['enemy']} ({th['deaths']} of our deaths): counters "
-              + (", ".join(f"{sp} [{ko} KOs / {dd} deaths solo; {wh}]" for sp, ko, dd, wh in th["counters"]) or "none"), flush=True)
+              + (", ".join(f"{sp} [wins the duel {w:.0%}, {h:.0%} HP left; {wh}]" for sp, w, h, wh in th["counters"]) or "none"), flush=True)
 
 
 def sets_of(ctx, team) -> list[dict]:
@@ -238,7 +260,7 @@ def _run_boss(args, name: str) -> dict:
     print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} "
           f"{list(t)}  (others: {', '.join(f'{w_:.0%}' for w_, _, _, _ in results[1:])})  ({time.time() - ctx.t0:.0f}s)", flush=True)
     print(f"{name:<10} sets: " + ", ".join(f"{show(ctx.mons[s])} {ctx.mons[s].moves}" for s in t), flush=True)
-    threats = threats_of(ctx, attr[t], solo_vs)
+    threats = threats_of(ctx, attr[t], pool)
     say_threats(ctx, threats)
     repaired = None
     seed_sp = next((sp for th in threats for sp, *_ in th["counters"] if sp not in t), None)  # a counter the best team lacks
@@ -270,7 +292,7 @@ def _run_boxes(args, name: str) -> dict:
         species = [sp for sp, _ in box if mon_of(ctx, sp) is not None]
         team = greedy(ctx, species)
         w, d, pr, attr = searched(ctx, team)
-        threats = threats_of(ctx, attr, solo_vs, exclude=set(species))
+        threats = threats_of(ctx, attr, ctx.pool, exclude=set(species))
         for th in threats:
             for sp, _, _, wh in th["counters"][:1]:
                 missing[(th["enemy"], sp, wh)] += 1
@@ -295,6 +317,7 @@ def main() -> None:
     ap.add_argument("--n-solo", type=int, default=3)
     ap.add_argument("--n-team", type=int, default=4)
     ap.add_argument("--n-search", type=int, default=6)
+    ap.add_argument("--n-duel", type=int, default=4, help="duels per candidate when ranking counters to a threat")
     ap.add_argument("--search", default="9,8")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--workers", type=int, default=6)
