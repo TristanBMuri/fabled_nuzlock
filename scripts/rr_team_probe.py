@@ -82,27 +82,32 @@ def show(m: Mon) -> str:
 
 def play(bridge, brain, enemy, party: list[Mon], enemy_packed: str, n: int, search=None, arena=None, seeds=None):
     """n battles; returns (win rate, deaths per mon, mean progress, (our deaths by enemy mon,
-    enemy mons KO'd)). seeds: one engine seed per battle index, the same for every team and
-    variant (paired comparisons)."""
+    enemy mons KO'd), deathless-win rate). seeds: one engine seed per battle index, the same
+    for every team and variant (paired comparisons); it also seeds the RR AI's tie-breaks
+    (it uses the global `random`; found 2026-10-11 when two "paired" runs ranked stage A
+    differently) and the searcher's rollouts."""
     from ai_util.sim import SimBattle
-    wins, deaths, prog = 0, 0.0, 0.0
+    wins, deaths, prog, clean = 0, 0.0, 0.0, 0
     deaths_by, kos_on = collections.Counter(), collections.Counter()
     for i in range(n):
         sb = SimBattle(bridge, rp.FMT, pack_team(party), enemy_packed, full_info=True, arena=arena,
                        seed=seeds[i] if seeds else None)
-        if search is not None and seeds:  # the searcher's rollout seeds pair too
-            import numpy as np
-            search.rng = np.random.default_rng(seeds[i])
+        if seeds:  # pair everything: the engine (above), the RR AI's tie-breaks (global random), the searcher's rollouts
+            random.seed(sum(seeds[i]))
+            if search is not None:
+                import numpy as np
+                search.rng = np.random.default_rng(seeds[i])
         sb.play({"p1": search or brain, "p2": enemy}, 100)
         st = sb.state()
         wins += st["winner"] == "p1"
+        clean += st["winner"] == "p1" and not any(m["fainted"] for m in st["p1"])
         deaths += sum(m["fainted"] for m in st["p1"]) / len(st["p1"])
         prog += progress(st)
         d, k, _ = attribution(sb.history["p1"])
         deaths_by += d
         kos_on += k
         sb.close()
-    return wins / n, deaths / n, prog / n, (deaths_by, kos_on)
+    return wins / n, deaths / n, prog / n, (deaths_by, kos_on), clean / n
 
 
 def run_boss(args, name: str) -> dict:
@@ -161,7 +166,7 @@ def solo_stage(ctx, species: list[str]) -> tuple[list, dict]:
         m = mon_of(ctx, sp)
         if m is None:
             continue
-        _, _, pr, solo_vs[sp] = play(ctx.bridge, ctx.calc, ctx.enemy, [m], ctx.enemy_packed, ctx.args.n_solo, arena=ctx.arena, seeds=ctx.seeds)
+        _, _, pr, solo_vs[sp], _ = play(ctx.bridge, ctx.calc, ctx.enemy, [m], ctx.enemy_packed, ctx.args.n_solo, arena=ctx.arena, seeds=ctx.seeds)
         solo.append((pr, sp))
     solo.sort(reverse=True)
     return solo, solo_vs
@@ -185,7 +190,8 @@ def greedy(ctx, short: list[str], start: tuple = ()) -> tuple:
 
 
 def searched(ctx, team: tuple):
-    """(C) the team under calc + search, paired seeds: (win, deaths/mon, progress, attribution)."""
+    """(C) the team under calc + search, paired seeds: (win, deaths/mon, progress, attribution,
+    deathless-win rate)."""
     return play(ctx.bridge, ctx.calc, ctx.enemy, [ctx.mons[s] for s in team], ctx.enemy_packed, ctx.args.n_search,
                 search=ctx.searcher, arena=ctx.arena, seeds=ctx.seeds)
 
@@ -201,6 +207,7 @@ def duel(ctx, sp: str, enemy_mon: str, n: int) -> tuple[float, float]:
     wins, hp = 0, 0.0
     for i in range(n):
         sb = SimBattle(ctx.bridge, rp.FMT, pack_team([mon]), packed, full_info=True, arena=ctx.arena, seed=ctx.seeds[i % len(ctx.seeds)])
+        random.seed(sum(ctx.seeds[i % len(ctx.seeds)]))
         sb.play({"p1": ctx.calc, "p2": ctx.enemy}, 100)
         st = sb.state()
         if st["winner"] == "p1":
@@ -251,13 +258,13 @@ def _run_boss(args, name: str) -> dict:
     print(f"{name}: B {len(ctx.team_score)} teams scored in {time.time() - ctx.t0:.0f}s; greedy {team} "
           f"({ctx.team_score[team]:.2f}); best fast {ranked[0]} ({ctx.team_score[ranked[0]]:.2f})", flush=True)
     top = list(dict.fromkeys([team] + ranked))[:TOP]
-    results, attr = [], {}
+    results, attr, clean = [], {}, {}
     for t in top:
-        w, d, pr, attr[t] = searched(ctx, t)
+        w, d, pr, attr[t], clean[t] = searched(ctx, t)
         results.append((w, -d, t, d))
     results.sort(reverse=True)
     w, _, t, d = results[0]
-    print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} "
+    print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} deathless {clean[t]:.0%} "
           f"{list(t)}  (others: {', '.join(f'{w_:.0%}' for w_, _, _, _ in results[1:])})  ({time.time() - ctx.t0:.0f}s)", flush=True)
     print(f"{name:<10} sets: " + ", ".join(f"{show(ctx.mons[s])} {ctx.mons[s].moves}" for s in t), flush=True)
     threats = threats_of(ctx, attr[t], pool)
@@ -267,12 +274,12 @@ def _run_boss(args, name: str) -> dict:
     if args.repair and seed_sp:
         mon_of(ctx, seed_sp)
         rteam = greedy(ctx, short, (seed_sp,))
-        rw, rd, _, _ = searched(ctx, rteam)
-        repaired = {"team": list(rteam), "win": rw, "deaths_per_mon": rd, "seed": seed_sp}
-        print(f"{name:<10} repaired with {seed_sp}: win {rw:5.0%} deaths/mon {rd:.2f} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - ctx.t0:.0f}s)", flush=True)
+        rw, rd, _, _, rc = searched(ctx, rteam)
+        repaired = {"team": list(rteam), "win": rw, "deaths_per_mon": rd, "deathless": rc, "seed": seed_sp}
+        print(f"{name:<10} repaired with {seed_sp}: win {rw:5.0%} deaths/mon {rd:.2f} deathless {rc:.0%} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - ctx.t0:.0f}s)", flush=True)
     rows = [{"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "arena": ctx.arena,
-             "unmodelled": ctx.unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d, "n": args.n_search,
-             "all": [(list(t_), w_, d_) for w_, _, t_, d_ in results], "threats": threats, "repaired": repaired,
+             "unmodelled": ctx.unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d, "deathless": clean[t], "n": args.n_search,
+             "all": [(list(t_), w_, d_, clean[t_]) for w_, _, t_, d_ in results], "threats": threats, "repaired": repaired,
              "starter": starter, "sets": sets_of(ctx, t), "enemy": ctx.enemy_species, "pool": len(pool), "progress": ctx.progress, "shortlist": short}]
     ctx.bridge.close()
     return {"rows": rows}
@@ -291,21 +298,22 @@ def _run_boxes(args, name: str) -> dict:
         box = rp.sample_box(random.Random(f"{name}-box-{args.seed}-{i}"), ctx.progress, ctx.known)
         species = [sp for sp, _ in box if mon_of(ctx, sp) is not None]
         team = greedy(ctx, species)
-        w, d, pr, attr = searched(ctx, team)
+        w, d, pr, attr, cl = searched(ctx, team)
         threats = threats_of(ctx, attr, ctx.pool, exclude=set(species))
         for th in threats:
             for sp, _, _, wh in th["counters"][:1]:
                 missing[(th["enemy"], sp, wh)] += 1
-        boxes.append({"box": box, "team": list(team), "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "threats": threats})
-        print(f"{name:<10} box {i + 1:>2}/{args.boxes}: {len(box)} mons, team {list(team)} -> win {w:5.0%} deaths/mon {d:.2f}; "
+        boxes.append({"box": box, "team": list(team), "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl, "threats": threats})
+        print(f"{name:<10} box {i + 1:>2}/{args.boxes}: {len(box)} mons, team {list(team)} -> win {w:5.0%} deaths/mon {d:.2f} deathless {cl:.0%}; "
               + "; ".join(f"{th['enemy']} killed {th['deaths']}, missing " + (", ".join(f"{sp} ({wh})" for sp, _, _, wh in th["counters"][:1]) or "no counter in the pool") for th in threats)
               + f"  ({time.time() - ctx.t0:.0f}s)", flush=True)
     wins = [b["win"] for b in boxes]
     row = {"boss": name, "mode": "boxes", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "arena": ctx.arena,
            "n": args.n_search, "boxes": boxes, "mean_win": sum(wins) / len(wins), "p_clear": sum(w_ >= 0.5 for w_ in wins) / len(wins),
-           "mean_deaths": sum(b["deaths_per_mon"] for b in boxes) / len(boxes), "missing": [(k, v) for k, v in missing.most_common(6)],
+           "mean_deaths": sum(b["deaths_per_mon"] for b in boxes) / len(boxes), "mean_deathless": sum(b["deathless"] for b in boxes) / len(boxes),
+           "missing": [(k, v) for k, v in missing.most_common(6)],
            "enemy": ctx.enemy_species, "pool": len(ctx.pool), "progress": ctx.progress}
-    print(f"{name:<10} {args.boxes} boxes: mean win {row['mean_win']:.0%}, boxes with a >=50% team {row['p_clear']:.0%}, deaths/mon {row['mean_deaths']:.2f}; "
+    print(f"{name:<10} {args.boxes} boxes: mean win {row['mean_win']:.0%}, boxes with a >=50% team {row['p_clear']:.0%}, deaths/mon {row['mean_deaths']:.2f}, deathless wins {row['mean_deathless']:.0%}; "
           f"most missed: " + ", ".join(f"{sp} vs {en} ({wh}) x{v}" for (en, sp, wh), v in row["missing"][:3]), flush=True)
     ctx.bridge.close()
     return {"rows": [row]}
@@ -342,15 +350,15 @@ def main() -> None:
     print(f"\nRadical Red best-six probe ({mode}) | legal moves only: {args.legal} | arena effects: {args.arena} | field-aware calc bot: {not args.blind_field} | seeded | "
           f"search {args.search} x n={args.n_search} | no EVs, no items | enemy = RR AI, full info | {(time.time() - t0) / 60:.0f} min")
     if args.boxes:
-        print(f"  {'boss':<10} {'cap':>3} {'mean win':>8} {'>=50%':>6} {'d/mon':>5}  most missed counter (vs)")
+        print(f"  {'boss':<10} {'cap':>3} {'mean win':>8} {'>=50%':>6} {'d/mon':>5} {'clean':>5}  most missed counter (vs)")
         for r in sorted(rows, key=lambda r: r["cap"]):
             top = r["missing"][0] if r["missing"] else ((None, None, None), 0)
-            print(f"  {r['boss']:<10} {r['cap']:>3} {r['mean_win']:8.0%} {r['p_clear']:6.0%} {r['mean_deaths']:5.2f}  {top[0][1]} vs {top[0][0]} ({top[0][2]}) x{top[1]}")
+            print(f"  {r['boss']:<10} {r['cap']:>3} {r['mean_win']:8.0%} {r['p_clear']:6.0%} {r['mean_deaths']:5.2f} {r['mean_deathless']:5.0%}  {top[0][1]} vs {top[0][0]} ({top[0][2]}) x{top[1]}")
     else:
-        print(f"  {'boss':<10} {'cap':>3} {'win':>5} {'deaths/mon':>10}  best team  | arena")
+        print(f"  {'boss':<10} {'cap':>3} {'win':>5} {'deaths/mon':>10} {'clean':>5}  best team  | arena")
         for r in sorted(rows, key=lambda r: r["cap"]):
             ar = {k: v for k, v in r["arena"].items() if k != "ai_permanent"}
-            print(f"  {r['boss']:<10} {r['cap']:>3} {r['win']:5.0%} {r['deaths_per_mon']:10.2f}  {', '.join(r['best_team'])}  | {ar or '-'}")
+            print(f"  {r['boss']:<10} {r['cap']:>3} {r['win']:5.0%} {r['deaths_per_mon']:10.2f} {r['deathless']:5.0%}  {', '.join(r['best_team'])}  | {ar or '-'}")
 
 
 if __name__ == "__main__":
