@@ -22,9 +22,8 @@ Grinding Mode: that single fact changes several assumptions the probes made.
 
 - **No EVs anywhere** (player or trainers; Ghost Marowak 252 HP is the one
   exception); **all IVs 31**. Verified against the sheet's own speed stats:
-  84/92 boss mons match EV 0, none match 252. The ROM-dump parse currently
-  guesses 252/252/4 for trainers (`build_rr.guess_evs`) — too strong — and the
-  probes' "trained EVs" variant does not exist in this mode.
+  84/92 boss mons match EV 0, none match 252. `build_rr.trainer_evs` gives every
+  trainer EVs 0 (Ghost: 252 HP) since 2026-10-10; the player gets 0 too.
 - **Player bans** (82 moves): every set-up move, weather and terrain moves,
   Trick Room, Tailwind, hazards, Protect, Substitute, Taunt, Destiny Bond,
   Perish Song, Power-Up Punch, Flame Charge, Scale Shot, Fiery Dance, Charge
@@ -32,7 +31,8 @@ Grinding Mode: that single fact changes several assumptions the probes made.
   swaps for the player: Drought/Desolate Land → Sheer Force, Drizzle/Primordial
   Sea → Adaptability, Sand Stream → Sand Force, the four Surges, Speed Boost →
   Infiltrator, Moxie/Beast Boost/… → Unnerve, Magic Bounce → Magic Guard, etc.
-  `encounter_moves(best4)` and ability slot 0 ignore both lists today.
+  `gauntlet.BANNED_MOVES` (set by `rr_team_probe --legal`) removes the moves;
+  the ability swaps are still not applied (ability slot 0 as the dex lists it).
 - **AI weather/terrain is permanent**; Defog & co. do not clear terrain.
 - Set mode, no bag against gym leaders and selected bosses (the sim already
   has no bag).
@@ -59,19 +59,20 @@ Desolate Land (Blaine), **doubles + Primordial Sea/Snow (Lorelei)**, Misty
 Terrain (Bruno), Psychic Terrain (Agatha), no hazard removal (Lance, Clair),
 plus 16 mandatory mini-bosses with permanent weather and ~20 **doubles**
 fights (Game Corner and Hideout guards, Silph Ariana & Archer with partner
-Brendan, several route mini-bosses). None of this is in the sim yet.
+Brendan, several route mini-bosses). Weather / terrain / Tailwind / Trick Room
+are in the sim since 2026-10-11 (`SimBattle(arena=)`, `rr_probe.arena()`);
+doubles and the custom rules (Brock −33%, Erika's grass moves, Swamp, Magma
+Storm) are not.
 
-## Gaps, in the order they matter
+## Gaps, in the order they matter (3-5 partly closed 2026-10-11: `build_rr.progression()` gives trainer order, encounter gates and TM/tutor availability by trainer index; route trainers, gifts/statics and the care-package item timeline are still open)
 
 1. **Doubles.** Sabrina, Lorelei and ~20 mandatory fights are doubles. Showdown
    simulates them; the mirror, calc bot, searcher and RR-AI port are singles
    only. Either the run skips them (not a real answer) or the battler grows a
    doubles mode.
-2. **Permanent weather/terrain/Trick Room/Tailwind** at the start of boss
-   fights: a carry-state edit in `sim_bridge.js` (`battle.field.setWeather`
-   with infinite duration, `setTerrain`, pseudo-weather) plus the special
-   rules (Brock −33% on super-effective, Erika's grass moves, Swamp, Magma
-   Storm) which need per-boss scripts or are left out and declared.
+2. **Custom arena rules** (Brock −33% on super-effective hits, Erika's grass
+   moves, Swamp, Magma Storm, pre-burned / pre-boosted mons): per-boss scripts
+   in the bridge, or left out and declared. The generic effects are done.
 3. **Trainer sequence with levels.** Bosses: tracker order (95 mandatory) with
    caps; "Highest Lv − n" resolves against the cap. Route trainers: 470 dump
    slots have a FireRed map via `fr_slots.json`; map → progression segment is a
@@ -87,9 +88,9 @@ Brendan, several route mini-bosses). None of this is in the sim yet.
    move pool, apply ability swaps, Toxic/Leech whitelist, no EVs, 31 IVs,
    natures (free to choose? mints are not in the item sheet — assume the
    caught nature, or ask).
-7. **Enemy sets**: ROM dump with EVs 0 (fix `guess_evs`), IVs from the dump
-   (Trick Room mons carry 0 Spe), items/abilities as dumped; `parse_dump`
-   must keep "Max Level − n" mons (796 of 2308 are dropped today).
+7. **Enemy sets**: EVs 0 and the dump's IVs are in; `parse_dump` must still
+   keep "Max Level − n" mons (796 of 2308 are dropped today — all route
+   trainers and the scaled bosses), resolving them against the segment cap.
 8. **AI fidelity**: `ai_util/rr_ai.py` is a CFRU port; doubles targeting and
    the arena rules are not in it.
 

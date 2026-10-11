@@ -1,0 +1,8 @@
+team: [('electabuzz', 'Static', ['thunderpunch', 'swift', 'thief', 'thunderwave']), ('toucannon', 'Frisk', ['beakblast', 'uturn', 'steelwing', 'roost']), ('gogoat', 'Sap Sipper', ['razorleaf', 'earthquake', 'takedown', 'synthesis']), ('jynx', 'Dry Skin', ['psyshock', 'icywind', 'flash', 'psybeam']), ('throh', 'Guts', ['vitalthrow', 'bodyslam', 'dig', 'lowsweep']), ('boltund', 'Strong Jaw', ['spark', 'dig', 'icefang', 'thunderfang'])]
+enemy: [('Politoed', 'flipturn,scald,earthquake,toxic'), ('Ludicolo', 'gigadrain,scald,aurorabeam,thunderpunch'), ('Mantine', 'scald,hurricane,roost,hiddenpowergrass'), ('Clodsire', 'poisonjab,bulldoze,recover,toxic'), ('Starmie', 'scald,thunderbolt,psyshock,aurorabeam'), ('Toxicroak', 'swordsdance,drainpunch,poisonjab,suckerpunch')]
+
+MISTY: 7/12 wins
+our deaths by enemy mon on the field: [('Mantine', 22), ('Toxicroak', 14), ('Clodsire', 7), ('Starmie', 5), ('Ludicolo', 4), ('Politoed', 3)]
+which of ours die: [('Boltund', 11), ('Throh', 11), ('Jynx', 9), ('Toucannon', 9), ('Gogoat', 8), ('Electabuzz', 7)]
+enemy mons we KO (by our mon on field): [('Gogoat', 15), ('Jynx', 10), ('Toucannon', 10), ('Boltund', 9), ('Throh', 7), ('Electabuzz', 4)]
+enemy mons left standing at the end: [('Politoed', 5), ('Mantine', 5), ('Starmie', 3), ('Toxicroak', 3), ('Ludicolo', 1)]

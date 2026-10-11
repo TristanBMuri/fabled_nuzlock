@@ -1,0 +1,33 @@
+BROCK: arena {'ai_permanent': True, 'weather': 'sandstorm'}; not modelled: []
+BLAINE: arena {'ai_permanent': True, 'weather': 'desolateland'}; not modelled: []
+MISTY: arena {'ai_permanent': True, 'weather': 'raindance'}; not modelled: []
+ERIKA: arena {'ai_permanent': True, 'terrain': 'grassyterrain'}; not modelled: []
+KOGA: arena {'ai_permanent': True, 'p2': ['tailwind']}; not modelled: []
+LT. SURGE: arena {'ai_permanent': True, 'terrain': 'electricterrain'}; not modelled: []
+BROCK: A solo scores for 124 species in 3s; top: ledyba 0.47, tentacruel 0.43, patrat 0.38, ponytagalar 0.37, luvdisc 0.36, sentret 0.35, clawitzer 0.35, wailord 0.34
+MISTY: A solo scores for 219 species in 4s; top: ekans 0.43, shinx 0.31, seviper 0.28, smoochum 0.28, stunky 0.26, elekid 0.26, yamper 0.26, wooloo 0.25
+LT. SURGE: A solo scores for 272 species in 4s; top: ponytagalar 0.33, mareep 0.33, illumise 0.33, ponyta 0.33, snubbull 0.29, volbeat 0.28, sizzlipede 0.28, shinx 0.28
+KOGA: A solo scores for 449 species in 5s; top: qwilfishhisui 0.33, slowpokegalar 0.26, torkoal 0.23, aron 0.22, slowbrogalar 0.21, drifloon 0.19, forretress 0.19, bouffalant 0.19
+ERIKA: A solo scores for 360 species in 6s; top: varoom 0.45, gulpin 0.35, yanma 0.31, pidove 0.29, scatterbug 0.28, starly 0.28, cubchoo 0.27, doduo 0.26
+BLAINE: A solo scores for 545 species in 6s; top: exeggutoralola 0.27, noibat 0.26, mudbray 0.25, hoppip 0.24, cherubi 0.24, capsakid 0.22, vikavolt 0.22, seedot 0.22
+KOGA: B 279 teams scored in 21s; greedy ('basculinbluestriped', 'ekans', 'ferrothorn', 'pineco', 'qwilfishhisui', 'tinkatink') (0.72); best fast ('basculinbluestriped', 'ekans', 'ferrothorn', 'pineco', 'qwilfishhisui', 'tinkatink') (0.72)
+LT. SURGE: B 279 teams scored in 23s; greedy ('lunatone', 'ponytagalar', 'slowbrogalar', 'snubbull', 'solrock', 'volbeat') (1.26); best fast ('binacle', 'dedenne', 'mareep', 'shinx', 'sizzlipede', 'snubbull') (1.67)
+BLAINE: B 279 teams scored in 27s; greedy ('baltoy', 'exeggutoralola', 'gligar', 'inkay', 'seedot', 'trapinch') (0.79); best fast ('deerlingsummer', 'emolga', 'fletchling', 'noibat', 'tangrowth', 'tropius') (1.33)
+MISTY: B 279 teams scored in 30s; greedy ('axew', 'dunsparce', 'ekans', 'seviper', 'spearow', 'volbeat') (1.62); best fast ('axew', 'dunsparce', 'ekans', 'seviper', 'spearow', 'volbeat') (1.62)
+ERIKA: B 279 teams scored in 31s; greedy ('fletchling', 'houndour', 'scatterbug', 'varoom', 'yanma', 'zubat') (1.75); best fast ('fletchling', 'houndour', 'scatterbug', 'varoom', 'yanma', 'zubat') (1.75)
+BROCK: B 279 teams scored in 36s; greedy ('bramblin', 'sentret', 'sewaddle', 'tentacool', 'tentacruel', 'zigzagoon') (1.83); best fast ('bidoof', 'bramblin', 'clawitzer', 'ledyba', 'tentacool', 'wailord') (2.00)
+KOGA       legal=False best team under search: win   17% deaths/mon 0.94 ['basculinbluestriped', 'ekans', 'ferrothorn', 'pineco', 'qwilfishhisui', 'tinkatink']  (others: 17%, 0%, 0%, 0%, 0%)  (450s)
+LT. SURGE  legal=False best team under search: win  100% deaths/mon 0.47 ['binacle', 'dedenne', 'mareep', 'shinx', 'sizzlipede', 'snubbull']  (others: 100%, 83%, 83%, 67%, 50%)  (553s)
+ERIKA      legal=False best team under search: win  100% deaths/mon 0.25 ['fletchling', 'houndour', 'scatterbug', 'varoom', 'yanma', 'zubat']  (others: 100%, 83%, 83%, 83%, 83%)  (688s)
+BLAINE     legal=False best team under search: win  100% deaths/mon 0.42 ['deerlingsummer', 'emolga', 'fletchling', 'noibat', 'tangrowth', 'tropius']  (others: 67%, 50%, 50%, 33%, 0%)  (698s)
+MISTY      legal=False best team under search: win  100% deaths/mon 0.53 ['axew', 'dunsparce', 'ekans', 'octillery', 'seviper', 'spearow']  (others: 67%, 67%, 67%, 50%, 50%)  (766s)
+BROCK      legal=False best team under search: win  100% deaths/mon 0.03 ['budew', 'clauncher', 'cutiefly', 'sewaddle', 'tentacruel', 'zigzagoon']  (others: 100%, 100%, 100%, 100%, 100%)  (843s)
+
+Radical Red best-six probe | legal moves only: False | arena effects: True | shortlist 24, top 6 teams, search 9,8 x n=6 | no EVs, no items | enemy = RR AI, full info | 14 min
+  boss       cap   win deaths/mon  best team  | arena
+  BROCK       16  100%       0.03  budew, clauncher, cutiefly, sewaddle, tentacruel, zigzagoon  | {'weather': 'sandstorm'}
+  MISTY       28  100%       0.53  axew, dunsparce, ekans, octillery, seviper, spearow  | {'weather': 'raindance'}
+  LT. SURGE   36  100%       0.47  binacle, dedenne, mareep, shinx, sizzlipede, snubbull  | {'terrain': 'electricterrain'}
+  ERIKA       44  100%       0.25  fletchling, houndour, scatterbug, varoom, yanma, zubat  | {'terrain': 'grassyterrain'}
+  KOGA        68   17%       0.94  basculinbluestriped, ekans, ferrothorn, pineco, qwilfishhisui, tinkatink  | {'p2': ['tailwind']}
+  BLAINE      76  100%       0.42  deerlingsummer, emolga, fletchling, noibat, tangrowth, tropius  | {'weather': 'desolateland'}

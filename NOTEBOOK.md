@@ -1570,3 +1570,79 @@ now — items and EVs are gone. So the open question moved: not "can the battler
 win a boss fight" (yes, given the team) but "can the run layer assemble such
 a team from real encounters, and survive the arena effects and the doubles
 fights". `data/rr/README.md` lists the data and gaps in order.
+
+## Radical Red: arenas, real pools, real TMs (2026-10-11, `results/rr_team_probe_{arena_all,arena_legal,real,real_noarena}.*`, `results/rr_postmortem_misty.log`)
+
+Two corrections to the best-six probe, each measured on its own.
+
+**Arena effects** (`sim_bridge.js` arena: the gym's permanent weather / terrain /
+Tailwind set once the leads are in, no duration, re-asserted every turn; p2's
+own weather and terrain frozen too — the hardcore rule). Same inflated pool
+and every TM as the evening runs:
+
+  boss       no arena (all / legal)   arena (all / legal)   effect
+  Brock        100 / 100                100 / 100            sandstorm
+  Misty        100 / 100                100 /  83            rain          (legal: 0.72 deaths/mon)
+  Lt. Surge    100 / 100                100 / 100            Electric Terrain (spread widens to 50)
+  Erika        100 / 100                100 / 100            Grassy Terrain
+  Koga         100 / 100                 17 /  50            Tailwind      (five other teams 0%)
+  Blaine        83 / 100                100 / 100            Desolate Land (spread 100 → 0 / 17)
+
+Koga's Tailwind alone turns six teams at 100% into one coin flip; everything
+else the pool absorbs by picking around it (Blaine's teams become Fire-immune
+or -resistant: Salazzle, Galarian Ponyta, Diglett).
+
+**Real pools and real TMs.** Printing the Brock and Misty teams showed the
+probe's pool held Super Rod and Surf encounters at level 53-56 (Clawitzer,
+Luvdisc, Tentacruel under Pallet Town) and its movesets held Surf, Ice Beam,
+Earthquake, Sludge Wave (post-game) and Victory Road TMs at cap 16. Now
+`build_rr.progression()` writes the hardcore trainer order with the last
+encounter location open at each fight and the rods / Surf as trainer indices
+(Old Rod #0, Good Rod #21 Vermilion, Super Rod #74, Surf #81), and every TM
+and hardcore tutor move with the trainer index at which it is in hand (boss
+rewards after the boss, places when open, HM-locked spots with the HM, the
+grey tutors the sheet marks gone in hardcore skipped; money not modelled).
+`rr_probe.pools()` keeps a species only if some open location offers it by a
+method in hand at a level at or under the cap. Brock 124 → 105 species and 6
+TM/tutor moves in hand, Misty 219 → 191 and 22, Surge 272 → 251 and 35, Erika
+360 → 338 and 72. Scraggy at Brock now carries Thief / Low Sweep / Headbutt /
+Feint Attack; Arbok at Misty Poison Jab / Crunch / Dig / Sucker Punch.
+Early game only (the user's call: no point past the blender), legal moves,
+no EVs, no items, n=12 per team under search:
+
+  boss       cap  pool  no arena            arena               top-6 spread (arena)
+  Brock       16   105   (still running)      100%  0.32 d/mon    100 100 92 83 83 83
+  Misty       28   191   100%  0.36           58%  0.67          58 50 42 42 33 25
+  Lt. Surge   36   251   100%  0.51           75%  0.69          75 75 75 58 50 42
+  Erika       44   338   100%  0.10           92%  0.36          (one team)
+  (43 min on 4 workers each; the no-arena run has one team at 100% at Misty and
+  Surge, the rest 67-92 / 75-83)
+
+**Verdict.** With what a run actually has, the bot beats Brock, loses to Misty
+more often than not (58% best, 0.67 deaths per mon) and gets through Surge
+three times in four. The blender is Misty. Rain Misty is the wall, and it is a
+wall of two mons: the post-mortem (`scripts/rr_postmortem.py`, 12 replays of
+the best team) attributes 22 of 55 deaths to Mantine (Swift Swim, Scald /
+Hurricane / Roost) and 14 to Toxicroak (Dry Skin, Swords Dance); Politoed and
+Mantine are the ones left standing in 5 of 12 fights. Our Electric types
+(Boltund, Electabuzz) die 18 times for 13 KOs — Thunder Punch Electabuzz is
+not a Mantine answer at level 28 under rain.
+
+**What the bot needs to advance** (the question this run was for):
+1. A threat → counter step on the box: name the enemy mons that cause the
+   deaths and search the box for what walls or outspeeds them (here: a bulky
+   Electric or Grass special attacker for Mantine, a Psychic or Flying hit
+   that OHKOs Toxicroak before Swords Dance). The post-mortem is that step's
+   input; the planner's `risk()` over swaps is its output. Encounter routing
+   then follows: which route adds the counter.
+2. Set-up moves. The ban cost nothing measurable because the calc bot clicks
+   a boosting move only under a narrow safety rule (`calc_bot.py`: enemy threat
+   under 20% and own HP over 60%), which the RR AI rarely allows, and because
+   search can see a two-turn plan only if the rollout brain plays it. The
+   enemy's set-up turns (Toxicroak's Swords Dance) are not read as a threat
+   either. A boost-aware value in the rollout brain (expected damage over the
+   remaining fight, not this turn) is what lets search use and punish set-up.
+   This is the battler's ceiling, not the planner's.
+3. Starter and gifts (HUMAN_TODO 8): the pool has no starter; a Bulbasaur
+   line changes Misty.
+Doubles, natures and the player's ability swaps are still out.

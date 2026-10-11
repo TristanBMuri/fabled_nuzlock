@@ -341,23 +341,24 @@ brain's block ranking does not transfer to search play at Cynthia),
 20% / 40%; anything scored by the fast brain at the League transfers badly
 to search play — three times now: E8, EVs, moves).
 
-## Radical Red (2026-10-10)
+## Radical Red (2026-10-10/11)
 
-The question the project exists for. Two measurements (NOTEBOOK.md → Radical
-Red boss probe / best-six probe): on the RadicalRedShowdown fork with the CFRU
-AI port as the enemy and full information, **a random box at the cap clears
-Brock only** (93% / 38% / 18-27% / 18% / 2% / 8% from Brock to Blaine, with
-252-EV enemies), but **the best six in the reachable pool beat every probed
-gym at 100% under search** with the real hardcore rules (no EVs on either
-side, no items, the 82 banned moves removed), Blaine least convincingly
-(top-six spread 100 → 17%). The battler is not the blocker given the team;
-the run layer (which encounters, which six) and what is not modelled (arena
-effects, doubles, natures, ability swaps) are.
+The question the project exists for. Measured so far (NOTEBOOK.md → Radical
+Red entries): a random box at the cap clears Brock only; the best six in the
+reachable pool with every TM beat every gym at 100% — until the gym arenas
+(Koga's Tailwind: 17-50%) and, decisively, **real pools and real TMs**
+(`build_rr.progression()`: trainer order, encounter gates, TM/tutor
+availability by trainer index): then **Brock 100%, Misty 58%, Lt. Surge 75%,
+Erika 92%** with legal moves, no EVs, no items (n=12). Misty's rain, Mantine
+and Toxicroak are the blender (`scripts/rr_postmortem.py`). Next: a threat →
+counter step on the box (post-mortem → `risk()` over swaps → encounter
+routing) and a boost-aware rollout so search can use set-up moves.
 Pieces: `pokemon-showdown-rr/` (ignored; clone + `node build` +
 `config/custom-formats.ts` as README → Setup for the main clone),
-`scripts/build_rr.py` → `data/rr/`, `scripts/rr_probe.py`,
-`scripts/rr_team_probe.py` (`--legal`), `ai_util/rr_ai.py`,
-`gauntlet.BANNED_MOVES`.
+`scripts/build_rr.py` → `data/rr/` (`order.json`, `tms.json` are the
+progression), `scripts/rr_probe.py` (`pools()`, `arena()`),
+`scripts/rr_team_probe.py` (`--legal --arena`), `scripts/rr_postmortem.py`,
+`ai_util/rr_ai.py`, `gauntlet.BANNED_MOVES`, `SimBattle(arena=)`.
 **Data for the full run is collected (2026-10-10 evening): `data/rr/README.md`**
 — the three official 4.1 sheets (`data/rr/sheets/`), the hardcore rules as
 JSON (no EVs for anyone, 31 IVs, 82 banned player moves, ability swaps, 18
