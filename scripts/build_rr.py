@@ -285,7 +285,11 @@ def main() -> None:
     bosses = json.load(open(RR / "tracker_bosses.json"))
     names = {e["species"] for l in enc["locations"] for t in l["methods"].values() for e in t}
     names |= {p["species"] for mode in bosses.values() for c in mode["categories"] for x in c["bosses"] for p in x["pokemon"]}
-    ids = sorted({to_id_str(n) for n in names})
+    # the player's possible starters (every generation; drawn at random per run) are not wild encounters
+    starters = ["bulbasaur", "charmander", "squirtle", "chikorita", "cyndaquil", "totodile", "treecko", "torchic", "mudkip",
+                "turtwig", "chimchar", "piplup", "snivy", "tepig", "oshawott", "chespin", "fennekin", "froakie", "rowlet",
+                "litten", "popplio", "grookey", "scorbunny", "sobble", "sprigatito", "fuecoco", "quaxly"]
+    ids = sorted({to_id_str(n) for n in names} | set(starters))
     raw = subprocess.run(["node", "-e", NODE, str(FORK), *ids], capture_output=True, text=True, check=True).stdout
     data = json.loads(raw)
     missing = [i for i in ids if i not in data["species"]]
