@@ -110,3 +110,16 @@ def test_forme_next_to_base_form_gets_distinct_names(bridge):
     sb.play(brains(), max_turns=60)
     assert sb.ended and sb.stats["rejected"] == 0
     sb.close()
+
+
+def test_arena_weather_is_permanent(bridge):
+    """A fixed arena (Radical Red hardcore gyms): the weather is up from turn one and
+    never runs out — sandstorm lasts 5 turns normally."""
+    from poke_env.battle import Weather
+    sb = SimBattle(bridge, FMT, TEAM_A, TEAM_B, seed=[1, 2, 3, 4], arena={"weather": "sandstorm", "ai_permanent": True})
+    assert Weather.SANDSTORM in sb.mirrors["p1"].weather
+    sb.play(brains(), max_turns=8)
+    assert sb.turn >= 7 or sb.ended
+    assert Weather.SANDSTORM in sb.mirrors["p1"].weather
+    f = sb.fork(seed=[1, 2, 3, 4])  # a fork keeps the arena
+    assert f.arena == sb.arena and Weather.SANDSTORM in f.mirrors["p2"].weather

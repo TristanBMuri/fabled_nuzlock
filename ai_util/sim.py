@@ -95,12 +95,14 @@ class SimBridge:
 class SimBattle:
     def __init__(self, bridge: SimBridge, fmt: str, p1_team: str | None, p2_team: str | None,
                  seed: list[int] | None = None, dedupe: bool = True, carry: list | None = None,
-                 full_info: bool = False):
+                 full_info: bool = False, arena: dict | None = None):
         """Packed teams; None lets the format's generator build one (randombattle).
         carry: per p1 mon {hp, status, pp} to start from (no heal since the last fight).
         full_info: each mirror knows the other side's whole team from turn one (sets,
-        levels, items, abilities, real stats) — the full-docs regime, both ways."""
-        self.bridge, self.fmt, self.full_info = bridge, fmt, full_info
+        levels, items, abilities, real stats) — the full-docs regime, both ways.
+        arena: field effects fixed for the fight — {weather, terrain, pseudo: [...],
+        p2: [side conditions], ai_permanent} (Radical Red hardcore gyms; sim_bridge.js)."""
+        self.bridge, self.fmt, self.full_info, self.arena = bridge, fmt, full_info, arena
         self.gen = GenData.from_format(fmt).gen
         self.id = f"b{next(_IDS)}"
         if dedupe:
@@ -116,7 +118,7 @@ class SimBattle:
         self.mirrors = {s: self._mirror(s) for s in SIDES}
         if bridge is not None and fmt is not None:
             self._absorb(bridge.call(
-                op="new", id=self.id, format=fmt, seed=seed, carry=carry,
+                op="new", id=self.id, format=fmt, seed=seed, carry=carry, arena=arena,
                 p1={"name": "p1", "team": p1_team}, p2={"name": "p2", "team": p2_team}))
 
     # ------------------------------------------------------------ mirroring
@@ -228,7 +230,7 @@ class SimBattle:
         two forks with the same seed replay the same chance events (common random
         numbers across search candidates); reseed=True rolls a fresh one."""
         new = SimBattle.__new__(SimBattle)
-        new.bridge, new.fmt, new.gen, new.full_info = self.bridge, self.fmt, self.gen, self.full_info
+        new.bridge, new.fmt, new.gen, new.full_info, new.arena = self.bridge, self.fmt, self.gen, self.full_info, self.arena
         new.id = f"b{next(_IDS)}"
         new.teams = self.teams
         new.history = {s: list(self.history[s]) for s in SIDES}

@@ -5,6 +5,7 @@
 //    "p1":{"name":"p1","team":"<packed>"},"p2":{...},"seed":[..]?}   -> flush
 //   {"op":"choose","id":"b0","p1":"move 1","p2":"switch 2"}          -> flush
 //   {"op":"fork","id":"b0","new":"b1","reseed":true,"seed":[..]?}    -> {"ok":true}
+//   new also takes "arena": {weather, terrain, pseudo:[], p2:[], ai_permanent} (see applyArena)
 //     seed = 4 ints (Gen5 PRNG) fixes the fork's RNG; reseed=true rolls a fresh one
 //   {"op":"forcelose","id":"b0","side":"p1"}                         -> flush
 //   {"op":"state","id":"b0"}   -> hp/fainted per mon in original team order
@@ -57,6 +58,22 @@ function attach(entry) {
   entry.battle.send = sender(entry);
 }
 
+// arena: field effects fixed for the whole fight (Radical Red hardcore gym rules):
+// {weather, terrain, pseudo: [...], p2: [side conditions], ai_permanent}. Set once the battle
+// has started (leads in, so the messages reach the mirrors) with no duration, and re-asserted
+// after every turn; ai_permanent also freezes whatever weather / terrain p2's own mons set.
+function applyArena(e) {
+  const a = e.arena, b = e.battle, f = b.field;
+  if (!a || !b.started || b.ended) return;
+  const src = b.sides[1].active[0];
+  const pin = (st) => { if (st) st.duration = 0; };
+  if (a.weather) { if (f.weatherState.id !== a.weather) f.setWeather(a.weather, src); pin(f.weatherState); }
+  if (a.terrain) { if (f.terrainState.id !== a.terrain) f.setTerrain(a.terrain, src); pin(f.terrainState); }
+  for (const id of a.pseudo || []) { if (!f.pseudoWeather[id]) f.addPseudoWeather(id, src); pin(f.pseudoWeather[id]); }
+  for (const id of a.p2 || []) { if (!b.sides[1].sideConditions[id]) b.sides[1].addSideCondition(id, src); pin(b.sides[1].sideConditions[id]); }
+  if (a.ai_permanent) for (const st of [f.weatherState, f.terrainState]) if (st.source && st.source.side && st.source.side.id === 'p2') pin(st);
+}
+
 function winnerId(b) {
   if (!b.ended || !b.winner) return '';
   const side = b.sides.find(s => s.name === b.winner);
@@ -64,6 +81,7 @@ function winnerId(b) {
 }
 
 function flush(entry) {
+  applyArena(entry);
   const b = entry.battle;
   b.sendUpdates();
   const out = entry.out;
@@ -107,6 +125,7 @@ function handle(msg) {
         });
       }
       e.battle.setPlayer('p2', prepPlayer(msg.format, msg.p2));
+      e.arena = msg.arena || null;
       battles.set(msg.id, e);
       return flush(e);
     }
@@ -116,7 +135,7 @@ function handle(msg) {
     case 'fork': {
       // stringify: toJSON shares array refs (log) with the live battle
       const b = Battle.fromJSON(JSON.stringify(entry.battle.toJSON()));
-      const e = { battle: b, out: { p1: [], p2: [] } };
+      const e = { battle: b, out: { p1: [], p2: [] }, arena: entry.arena };
       attach(e);
       if (msg.seed) b.resetRNG(msg.seed);
       else if (msg.reseed !== false) b.resetRNG(null);

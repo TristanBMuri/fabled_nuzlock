@@ -13,8 +13,10 @@ late copies). `--legal` removes the 82 moves hardcore bans for the player
 (data/rr/hardcore_rules.json) from every moveset in stages A-C; without it the
 player has every move (the 2026-10-10 afternoon run also gave the enemy
 252/252 EVs and the player items / trained EVs — see NOTEBOOK.md). Full enemy
-information; enemy = the RR AI port. Not modelled: the gyms' permanent field
-effects (favours the player), natures, the player's ability swaps.
+information; enemy = the RR AI port. `--arena` puts the gym's permanent field effect
+(tracker battleEffect: weather / terrain / Tailwind / Trick Room) into the sim and
+makes p2's own weather and terrain permanent (hardcore). Not modelled: doubles,
+the custom arena rules, natures, the player's ability swaps.
 
   uv run python scripts/rr_team_probe.py --bosses "MISTY,LT. SURGE,ERIKA" --workers 3 --out logs/rr_team_probe.jsonl
 """
@@ -61,12 +63,12 @@ def build_mon(species: str, cap: int, known: dict) -> Mon | None:
     return m
 
 
-def play(bridge, brain, enemy, party: list[Mon], enemy_packed: str, n: int, search=None):
+def play(bridge, brain, enemy, party: list[Mon], enemy_packed: str, n: int, search=None, arena=None):
     """n battles; returns (win rate, deaths per mon, mean progress)."""
     from ai_util.sim import SimBattle
     wins, deaths, prog = 0, 0.0, 0.0
     for _ in range(n):
-        sb = SimBattle(bridge, rp.FMT, pack_team(party), enemy_packed, full_info=True)
+        sb = SimBattle(bridge, rp.FMT, pack_team(party), enemy_packed, full_info=True, arena=arena)
         sb.play({"p1": search or brain, "p2": enemy}, 100)
         st = sb.state()
         wins += st["winner"] == "p1"
@@ -91,7 +93,9 @@ def _run_boss(args, name: str) -> dict:
     from ai_util.rr_ai import RadicalRedAI
     from ai_util.sim import SimBridge, player_brain
     by, known = rp.pools()
-    _, cap, pool = by[name]
+    block, cap, pool = by[name]
+    arena, unmodelled = rp.arena(block.get("battleEffect", "")) if args.arena else ({}, [block.get("battleEffect", "")])
+    print(f"{name}: arena {arena}; not modelled: {unmodelled}", flush=True)
     if args.legal:
         gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(rp.RR / "hardcore_rules.json"))["banned_moves"]}
     enemy_packed, dump_cap, enemy_species = rp.boss_team(name)
@@ -107,7 +111,7 @@ def _run_boss(args, name: str) -> dict:
         m = build_mon(sp, cap, known)
         if m is None:
             continue
-        _, _, pr = play(bridge, calc, enemy, [m], enemy_packed, args.n_solo)
+        _, _, pr = play(bridge, calc, enemy, [m], enemy_packed, args.n_solo, arena=arena)
         solo.append((pr, sp))
     solo.sort(reverse=True)
     short = [sp for _, sp in solo[:SHORT]]
@@ -119,7 +123,7 @@ def _run_boss(args, name: str) -> dict:
 
     def score(team: tuple) -> float:
         if team not in team_score:
-            team_score[team] = play(bridge, calc, enemy, [mons[s] for s in team], enemy_packed, args.n_team)[2]
+            team_score[team] = play(bridge, calc, enemy, [mons[s] for s in team], enemy_packed, args.n_team, arena=arena)[2]
         return team_score[team]
     team = ()
     while len(team) < 6:  # greedy: add the species that lifts the team's progress most
@@ -136,11 +140,11 @@ def _run_boss(args, name: str) -> dict:
     searcher = Searcher(None, enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed)
     results = []
     for t in top:
-        w, d, pr = play(bridge, calc, enemy, [mons[s] for s in t], enemy_packed, args.n_search, search=searcher)
+        w, d, pr = play(bridge, calc, enemy, [mons[s] for s in t], enemy_packed, args.n_search, search=searcher, arena=arena)
         results.append((w, -d, t, d))
     results.sort(reverse=True)
     w, _, t, d = results[0]
-    rows = [{"boss": name, "cap": cap, "legal": args.legal, "best_team": list(t), "win": w, "deaths_per_mon": d,
+    rows = [{"boss": name, "cap": cap, "legal": args.legal, "arena": arena, "unmodelled": unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d,
              "n": args.n_search, "all": [(list(t_), w_, d_) for w_, _, t_, d_ in results],
              "enemy": enemy_species, "pool": len(pool), "shortlist": short}]
     print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} "
@@ -159,6 +163,7 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--workers", type=int, default=6)
     ap.add_argument("--legal", action="store_true", help="drop the moves hardcore bans for the player")
+    ap.add_argument("--arena", action="store_true", help="the gym's permanent field effect (tracker battleEffect) in the sim")
     ap.add_argument("--out")
     args = ap.parse_args()
     names = [b.strip() for b in args.bosses.split(",")]
@@ -171,11 +176,12 @@ def main() -> None:
     rows = [r for p in parts for r in p["rows"]]
     if args.out:
         Path(args.out).write_text("".join(json.dumps(r) + "\n" for r in rows))
-    print(f"\nRadical Red best-six probe | legal moves only: {args.legal} | shortlist {SHORT}, top {TOP} teams, "
+    print(f"\nRadical Red best-six probe | legal moves only: {args.legal} | arena effects: {args.arena} | shortlist {SHORT}, top {TOP} teams, "
           f"search {args.search} x n={args.n_search} | no EVs, no items | enemy = RR AI, full info | {(time.time() - t0) / 60:.0f} min")
-    print(f"  {'boss':<10} {'cap':>3} {'win':>5} {'deaths/mon':>10}  best team")
+    print(f"  {'boss':<10} {'cap':>3} {'win':>5} {'deaths/mon':>10}  best team  | arena")
     for r in sorted(rows, key=lambda r: r["cap"]):
-        print(f"  {r['boss']:<10} {r['cap']:>3} {r['win']:5.0%} {r['deaths_per_mon']:10.2f}  {', '.join(r['best_team'])}")
+        ar = {k: v for k, v in r["arena"].items() if k != "ai_permanent"}
+        print(f"  {r['boss']:<10} {r['cap']:>3} {r['win']:5.0%} {r['deaths_per_mon']:10.2f}  {', '.join(r['best_team'])}  | {ar or '-'}")
 
 
 if __name__ == "__main__":

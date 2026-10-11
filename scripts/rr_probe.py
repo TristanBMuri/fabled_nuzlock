@@ -15,6 +15,7 @@ player's TMs / items / EV training unless --tms (an upper bound), doubles.
 
 import argparse
 import json
+import re
 import multiprocessing as mp
 import random
 import sys
@@ -92,6 +93,32 @@ def boss_team(name: str) -> tuple[str, int, list[str]]:
     dump = {t["id"]: t for t in json.load(open(RR / "trainers_hardcore.json"))}
     t = dump[DUMP_ID[name]]
     return t["packed"], t["cap"], [m["species"] for m in t["mons"]]
+
+
+ARENA = {"DESOLATE LAND": ("weather", "desolateland"), "PRIMORDIAL SEA": ("weather", "primordialsea"),
+         "SANDSTORM": ("weather", "sandstorm"), "RAIN": ("weather", "raindance"), "SUN": ("weather", "sunnyday"),
+         "SNOW": ("weather", "snow"), "HAIL": ("weather", "hail"),
+         "ELECTRIC TERRAIN": ("terrain", "electricterrain"), "GRASSY TERRAIN": ("terrain", "grassyterrain"),
+         "MISTY TERRAIN": ("terrain", "mistyterrain"), "PSYCHIC TERRAIN": ("terrain", "psychicterrain"),
+         "TRICK ROOM": ("pseudo", "trickroom"), "TAILWIND": ("p2", "tailwind")}
+
+
+def arena(effect: str) -> tuple[dict, list[str]]:
+    """The tracker's battleEffect ("PERMANENT SANDSTORM", "DOUBLES + PERMANENT TRICK ROOM") as
+    the bridge's arena (weather / terrain / pseudo-weather / p2 side conditions, all permanent,
+    plus the hardcore rule that p2's own weather and terrain never run out) and the parts the
+    sim does not model (doubles, Brock's -33% on super-effective hits, Swamp, Magma Storm ...)."""
+    out, rest = {"ai_permanent": True}, []
+    for part in re.split(r"\s*[+&]\s*|\n", effect.upper()):
+        part = part.replace("PERMANENT ", "").strip()
+        hit = next((v for k, v in ARENA.items() if re.search(rf"\b{k}\b", part)), None)  # RAIN is not in TERRAIN
+        if hit and hit[0] in ("pseudo", "p2"):
+            out.setdefault(hit[0], []).append(hit[1])
+        elif hit:
+            out[hit[0]] = hit[1]
+        elif part:
+            rest.append(part)
+    return out, rest
 
 
 def pools() -> tuple[dict, dict]:
