@@ -354,8 +354,20 @@ and teams without a safe answer to one enemy mon (Lunatone, Mantine). The
 answer under test: `ai_util/matchup.py` (hits-to-KO matrix on the real sets,
 `safe` / `race` tiers, `cover()` chooser), `calc_bot.MATCHUP` switching,
 `--death-weight 6`. Same team and seeds at Misty: 8/12 → 12/12 wins, 47 → 17
-deaths. Open: the cover runs (`logs/rr_cover_*`), the field model's switch
-behaviour, doubles, route trainers.
+deaths. **Cover chooser results (2026-10-11 evening, n=30):** Misty planned
+pool 30/30, 0.23 deaths per mon, 30% deathless (was 67–80%); Brock unchanged
+(30/30, 0.21, 23%: the fast-stage six beats the cover six, the deaths are
+Cacnea under sand). Boxes with a starter, rarity-drawn: Brock 66% mean / 80%
+≥50% / 3% deathless, Misty 58 / 67 / 5% — a random box lacks the counters the
+cover wants ("most missed" column = what routing must catch). Pre-Brock
+fights #2, #4, #7, #15 are 30/30 deathless. Field-aware vs blind under the
+matchup rule, same team: Erika 12 vs 24 deaths (field wins), Brock 37 vs 20
+(field loses; it retreats into a bench with no Cacnea answer). Data fixes:
+the ROM dump's 12-character names map in `rp.dump_id` (986dda0); the RR AI
+takes the recharge turn unscored (31edf3f); #14 Lass Relli has no team data.
+Open: the remaining early bosses (#5, #9, #10, #16; see `results/
+rr_cover_early_*`), field-aware as default, doubles, route trainers, the
+`UI_TODO.md` dashboard.
 Pieces: `pokemon-showdown-rr/` (ignored; clone + `node build` +
 `config/custom-formats.ts` as README → Setup for the main clone),
 `scripts/build_rr.py` → `data/rr/` (`order.json` incl. gifts, `tms.json` are
