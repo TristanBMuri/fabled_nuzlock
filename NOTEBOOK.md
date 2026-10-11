@@ -1611,12 +1611,12 @@ Early game only (the user's call: no point past the blender), legal moves,
 no EVs, no items, n=12 per team under search:
 
   boss       cap  pool  no arena            arena               top-6 spread (arena)
-  Brock       16   105   (still running)      100%  0.32 d/mon    100 100 92 83 83 83
+  Brock       16   105   100%  0.07           100%  0.32          100 100 92 83 83 83
   Misty       28   191   100%  0.36           58%  0.67          58 50 42 42 33 25
   Lt. Surge   36   251   100%  0.51           75%  0.69          75 75 75 58 50 42
   Erika       44   338   100%  0.10           92%  0.36          (one team)
-  (43 min on 4 workers each; the no-arena run has one team at 100% at Misty and
-  Surge, the rest 67-92 / 75-83)
+  (43 / 64 min on 4 workers; the no-arena run has one team at 100% at Misty and
+  Surge, the rest 67-92 / 75-83; Brock without sandstorm: four teams at 100%)
 
 **Verdict.** With what a run actually has, the bot beats Brock, loses to Misty
 more often than not (58% best, 0.67 deaths per mon) and gets through Surge
