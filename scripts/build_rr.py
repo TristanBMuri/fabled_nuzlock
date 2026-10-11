@@ -8,6 +8,7 @@ gauntlet.encounter_moves / evolve / the probe need. Not a full gauntlet yet
 """
 
 import json
+import re
 import subprocess
 from pathlib import Path
 
@@ -131,6 +132,136 @@ def parse_dump() -> None:
         if v:
             print(f"  dump {k} unknown to the mod ({len(v)}): {sorted(v)[:15]}")
 
+# --- progression: the tracker's trainer order as the gauntlet index, locations / items / TMs on it
+ALIASES = [  # places the item sheets name that are not encounter locations -> the location reached with them
+    (r"SAFARI.*(WEST|FAR WEST)", "SAFARI WEST (ZONE 4)"), (r"SAFARI.*EAST", "SAFARI EAST (ZONE 2)"),
+    (r"SAFARI.*NORTH", "SAFARI NORTH (ZONE 3)"), (r"SAFARI", "SAFARI CENTER (ZONE 1)"),
+    (r"SILPH|SAFFRON|DOJO|MR PSYCHIC", "PKMN TOWER 7F"), (r"ROCKET HIDEOUT", "PKMN TOWER 3&5F"),
+    (r"POKEMON TOWER|PKMN TOWER", "PKMN TOWER 3&5F"), (r"LAVENDER", "ROCK TUNNEL B1F"),
+    (r"INDIGO PLATEAU", "VICTORY ROAD 3F"), (r"VICTORY ROAD", "VICTORY ROAD 1F"), (r"SEAFOAM", "SEAFOAM 1F"),
+    (r"UNDERGROUND PATH|ROUTE 7/8", "ROUTE 8"), (r"DIGLETT", "DIGLETT CAVE"), (r"ROCK TUNNEL", "ROCK TUNNEL 1F"),
+    (r"MT MOON", "MT MOON 1F"), (r"DEPT STORE|GAME CORNER|CELADON", "CELADON CITY"), (r"MANSION", "MANSION 1F"),
+    (r"CINNABAR", "CINNABAR ISLAND"), (r"CERULEAN CAVE", "CERULEAN CAVE 1F"), (r"POWER PLANT", "POWER PLANT"),
+    (r"SS ANNE", "S.S. ANNE"), (r"VIRIDIAN FOREST", "VIRIDIAN FOREST")]
+NEVER = r"POST GAME|CANNOT BE FOUND|REMATCH|ONE ISLAND|ISLAND ONE|TWO ISLAND|THREE ISLAND|SEVII|EMBER"
+TUTORS_GONE = "FFEFEFEF"  # grey font on a tutor's location in the sheet: not there in hardcore
+
+
+MOVES_KNOWN = set(json.load(open(RR / "moves.json"))) if (RR / "moves.json").exists() else set()
+
+
+def _norm(s: str) -> str:
+    s = s.upper().replace("VERMILLION", "VERMILION").replace("POKÉMON", "POKEMON").replace("'S", " ")
+    return re.sub(r"\s+", " ", re.sub(r"[^A-Z0-9&/ ]", " ", s)).strip()
+
+
+def progression() -> None:
+    """data/rr/order.json: the hardcore trainer order (name, location, cap, optional, arena
+    effect) with `reach` = the index of the last encounter location open at that fight, and
+    the method gates (rods / Surf) as trainer indices; data/rr/tms.json: every TM and hardcore
+    tutor move with before_trainer = the trainer index at which it is in hand (a boss's TM:
+    after that boss; a place: the first trainer that place is open at; post-game, rematch
+    rewards and the Sevii Islands never). Money is not modelled (Game Corner TMs cost up to
+    30k). Unmatched item texts are printed for review."""
+    enc = json.load(open(RR / "tracker_encounters.json"))
+    bosses = json.load(open(RR / "tracker_bosses.json"))["hardcore"]
+    items = json.load(open(RR / "tracker_items.json"))
+    locs = [_norm(l["name"]) for l in enc["locations"] if not l["postgame"]]
+
+    def loc_index(text: str) -> int | None:
+        t = _norm(text)
+        if re.search(NEVER, t):
+            return None
+        hits = [i for i, n in enumerate(locs) if re.search(rf"\b{re.escape(n)}\b", t)]
+        for pat, name in ALIASES:
+            if not hits and re.search(pat, t):
+                hits = [locs.index(_norm(name))]
+        return min(hits) if hits else None
+
+    entries, reach, cap = [], 0, 0
+    for t in bosses["trainerOrder"]:
+        li = loc_index(t["location"].replace(" GYM", ""))
+        reach = max(reach, li if li is not None else 0)
+        digits = "".join(ch for ch in str(t["levelCap"]).split("/")[0] if ch.isdigit())
+        cap = int(digits) if digits else cap
+        entries.append({"name": t["name"], "location": t["location"], "cap": cap, "optional": t["optional"], "reach": reach})
+    by_title = {}
+    for c in bosses["categories"]:
+        for x in c["bosses"]:
+            by_title.setdefault(x["title"].split("·")[-1].strip(), x.get("battleEffect", ""))
+    for e in entries:
+        e["effect"] = by_title.get(e["name"], "")
+
+    def first_trainer(li: int | None) -> int | None:
+        return None if li is None else next((i for i, e in enumerate(entries) if e["reach"] >= li), None)
+
+    def when(text: str) -> int | None:
+        """The trainer index at which an item described by `text` is in hand."""
+        m = re.search(r"from (?:the )?(.+?) after defeating", text, re.I)
+        if m and not re.search(NEVER, _norm(text)):
+            name = _norm(m.group(1))
+            li = loc_index(text)
+            for i, e in enumerate(entries):
+                if _norm(e["name"]) in name and (li is None or e["reach"] >= li):
+                    return i + 1
+        w = first_trainer(loc_index(text))
+        hm = re.search(r"\(([A-Za-z ]+) HM required\)", text)
+        if w is not None and hm:  # the place is open, the item behind an HM comes with the HM
+            hw = next((when(h["location"]) for h in items["hms"] if h["move"].lower() == hm.group(1).strip().lower()), None)
+            w = max(w, hw) if hw is not None else None
+        return w
+
+    gates = {}
+    for area in items["overworld"]:
+        for x in area["items"]:
+            key = {"Old Rod": "old_rod", "Good Rod": "good_rod", "Super Rod": "super_rod", "HM 03 - Surf": "surfing"}.get(x["name"])
+            if key:
+                gates[key] = when(f"{area['area']}, {x['location']}")
+    tms, unmatched = {}, []
+    for t in items["tms"] + items["hms"]:
+        w = when(t["location"])
+        if w is None and not re.search(NEVER, _norm(t["location"])):
+            unmatched.append((t["move"], t["location"][:80]))
+        tms[to_id_str(t["move"])] = {"name": t["move"], "before_trainer": w if w is not None else 999, "from": t["location"]}
+    # tutors: the sheet's Move Tutors tab (location row, then one row per move; grey = gone in hardcore)
+    import zipfile
+    z = zipfile.ZipFile(RR / "sheets" / "rr_items_tms_tutors.xlsx")
+    ss = [re.sub(r"<[^>]+>", "", m) for m in re.findall(r"<si>(.*?)</si>", z.read("xl/sharedStrings.xml").decode(), re.S)]
+    st = z.read("xl/styles.xml").decode()
+    font = [(re.search(r'<color rgb="([0-9A-F]+)"', f) or [None, None])[1] for f in re.findall(r"<font>(.*?)</font>", st, re.S)]
+    xf_font = [int(m) for m in re.findall(r'<xf [^>]*fontId="(\d+)"', re.search(r"<cellXfs[^>]*>(.*?)</cellXfs>", st, re.S).group(1))]
+    sheets = dict(re.findall(r'<sheet [^>]*name="([^"]+)"[^>]*r:id="([^"]+)"', z.read("xl/workbook.xml").decode()))
+    rels = dict(re.findall(r'Id="([^"]+)"[^>]*Target="([^"]+)"', z.read("xl/_rels/workbook.xml.rels").decode()))
+    x = z.read("xl/" + rels[sheets["Move Tutors"]].replace("/xl/", "").lstrip("/")).decode()
+    place, gone = None, False
+    for row in re.findall(r"<row[^>]*>(.*?)</row>", x, re.S):
+        cells = []
+        for attrs, body in re.findall(r"<c ([^>]*?)>(.*?)</c>", re.sub(r"<c [^>]*/>", "", row), re.S):
+            tt, sidx, v = re.search(r'\bt="([^"]+)"', attrs), re.search(r'\bs="(\d+)"', attrs), re.search(r"<v>(.*?)</v>", body, re.S)
+            val = (ss[int(v.group(1))] if tt and tt.group(1) == "s" else v.group(1)) if v else ""
+            if val.strip():
+                cells.append((val.strip(), font[xf_font[int(sidx.group(1))]] if sidx else None))
+        if not cells or cells[0][0] == "SPECIAL MOVE TUTORS":
+            if cells:
+                place = None
+            continue
+        if len(cells) >= 2 and to_id_str(cells[0][0]) not in MOVES_KNOWN:  # a location row
+            place, gone = cells[0][0], cells[0][1] == TUTORS_GONE
+            continue
+        mid = to_id_str(cells[0][0])
+        if place is None or gone or mid not in MOVES_KNOWN:
+            continue
+        w = when(place)
+        if mid not in tms or (w or 999) < tms[mid]["before_trainer"]:
+            tms[mid] = {"name": cells[0][0], "before_trainer": w if w is not None else 999, "from": f"tutor: {place}"}
+    (RR / "order.json").write_text(json.dumps({"entries": entries, "gates": gates}, indent=0))
+    (RR / "tms.json").write_text(json.dumps(tms))
+    n_early = {b: sum(1 for v in tms.values() if v["before_trainer"] <= i) for i, b in
+               [(6, "Brock"), (15, "Misty"), (26, "Surge"), (34, "Erika")]}
+    print(f"data/rr/order.json: {len(entries)} trainers, gates {gates}; tms.json: {len(tms)} TM/tutor moves, in hand by {n_early}")
+    for u in unmatched:
+        print("  unmatched item text:", u)
+
 
 def main() -> None:
     enc = json.load(open(RR / "tracker_encounters.json"))
@@ -145,15 +276,12 @@ def main() -> None:
     (RR / "evolutions.json").write_text(json.dumps(data["evos"]))
     (RR / "species.json").write_text(json.dumps(data["species"]))
     (RR / "moves.json").write_text(json.dumps(data["moves"]))
-    # every TM / tutor move is "in hand" from the start: the probe's upper bound (gates come with the gauntlet)
-    (RR / "tms.json").write_text(json.dumps({m: {"tm": 0, "name": m, "before_trainer": 0, "from": "any"}
-                                             for ls in data["learnsets"].values() for m in ls["tm"]}))
     (RR / "items.json").write_text("{}")
     (RR / "trainers.json").write_text(json.dumps({"trainers": []}))
-    (RR / "order.json").write_text(json.dumps({"entries": []}))
     (RR / "encounters.json").write_text(json.dumps({"starter": [], "routes": []}))
     print(f"data/rr: {len(data['species'])} species, {len(data['moves'])} moves; {len(missing)} ids unknown to the mod: {missing[:30]}")
     parse_dump()
+    progression()
     # the mod's full tables, for rr_probe.inject_mod_data (poke-env's mirrors must know the mod's own moves / species)
     dump = subprocess.run(["node", "-e", """
 const {Dex} = require(process.argv[1] + '/dist/sim'); const d = Dex.mod('gen9rr'); const out = {};

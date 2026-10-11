@@ -1,8 +1,10 @@
 """Radical Red: the best six in the pool (step two, 2026-10-10).
 
 Does *any* team from the encounters available before a hardcore boss win the
-fight reliably under search play? Per boss: (A) every species in the pool,
-evolved at the cap with best4 movesets over every TM, fights the boss solo
+fight reliably under search play? Per boss: (A) every species catchable
+before it (rr_probe.pools: open locations, rods / Surf in hand, encounter level at or
+under the cap), evolved by level at the cap, best4 moves over the TMs and tutors in
+hand by then (data/rr/tms.json), fights the boss solo
 under the calc bot (n battles) — the progress it makes is its score; (B) the
 SHORT best are combined: a greedy build plus random six-subsets, each team
 scored by the calc bot's progress (n battles); (C) the TOP teams are played
@@ -51,11 +53,12 @@ def progress(st: dict) -> float:
     return done
 
 
-def build_mon(species: str, cap: int, known: dict) -> Mon | None:
-    """Evolved at the cap, best4 moves over every TM (minus gauntlet.BANNED_MOVES), ability
-    slot 0, no item, no EVs (Minimal Grinding Mode)."""
+def build_mon(species: str, cap: int, known: dict, progress: int) -> Mon | None:
+    """Evolved by level at the cap (no stones), best4 moves over the TMs and tutors in hand
+    by trainer `progress` (data/rr/tms.json, minus gauntlet.BANNED_MOVES), ability slot 0,
+    no item, no EVs (Minimal Grinding Mode)."""
     ev = evolve(species, cap, None, caught_level=5, trainer_idx=None)
-    moves = encounter_moves(ev, cap, "best4", progress=0)
+    moves = encounter_moves(ev, cap, "best4", progress=progress)
     if not moves or ev not in known:
         return None
     m = Mon(ev, cap, moves, ability=known[ev].get("abilities", {}).get("0"), item=None, caught_level=5)
@@ -93,9 +96,9 @@ def _run_boss(args, name: str) -> dict:
     from ai_util.rr_ai import RadicalRedAI
     from ai_util.sim import SimBridge, player_brain
     by, known = rp.pools()
-    block, cap, pool = by[name]
+    block, cap, pool, progress = by[name]
     arena, unmodelled = rp.arena(block.get("battleEffect", "")) if args.arena else ({}, [block.get("battleEffect", "")])
-    print(f"{name}: arena {arena}; not modelled: {unmodelled}", flush=True)
+    print(f"{name}: trainer #{progress}, cap {cap}, pool {len(pool)} species; arena {arena}; not modelled: {unmodelled}", flush=True)
     if args.legal:
         gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(rp.RR / "hardcore_rules.json"))["banned_moves"]}
     enemy_packed, dump_cap, enemy_species = rp.boss_team(name)
@@ -108,7 +111,7 @@ def _run_boss(args, name: str) -> dict:
     # A: solo scores (the ranking, not the final strength)
     solo = []
     for sp in pool:
-        m = build_mon(sp, cap, known)
+        m = build_mon(sp, cap, known, progress)
         if m is None:
             continue
         _, _, pr = play(bridge, calc, enemy, [m], enemy_packed, args.n_solo, arena=arena)
@@ -118,7 +121,7 @@ def _run_boss(args, name: str) -> dict:
     print(f"{name}: A solo scores for {len(solo)} species in {time.time() - t0:.0f}s; top: "
           + ", ".join(f"{sp} {pr:.2f}" for pr, sp in solo[:8]), flush=True)
     # B: teams from the shortlist, scored by the calc bot
-    mons = {sp: build_mon(sp, cap, known) for sp in short}
+    mons = {sp: build_mon(sp, cap, known, progress) for sp in short}
     team_score = {}
 
     def score(team: tuple) -> float:
@@ -146,7 +149,7 @@ def _run_boss(args, name: str) -> dict:
     w, _, t, d = results[0]
     rows = [{"boss": name, "cap": cap, "legal": args.legal, "arena": arena, "unmodelled": unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d,
              "n": args.n_search, "all": [(list(t_), w_, d_) for w_, _, t_, d_ in results],
-             "enemy": enemy_species, "pool": len(pool), "shortlist": short}]
+             "enemy": enemy_species, "pool": len(pool), "progress": progress, "shortlist": short}]
     print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} "
           f"{list(t)}  (others: {', '.join(f'{w_:.0%}' for w_, _, _, _ in results[1:])})  ({time.time() - t0:.0f}s)", flush=True)
     bridge.close()

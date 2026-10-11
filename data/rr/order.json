@@ -1,1 +1,930 @@
-{"entries": []}
+{
+"entries": [
+{
+"name": "RIVAL",
+"location": "ROUTE 22",
+"cap": 16,
+"optional": true,
+"reach": 3,
+"effect": ""
+},
+{
+"name": "BRENDAN",
+"location": "VIRIDIAN FOREST",
+"cap": 16,
+"optional": false,
+"reach": 5,
+"effect": ""
+},
+{
+"name": "LASS ANNE",
+"location": "VIRIDIAN FOREST",
+"cap": 16,
+"optional": false,
+"reach": 5,
+"effect": ""
+},
+{
+"name": "ACE NELLE",
+"location": "VIRIDIAN FOREST",
+"cap": 16,
+"optional": true,
+"reach": 5,
+"effect": ""
+},
+{
+"name": "CATCHER SAMMY",
+"location": "VIRIDIAN FOREST",
+"cap": 16,
+"optional": false,
+"reach": 5,
+"effect": ""
+},
+{
+"name": "FALKNER",
+"location": "PEWTER CITY",
+"cap": 16,
+"optional": false,
+"reach": 7,
+"effect": ""
+},
+{
+"name": "BROCK",
+"location": "PEWTER CITY",
+"cap": 16,
+"optional": false,
+"reach": 7,
+"effect": "PERMANENT SANDSTORM"
+},
+{
+"name": "LASS SALLY",
+"location": "ROUTE 3",
+"cap": 23,
+"optional": false,
+"reach": 8,
+"effect": ""
+},
+{
+"name": "SUPER NERD MIGUEL",
+"location": "MT. MOON",
+"cap": 23,
+"optional": false,
+"reach": 9,
+"effect": ""
+},
+{
+"name": "ARCHER",
+"location": "MT. MOON",
+"cap": 23,
+"optional": false,
+"reach": 9,
+"effect": ""
+},
+{
+"name": "RIVAL",
+"location": "CERULEAN CITY",
+"cap": 28,
+"optional": false,
+"reach": 13,
+"effect": ""
+},
+{
+"name": "CATCHER CALE",
+"location": "NUGGET BRIDGE",
+"cap": 28,
+"optional": false,
+"reach": 13,
+"effect": ""
+},
+{
+"name": "LASS ALI",
+"location": "NUGGET BRIDGE",
+"cap": 28,
+"optional": false,
+"reach": 13,
+"effect": ""
+},
+{
+"name": "YOUNGSTER TIMMY",
+"location": "NUGGET BRIDGE",
+"cap": 28,
+"optional": false,
+"reach": 13,
+"effect": ""
+},
+{
+"name": "LASS RELLI",
+"location": "NUGGET BRIDGE",
+"cap": 28,
+"optional": false,
+"reach": 13,
+"effect": ""
+},
+{
+"name": "CAMPER ETHAN",
+"location": "NUGGET BRIDGE",
+"cap": 28,
+"optional": false,
+"reach": 13,
+"effect": ""
+},
+{
+"name": "GRUNT",
+"location": "NUGGET BRIDGE",
+"cap": 28,
+"optional": false,
+"reach": 13,
+"effect": ""
+},
+{
+"name": "BUGSY",
+"location": "ROUTE 25",
+"cap": 28,
+"optional": true,
+"reach": 15,
+"effect": "PERMANENT RAIN"
+},
+{
+"name": "MISTY",
+"location": "CERULEAN CITY",
+"cap": 28,
+"optional": false,
+"reach": 15,
+"effect": "PERMANENT RAIN"
+},
+{
+"name": "GRUNT",
+"location": "DIG HOUSE",
+"cap": 28,
+"optional": false,
+"reach": 15,
+"effect": ""
+},
+{
+"name": "CAMPER JEFF",
+"location": "ROUTE 6",
+"cap": 28,
+"optional": false,
+"reach": 17,
+"effect": ""
+},
+{
+"name": "ANN & BROOKS",
+"location": "S.S. ANNE",
+"cap": 28,
+"optional": false,
+"reach": 19,
+"effect": ""
+},
+{
+"name": "EDMOND & TREVOR",
+"location": "S.S. ANNE",
+"cap": 28,
+"optional": false,
+"reach": 19,
+"effect": ""
+},
+{
+"name": "BRENDAN",
+"location": "S.S. ANNE",
+"cap": 28,
+"optional": false,
+"reach": 19,
+"effect": ""
+},
+{
+"name": "WHITNEY",
+"location": "ROUTE 11",
+"cap": 28,
+"optional": true,
+"reach": 20,
+"effect": "SWELLOW IS PRE-BURNED"
+},
+{
+"name": "GENTLEMAN TUCKER",
+"location": "VERMILLION CITY GYM",
+"cap": 36,
+"optional": false,
+"reach": 20,
+"effect": ""
+},
+{
+"name": "LT. SURGE",
+"location": "VERMILLION CITY",
+"cap": 36,
+"optional": false,
+"reach": 20,
+"effect": "PERMANENT ELECTRIC TERRAIN"
+},
+{
+"name": "PICNICKER ALICIA",
+"location": "ROUTE 9",
+"cap": 36,
+"optional": false,
+"reach": 23,
+"effect": ""
+},
+{
+"name": "PICNICKER CAITLIN",
+"location": "ROUTE 9",
+"cap": 36,
+"optional": false,
+"reach": 23,
+"effect": ""
+},
+{
+"name": "PICNICKER DANA",
+"location": "ROCK TUNNEL",
+"cap": 36,
+"optional": false,
+"reach": 25,
+"effect": ""
+},
+{
+"name": "MANIAC HERMAN",
+"location": "ROUTE 10",
+"cap": 36,
+"optional": false,
+"reach": 25,
+"effect": ""
+},
+{
+"name": "MORTY",
+"location": "LAVENDER TOWN",
+"cap": 36,
+"optional": true,
+"reach": 26,
+"effect": ""
+},
+{
+"name": "SUPER NERD AIDAN",
+"location": "ROUTE 8",
+"cap": 36,
+"optional": false,
+"reach": 27,
+"effect": ""
+},
+{
+"name": "ACE MARY",
+"location": "CELADON CITY GYM",
+"cap": 36,
+"optional": false,
+"reach": 29,
+"effect": ""
+},
+{
+"name": "ERIKA",
+"location": "CELADON CITY",
+"cap": 44,
+"optional": false,
+"reach": 29,
+"effect": "PERMANENT GRASSY TERRAIN"
+},
+{
+"name": "GUARD",
+"location": "GAME CORNER",
+"cap": 47,
+"optional": false,
+"reach": 29,
+"effect": "DOUBLES"
+},
+{
+"name": "LEFT GUARD",
+"location": "ROCKET HIDEOUT",
+"cap": 47,
+"optional": false,
+"reach": 30,
+"effect": "DOUBLES"
+},
+{
+"name": "RIGHT GUARD",
+"location": "ROCKET HIDEOUT",
+"cap": 47,
+"optional": false,
+"reach": 30,
+"effect": "DOUBLES"
+},
+{
+"name": "GIOVANNI",
+"location": "ROCKET HIDEOUT",
+"cap": 47,
+"optional": false,
+"reach": 30,
+"effect": ""
+},
+{
+"name": "CHANNELER RUTH",
+"location": "POKEMON TOWER",
+"cap": 36,
+"optional": false,
+"reach": 30,
+"effect": ""
+},
+{
+"name": "GHOST",
+"location": "POKEMON TOWER",
+"cap": 56,
+"optional": false,
+"reach": 30,
+"effect": "OMNI-BOOSTED + 252 HP EVs + STATS CANNOT BE REDUCED + SAFEGUARD"
+},
+{
+"name": "GRUNT 1",
+"location": "POKEMON TOWER",
+"cap": 56,
+"optional": false,
+"reach": 30,
+"effect": ""
+},
+{
+"name": "GRUNT 2",
+"location": "POKEMON TOWER",
+"cap": 56,
+"optional": false,
+"reach": 30,
+"effect": ""
+},
+{
+"name": "GRUNT 3",
+"location": "POKEMON TOWER",
+"cap": 56,
+"optional": false,
+"reach": 30,
+"effect": ""
+},
+{
+"name": "RIVAL",
+"location": "SILPH CO.",
+"cap": 56,
+"optional": false,
+"reach": 33,
+"effect": ""
+},
+{
+"name": "ARIANA & ARCHER",
+"location": "SILPH CO.",
+"cap": 56,
+"optional": false,
+"reach": 33,
+"effect": ""
+},
+{
+"name": "GIOVANNI",
+"location": "SILPH CO.",
+"cap": 57,
+"optional": false,
+"reach": 33,
+"effect": ""
+},
+{
+"name": "ACE COLE",
+"location": "ROUTE 8",
+"cap": 59,
+"optional": true,
+"reach": 33,
+"effect": ""
+},
+{
+"name": "BEAUTY SAM",
+"location": "CELADON CITY HOTEL",
+"cap": 59,
+"optional": true,
+"reach": 33,
+"effect": ""
+},
+{
+"name": "BEAUTY SHELLY",
+"location": "CELADON CITY HOTEL",
+"cap": 59,
+"optional": true,
+"reach": 33,
+"effect": ""
+},
+{
+"name": "CHUCK",
+"location": "SAFFRON CITY",
+"cap": 36,
+"optional": true,
+"reach": 33,
+"effect": "CHUCK'S POKEMON HAVE ENDURE STATUS IF ABOVE 75% OF MAX HP"
+},
+{
+"name": "SABRINA",
+"location": "SAFFRON CITY",
+"cap": 59,
+"optional": false,
+"reach": 33,
+"effect": "DOUBLES + PERMANENT TRICK ROOM"
+},
+{
+"name": "DUMASS KID",
+"location": "SAFFRON CITY",
+"cap": 59,
+"optional": true,
+"reach": 33,
+"effect": ""
+},
+{
+"name": "ROCKER LUCA",
+"location": "ROUTE 12",
+"cap": 68,
+"optional": false,
+"reach": 37,
+"effect": ""
+},
+{
+"name": "CAMPER JUSTIN",
+"location": "ROUTE 12",
+"cap": 68,
+"optional": false,
+"reach": 37,
+"effect": ""
+},
+{
+"name": "FISHERMAN ANDREW",
+"location": "ROUTE 12",
+"cap": 68,
+"optional": false,
+"reach": 37,
+"effect": ""
+},
+{
+"name": "BIRD KE. SEBASTIAN",
+"location": "ROUTE 13",
+"cap": 68,
+"optional": false,
+"reach": 38,
+"effect": ""
+},
+{
+"name": "PICNICKER SUSIE",
+"location": "ROUTE 13",
+"cap": 68,
+"optional": false,
+"reach": 38,
+"effect": ""
+},
+{
+"name": "PICNICKER ALMA",
+"location": "ROUTE 13",
+"cap": 68,
+"optional": false,
+"reach": 38,
+"effect": ""
+},
+{
+"name": "LOLA & SHEILA",
+"location": "ROUTE 13",
+"cap": 68,
+"optional": false,
+"reach": 38,
+"effect": ""
+},
+{
+"name": "BIRD KEEPER PERRY",
+"location": "ROUTE 13",
+"cap": 68,
+"optional": false,
+"reach": 38,
+"effect": ""
+},
+{
+"name": "BIKER JARED",
+"location": "ROUTE 13",
+"cap": 68,
+"optional": false,
+"reach": 38,
+"effect": ""
+},
+{
+"name": "BIRD KEEPER ROBERT",
+"location": "ROUTE 13",
+"cap": 68,
+"optional": false,
+"reach": 38,
+"effect": ""
+},
+{
+"name": "ACE HALEY",
+"location": "ROUTE 15",
+"cap": 68,
+"optional": true,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "BIKER LAO",
+"location": "ROUTE 16",
+"cap": 68,
+"optional": false,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "CUE BALL KOJI",
+"location": "ROUTE 16",
+"cap": 68,
+"optional": false,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "CUE BALL LUKE",
+"location": "ROUTE 16",
+"cap": 68,
+"optional": false,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "BIKER RUBEN",
+"location": "ROUTE 16",
+"cap": 68,
+"optional": false,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "CUE BALL CAMRON",
+"location": "ROUTE 16",
+"cap": 68,
+"optional": false,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "BIKER HIDEO",
+"location": "ROUTE 16",
+"cap": 68,
+"optional": false,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "BIKER WILLIAM",
+"location": "ROUTE 18",
+"cap": 68,
+"optional": false,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "BIRD KEEPER JACOB",
+"location": "ROUTE 18",
+"cap": 68,
+"optional": false,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "TAMER RAMIRO",
+"location": "ROUTE 18",
+"cap": 68,
+"optional": true,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "ACE WILTON",
+"location": "ROUTE 18",
+"cap": 68,
+"optional": false,
+"reach": 40,
+"effect": ""
+},
+{
+"name": "BRENDAN",
+"location": "SAFARI ZONE",
+"cap": 68,
+"optional": false,
+"reach": 42,
+"effect": ""
+},
+{
+"name": "BROCK (REMATCH)",
+"location": "PEWTER CITY",
+"cap": 59,
+"optional": false,
+"reach": 42,
+"effect": ""
+},
+{
+"name": "MISTY (REMATCH)",
+"location": "CERULEAN CITY",
+"cap": 59,
+"optional": false,
+"reach": 42,
+"effect": ""
+},
+{
+"name": "LT. SURGE (REMATCH)",
+"location": "VERMILLION CITY",
+"cap": 59,
+"optional": false,
+"reach": 42,
+"effect": ""
+},
+{
+"name": "ERIKA (REMATCH)",
+"location": "CELADON CITY",
+"cap": 68,
+"optional": true,
+"reach": 42,
+"effect": ""
+},
+{
+"name": "JUGGLER KAYDEN",
+"location": "FUCHSIA CITY GYM",
+"cap": 68,
+"optional": false,
+"reach": 42,
+"effect": ""
+},
+{
+"name": "KOGA",
+"location": "FUCHSIA CITY",
+"cap": 68,
+"optional": false,
+"reach": 42,
+"effect": "PERMANENT TAILWIND"
+},
+{
+"name": "DUMASS JOJO FAN",
+"location": "POWER PLANT",
+"cap": 73,
+"optional": true,
+"reach": 62,
+"effect": ""
+},
+{
+"name": "PRYCE",
+"location": "SEAFOAM ISLANDS",
+"cap": 73,
+"optional": true,
+"reach": 62,
+"effect": "PERMANENT SNOW"
+},
+{
+"name": "MAY",
+"location": "CINNABAR ISLAND",
+"cap": 73,
+"optional": false,
+"reach": 62,
+"effect": "PERMANENT MAGMA STORM (FIRE TYPES ARE IMMUNE)"
+},
+{
+"name": "JASMINE",
+"location": "CINNABAR ISLAND LAB",
+"cap": 73,
+"optional": true,
+"reach": 62,
+"effect": "JASMINE IS IMMUNE TO FIRE TYPE ATTACKS"
+},
+{
+"name": "SCIENTIST TED",
+"location": "POKEMON MANSION",
+"cap": 73,
+"optional": true,
+"reach": 62,
+"effect": ""
+},
+{
+"name": "BURGLAR LEWIS",
+"location": "POKEMON MANSION",
+"cap": 73,
+"optional": false,
+"reach": 62,
+"effect": ""
+},
+{
+"name": "ACE DEREK",
+"location": "CINNABAR ISLAND GYM",
+"cap": 76,
+"optional": false,
+"reach": 62,
+"effect": ""
+},
+{
+"name": "ACE LUCY",
+"location": "CINNABAR ISLAND GYM",
+"cap": 76,
+"optional": false,
+"reach": 62,
+"effect": ""
+},
+{
+"name": "ACE ZAC",
+"location": "CINNABAR ISLAND GYM",
+"cap": 76,
+"optional": false,
+"reach": 62,
+"effect": ""
+},
+{
+"name": "BLAINE",
+"location": "CINNABAR ISLAND",
+"cap": 76,
+"optional": false,
+"reach": 62,
+"effect": "PERMANENT DESOLATE LAND"
+},
+{
+"name": "GRUNT 1",
+"location": "CERULEAN CAVE",
+"cap": 79,
+"optional": false,
+"reach": 67,
+"effect": ""
+},
+{
+"name": "GRUNT 2",
+"location": "CERULEAN CAVE",
+"cap": 79,
+"optional": false,
+"reach": 67,
+"effect": ""
+},
+{
+"name": "ARCHER",
+"location": "CERULEAN CAVE",
+"cap": 79,
+"optional": false,
+"reach": 67,
+"effect": ""
+},
+{
+"name": "ARIANA",
+"location": "CERULEAN CAVE",
+"cap": 79,
+"optional": false,
+"reach": 67,
+"effect": ""
+},
+{
+"name": "GIOVANNI",
+"location": "CERULEAN CAVE",
+"cap": 80,
+"optional": false,
+"reach": 67,
+"effect": ""
+},
+{
+"name": "BLACK BELT KETCHUP",
+"location": "CERULEAN CAVE",
+"cap": 81,
+"optional": true,
+"reach": 67,
+"effect": ""
+},
+{
+"name": "CLAIR",
+"location": "VIRIDIAN CITY",
+"cap": 81,
+"optional": false,
+"reach": 67,
+"effect": "UNABLE TO USE FAIRY TYPES + CAN'T REMOVE HAZARDS"
+},
+{
+"name": "BURGLAR MAX",
+"location": "POKEMON MANSION 4F",
+"cap": 82,
+"optional": true,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "BURGLAR ANSON",
+"location": "POKEMON MANSION 4F",
+"cap": 82,
+"optional": true,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "RIVAL",
+"location": "ROUTE 22",
+"cap": 82,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "BRENDAN",
+"location": "ROUTE 23",
+"cap": 82,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "ACE NAOMI",
+"location": "VICTORY ROAD",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "ACE ROLANDO",
+"location": "VICTORY ROAD",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "ACE GEORGE",
+"location": "VICTORY ROAD",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "ACE CAROLINE",
+"location": "VICTORY ROAD",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "ACE COLBY",
+"location": "VICTORY ROAD",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "ACE ALEXA",
+"location": "VICTORY ROAD",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "RAY & TYRA",
+"location": "VICTORY ROAD",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "DUMASS CREATOR",
+"location": "INDIGO PLATEAU",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "LORELEI",
+"location": "ELITE FOUR",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": "DOUBLES + PERMANENT PRIMORDIAL SEA"
+},
+{
+"name": "BRUNO",
+"location": "ELITE FOUR",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": "PERMANENT MISTY TERRAIN"
+},
+{
+"name": "AGATHA",
+"location": "ELITE FOUR",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": "PERMANENT PSYCHIC TERRAIN"
+},
+{
+"name": "LANCE",
+"location": "ELITE FOUR",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": ""
+},
+{
+"name": "RIVAL",
+"location": "CHAMPION",
+"cap": 85,
+"optional": false,
+"reach": 70,
+"effect": ""
+}
+],
+"gates": {
+"old_rod": 0,
+"good_rod": 21,
+"super_rod": 74,
+"surfing": 81
+}
+}

@@ -122,11 +122,15 @@ def arena(effect: str) -> tuple[dict, list[str]]:
 
 
 def pools() -> tuple[dict, dict]:
-    """{boss name: (block, cap, [species ids available before it])} from the tracker export."""
+    """{boss name: (block, cap, [species ids catchable before it], trainer index)} from the
+    tracker export and data/rr/order.json: every encounter at a location open by that fight
+    (order.json `reach`) whose method is in hand (grass always; rods and Surf from `gates`)
+    and whose lowest level is at or under the cap. Gifts, statics, fossils, trades and the
+    starter are not in it; neither is rarity or the one-encounter-per-route rule."""
     enc = json.load(open(RR / "tracker_encounters.json"))
     bosses = json.load(open(RR / "tracker_bosses.json"))["hardcore"]
+    order = json.load(open(RR / "order.json"))
     locs = [l for l in enc["locations"] if not l["postgame"]]
-    names = [l["name"].upper().replace("VERMILLION", "VERMILION") for l in locs]
     known = load_game("rr")["species"]
     dex9 = GenData.from_gen(9).pokedex
     # the first fight of each boss: leaders from "Kanto Leaders" (not "Kanto Rematch"), the League from
@@ -137,24 +141,21 @@ def pools() -> tuple[dict, dict]:
             continue
         for x in c["bosses"]:
             by_title.setdefault(x["title"].split("·")[-1].strip(), x)
-    out, reach = {}, 0
-    for t in bosses["trainerOrder"]:
-        ln = t["location"].upper().replace("VERMILLION", "VERMILION").replace(" GYM", "")
-        hits = [i for i, n in enumerate(names) if n == ln or n.startswith(ln + " ")]
-        if hits:
-            reach = max(reach, min(hits))
-        if t["name"] in by_title and t["name"] not in out:
-            pool = sorted({to_id_str(e["species"]) for l in locs[:reach + 1] for tb in l["methods"].values() for e in tb})
-            pool = [s for s in pool if s in known and s in dex9]
-            digits = "".join(ch for ch in str(t["levelCap"]).split("/")[0] if ch.isdigit())
-            levels = [int(x["level"]) for x in by_title[t["name"]]["pokemon"] if str(x["level"]).isdigit()]
-            cap = int(digits) if digits else (max(levels) if levels else 0)  # an empty cap: the block's own levels
-            if cap:
-                out[t["name"]] = (by_title[t["name"]], cap, pool)
+    out = {}
+    for t, e in enumerate(order["entries"]):
+        if e["name"] not in by_title or e["name"] in out or not e["cap"]:
+            continue
+        pool = set()
+        for l in locs[:e["reach"] + 1]:
+            for meth, tb in l["methods"].items():
+                if (0 if meth.startswith("grass") else order["gates"].get(meth, 999)) > t:
+                    continue
+                pool |= {to_id_str(x["species"]) for x in tb if int(x["levels"].split("-")[0]) <= e["cap"]}
+        out[e["name"]] = (by_title[e["name"]], e["cap"], sorted(s for s in pool if s in known and s in dex9), t)
     return out, known
 
 
-def player_party(pool: list[str], cap: int, rng: random.Random, known: dict, tms: bool) -> list[Mon]:
+def player_party(pool: list[str], cap: int, rng: random.Random, known: dict, progress: int | None) -> list[Mon]:
     """A run's box: BOX species drawn from the pool, each evolved by level at the cap;
     the party = the six with the highest base-stat total (the fast rule's pick)."""
     box = []
@@ -162,7 +163,7 @@ def player_party(pool: list[str], cap: int, rng: random.Random, known: dict, tms
         ev = evolve(sp, cap, rng, caught_level=5, trainer_idx=None)
         slots = known.get(ev, {}).get("abilities", {})
         ability = rng.choice([slots[k] for k in ("0", "1") if k in slots]) if slots else None
-        moves = encounter_moves(ev, cap, "best4", progress=0 if tms else None)
+        moves = encounter_moves(ev, cap, "best4", progress=progress)  # None = level-up only
         if not moves:
             continue
         box.append(Mon(ev, cap, moves, ability=ability, caught_level=5))
@@ -185,11 +186,11 @@ def _run_boss(args, name: str, tms: bool) -> dict:
     from ai_util.rr_ai import RadicalRedAI
     from ai_util.sim import SimBridge, player_brain
     by_boss, known = pools()
-    block, cap, pool = by_boss[name]
+    block, cap, pool, progress = by_boss[name]
     enemy_packed, dump_cap, enemy_species = boss_team(name)
     cap = max(cap, dump_cap)
     rng = random.Random(f"{name}-{args.seed}")
-    parties = [player_party(pool, cap, rng, known, tms) for _ in range(args.boxes)]
+    parties = [player_party(pool, cap, rng, known, progress if tms else None) for _ in range(args.boxes)]
     bridge = SimBridge(showdown=str(FORK))
     enemy = player_brain(RadicalRedAI(battle_format=FMT, start_listening=False, log_level=50))
     calc = calc_brain()
