@@ -1,0 +1,109 @@
+#7: trainer #7, cap 23, pool 115 species; arena {'ai_permanent': True}; not modelled: []
+#9: trainer #9, cap 23, pool 131 species; arena {'ai_permanent': True}; not modelled: []
+#7: starter piplup; boss attacks with ['Electric', 'Fairy', 'Fire', 'Flying', 'Grass', 'Normal', 'Poison', 'Psychic', 'Steel']
+#9: starter snivy; boss attacks with ['Dark', 'Fire', 'Flying', 'Grass', 'Ground', 'Ice', 'Normal', 'Poison', 'Psychic', 'Rock']
+#4: trainer #4, cap 16, pool 79 species; arena {'ai_permanent': True}; not modelled: []
+#4: starter litten; boss attacks with ['Bug', 'Electric', 'Flying', 'Grass', 'Ground', 'Normal', 'Poison', 'Psychic', 'Rock', 'Water']
+#2: trainer #2, cap 16, pool 79 species; arena {'ai_permanent': True}; not modelled: []
+#2: starter charmander; boss attacks with ['Fighting', 'Flying', 'Normal']
+#5: trainer #5, cap 16, pool 105 species; arena {'ai_permanent': True}; not modelled: []
+#5: starter sprigatito; boss attacks with ['Dark', 'Electric', 'Fighting', 'Fire', 'Flying', 'Grass', 'Normal', 'Rock']
+#10: trainer #10, cap 28, pool 163 species; arena {'ai_permanent': True}; not modelled: []
+#10: starter piplup; boss attacks with ['Dark', 'Electric', 'Fighting', 'Fire', 'Grass', 'Ice', 'Normal', 'Poison', 'Steel', 'Water']
+#10 FAILED: ValueError: Unknown move: drainkiss
+mon.py", line 769, in _update_from_teambuilder
+    move = Move(Move.retrieve_id(move_str), gen=self.gen)
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/move.py", line 114, in __init__
+    self._current_pp = min(5, self.max_pp) if from_transform else self.max_pp
+                                                                  ^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/move.py", line 476, in max_pp
+    max_pp = self.entry["pp"] * 8 // 5
+             ^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/move.py", line 319, in entry
+    raise ValueError("Unknown move: %s" % self._id)
+ValueError: Unknown move: drainkiss
+
+#2 FAILED: RuntimeError: Error: invalid team: "none" is an invalid item.
+    at prepPlayer (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:36:23)
+    at handle (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:127:32)
+    at Interface.<anonymous> (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:167:13)
+    at Interface.emit (node:events:524:28)
+    at Interface.emit (node:domain:489:12)
+    at [_onLine] [as _onLine] (node:internal/readline/interface:415:12)
+    at [_normalWrite] [as _normalWrite] (node:internal/readline/interface:609:22)
+    at Socket.ondata (node:internal/readline/interface:242:23)
+    at Socket.emit (node:events:524:28)
+    at Socket.emit (node:domain:489:12)
+zlock_rl/ai_util/sim.py", line 88, in call
+    raise RuntimeError(reply["error"])
+RuntimeError: Error: invalid team: "none" is an invalid item.
+    at prepPlayer (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:36:23)
+    at handle (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:127:32)
+    at Interface.<anonymous> (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:167:13)
+    at Interface.emit (node:events:524:28)
+    at Interface.emit (node:domain:489:12)
+    at [_onLine] [as _onLine] (node:internal/readline/interface:415:12)
+    at [_normalWrite] [as _normalWrite] (node:internal/readline/interface:609:22)
+    at Socket.ondata (node:internal/readline/interface:242:23)
+    at Socket.emit (node:events:524:28)
+    at Socket.emit (node:domain:489:12)
+
+#14 FAILED: KeyError: '#14'
+Traceback (most recent call last):
+  File "/home/tristan/CodingProjects/nuzlock_rl/scripts/rr_team_probe.py", line 115, in run_boss
+    return _run_boxes(args, name) if args.boxes else _run_boss(args, name)
+                                                     ~~~~~~~~~^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/scripts/rr_team_probe.py", line 257, in _run_boss
+    ctx = setup(args, name)
+  File "/home/tristan/CodingProjects/nuzlock_rl/scripts/rr_team_probe.py", line 131, in setup
+    block, cap, pool, progress = by[name]
+                                 ~~^^^^^^
+KeyError: '#14'
+
+#15: trainer #15, cap 28, pool 163 species; arena {'ai_permanent': True}; not modelled: []
+#15: starter bulbasaur; boss attacks with ['Dark', 'Electric', 'Fire', 'Ghost', 'Grass', 'Ice', 'Normal', 'Poison']
+#16: trainer #16, cap 28, pool 163 species; arena {'ai_permanent': True}; not modelled: []
+#16: starter turtwig; boss attacks with ['Bug', 'Dragon', 'Electric', 'Fire', 'Ground', 'Normal', 'Poison', 'Steel']
+#4: A solo scores for 80 species in 1s; top: sentret 2.00, poochyena 2.00, ponytagalar 2.00, kricketot 1.56, patrat 1.19, rattata 1.18, wurmple 0.85, zigzagoon 0.75
+#7: A solo scores for 116 species in 2s; top: houndour 0.90, patrat 0.67, yungoos 0.62, skwovet 0.60, poochyena 0.56, slakoth 0.50, grubbin 0.43, sentret 0.43
+#9: A solo scores for 132 species in 2s; top: spearow 0.66, rattata 0.66, nickit 0.63, kricketot 0.60, zigzagoongalar 0.54, sawk 0.46, poochyena 0.43, meowthalola 0.40
+#5: A solo scores for 106 species in 2s; top: sentret 2.00, kricketot 1.23, rattata 0.98, zigzagoon 0.76, wattrel 0.72, shinx 0.66, poochyena 0.64, ponytagalar 0.55
+#15: A solo scores for 164 species in 3s; top: ekans 2.00, stunky 1.63, surskit 1.28, glameow 1.06, zigzagoongalar 1.03, wattrel 0.98, nickit 0.86, litleo 0.84
+#16: A solo scores for 164 species in 2s; top: mudbray 0.63, phanpy 0.55, rockruff 0.45, nickit 0.43, wattrel 0.36, swinub 0.33, mienfoo 0.32, slugma 0.32
+#4: B 279 teams scored in 14s; greedy ('kricketot', 'patrat', 'ponytagalar', 'poochyena', 'rattata', 'sentret') (2.00); best fast ('kricketot', 'patrat', 'ponytagalar', 'poochyena', 'rattata', 'sentret') (2.00)
+#4: cover team ('hoothoot', 'kricketot', 'patrat', 'rattataalola', 'sentret', 'zigzagoon')
+#15: B 279 teams scored in 14s; greedy ('ekans', 'glameow', 'stunky', 'surskit', 'wattrel', 'zigzagoongalar') (2.00); best fast ('ekans', 'glameow', 'stunky', 'surskit', 'wattrel', 'zigzagoongalar') (2.00)
+#15: cover team ('glameow', 'houndour', 'makuhita', 'marill', 'skwovet', 'stunky')
+#7: B 279 teams scored in 18s; greedy ('grubbin', 'houndour', 'patrat', 'poochyena', 'skwovet', 'yungoos') (2.00); best fast ('grubbin', 'houndour', 'patrat', 'poochyena', 'skwovet', 'yungoos') (2.00)
+#7: cover team ('bonsly', 'chingling', 'ekans', 'houndour', 'nickit', 'skwovet')
+#5: B 279 teams scored in 21s; greedy ('ponytagalar', 'rattata', 'sentret', 'wattrel', 'yungoos', 'zigzagoon') (2.00); best fast ('ponytagalar', 'rattata', 'sentret', 'wattrel', 'yungoos', 'zigzagoon') (2.00)
+#5: cover team ('bonsly', 'chingling', 'patrat', 'shinx', 'yungoos', 'zigzagoon')
+#9: B 279 teams scored in 24s; greedy ('nickit', 'rattata', 'rattataalola', 'sawk', 'spearow', 'zigzagoongalar') (1.88); best fast ('abra', 'buneary', 'chewtle', 'kricketot', 'rattataalola', 'zigzagoongalar') (2.00)
+#9: cover team ('bidoof', 'dunsparce', 'rattataalola', 'sawk', 'skwovet', 'throh')
+#16: B 279 teams scored in 25s; greedy ('corphish', 'mudbray', 'nickit', 'rockruff', 'tympole', 'zigzagoongalar') (2.00); best fast ('corphish', 'mudbray', 'nickit', 'rockruff', 'tympole', 'zigzagoongalar') (2.00)
+#16: cover team ('makuhita', 'meowthgalar', 'riolu', 'skwovet', 'teddiursa', 'throh')
+#7         legal=True  best team under search: win  100% deaths/mon 0.00 deathless 100% ['grubbin', 'houndour', 'patrat', 'skwovet', 'slakoth', 'yungoos']  (others: 100%, 100%, 100%, 100%, 100%)  (837s)
+#7         sets: charjabug(Jolly/Swarm) ['spark', 'bugbite', 'bite', 'flash'], houndoom(Timid/Flash Fire) ['flameburst', 'crunch', 'thunderfang', 'inferno'], watchog(Adamant/Analytic) ['headbutt', 'crunch', 'lowkick', 'hypnosis'], greedent(Adamant/Cheek Pouch) ['bodyslam', 'crunch', 'covet', 'thief'], vigoroth(Jolly/Vital Spirit) ['slash', 'suckerpunch', 'rocktomb', 'uproar'], gumshoos(Adamant/Stakeout) ['headbutt', 'crunch', 'thunderfang', 'icefang']
+#15        legal=True  best team under search: win  100% deaths/mon 0.00 deathless 100% ['glameow', 'houndour', 'makuhita', 'marill', 'skwovet', 'stunky']  (others: 100%, 100%, 100%, 100%, 100%)  (849s)
+#15        sets: purugly(Adamant/Thick Fat) ['headbutt', 'dig', 'thief', 'slackoff'], houndoom(Timid/Flash Fire) ['flameburst', 'crunch', 'thunderfang', 'inferno'], hariyama(Adamant/Thick Fat) ['vitalthrow', 'dig', 'knockoff', 'upperhand'], azumarill(Adamant/Sap Sipper) ['playrough', 'aquatail', 'bodyslam', 'covet'], greedent(Adamant/Cheek Pouch) ['bodyslam', 'dig', 'crunch', 'rest'], skuntank(Jolly/Stench) ['knockoff', 'flamethrower', 'dig', 'toxic']
+#4         legal=True  best team under search: win  100% deaths/mon 0.00 deathless 100% ['kricketot', 'patrat', 'ponytagalar', 'poochyena', 'sentret', 'zigzagoon']  (others: 100%, 100%, 100%, 100%, 100%)  (1054s)
+#4         sets: kricketune(Adamant/Technician) ['bugbite', 'rocktomb', 'tackle', 'pounce'], watchog(Adamant/Analytic) ['headbutt', 'crunch', 'lowkick', 'hypnosis'], ponytagalar(Adamant/Immunity) ['covet', 'flamewheel', 'stomp', 'willowisp'], mightyena(Adamant/Intimidate) ['crunch', 'psychicfangs', 'thunderfang', 'suckerpunch'], furret(Adamant/Adaptability) ['headbutt', 'scratch', 'quickattack', 'foresight'], linoone(Adamant/Pickup) ['headbutt', 'playrough', 'tackle', 'odorsleuth']
+#5         legal=True  best team under search: win  100% deaths/mon 0.00 deathless 100% ['hoothoot', 'ponytagalar', 'rattata', 'sentret', 'wattrel', 'zigzagoon']  (others: 100%, 100%, 100%, 100%, 100%)  (2536s)
+#5         sets: noctowl(Modest/Tinted Lens) ['aircutter', 'flash', 'echoedvoice', 'hypnosis'], ponytagalar(Adamant/Flash Fire) ['covet', 'flamewheel', 'stomp', 'willowisp'], raticate(Adamant/Run Away) ['hyperfang', 'suckerpunch', 'thief', 'bite'], furret(Adamant/Adaptability) ['headbutt', 'thief', 'scratch', 'quickattack'], wattrel(Timid/Volt Absorb) ['flash', 'pluck', 'quickattack', 'electroweb'], linoone(Adamant/Pickup) ['headbutt', 'playrough', 'thief', 'tackle']
+#16        legal=True  best team under search: win  100% deaths/mon 0.04 deathless 80% ['corphish', 'lunatone', 'mudbray', 'nickit', 'rockruff', 'tympole']  (others: 100%, 100%, 100%, 100%, 100%)  (3015s)
+#16        sets: crawdaunt(Adamant/Hyper Cutter) ['razorshell', 'nightslash', 'dig', 'knockoff'], lunatone(Modest/Levitate) ['psyshock', 'powergem', 'moonblast', 'hypnosis'], mudbray(Adamant/Own Tempo) ['highhorsepower', 'stomp', 'rocktomb', 'bulldoze'], thievul(Timid/Run Away) ['darkpulse', 'dig', 'thunderfang', 'snarl'], lycanroc(Adamant/Inner Focus) ['rocktomb', 'dig', 'thunderfang', 'rockthrow'], palpitoad(Modest/Swift Swim) ['muddywater', 'uproar', 'mudshot', 'bubblebeam']
+#16        threat Druddigon (3 of our deaths): counters nacli [wins the duel 100%, 100% HP left; MT MOON B1F / grass_day 20%], lunatone [wins the duel 100%, 83% HP left; MT MOON B2F / grass_night 4%], snubbull [wins the duel 100%, 72% HP left; ROUTE 22 / grass_day 10%]
+#16        threat Arcanine (3 of our deaths): counters mienfoo [wins the duel 100%, 64% HP left; ROUTE 1 / grass_day 10%], tentacool [wins the duel 100%, 62% HP left; PALLET TOWN / old_rod 70%], psyduck [wins the duel 100%, 58% HP left; ROUTE 22 / old_rod 70%]
+#9         legal=True  best team under search: win  100% deaths/mon 0.06 deathless 73% ['abra', 'espurr', 'gastly', 'meowthalola', 'patrat', 'poochyena']  (others: 100%, 100%, 100%, 100%, 100%)  (3630s)
+#9         sets: kadabra(Modest/Synchronize) ['psybeam', 'flash', 'hiddenpower', 'confusion'], meowstic(Timid/Prankster) ['psybeam', 'flash', 'covet', 'thunderwave'], haunter(Timid/Levitate) ['ominouswind', 'suckerpunch', 'hypnosis', 'nightshade'], persianalola(Jolly/Fur Coat) ['thief', 'playrough', 'flash', 'feintattack'], watchog(Adamant/Analytic) ['headbutt', 'crunch', 'lowkick', 'hypnosis'], mightyena(Adamant/Intimidate) ['crunch', 'psychicfangs', 'poisonfang', 'suckerpunch']
+#9         threat Seviper (5 of our deaths): counters wattrel [wins the duel 100%, 100% HP left; VIRIDIAN CITY / grass_night 8%], spearow [wins the duel 100%, 91% HP left; VIRIDIAN CITY / grass_day 10%], espurr [wins the duel 100%, 71% HP left; PEWTER CITY / grass_night 10%]
+#9         threat Mightyena (2 of our deaths): counters wurmple [wins the duel 100%, 100% HP left; VIRIDIAN FOREST / grass_night 20%], tyrogue [wins the duel 100%, 100% HP left; MT MOON 1F / grass_day 4%], tarountula [wins the duel 100%, 100% HP left; FOREST EXPANSION / grass_night 20%]
+
+Radical Red best-six probe (pool) | legal moves only: True | arena effects: True | field-aware calc bot: True | chooser cover | matchup play True | death weight 6.0 | seeded | search 9,8 x n=30 | no EVs, no items | enemy = RR AI, full info | 61 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  #4          16  100%       0.00  100%  kricketot, patrat, ponytagalar, poochyena, sentret, zigzagoon  | -
+  #5          16  100%       0.00  100%  hoothoot, ponytagalar, rattata, sentret, wattrel, zigzagoon  | -
+  #7          23  100%       0.00  100%  grubbin, houndour, patrat, skwovet, slakoth, yungoos  | -
+  #9          23  100%       0.06   73%  abra, espurr, gastly, meowthalola, patrat, poochyena  | -
+  #15         28  100%       0.00  100%  glameow, houndour, makuhita, marill, skwovet, stunky  | -
+  #16         28  100%       0.04   80%  corphish, lunatone, mudbray, nickit, rockruff, tympole  | -

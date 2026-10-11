@@ -1863,11 +1863,24 @@ mostly lacks the counters the cover wants (the "most missed" column is what
 routing would have to go and catch: at Misty a Mantine answer was absent from
 20 of 30 boxes). That is the gap between the planned pool (30/30) and a run.
 
-**The other early bosses** (planned pool, n=30, same config; `results/
-rr_cover_early_*.log`): #2 Lass Anne, #4 Catcher Sammy, #7 Lass Sally and
-#15 Camper Ethan are all 30/30 with no deaths, and every candidate six did the
-same — before Brock the early game is not the problem. Two data fixes on the
-way (986dda0, 31edf3f): the ROM dump's 12-character names ("Drain Kiss",
-"None" items) only resolved for the twelve hand-fixed bosses, and the enemy
-AI crashed on a Metronome-called Hyper Beam's recharge turn. #14 Lass Relli
-has no team in either source. Falkner, Archer, the Rival and the Grunt follow.
+**The other early bosses** (planned pool, n=30, same config;
+`results/rr_cover_early*.log`):
+
+  #   trainer            cap  win   deaths/mon  deathless  killers (counters in the pool)
+  2   Lass Anne           16  30/30    0.00       100%
+  4   Catcher Sammy       16  30/30    0.00       100%
+  5   Falkner             16  30/30    0.00       100%
+  7   Lass Sally          23  30/30    0.00       100%
+  9   Archer (Mt. Moon)   23  30/30    0.06        73%     Seviper 5, Mightyena 2 (Wattrel, Spearow; Wurmple, Tyrogue)
+  15  Camper Ethan        28  30/30    0.00       100%
+  16  Grunt (Nugget Br.)  28  30/30    0.04        80%     Druddigon 3, Arcanine 3 (Nacli, Lunatone; Mienfoo, Tentacool)
+
+Every candidate six won every fight at all seven; the singles fights between
+Brendan and Misty are not where runs die. Brock (23% deathless) and Misty
+(30%) remain the two blenders, and both now have the shape "100% wins, a
+handful of deaths to one or two named mons whose duel-winning counters sit
+in the pool". Two data fixes on the way (986dda0, 31edf3f): the ROM dump's
+12-character names ("Drain Kiss", "None" items) only resolved for the twelve
+hand-fixed bosses, and the enemy AI crashed on a Metronome-called Hyper
+Beam's recharge turn. #14 Lass Relli has no team in either source; #8 and
+#11–13 are doubles. The Cerulean Rival (#10) is still running.
