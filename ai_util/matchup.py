@@ -12,20 +12,36 @@ import math
 from ai_util.calc_bot import dmg_frac, stat
 
 SAFE_OURS, SAFE_THEIRS = 2, 3
+HEALS = {"roost", "recover", "slackoff", "softboiled", "milkdrink", "synthesis", "moonlight", "morningsun",
+         "shoreup", "rest", "wish", "lunarblessing", "strengthsap"}
 
 
 def pair(me, opp, battle) -> dict:
-    """{ko_them, ko_us, faster, hit, take}: hits to KO each way (99 = never), who moves
-    first, and the best fraction each side takes per hit."""
+    """{ko_them, ko_us, faster, heals, hit, take}: hits to KO each way (99 = never), who moves
+    first, whether they carry a recovery move, and the best fraction each side takes per hit."""
     hit = max((dmg_frac(me, opp, mv, True, battle) for mv in me.moves.values()), default=0.0)
     take = max((dmg_frac(opp, me, mv, False, battle) for mv in opp.moves.values()), default=0.0)
-    return {"ko_them": math.ceil(opp.current_hp_fraction / hit) if hit > 0 else 99,
-            "ko_us": math.ceil(me.current_hp_fraction / take) if take > 0 else 99,
-            "faster": stat(me, "spe", True, battle) > stat(opp, "spe", False, battle), "hit": hit, "take": take}
+    their_hp = opp.current_hp_fraction if opp.current_hp else 1.0  # a benched enemy reads as unknown HP: full
+    our_hp = me.current_hp_fraction if me.current_hp else 1.0
+    return {"ko_them": math.ceil(their_hp / hit) if hit > 0 else 99,
+            "ko_us": math.ceil(our_hp / take) if take > 0 else 99,
+            "faster": stat(me, "spe", True, battle) > stat(opp, "spe", False, battle),
+            "heals": any(mv.id in HEALS for mv in opp.moves.values()), "hit": hit, "take": take}
 
 
 def safe(p: dict) -> bool:
-    return p["ko_them"] <= SAFE_OURS and p["ko_us"] >= SAFE_THEIRS
+    """We KO in at most two hits and survive the hits we absorb before our last one with one
+    to spare (we absorb ko_them hits moving second, one fewer moving first; never fewer than
+    three to KO us); a healer (Roost / Recover / ...) must fall before it heals: one hit, or
+    two while moving first (2026-10-11: Gyarados "2/3" vs Roost Mantine was no answer)."""
+    if p["ko_them"] > SAFE_OURS:
+        return False
+    absorbed = p["ko_them"] - (1 if p["faster"] else 0)
+    if p["ko_us"] < max(SAFE_THEIRS, absorbed + 2):
+        return False
+    if p.get("heals") and not (p["ko_them"] <= 1 or (p["ko_them"] <= 2 and p["faster"])):
+        return False
+    return True
 
 
 def edge(p: dict) -> float:

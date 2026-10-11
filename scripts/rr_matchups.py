@@ -1,7 +1,7 @@
 """Radical Red matchup matrix with perfect information: for a boss, every (ours, theirs) pair's
 hits to KO both ways under the arena, from the calc bot's own damage model on the real sets
-at the cap (the enemy's from the dump, ours as the probe builds them). "safe" = we KO in at
-most 2 hits and they need at least 3 on us. Over a team it shows the holes; over the pool it
+at the cap (the enemy's from the dump, ours as the probe builds them). "safe" = ai_util.matchup.safe
+(we KO in at most 2 hits, they need 3, 4 if they move first; healers must fall before they heal). Over a team it shows the holes; over the pool it
 shows whether a deathless answer to each enemy mon exists at all.
 
   uv run python scripts/rr_matchups.py BROCK --team applin,sandshrewalola,furret,skwovet,gumshoos,linoonegalar
@@ -10,7 +10,6 @@ shows whether a deathless answer to each enemy mon exists at all.
 
 import argparse
 import json
-import math
 import sys
 from pathlib import Path
 
@@ -25,7 +24,7 @@ def main() -> None:
     import gauntlet
     from gauntlet import pack_team
     from poke_env.data import to_id_str
-    from ai_util.calc_bot import dmg_frac, stat
+    from ai_util.matchup import pair, safe
     from ai_util.sim import SimBattle, SimBridge
 
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -56,30 +55,21 @@ def main() -> None:
             me = next((p for p in ours.values() if p.species == to_id_str(mons[sp].species)), None)
             if me is None:
                 continue
-            row = {}
-            for opp in theirs:
-                hit = max((dmg_frac(me, opp, mv, True, b) for mv in me.moves.values()), default=0)
-                take = max((dmg_frac(opp, me, mv, False, b) for mv in opp.moves.values()), default=0)
-                faster = stat(me, "spe", True, b) > stat(opp, "spe", False, b)
-                ko_us = math.ceil(1 / hit) if hit > 0 else 99
-                ko_them = math.ceil(1 / take) if take > 0 else 99
-                row[opp.species] = (ko_us, ko_them, faster)
-            rows[sp] = (mons[sp], row)
+            rows[sp] = (mons[sp], {opp.species: pair(me, opp, b) for opp in theirs})
         sb.close()
     bridge.close()
     enemies = [p.split("|")[0] for p in enemy_packed.split("]")]
     ids = [to_id_str(e) for e in enemies]
-    print(f"{args.boss}: cap {cap}, arena {arena}. cell = hits we need / hits they need (> = we are faster); * = safe (<=2 / >=3)")
+    print(f"{args.boss}: cap {cap}, arena {arena}. cell = hits we need / hits they need (> = we move first, h = they heal); * = safe (ai_util.matchup.safe)")
     print(f"{'ours':<22}" + "".join(f"{e[:11]:>12}" for e in enemies))
     safe_count = {e: [] for e in ids}
     for sp, (m, row) in rows.items():
         cells = []
         for e in ids:
-            ku, kt, f = row.get(e, (99, 99, False))
-            safe = ku <= 2 and kt >= 3
-            if safe:
+            p = row.get(e, {"ko_them": 99, "ko_us": 99, "faster": False, "heals": False})
+            if safe(p):
                 safe_count[e].append(m.species)
-            cells.append(f"{'*' if safe else ' '}{min(ku, 9)}/{min(kt, 9)}{'>' if f else ' '}".rjust(12))
+            cells.append(f"{'*' if safe(p) else ' '}{min(p['ko_them'], 9)}/{min(p['ko_us'], 9)}{'>' if p['faster'] else ' '}{'h' if p['heals'] else ' '}".rjust(12))
         if not args.pool:
             print(f"{m.species[:21]:<22}" + "".join(cells) + f"   {m.nature} {m.ability} {m.moves}")
     if not args.pool:

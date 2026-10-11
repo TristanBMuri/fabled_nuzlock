@@ -1,0 +1,12 @@
+team: [('toucannon', 'Adamant', 'Frisk', ['beakblast', 'uturn', 'steelwing', 'roost']), ('golduck', 'Timid', 'Swift Swim', ['scald', 'zenheadbutt', 'dig', 'aquatail']), ('gogoat', 'Adamant', 'Sap Sipper', ['razorleaf', 'earthquake', 'takedown', 'synthesis']), ('jynx', 'Modest', 'Dry Skin', ['psyshock', 'icywind', 'flash', 'psybeam']), ('skuntank', 'Jolly', 'Stench', ['knockoff', 'flamethrower', 'dig', 'toxic']), ('boltund', 'Adamant', 'Strong Jaw', ['spark', 'dig', 'icefang', 'thunderfang'])]
+enemy: [('Politoed', 'iapapaberry', 'drizzle', 'flipturn,scald,earthquake,toxic'), ('Ludicolo', 'sitrusberry', 'swiftswim', 'gigadrain,scald,aurorabeam,thunderpunch'), ('Mantine', 'wacanberry', 'swiftswim', 'scald,hurricane,roost,hiddenpowergrass'), ('Clodsire', 'blacksludge', 'waterabsorb', 'poisonjab,bulldoze,recover,toxic'), ('Starmie', 'mysticwater', 'analytic', 'scald,thunderbolt,psyshock,aurorabeam'), ('Toxicroak', 'lifeorb', 'dryskin', 'swordsdance,drainpunch,poisonjab,suckerpunch')]
+death weight 6.0, preserve False, matchup True
+
+MISTY: 12/12 wins, 5 deathless, 17 deaths (1.4 per fight), fights last 30 turns
+deaths by enemy mon: [('Starmie', 6), ('Ludicolo', 5), ('Clodsire', 3), ('Toxicroak', 2), ('Mantine', 1)]
+deaths by enemy move: [('Starmie Scald', 3), ('Ludicolo Giga Drain', 3), ('Starmie Thunderbolt', 3), ('Clodsire Bulldoze', 2), ('Toxicroak Poison Jab', 2), ('Ludicolo Scald', 1), ('Clodsire Poison Jab', 1), ('Mantine Hurricane', 1)]
+which of ours: [('Boltund', 4), ('Golduck', 3), ('Jynx', 3), ('Toucannon', 3), ('Gogoat', 2), ('Skuntank', 2)]
+HP before the killing hit: [('low (<0.5)', 12), ('half+ (0.5-0.9)', 5)]
+died the turn it switched in: 9 of 17
+deaths in won fights: 17 | in lost fights: 0
+by turn: [(15, 6), (5, 4), (10, 3), (30, 3), (20, 1)]

@@ -3,12 +3,15 @@
 from ai_util.matchup import cover, edge, safe
 
 
-def P(ko_them, ko_us, faster=True):
-    return {"ko_them": ko_them, "ko_us": ko_us, "faster": faster, "hit": 1 / ko_them, "take": 1 / ko_us}
+def P(ko_them, ko_us, faster=True, heals=False):
+    return {"ko_them": ko_them, "ko_us": ko_us, "faster": faster, "heals": heals, "hit": 1 / ko_them, "take": 1 / ko_us}
 
 
 def test_safe_and_edge():
     assert safe(P(2, 3)) and not safe(P(3, 3)) and not safe(P(2, 2))
+    assert not safe(P(2, 3, faster=False)) and safe(P(2, 4, faster=False))  # moving second costs a hit of margin
+    assert not safe(P(2, 3, faster=False, heals=True))  # Gyarados vs Roost Mantine
+    assert safe(P(1, 3, faster=False, heals=True)) and safe(P(2, 3, faster=True, heals=True))
     assert edge(P(1, 4)) > edge(P(2, 3)) > edge(P(2, 2))
 
 

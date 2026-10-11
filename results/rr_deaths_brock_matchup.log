@@ -1,0 +1,12 @@
+team: [('applin', 'Jolly', 'Ripen', ['megadrain', 'dragonbreath', 'astonish']), ('sandshrewalola', 'Adamant', 'Slush Rush', ['metalclaw', 'thief', 'iceshard', 'iceball']), ('furret', 'Adamant', 'Adaptability', ['headbutt', 'thief', 'scratch', 'quickattack']), ('skwovet', 'Adamant', 'Cheek Pouch', ['tackle', 'thief', 'bulletseed', 'bite']), ('gumshoos', 'Adamant', 'Stakeout', ['headbutt', 'crunch', 'rocktomb', 'thief']), ('linoonegalar', 'Adamant', 'Pickup', ['headbutt', 'nightslash', 'seedbomb', 'thief'])]
+enemy: [('Hippopotas', 'berryjuice', 'sandstream', 'bulldoze,rocktomb,toxic,slackoff'), ('Cacnea', 'eviolite', 'sandrush', 'poweruppunch,bulletseed,thunderpunch,pinmissile'), ('Lunatone', 'lumberry', 'levitate', 'ancientpower,psybeam,hiddenpowerground,icywind'), ('Lileep', 'oranberry', 'suctioncups', 'stockpile,recover,hiddenpowerrock,megadrain'), ('Archen', 'iapapaberry', 'defeatist', 'wingattack,rocktomb,bulldoze,facade'), ('Varoom', 'airballoon', 'overcoat', 'bulldoze,gyroball,toxic,protect')]
+death weight 0.5, preserve False, matchup True
+
+BROCK: 11/12 wins, 1 deathless, 40 deaths (3.3 per fight), fights last 33 turns
+deaths by enemy mon: [('Cacnea', 12), ('Lunatone', 12), ('Varoom', 6), ('Archen', 5), ('Lileep', 3), ('Hippopotas', 2)]
+deaths by enemy move: [('Cacnea Power-Up Punch', 7), ('Lunatone Ancient Power', 5), ('Varoom Bulldoze', 4), ('Lunatone residual/other', 4), ('Archen residual/other', 3), ('Cacnea Pin Missile', 3), ('Lileep Mega Drain', 2), ('Varoom residual/other', 2)]
+which of ours: [('Linoone', 10), ('Gumshoos', 9), ('Skwovet', 8), ('Furret', 8), ('Applin', 3), ('Sandshrew', 2)]
+HP before the killing hit: [('low (<0.5)', 39), ('full (>=0.9)', 1)]
+died the turn it switched in: 10 of 40
+deaths in won fights: 34 | in lost fights: 6
+by turn: [(10, 14), (15, 12), (5, 5), (20, 4), (30, 4), (25, 1)]
