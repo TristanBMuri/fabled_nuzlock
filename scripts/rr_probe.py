@@ -121,12 +121,48 @@ def arena(effect: str) -> tuple[dict, list[str]]:
     return out, rest
 
 
+# every generation's starters: the run draws one at random (user decision 2026-10-11)
+STARTERS = ["bulbasaur", "charmander", "squirtle", "chikorita", "cyndaquil", "totodile", "treecko", "torchic",
+            "mudkip", "turtwig", "chimchar", "piplup", "snivy", "tepig", "oshawott", "chespin", "fennekin",
+            "froakie", "rowlet", "litten", "popplio", "grookey", "scorbunny", "sobble", "sprigatito", "fuecoco", "quaxly"]
+NATURE = {("atk", "spa"): "Adamant", ("spa", "atk"): "Modest", ("spe", "atk"): "Timid", ("spe", "spa"): "Jolly"}
+
+
+def choose_nature(species: str, moves: list[str], known: dict) -> str:
+    """Mints are free (hardcore sells them): + the attacking stat the set uses, - the other;
+    a mixed set takes +Spe and drops the weaker attacking stat."""
+    md = load_game("rr")["moves"]
+    cats = [md[m]["category"] for m in moves if m in md and md[m]["category"] != "Status"]
+    bs = known.get(species, {}).get("baseStats", {"atk": 1, "spa": 1})
+    if "Physical" in cats and "Special" in cats:
+        return NATURE[("spe", "atk" if bs["atk"] < bs["spa"] else "spa")]
+    return NATURE[("atk", "spa")] if "Physical" in cats or not cats else NATURE[("spa", "atk")]
+
+
+def choose_ability(species: str, known: dict, boss_types: set, arena: dict) -> str | None:
+    """Capsules (and the patch) make every slot available: an immunity to a type the boss
+    attacks with, a speed ability for the gym's weather / terrain, Intimidate; else slot 0."""
+    from ai_util.calc_bot import ABILITY_IMMUNE_TYPE, SPEED_ABILITY
+    slots = known.get(species, {}).get("abilities", {})
+    if not slots:
+        return None
+    weather = {"raindance": "swiftswim", "sunnyday": "chlorophyll", "sandstorm": "sandrush", "snow": "slushrush",
+               "desolateland": "chlorophyll", "primordialsea": "swiftswim"}.get(arena.get("weather", ""), "")
+
+    def score(ab: str) -> int:
+        a = to_id_str(ab)
+        return (2 * (ABILITY_IMMUNE_TYPE.get(a) in boss_types) + 2 * (a == weather or (a == "surgesurfer" and arena.get("terrain") == "electricterrain"))
+                + (a == "intimidate") + (a in SPEED_ABILITY and SPEED_ABILITY[a] and False))
+    return max((slots[k] for k in ("0", "1", "H") if k in slots), key=score)
+
+
 def pools() -> tuple[dict, dict]:
     """{boss name: (block, cap, [species ids catchable before it], trainer index)} from the
     tracker export and data/rr/order.json: every encounter at a location open by that fight
     (order.json `reach`) whose method is in hand (grass always; rods and Surf from `gates`)
-    and whose lowest level is at or under the cap. Gifts, statics, fossils, trades and the
-    starter are not in it; neither is rarity or the one-encounter-per-route rule."""
+    and whose lowest level is at or under the cap, plus the gifts and in-game trades in hand
+    (order.json `gifts`). The starter is drawn by the caller (STARTERS); statics, fossils,
+    rarity and the one-encounter-per-route rule are not in it."""
     enc = json.load(open(RR / "tracker_encounters.json"))
     bosses = json.load(open(RR / "tracker_bosses.json"))["hardcore"]
     order = json.load(open(RR / "order.json"))
@@ -145,7 +181,7 @@ def pools() -> tuple[dict, dict]:
     for t, e in enumerate(order["entries"]):
         if e["name"] not in by_title or e["name"] in out or not e["cap"]:
             continue
-        pool = set()
+        pool = {g["species"] for g in order.get("gifts", []) if g["t"] <= t and (g["level"] or 0) <= e["cap"]}
         for l in locs[:e["reach"] + 1]:
             for meth, tb in l["methods"].items():
                 if (0 if meth.startswith("grass") else order["gates"].get(meth, 999)) > t:
@@ -158,9 +194,14 @@ def pools() -> tuple[dict, dict]:
 def where(species: str, t: int) -> str:
     """The first open location and method (by trainer t) that offers `species` at or under
     the cap: the encounter-routing answer for a counter."""
+    if species in STARTERS:
+        return "starter"
     enc = json.load(open(RR / "tracker_encounters.json"))
     order = json.load(open(RR / "order.json"))
     e = order["entries"][t]
+    for g in order.get("gifts", []):
+        if g["species"] == species and g["t"] <= t:
+            return g["how"]
     for l in [x for x in enc["locations"] if not x["postgame"]][:e["reach"] + 1]:
         for meth, tb in l["methods"].items():
             if (0 if meth.startswith("grass") else order["gates"].get(meth, 999)) > t:

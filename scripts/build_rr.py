@@ -254,11 +254,25 @@ def progression() -> None:
         w = when(place)
         if mid not in tms or (w or 999) < tms[mid]["before_trainer"]:
             tms[mid] = {"name": cells[0][0], "before_trainer": w if w is not None else 999, "from": f"tutor: {place}"}
-    (RR / "order.json").write_text(json.dumps({"entries": entries, "gates": gates}, indent=0))
+    # gifts and in-game trades: species, level (a trade keeps the given mon's level: None), the trainer
+    # index at which they are in hand (rematch rewards and the Sevii Islands never), how
+    gifts = []
+    for g in enc["gifts"]:
+        w = when(f"{g['location']}, {g['requirements']}")
+        lv = re.search(r"Lv\. ?(\d+)", g.get("info", "") + g.get("requirements", ""))
+        if w is not None and lv:
+            gifts.append({"species": to_id_str(g["species"]), "level": int(lv.group(1)), "t": w,
+                          "how": f"gift: {g['location']} — {g['requirements']}"})
+    for tr in enc["trades"]:
+        w = when(tr["location"])
+        if w is not None and tr["receive"] != "?":
+            gifts.append({"species": to_id_str(tr["receive"]), "level": None, "t": w,
+                          "how": f"trade: give {tr['give']} at {tr['location']}"})
+    (RR / "order.json").write_text(json.dumps({"entries": entries, "gates": gates, "gifts": gifts}, indent=0))
     (RR / "tms.json").write_text(json.dumps(tms))
     n_early = {b: sum(1 for v in tms.values() if v["before_trainer"] <= i) for i, b in
                [(6, "Brock"), (15, "Misty"), (26, "Surge"), (34, "Erika")]}
-    print(f"data/rr/order.json: {len(entries)} trainers, gates {gates}; tms.json: {len(tms)} TM/tutor moves, in hand by {n_early}")
+    print(f"data/rr/order.json: {len(entries)} trainers, gates {gates}, {len(gifts)} gifts/trades; tms.json: {len(tms)} TM/tutor moves, in hand by {n_early}")
     for u in unmatched:
         print("  unmatched item text:", u)
 

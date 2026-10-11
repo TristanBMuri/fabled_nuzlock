@@ -55,17 +55,23 @@ def progress(st: dict) -> float:
     return done
 
 
-def build_mon(species: str, cap: int, known: dict, progress: int) -> Mon | None:
+def build_mon(species: str, cap: int, known: dict, progress: int, boss_types: set = frozenset(), arena: dict = {}) -> Mon | None:
     """Evolved by level at the cap (no stones), best4 moves over the TMs and tutors in hand
-    by trainer `progress` (data/rr/tms.json, minus gauntlet.BANNED_MOVES), ability slot 0,
-    no item, no EVs (Minimal Grinding Mode)."""
+    by trainer `progress` (data/rr/tms.json, minus gauntlet.BANNED_MOVES), the nature and
+    ability the planner picks for this boss (rr_probe.choose_nature / choose_ability), no
+    item, no EVs (Minimal Grinding Mode)."""
     ev = evolve(species, cap, None, caught_level=5, trainer_idx=None)
     moves = encounter_moves(ev, cap, "best4", progress=progress)
     if not moves or ev not in known:
         return None
-    m = Mon(ev, cap, moves, ability=known[ev].get("abilities", {}).get("0"), item=None, caught_level=5)
+    m = Mon(ev, cap, moves, ability=rp.choose_ability(ev, known, boss_types, arena), item=None, caught_level=5,
+            nature=rp.choose_nature(ev, moves, known))
     m.evs = dict.fromkeys(STATS, 0)
     return m
+
+
+def show(m: Mon) -> str:
+    return f"{m.species}({m.nature}/{m.ability})"
 
 
 def play(bridge, brain, enemy, party: list[Mon], enemy_packed: str, n: int, search=None, arena=None, seeds=None):
@@ -120,15 +126,20 @@ def _run_boss(args, name: str) -> dict:
     seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(max(args.n_solo, args.n_team, args.n_search))]
     enemy_packed, dump_cap, enemy_species = rp.boss_team(name)
     cap = max(cap, dump_cap)
+    md = rp.load_game("rr")["moves"]
+    boss_types = {md[mv]["type"] for mon in enemy_packed.split("]") for mv in mon.split("|")[4].split(",") if mv in md}
     bridge = SimBridge(showdown=str(rp.FORK))
     enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
     calc = calc_brain()
     rng = random.Random(f"{name}-team-{args.seed}")
+    starter = rng.choice(rp.STARTERS)  # one per run, at random across every generation
+    pool = sorted(set(pool) | {starter})
+    print(f"{name}: starter {starter}; boss attacks with {sorted(boss_types)}", flush=True)
     t0 = time.time()
     # A: solo scores (the ranking, not the final strength)
     solo, solo_vs = [], {}
     for sp in pool:
-        m = build_mon(sp, cap, known, progress)
+        m = build_mon(sp, cap, known, progress, boss_types, arena)
         if m is None:
             continue
         _, _, pr, solo_vs[sp] = play(bridge, calc, enemy, [m], enemy_packed, args.n_solo, arena=arena, seeds=seeds)
@@ -138,7 +149,7 @@ def _run_boss(args, name: str) -> dict:
     print(f"{name}: A solo scores for {len(solo)} species in {time.time() - t0:.0f}s; top: "
           + ", ".join(f"{sp} {pr:.2f}" for pr, sp in solo[:8]), flush=True)
     # B: teams from the shortlist, scored by the calc bot
-    mons = {sp: build_mon(sp, cap, known, progress) for sp in short}
+    mons = {sp: build_mon(sp, cap, known, progress, boss_types, arena) for sp in short}
     team_score = {}
 
     def score(team: tuple) -> float:
@@ -166,6 +177,7 @@ def _run_boss(args, name: str) -> dict:
     w, _, t, d = results[0]
     print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} "
           f"{list(t)}  (others: {', '.join(f'{w_:.0%}' for w_, _, _, _ in results[1:])})  ({time.time() - t0:.0f}s)", flush=True)
+    print(f"{name:<10} sets: " + ", ".join(f"{show(mons[s])} {mons[s].moves}" for s in t), flush=True)
     # threats -> counters: who killed the best team, and which pool species beat that mon solo
     # in stage A (KOs on it minus deaths to it), with where to catch them
     threats = []
@@ -179,7 +191,7 @@ def _run_boss(args, name: str) -> dict:
     seed_sp = next((sp for th in threats for sp, *_ in th["counters"] if sp not in t), None)  # a counter the best team lacks
     if args.repair and seed_sp:
         if seed_sp not in mons:
-            mons[seed_sp] = build_mon(seed_sp, cap, known, progress)
+            mons[seed_sp] = build_mon(seed_sp, cap, known, progress, boss_types, arena)
         rteam = (seed_sp,)
         while len(rteam) < 6:  # the same greedy build, seeded with the counter
             best = max((s for s in short if s not in rteam), key=lambda s: score(tuple(sorted(rteam + (s,)))))
@@ -189,6 +201,7 @@ def _run_boss(args, name: str) -> dict:
         print(f"{name:<10} repaired with {seed_sp}: win {rw:5.0%} deaths/mon {rd:.2f} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - t0:.0f}s)", flush=True)
     rows = [{"boss": name, "cap": cap, "legal": args.legal, "field_aware": not args.blind_field, "arena": arena, "unmodelled": unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d,
              "n": args.n_search, "all": [(list(t_), w_, d_) for w_, _, t_, d_ in results], "threats": threats, "repaired": repaired,
+             "starter": starter, "sets": [{"species": mons[s].species, "nature": mons[s].nature, "ability": mons[s].ability, "moves": mons[s].moves} for s in t],
              "enemy": enemy_species, "pool": len(pool), "progress": progress, "shortlist": short}]
     bridge.close()
     return {"rows": rows}
