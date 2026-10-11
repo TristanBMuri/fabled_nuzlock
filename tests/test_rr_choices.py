@@ -34,3 +34,15 @@ def test_sample_box_is_one_encounter_per_open_location():
     assert len(places) == len(set(places)) and 10 <= len(box) <= 30
     assert box[0][1] == "starter" and box[0][0] in rp.STARTERS
     assert all(s in pool for s, w in box[1:]) and len({s for s, _ in box}) == len(box)  # catchable, no dupes
+
+
+def test_dump_names_resolve_to_fork_ids():
+    """The ROM dump's 12-character names ("Drain Kiss", "None" items) pack as the fork's ids."""
+    import rr_probe as rp
+    assert rp.dump_id("Drain Kiss") == "drainingkiss"
+    assert rp.dump_id("Hidden Power Grass") == "hiddenpowergrass"
+    assert rp.dump_id("None") == ""
+    assert rp.dump_id("As One", "Calyrex-Shadow") == "asonespectrier"
+    assert rp.dump_id("Applite", "Flapple") == "flapplite"
+    packed = rp.boss_team(2)[0]  # Lass Anne: Audino holds nothing
+    assert "|none|" not in packed and "drainkiss" not in packed

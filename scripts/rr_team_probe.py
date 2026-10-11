@@ -128,6 +128,8 @@ def setup(args, name: str):
     from ai_util.rr_ai import RadicalRedAI
     from ai_util.sim import SimBridge, player_brain
     by, known = rp.pools()
+    if name not in by:
+        raise KeyError(f"{name}: no team data (not a tracker boss block nor a dump id)")
     block, cap, pool, progress = by[name]
     arena, unmodelled = rp.arena(block.get("battleEffect", "")) if args.arena else ({}, [block.get("battleEffect", "")])
     print(f"{name}: trainer #{progress}, cap {cap}, pool {len(pool)} species; arena {arena}; not modelled: {unmodelled}", flush=True)

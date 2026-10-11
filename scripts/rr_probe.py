@@ -87,14 +87,33 @@ DUMP_ID = {"BROCK": "0x19e", "MISTY": "0x19f", "LT. SURGE": "0x1a0", "ERIKA": "0
            "AGATHA": "0x53", "LANCE": "0x56"}
 
 
+# the ROM's 12-character names the docs export keeps ("Drain Kiss", "Soupercell Slam") -> the
+# fork's ids; "None" and consumables are no held item; As One / Applite depend on the species
+DUMP_NAMES = {"drainkiss": "drainingkiss", "soupercellslam": "supercellslam", "disarmcry": "disarmingvoice",
+              "craftyguard": "craftyshield", "none": "", "xattack": "", "hyperpotion": "", "abilitypill": "",
+              "blastoisnite": "blastoisinite", "houndoomnite": "houndoominite", "necroziumz": "ultranecroziumz",
+              "rustysword": "rustedsword", "rustyshield": "rustedshield", "aerodactlite": "aerodactylite",
+              "kangaskanite": "kangaskhanite", "neutralizegas": "neutralizinggas", "valiantshield": "dauntlessshield",
+              "wanderingsoul": "wanderingspirit"}
+
+
+def dump_id(name: str, species: str = "") -> str:
+    x = to_id_str(name or "")
+    if x == "asone":
+        return "asonespectrier" if "shadow" in species.lower() else "asoneglastrier"
+    if x == "applite":
+        return "flapplite" if "flapple" in species.lower() else "appletunite"
+    return DUMP_NAMES.get(x, x)
+
+
 def pack_trainer(t: dict, cap: int | None) -> str:
     """A dump trainer's packed team; a mon with a relative level ("Max Level - n") gets cap + n."""
     spread = lambda e: ",".join(str(e[k]) for k in ("hp", "atk", "def", "spa", "spd", "spe"))
     parts = []
     for d in t["mons"]:
         lv = d["level"] if d["level"] is not None else (cap or 0) + (d.get("offset") or 0)
-        parts.append("|".join([d["species"], "", to_id_str(d["item"]), to_id_str(d["ability"]),
-                               ",".join(to_id_str(x) for x in d["moves"]), d["nature"], spread(d["evs"]), d["gender"],
+        parts.append("|".join([d["species"], "", dump_id(d["item"]), dump_id(d["ability"], d["species"]),
+                               ",".join(dump_id(x) for x in d["moves"]), d["nature"], spread(d["evs"]), d["gender"],
                                spread(d["ivs"]), "", str(lv), ""]))
     return "]".join(parts)
 

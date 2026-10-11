@@ -66,6 +66,11 @@ Storm) are not.
 
 ## Gaps, in the order they matter (3-5 partly closed 2026-10-11: `build_rr.progression()` gives trainer order, encounter gates and TM/tutor availability by trainer index; route trainers, gifts/statics and the care-package item timeline are still open)
 
+- **#14 LASS RELLI (Nugget Bridge) has no team data**: the trainer order lists her but
+  the tracker has no boss block for her and the dump has no "Lass Relli"; the probe
+  skips her ("no team data"). The tracker's Nugget Bridge mini bosses are Cale, Ali,
+  Timmy (doubles) and Ethan. (2026-10-11)
+
 1. **Doubles.** Sabrina, Lorelei and ~20 mandatory fights are doubles. Showdown
    simulates them; the mirror, calc bot, searcher and RR-AI port are singles
    only. Either the run skips them (not a real answer) or the battler grows a
