@@ -270,13 +270,17 @@ def _run_boss(args, name: str) -> dict:
     threats = threats_of(ctx, attr[t], pool)
     say_threats(ctx, threats)
     repaired = None
-    seed_sp = next((sp for th in threats for sp, *_ in th["counters"] if sp not in t), None)  # a counter the best team lacks
-    if args.repair and seed_sp:
-        mon_of(ctx, seed_sp)
-        rteam = greedy(ctx, short, (seed_sp,))
-        rw, rd, _, _, rc = searched(ctx, rteam)
-        repaired = {"team": list(rteam), "win": rw, "deaths_per_mon": rd, "deathless": rc, "seed": seed_sp}
-        print(f"{name:<10} repaired with {seed_sp}: win {rw:5.0%} deaths/mon {rd:.2f} deathless {rc:.0%} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - ctx.t0:.0f}s)", flush=True)
+    extra = [sp for th in threats for sp, *_ in th["counters"] if sp not in short]  # counters the shortlist lacked
+    if args.repair and extra:
+        # unforced: the counters join the candidates and must earn a slot on team value (forcing
+        # the top counter in made Misty worse, 63% -> 27%, 2026-10-11)
+        for sp in extra:
+            mon_of(ctx, sp)
+        rteam = greedy(ctx, short + extra)
+        taken = [sp for sp in extra if sp in rteam]
+        rw, rd, _, _, rc = searched(ctx, rteam) if rteam != t else (w, d, None, None, clean[t])
+        repaired = {"team": list(rteam), "win": rw, "deaths_per_mon": rd, "deathless": rc, "counters_offered": extra, "counters_taken": taken}
+        print(f"{name:<10} repaired: counters offered {extra}, taken {taken}: win {rw:5.0%} deaths/mon {rd:.2f} deathless {rc:.0%} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - ctx.t0:.0f}s)", flush=True)
     rows = [{"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "arena": ctx.arena,
              "unmodelled": ctx.unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d, "deathless": clean[t], "n": args.n_search,
              "all": [(list(t_), w_, d_, clean[t_]) for w_, _, t_, d_ in results], "threats": threats, "repaired": repaired,
@@ -332,7 +336,7 @@ def main() -> None:
     ap.add_argument("--legal", action="store_true", help="drop the moves hardcore bans for the player")
     ap.add_argument("--arena", action="store_true", help="the gym's permanent field effect (tracker battleEffect) in the sim")
     ap.add_argument("--blind-field", action="store_true", help="the calc bot ignores weather / terrain (the pre-2026-10-11 bot)")
-    ap.add_argument("--repair", action="store_true", help="rebuild the team around the best counter to the top threat and play it too")
+    ap.add_argument("--repair", action="store_true", help="offer the counters to the greedy build and play the result too")
     ap.add_argument("--boxes", type=int, default=0, help="sampled-box mode: N boxes per boss drawn by rarity, the chooser picks six from each")
     ap.add_argument("--out")
     args = ap.parse_args()

@@ -1,0 +1,23 @@
+LT. SURGE: trainer #26, cap 36, pool 251 species; arena {'ai_permanent': True, 'terrain': 'electricterrain'}; not modelled: []
+BROCK: trainer #6, cap 16, pool 105 species; arena {'ai_permanent': True, 'weather': 'sandstorm'}; not modelled: []
+ERIKA: trainer #34, cap 44, pool 338 species; arena {'ai_permanent': True, 'terrain': 'grassyterrain'}; not modelled: []
+MISTY: trainer #18, cap 28, pool 191 species; arena {'ai_permanent': True, 'weather': 'raindance'}; not modelled: []
+BROCK: A solo scores for 105 species in 2s; top: patrat 0.35, zigzagoon 0.35, sentret 0.34, bonsly 0.33, seedot 0.30, rattataalola 0.28, cubchoo 0.27, zigzagoongalar 0.27
+LT. SURGE: A solo scores for 251 species in 3s; top: ponytagalar 0.31, fletchling 0.31, yanma 0.29, tatsugiri 0.29, elekid 0.27, ralts 0.26, mareep 0.26, snubbull 0.21
+MISTY: A solo scores for 191 species in 3s; top: riolu 0.28, zangoose 0.27, shinx 0.27, yamper 0.25, pawmi 0.25, rattata 0.25, stunky 0.24, teddiursa 0.21
+ERIKA: A solo scores for 338 species in 5s; top: ledyba 0.33, gulpin 0.33, torkoal 0.33, stufful 0.29, starly 0.28, ekans 0.26, stunfiskgalar 0.26, volbeat 0.26
+LT. SURGE: B 279 teams scored in 20s; greedy ('elekid', 'ponytagalar', 'stunky', 'tatsugiri', 'yanma', 'zigzagoon') (0.95); best fast ('joltik', 'ponytagalar', 'snubbull', 'tatsugiri', 'volbeat', 'zangoose') (1.15)
+MISTY: B 279 teams scored in 27s; greedy ('pawmi', 'riolu', 'skwovet', 'smoochum', 'snubbull', 'throh') (0.69); best fast ('sawk', 'shinx', 'smoochum', 'stunky', 'teddiursa', 'yungoos') (0.87)
+ERIKA: B 279 teams scored in 29s; greedy ('gulpin', 'ponyta', 'starly', 'stufful', 'torkoal', 'yanma') (1.71); best fast ('gulpin', 'ponyta', 'starly', 'stufful', 'torkoal', 'yanma') (1.71)
+BROCK: B 279 teams scored in 35s; greedy ('blipbug', 'bonsly', 'patrat', 'sandshrewalola', 'yungoos', 'zigzagoon') (1.83); best fast ('cubchoo', 'oddish', 'patrat', 'scraggy', 'sewaddle', 'snubbull') (1.96)
+LT. SURGE  legal=True  best team under search: win   90% deaths/mon 0.66 ['cutiefly', 'illumise', 'ralts', 'teddiursa', 'tyrogue', 'volbeat']  (others: 67%, 57%, 50%, 30%, 23%)  (3232s)
+MISTY      legal=True  best team under search: win   43% deaths/mon 0.88 ['ekans', 'elekid', 'pawmi', 'ponytagalar', 'sawk', 'smoochum']  (others: 33%, 20%, 10%, 10%, 3%)  (4118s)
+ERIKA      legal=True  best team under search: win  100% deaths/mon 0.21 ['ponyta', 'rhyhorn', 'slowpokegalar', 'starly', 'stufful', 'zubat']  (others: 97%, 97%, 90%, 90%, 70%)  (6533s)
+BROCK      legal=True  best team under search: win  100% deaths/mon 0.38 ['cubchoo', 'oddish', 'patrat', 'scraggy', 'sewaddle', 'snubbull']  (others: 100%, 97%, 97%, 93%, 83%)  (8152s)
+
+Radical Red best-six probe | legal moves only: True | arena effects: True | field-aware calc bot: False | seeded | shortlist 24, top 6 teams, search 9,8 x n=30 | no EVs, no items | enemy = RR AI, full info | 136 min
+  boss       cap   win deaths/mon  best team  | arena
+  BROCK       16  100%       0.38  cubchoo, oddish, patrat, scraggy, sewaddle, snubbull  | {'weather': 'sandstorm'}
+  MISTY       28   43%       0.88  ekans, elekid, pawmi, ponytagalar, sawk, smoochum  | {'weather': 'raindance'}
+  LT. SURGE   36   90%       0.66  cutiefly, illumise, ralts, teddiursa, tyrogue, volbeat  | {'terrain': 'electricterrain'}
+  ERIKA       44  100%       0.21  ponyta, rhyhorn, slowpokegalar, starly, stufful, zubat  | {'terrain': 'grassyterrain'}

@@ -1,0 +1,18 @@
+MISTY: trainer #18, cap 28, pool 191 species; arena {'ai_permanent': True, 'weather': 'raindance'}; not modelled: []
+LT. SURGE: trainer #26, cap 36, pool 251 species; arena {'ai_permanent': True, 'terrain': 'electricterrain'}; not modelled: []
+MISTY: A solo scores for 191 species in 3s; top: riolu 0.28, zangoose 0.27, yamper 0.26, pawmi 0.25, rattata 0.25, stunky 0.24, shinx 0.24, teddiursa 0.21
+LT. SURGE: A solo scores for 251 species in 3s; top: ponytagalar 0.31, mareep 0.31, fletchling 0.31, elekid 0.27, ralts 0.21, stufful 0.21, volbeat 0.20, ekans 0.20
+LT. SURGE: B 279 teams scored in 23s; greedy ('joltik', 'ponytagalar', 'snubbull', 'tatsugiri', 'tyrogue', 'zangoose') (1.12); best fast ('cutiefly', 'ekans', 'elekid', 'flittle', 'ralts', 'teddiursa') (1.24)
+MISTY: B 279 teams scored in 29s; greedy ('rattata', 'riolu', 'shinx', 'smoochum', 'stunky', 'timburr') (0.68); best fast ('rattata', 'riolu', 'shroomish', 'smoochum', 'yamper', 'zangoose') (0.96)
+LT. SURGE  legal=True  best team under search: win   87% deaths/mon 0.60 ['cutiefly', 'elekid', 'illumise', 'ralts', 'teddiursa', 'zigzagoon']  (others: 83%, 70%, 63%, 60%, 43%)  (3598s)
+LT. SURGE  threat Electrode-Hisui (30 of our deaths): counters none in the pool
+LT. SURGE  threat Pawmot (22 of our deaths): counters none in the pool
+MISTY      legal=True  best team under search: win   63% deaths/mon 0.72 ['bramblin', 'ekans', 'pawmi', 'psyduck', 'yamper', 'yungoos']  (others: 43%, 33%, 20%, 10%, 7%)  (5083s)
+MISTY      threat Ludicolo (74 of our deaths): counters none in the pool
+MISTY      threat Toxicroak (22 of our deaths): counters rattata [3 KOs / 0 deaths solo; ROUTE 1 / grass_day 10%]
+MISTY      repaired with rattata: win   27% deaths/mon 0.95 ['audino', 'bramblin', 'ekans', 'gastly', 'rattata', 'yamper']  (best was 63% / 0.72)  (6180s)
+
+Radical Red best-six probe | legal moves only: True | arena effects: True | field-aware calc bot: True | seeded | shortlist 24, top 6 teams, search 9,8 x n=30 | no EVs, no items | enemy = RR AI, full info | 103 min
+  boss       cap   win deaths/mon  best team  | arena
+  MISTY       28   63%       0.72  bramblin, ekans, pawmi, psyduck, yamper, yungoos  | {'weather': 'raindance'}
+  LT. SURGE   36   87%       0.60  cutiefly, elekid, illumise, ralts, teddiursa, zigzagoon  | {'terrain': 'electricterrain'}
