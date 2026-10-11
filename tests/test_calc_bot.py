@@ -87,3 +87,32 @@ def test_ability_immunities_void_a_move():
     assert jynx.damage_multiplier(scald) == 1.0 and effectiveness(scald, jynx) == 0.0
     assert effectiveness(quake, gastly) == 0.0 and effectiveness(psychic, gastly) == 2.0
     assert effectiveness(psychic, jynx) == 0.5
+
+
+def test_field_effects_in_the_numbers():
+    """Rain: Water x1.5, Fire x0.5, Hurricane sure-hit, Swift Swim doubles Speed; Electric
+    Terrain: x1.3 for a grounded user only; Tailwind doubles the side's Speed. No engine."""
+    from ai_util.calc_bot import dmg_frac, stat
+    from poke_env.battle import Battle, Field, Move, Pokemon, SideCondition, Weather
+    import logging
+    b = Battle("t", "p1", logging.getLogger("t"), gen=9)
+    mantine = Pokemon(gen=9, species="mantine"); mantine._ability = "swiftswim"; mantine._level = 27
+    jynx = Pokemon(gen=9, species="jynx"); jynx._level = 28
+    emolga = Pokemon(gen=9, species="emolga"); emolga._level = 28
+    scald, hurricane, ember, spark = (Move(m, gen=9) for m in ("scald", "hurricane", "ember", "spark"))
+    dry = {m: dmg_frac(mantine, jynx, m, False, b) for m in (scald, hurricane, ember)}
+    assert dry[scald] == dmg_frac(mantine, jynx, scald, False)  # no weather: the plain number
+    b._weather = {Weather.RAINDANCE: 1}
+    assert dmg_frac(mantine, jynx, scald, False, b) == pytest.approx(dry[scald] * 1.5)
+    assert dmg_frac(mantine, jynx, ember, False, b) == pytest.approx(dry[ember] * 0.5)
+    assert dmg_frac(mantine, jynx, hurricane, False, b) == pytest.approx(dry[hurricane] / 0.7)  # 70% -> sure hit
+    assert stat(mantine, "spe", False, b) == 2 * stat(mantine, "spe", False)
+    assert stat(jynx, "spe", True, b) == stat(jynx, "spe", True)
+    b._weather = {}
+    b._fields = {Field.ELECTRIC_TERRAIN: 1}
+    assert dmg_frac(jynx, mantine, spark, True, b) == pytest.approx(dmg_frac(jynx, mantine, spark, True) * 1.3)
+    assert dmg_frac(emolga, mantine, spark, True, b) == pytest.approx(dmg_frac(emolga, mantine, spark, True))  # Flying: not grounded
+    b._fields = {}
+    b._opponent_side_conditions = {SideCondition.TAILWIND: 1}
+    assert stat(mantine, "spe", False, b) == 2 * stat(mantine, "spe", False)
+    assert stat(jynx, "spe", True, b) == stat(jynx, "spe", True)

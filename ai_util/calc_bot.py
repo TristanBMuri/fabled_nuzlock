@@ -12,7 +12,7 @@ expected hit. Beats SimpleHeuristics and the search line on the Edwin /
 rival probes (NOTEBOOK.md); the teacher for the next prior.
 """
 
-from poke_env.battle import MoveCategory, Status
+from poke_env.battle import Field, MoveCategory, PokemonType, SideCondition, Status, Weather
 from poke_env.data import GenData
 from poke_env.player import Player
 
@@ -20,18 +20,43 @@ GAME_FORMAT = "gen8customgamenogimmicks"
 _CHART = GenData.from_format(GAME_FORMAT).type_chart
 ROLL = 0.925          # mean damage roll
 ENEMY_IV, ENEMY_EV = 31, 85
+FIELD_AWARE = True    # weather / terrain / Tailwind in the numbers (False = the pre-2026-10-11 bot)
+
+# field effects (2026-10-11: Radical Red's gyms fight under permanent weather / terrain)
+RAIN, SUN = {Weather.RAINDANCE, Weather.PRIMORDIALSEA}, {Weather.SUNNYDAY, Weather.DESOLATELAND}
+SAND, SNOW = {Weather.SANDSTORM}, {Weather.HAIL, Weather.SNOWSCAPE}
+SPEED_ABILITY = {"swiftswim": RAIN, "chlorophyll": SUN, "sandrush": SAND, "slushrush": SNOW}
+TERRAIN_BOOST = {Field.ELECTRIC_TERRAIN: PokemonType.ELECTRIC, Field.GRASSY_TERRAIN: PokemonType.GRASS,
+                 Field.PSYCHIC_TERRAIN: PokemonType.PSYCHIC}
 
 
-def stat(mon, key: str, own: bool) -> float:
+def _ability(mon) -> str:
+    return (mon.ability or "").replace(" ", "").lower()
+
+
+def grounded(mon) -> bool:
+    return PokemonType.FLYING not in mon.types and _ability(mon) != "levitate" and mon.item != "airballoon"
+
+
+def stat(mon, key: str, own: bool, battle=None) -> float:
     """The real stat when known (ours from the request, theirs under full info),
-    else estimated; then boost stages and paralysis."""
+    else estimated; then boost stages, paralysis, and with `battle` the field:
+    weather speed abilities, Surge Surfer, the side's Tailwind."""
     v = (mon.stats or {}).get(key)
     if not v:
         v = ((2 * mon.base_stats[key] + ENEMY_IV + ENEMY_EV // 4) * mon.level) // 100 + 5
     b = mon.boosts.get(key, 0)
     v *= (2 + b) / 2 if b >= 0 else 2 / (2 - b)
-    if key == "spe" and mon.status == Status.PAR:
-        v *= 0.5
+    if key == "spe":
+        if mon.status == Status.PAR:
+            v *= 0.5
+        if battle is not None and FIELD_AWARE:
+            ab = _ability(mon)
+            if SPEED_ABILITY.get(ab, set()) & set(battle.weather) or \
+                    (ab == "surgesurfer" and Field.ELECTRIC_TERRAIN in battle.fields):
+                v *= 2
+            if SideCondition.TAILWIND in (battle.side_conditions if own else battle.opponent_side_conditions):
+                v *= 2
     return v
 
 
@@ -65,8 +90,51 @@ def effectiveness(move, dfn) -> float:
     return mult
 
 
-def dmg_frac(att, dfn, move, att_own: bool) -> float:
-    """Expected fraction of dfn's max HP one use of move removes (accuracy included)."""
+def field_mod(att, dfn, move, battle) -> tuple[float, float | None]:
+    """(damage multiplier, accuracy override) from the battle's weather and terrain:
+    rain / sun on Water and Fire (the primal weathers void the opposed type), Hurricane
+    and Thunder sure-hit in rain and 50% in sun, Blizzard sure-hit in snow, sandstorm
+    x1.5 SpD for Rock, snow x1.5 Def for Ice, Electric / Grassy / Psychic Terrain x1.3
+    for a grounded user, Grassy halves Earthquake / Bulldoze on a grounded target,
+    Misty halves Dragon moves on one."""
+    if battle is None or not FIELD_AWARE:
+        return 1.0, None
+    mod, acc = 1.0, None
+    w = set(battle.weather)
+    if w & RAIN:
+        if move.type == PokemonType.WATER:
+            mod *= 1.5
+        elif move.type == PokemonType.FIRE:
+            mod *= 0.0 if Weather.PRIMORDIALSEA in w else 0.5
+        if move.id in ("hurricane", "thunder"):
+            acc = 1.0
+    elif w & SUN:
+        if move.type == PokemonType.FIRE:
+            mod *= 1.5
+        elif move.type == PokemonType.WATER:
+            mod *= 0.0 if Weather.DESOLATELAND in w else 0.5
+        if move.id in ("hurricane", "thunder"):
+            acc = 0.5
+    elif w & SAND and move.category == MoveCategory.SPECIAL and PokemonType.ROCK in dfn.types:
+        mod /= 1.5
+    elif w & SNOW:
+        if move.category == MoveCategory.PHYSICAL and PokemonType.ICE in dfn.types:
+            mod /= 1.5
+        if move.id == "blizzard":
+            acc = 1.0
+    for terrain, typ in TERRAIN_BOOST.items():
+        if terrain in battle.fields and move.type == typ and grounded(att):
+            mod *= 1.3
+    if Field.GRASSY_TERRAIN in battle.fields and move.id in ("earthquake", "bulldoze", "magnitude") and grounded(dfn):
+        mod *= 0.5
+    if Field.MISTY_TERRAIN in battle.fields and move.type == PokemonType.DRAGON and grounded(dfn):
+        mod *= 0.5
+    return mod, acc
+
+
+def dmg_frac(att, dfn, move, att_own: bool, battle=None) -> float:
+    """Expected fraction of dfn's max HP one use of move removes (accuracy included);
+    with `battle`, under its weather and terrain."""
     if move.category == MoveCategory.STATUS:
         return 0.0
     hp = max_hp(dfn, not att_own)
@@ -76,25 +144,26 @@ def dmg_frac(att, dfn, move, att_own: bool) -> float:
     if not move.base_power:
         return 0.0
     phys = move.category == MoveCategory.PHYSICAL
-    a = stat(att, "atk" if phys else "spa", att_own)
-    d = stat(dfn, "def" if phys else "spd", not att_own)
+    a = stat(att, "atk" if phys else "spa", att_own, battle)
+    d = stat(dfn, "def" if phys else "spd", not att_own, battle)
     base = ((2 * att.level / 5 + 2) * move.base_power * a / d) / 50 + 2
     mod = ROLL * (1.5 if move.type in att.types else 1.0) * effectiveness(move, dfn)
     mod *= getattr(move, "expected_hits", 1) or 1
     if att.status == Status.BRN and phys:
         mod *= 0.5
-    return base * mod / hp * (move.accuracy or 1)
+    fmod, acc = field_mod(att, dfn, move, battle)
+    return base * mod * fmod / hp * (move.accuracy or 1 if acc is None else acc)
 
 
-def threat(opp, mon) -> float:
+def threat(opp, mon, battle=None) -> float:
     """Best expected fraction the enemy's active takes off `mon` this turn. Unknown
     moves: a 60-power STAB of each of its types in its better category."""
     moves = list(opp.moves.values())
     if moves:
-        return max(dmg_frac(opp, mon, m, False) for m in moves)
+        return max(dmg_frac(opp, mon, m, False, battle) for m in moves)
     phys = opp.base_stats["atk"] >= opp.base_stats["spa"]
-    a = stat(opp, "atk" if phys else "spa", False)
-    d = stat(mon, "def" if phys else "spd", True)
+    a = stat(opp, "atk" if phys else "spa", False, battle)
+    d = stat(mon, "def" if phys else "spd", True, battle)
     best = 0.0
     for t in opp.types:
         if t is None:
@@ -110,13 +179,13 @@ class CalcPlayer(Player):
         me, opp = battle.active_pokemon, battle.opponent_active_pokemon
         if me is None or opp is None:
             return self.choose_random_move(battle)
-        thr = threat(opp, me) if not me.fainted else 0.0
+        thr = threat(opp, me, battle) if not me.fainted else 0.0
         opp_prio = max((m.priority for m in opp.moves.values()), default=0)
-        faster = stat(me, "spe", True) > stat(opp, "spe", False)
+        faster = stat(me, "spe", True, battle) > stat(opp, "spe", False, battle)
 
         def switch_score(m):
-            t = threat(opp, m)
-            hit = max((dmg_frac(m, opp, mv, True) for mv in m.moves.values()), default=0)
+            t = threat(opp, m, battle)
+            hit = max((dmg_frac(m, opp, mv, True, battle) for mv in m.moves.values()), default=0)
             survive = 2.0 if t < m.current_hp_fraction / 2 else (1.0 if t < m.current_hp_fraction else 0.0)
             return survive + hit - t
 
@@ -125,7 +194,7 @@ class CalcPlayer(Player):
                 return self.create_order(max(battle.available_switches, key=switch_score))
             return self.choose_random_move(battle)
 
-        scored = [(dmg_frac(me, opp, mv, True), mv) for mv in battle.available_moves]
+        scored = [(dmg_frac(me, opp, mv, True, battle), mv) for mv in battle.available_moves]
         best_frac, best_mv = max(scored, key=lambda x: x[0])
         # a KO in hand: the mean roll covers the HP left; P(KO) ~ accuracy
         kos = [(mv.accuracy or 1, mv) for f, mv in scored if f / (mv.accuracy or 1) >= opp.current_hp_fraction]
