@@ -365,7 +365,7 @@ matchup rule, same team: Erika 12 vs 24 deaths (field wins), Brock 37 vs 20
 (field loses; it retreats into a bench with no Cacnea answer). Data fixes:
 the ROM dump's 12-character names map in `rp.dump_id` (986dda0); the RR AI
 takes the recharge turn unscored (31edf3f); #14 Lass Relli has no team data.
-Open: the remaining early bosses (#5, #9, #10, #16; see `results/
+Every singles fight from #2 to #16 is 30/30 (Archer 73%, Grunt 80%, Rival 93% deathless, the rest 100%; `results/
 rr_cover_early_*`), field-aware as default, doubles, route trainers, the
 `UI_TODO.md` dashboard.
 Pieces: `pokemon-showdown-rr/` (ignored; clone + `node build` +

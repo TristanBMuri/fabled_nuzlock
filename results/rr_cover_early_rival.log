@@ -1,0 +1,31 @@
+#2: trainer #2, cap 16, pool 79 species; arena {'ai_permanent': True}; not modelled: []
+#2: starter charmander; boss attacks with ['Fighting', 'Flying', 'Normal']
+#10: trainer #10, cap 28, pool 163 species; arena {'ai_permanent': True}; not modelled: []
+#10: starter piplup; boss attacks with ['Dark', 'Electric', 'Fairy', 'Fighting', 'Fire', 'Grass', 'Ice', 'Normal', 'Poison', 'Steel', 'Water']
+#2: A solo scores for 80 species in 2s; top: wurmple 2.00, scatterbug 2.00, caterpie 2.00, budew 2.00, abra 2.00, hoothoot 1.55, sandygast 1.54, sentret 1.44
+#10: A solo scores for 164 species in 3s; top: pidove 0.60, spearow 0.54, ekans 0.45, nincada 0.44, psyduck 0.43, pikipek 0.43, tentacool 0.42, abra 0.41
+#2 FAILED: KeyError: 'priority'
+, in _choose_singles
+    scored.append((move, self._score_move(battle, active, opponent, move)))
+                         ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/ai_util/rr_ai.py", line 147, in _score_move
+    score += self._positives(battle, active, opponent, move)
+             ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/ai_util/rr_ai.py", line 266, in _positives
+    if move.priority > 0 and self._incoming_ko_risk(active, opponent) and dmg > 0:
+       ^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/move.py", line 520, in priority
+    return self.entry["priority"]
+           ~~~~~~~~~~^^^^^^^^^^^^
+KeyError: 'priority'
+
+#10: B 279 teams scored in 31s; greedy ('ekans', 'nincada', 'pidove', 'pikipek', 'spearow', 'surskit') (1.96); best fast ('ekans', 'nincada', 'pidove', 'pikipek', 'spearow', 'surskit') (1.96)
+#10: cover team ('chewtle', 'chingling', 'dunsparce', 'lunatone', 'magikarp', 'tentacool')
+#10        legal=True  best team under search: win  100% deaths/mon 0.01 deathless 93% ['ekans', 'nincada', 'pidove', 'pikipek', 'spearow', 'surskit']  (others: 100%, 100%, 100%, 100%, 97%)  (4348s)
+#10        sets: arbok(Adamant/Intimidate) ['poisonjab', 'crunch', 'dig', 'suckerpunch'], ninjask(Adamant/Speed Boost) ['bugbite', 'aerialace', 'dig', 'roost'], unfezant(Adamant/Frisk) ['drillpeck', 'slash', 'steelwing', 'roost'], toucannon(Adamant/Frisk) ['beakblast', 'steelwing', 'thief', 'roost'], fearow(Adamant/Frisk) ['aerialace', 'drillrun', 'steelwing', 'roost'], masquerain(Modest/Intimidate) ['bugbuzz', 'bubblebeam', 'airslash', 'roost']
+#10        threat Clefable (1 of our deaths): counters ponyta [wins the duel 100%, 79% HP left; ROUTE 2 / grass_day 10%], tentacool [wins the duel 100%, 73% HP left; PALLET TOWN / old_rod 70%], ekans [wins the duel 100%, 71% HP left; PEWTER CITY / grass_day 4%]
+#10        threat Arbok (1 of our deaths): counters riolu [wins the duel 100%, 58% HP left; MT MOON B1F / grass_day 1%], rockruff [wins the duel 100%, 56% HP left; ROUTE 22 / grass_day 4%], phanpy [wins the duel 100%, 52% HP left; ROUTE 2 / grass_day 10%]
+
+Radical Red best-six probe (pool) | legal moves only: True | arena effects: True | field-aware calc bot: True | chooser cover | matchup play True | death weight 6.0 | seeded | search 9,8 x n=30 | no EVs, no items | enemy = RR AI, full info | 73 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  #10         28  100%       0.01   93%  ekans, nincada, pidove, pikipek, spearow, surskit  | -
