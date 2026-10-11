@@ -155,6 +155,22 @@ def pools() -> tuple[dict, dict]:
     return out, known
 
 
+def where(species: str, t: int) -> str:
+    """The first open location and method (by trainer t) that offers `species` at or under
+    the cap: the encounter-routing answer for a counter."""
+    enc = json.load(open(RR / "tracker_encounters.json"))
+    order = json.load(open(RR / "order.json"))
+    e = order["entries"][t]
+    for l in [x for x in enc["locations"] if not x["postgame"]][:e["reach"] + 1]:
+        for meth, tb in l["methods"].items():
+            if (0 if meth.startswith("grass") else order["gates"].get(meth, 999)) > t:
+                continue
+            for x in tb:
+                if to_id_str(x["species"]) == species and int(x["levels"].split("-")[0]) <= e["cap"]:
+                    return f"{l['name']} / {meth} {x['rarity']}"
+    return "?"
+
+
 def player_party(pool: list[str], cap: int, rng: random.Random, known: dict, progress: int | None) -> list[Mon]:
     """A run's box: BOX species drawn from the pool, each evolved by level at the cap;
     the party = the six with the highest base-stat total (the fast rule's pick)."""

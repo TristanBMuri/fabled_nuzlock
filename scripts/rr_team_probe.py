@@ -24,6 +24,7 @@ the custom arena rules, natures, the player's ability swaps.
 """
 
 import argparse
+import collections
 import json
 import multiprocessing as mp
 import random
@@ -35,7 +36,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 from poke_env.data import to_id_str  # noqa: E402
-import rr_probe as rp  # noqa: E402  (sets gauntlet.GAME = "rr", injects the mod data)
+import rr_probe as rp  # noqa: E402
+from rr_postmortem import attribution  # noqa: E402  (sets gauntlet.GAME = "rr", injects the mod data)
 import gauntlet  # noqa: E402
 from gauntlet import STATS, Mon, encounter_moves, evolve, pack_team  # noqa: E402
 
@@ -67,20 +69,28 @@ def build_mon(species: str, cap: int, known: dict, progress: int) -> Mon | None:
 
 
 def play(bridge, brain, enemy, party: list[Mon], enemy_packed: str, n: int, search=None, arena=None, seeds=None):
-    """n battles; returns (win rate, deaths per mon, mean progress). seeds: one engine seed per
-    battle index, the same for every team and variant (paired comparisons)."""
+    """n battles; returns (win rate, deaths per mon, mean progress, (our deaths by enemy mon,
+    enemy mons KO'd)). seeds: one engine seed per battle index, the same for every team and
+    variant (paired comparisons)."""
     from ai_util.sim import SimBattle
     wins, deaths, prog = 0, 0.0, 0.0
+    deaths_by, kos_on = collections.Counter(), collections.Counter()
     for i in range(n):
         sb = SimBattle(bridge, rp.FMT, pack_team(party), enemy_packed, full_info=True, arena=arena,
                        seed=seeds[i] if seeds else None)
+        if search is not None and seeds:  # the searcher's rollout seeds pair too
+            import numpy as np
+            search.rng = np.random.default_rng(seeds[i])
         sb.play({"p1": search or brain, "p2": enemy}, 100)
         st = sb.state()
         wins += st["winner"] == "p1"
         deaths += sum(m["fainted"] for m in st["p1"]) / len(st["p1"])
         prog += progress(st)
+        d, k, _ = attribution(sb.history["p1"])
+        deaths_by += d
+        kos_on += k
         sb.close()
-    return wins / n, deaths / n, prog / n
+    return wins / n, deaths / n, prog / n, (deaths_by, kos_on)
 
 
 def run_boss(args, name: str) -> dict:
@@ -116,12 +126,12 @@ def _run_boss(args, name: str) -> dict:
     rng = random.Random(f"{name}-team-{args.seed}")
     t0 = time.time()
     # A: solo scores (the ranking, not the final strength)
-    solo = []
+    solo, solo_vs = [], {}
     for sp in pool:
         m = build_mon(sp, cap, known, progress)
         if m is None:
             continue
-        _, _, pr = play(bridge, calc, enemy, [m], enemy_packed, args.n_solo, arena=arena, seeds=seeds)
+        _, _, pr, solo_vs[sp] = play(bridge, calc, enemy, [m], enemy_packed, args.n_solo, arena=arena, seeds=seeds)
         solo.append((pr, sp))
     solo.sort(reverse=True)
     short = [sp for _, sp in solo[:SHORT]]
@@ -148,17 +158,38 @@ def _run_boss(args, name: str) -> dict:
     # C: the top teams under search
     width = tuple(int(x) for x in args.search.split(","))
     searcher = Searcher(None, enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed)
-    results = []
+    results, attr = [], {}
     for t in top:
-        w, d, pr = play(bridge, calc, enemy, [mons[s] for s in t], enemy_packed, args.n_search, search=searcher, arena=arena, seeds=seeds)
+        w, d, pr, attr[t] = play(bridge, calc, enemy, [mons[s] for s in t], enemy_packed, args.n_search, search=searcher, arena=arena, seeds=seeds)
         results.append((w, -d, t, d))
     results.sort(reverse=True)
     w, _, t, d = results[0]
-    rows = [{"boss": name, "cap": cap, "legal": args.legal, "field_aware": not args.blind_field, "arena": arena, "unmodelled": unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d,
-             "n": args.n_search, "all": [(list(t_), w_, d_) for w_, _, t_, d_ in results],
-             "enemy": enemy_species, "pool": len(pool), "progress": progress, "shortlist": short}]
     print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} "
           f"{list(t)}  (others: {', '.join(f'{w_:.0%}' for w_, _, _, _ in results[1:])})  ({time.time() - t0:.0f}s)", flush=True)
+    # threats -> counters: who killed the best team, and which pool species beat that mon solo
+    # in stage A (KOs on it minus deaths to it), with where to catch them
+    threats = []
+    for enemy_mon, k in attr[t][0].most_common(2):
+        ranked_c = sorted(solo_vs, key=lambda sp: solo_vs[sp][1][enemy_mon] - solo_vs[sp][0][enemy_mon], reverse=True)
+        ranked_c = [sp for sp in ranked_c if solo_vs[sp][1][enemy_mon] > solo_vs[sp][0][enemy_mon]][:3]
+        threats.append({"enemy": enemy_mon, "deaths": k, "counters": [(sp, solo_vs[sp][1][enemy_mon], solo_vs[sp][0][enemy_mon], rp.where(sp, progress)) for sp in ranked_c]})
+        print(f"{name:<10} threat {enemy_mon} ({k} of our deaths): counters "
+              + (", ".join(f"{sp} [{ko} KOs / {dd} deaths solo; {wh}]" for sp, ko, dd, wh in threats[-1]["counters"]) or "none in the pool"), flush=True)
+    repaired = None
+    seed_sp = next((sp for th in threats for sp, *_ in th["counters"] if sp not in t), None)  # a counter the best team lacks
+    if args.repair and seed_sp:
+        if seed_sp not in mons:
+            mons[seed_sp] = build_mon(seed_sp, cap, known, progress)
+        rteam = (seed_sp,)
+        while len(rteam) < 6:  # the same greedy build, seeded with the counter
+            best = max((s for s in short if s not in rteam), key=lambda s: score(tuple(sorted(rteam + (s,)))))
+            rteam = tuple(sorted(rteam + (best,)))
+        rw, rd, _, _ = play(bridge, calc, enemy, [mons[s] for s in rteam], enemy_packed, args.n_search, search=searcher, arena=arena, seeds=seeds)
+        repaired = {"team": list(rteam), "win": rw, "deaths_per_mon": rd, "seed": seed_sp}
+        print(f"{name:<10} repaired with {seed_sp}: win {rw:5.0%} deaths/mon {rd:.2f} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - t0:.0f}s)", flush=True)
+    rows = [{"boss": name, "cap": cap, "legal": args.legal, "field_aware": not args.blind_field, "arena": arena, "unmodelled": unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d,
+             "n": args.n_search, "all": [(list(t_), w_, d_) for w_, _, t_, d_ in results], "threats": threats, "repaired": repaired,
+             "enemy": enemy_species, "pool": len(pool), "progress": progress, "shortlist": short}]
     bridge.close()
     return {"rows": rows}
 
@@ -175,6 +206,7 @@ def main() -> None:
     ap.add_argument("--legal", action="store_true", help="drop the moves hardcore bans for the player")
     ap.add_argument("--arena", action="store_true", help="the gym's permanent field effect (tracker battleEffect) in the sim")
     ap.add_argument("--blind-field", action="store_true", help="the calc bot ignores weather / terrain (the pre-2026-10-11 bot)")
+    ap.add_argument("--repair", action="store_true", help="rebuild the team around the best counter to the top threat and play it too")
     ap.add_argument("--out")
     args = ap.parse_args()
     names = [b.strip() for b in args.bosses.split(",")]
