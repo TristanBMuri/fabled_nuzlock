@@ -2,14 +2,15 @@
 objects, so existing brains (policy nets, SimpleHeuristics) act on them unchanged.
 
 No websocket server, no logins, no hung challenges. Fork = Showdown state
-serialize/deserialize + fresh RNG; the poke-env mirrors are rebuilt by replaying
-the per-side protocol history (deterministic, a few ms).
+serialize/deserialize + fresh RNG; the poke-env mirrors are pickle-copied
+(under a millisecond, flat in the fight's length; 2026-10-11).
 """
 
 import itertools
 import json
 import logging
 import os
+import pickle
 import re
 import subprocess
 from collections import Counter
@@ -234,18 +235,16 @@ class SimBattle:
         new.id = f"b{next(_IDS)}"
         new.teams = self.teams
         new.history = {s: list(self.history[s]) for s in SIDES}
-        new.pending = {s: False for s in SIDES}
+        new.pending = dict(self.pending)
         new.errors = {s: 0 for s in SIDES}
         new.stats = {k: 0 for k in self.stats}
         new.why = Counter()
         new.ended, new.winner, new.turn = self.ended, self.winner, self.turn
         self.bridge.call(op="fork", id=self.id, new=new.id, reseed=reseed, seed=seed)
-        new.mirrors = {}
-        for side in SIDES:  # replay history -> identical mirror + pending state
-            m = new._mirror(side)
-            for line in new.history[side]:
-                new._feed(m, side, line)
-            new.mirrors[side] = m
+        # the mirrors are copied, not replayed: a pickle round trip is ~0.6 ms flat, the
+        # replay of the whole history was 1.6 -> 5.8 ms as a fight went on (72 forks per
+        # search decision; 2026-10-11). The copy reads identically to a replayed mirror.
+        new.mirrors = pickle.loads(pickle.dumps(self.mirrors))
         return new
 
     def state(self) -> dict:

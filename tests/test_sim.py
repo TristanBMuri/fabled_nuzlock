@@ -61,6 +61,13 @@ def test_fork_continues_independently(bridge):
     assert f.mirrors["p1"].turn == sb.mirrors["p1"].turn
     assert [p.current_hp for p in f.mirrors["p1"].team.values()] == \
            [p.current_hp for p in sb.mirrors["p1"].team.values()]
+    for side in ("p1", "p2"):  # the copy reads like the original on everything a brain uses
+        a, c = sb.mirrors[side], f.mirrors[side]
+        assert (sorted(m.id for m in c.available_moves), [p.species for p in c.available_switches], c.force_switch,
+                c.opponent_active_pokemon.species, c.opponent_active_pokemon.current_hp_fraction) == \
+               (sorted(m.id for m in a.available_moves), [p.species for p in a.available_switches], a.force_switch,
+                a.opponent_active_pokemon.species, a.opponent_active_pokemon.current_hp_fraction)
+        assert c.active_pokemon is not a.active_pokemon  # independent objects
     f.play(b, max_turns=60)
     assert f.ended and not sb.ended  # original untouched
     sb.play(b, max_turns=60)
