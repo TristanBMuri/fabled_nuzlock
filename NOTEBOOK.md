@@ -1826,3 +1826,15 @@ breaks ties with the global `random`: seeded per battle since 7a6675b. The
 cover + matchup + death-weight-6 runs on Brock and Misty (pool n=30, 30
 boxes) are the next numbers; `scripts/rr_status.py` and `UI_TODO.md` are the
 run overview and its web successor.
+
+**Cover chooser, Misty, planned pool** (n=30, cover + matchup + death weight
+6, `results/rr_cover_pool.log`): **30/30 wins, 0.23 deaths per mon, 30%
+deathless** with Grimer / Gyarados / Hariyama / Parasect / Toucannon / Crobat
+(the cover of the matrix: Parasect for Starmie and Ludicolo, Gyarados and
+Crobat race Mantine, Hariyama the race-winner tier) against 60 / 53 / 50 / 43
+/ 20% for the greedy and fast-stage teams on the same seeds. The old planned
+Misty was 67–80% with 0.4–0.5 deaths per mon. The deaths that remain are
+Starmie (11) and Clodsire (8), both with duel-winning counters in the pool
+(Ekans, Paras, Morelull; Kricketot, Mudbray, Smoochum) that the cover did not
+take because something else already answered them on paper. Brock's cover run
+and the 30-box runs are still in flight.
