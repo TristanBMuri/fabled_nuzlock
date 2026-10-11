@@ -105,6 +105,9 @@ class RadicalRedAI(Player):
         if active is None or opponent is None:
             return self.choose_random_move(battle)
 
+        if any(m.id == "recharge" for m in battle.available_moves):  # the Hyper Beam turn: no choice,
+            return self.create_order(battle.available_moves[0])  # and poke-env's stub entry has no priority
+
         scored: list[tuple[Move, int]] = []
         for move in battle.available_moves:
             scored.append((move, self._score_move(battle, active, opponent, move)))
