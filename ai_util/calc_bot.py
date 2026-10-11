@@ -135,15 +135,15 @@ def field_mod(att, dfn, move, battle) -> tuple[float, float | None]:
     return mod, acc
 
 
-def dmg_frac(att, dfn, move, att_own: bool, battle=None) -> float:
-    """Expected fraction of dfn's max HP one use of move removes (accuracy included);
-    with `battle`, under its weather and terrain."""
+def dmg_frac(att, dfn, move, att_own: bool, battle=None, with_acc: bool = True) -> float:
+    """Expected fraction of dfn's max HP one use of move removes (accuracy included unless
+    `with_acc` is False: the damage if it hits); with `battle`, under its weather and terrain."""
     if move.category == MoveCategory.STATUS:
         return 0.0
     hp = max_hp(dfn, not att_own)
     if move.damage:  # Seismic Toss / Night Shade / fixed damage
         d = att.level if move.damage == "level" else float(move.damage)
-        return min(d, hp) / hp * (move.accuracy or 1)
+        return min(d, hp) / hp * ((move.accuracy or 1) if with_acc else 1)
     if not move.base_power:
         return 0.0
     phys = move.category == MoveCategory.PHYSICAL
@@ -155,6 +155,8 @@ def dmg_frac(att, dfn, move, att_own: bool, battle=None) -> float:
     if att.status == Status.BRN and phys:
         mod *= 0.5
     fmod, acc = field_mod(att, dfn, move, battle)
+    if not with_acc:
+        return base * mod * fmod / hp
     return base * mod * fmod / hp * ((move.accuracy or 1) if acc is None else acc)  # the field may override accuracy
 
 

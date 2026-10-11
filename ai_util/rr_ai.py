@@ -3,7 +3,8 @@
 Singles only. Each move starts at 100 (CFRU convention), then:
   negatives — dump immunities, redundant status, already-up field effects
   positives — KO, damage, STAB, setup, hazards, status, recovery, priority
-Smart-switch when the matchup is losing and a better bench mon exists.
+Switching is CFRU's (ai_switching.c): absorb a predicted move, dodge a predicted KO,
+Toxic counter, -3 offence, save the sweeper; switch-ins scored by damage calc.
 Not a 1:1 port of the C engine (~700KB); the decision skeleton is the same.
 """
 
@@ -26,12 +27,11 @@ from poke_env.battle.weather import Weather
 from poke_env.player.battle_order import BattleOrder, DefaultBattleOrder
 from poke_env.player.player import Player
 
-from ai_util.calc_bot import effectiveness
+from ai_util.calc_bot import dmg_frac, effectiveness, stat
 
 # CFRU starts every legal move at 100. Dumped moves go to 0.
 BASE_SCORE = 100
 KO_BONUS = 30
-SWITCH_MATCHUP_THRESHOLD = -1.5
 
 HAZARDS = {
     "stealthrock": SideCondition.STEALTH_ROCK,
@@ -59,6 +59,12 @@ RECOVERY = {
     "rest",
     "wish",
     "strengthsap",
+}
+ABSORB = {  # the abilities an absorb switch looks for, by the predicted move's type
+    PokemonType.FIRE: {"flashfire"},
+    PokemonType.ELECTRIC: {"voltabsorb", "lightningrod", "motordrive"},
+    PokemonType.WATER: {"waterabsorb", "dryskin", "stormdrain"},
+    PokemonType.GRASS: {"sapsipper"},
 }
 PIVOTS = {"uturn", "voltswitch", "flipturn", "partingshot", "teleport"}
 FIRST_TURN_ONLY = {"fakeout", "firstimpression"}
@@ -124,13 +130,11 @@ class RadicalRedAI(Player):
             best_move = random.choice(tied)
             best_score = top
 
-        if (
-            self._should_switch(battle, active, opponent, best_score)
-            and battle.available_switches
-        ):
-            return self._best_switch(battle) or self.choose_random_move(battle)
+        target = self._switch_target(battle, active, opponent, best_score)
+        if target is not None:
+            return self.create_order(target)
 
-        if best_move is not None and best_score > 0:
+        if best_move is not None:  # CFRU clicks its least-bad move rather than switch for nothing
             return self.create_order(
                 best_move,
                 mega=bool(battle.can_mega_evolve),
@@ -339,50 +343,173 @@ class RadicalRedAI(Player):
             return True
         return status == Status.SLP and Field.ELECTRIC_TERRAIN in battle.fields
 
-    # --- switching ---
+    # --- switching (CFRU src/Battle_AI/ai_switching.c, singles, smart AI; data/rr/AI_DIFF.md) ---
+    # Damage is the calc bot's model at its mean roll, against the player's real moves (full
+    # info = "the AI knows your team"). Not ported: Wish / Perish / locked moves / Yawn / sleep /
+    # Wonder Guard / Natural Cure / hazard removers, the fighting-style classes (a "damager" here
+    # = three or more attacking moves), the absorb-switch memory (cooldown = just switched in).
 
-    def _should_switch(
-        self, battle: Battle, active: Pokemon, opponent: Pokemon, best_score: int
-    ) -> bool:
-        if not self.switching or battle.trapped or not battle.available_switches:
+    def _hit(self, battle, att, dfn, move, att_own: bool) -> float:
+        """Fraction of dfn's max HP one hit of move removes."""
+        return dmg_frac(att, dfn, move, att_own, battle, with_acc=False)
+
+    def _attacks(self, mon) -> list:
+        return [m for m in mon.moves.values() if m.category != MoveCategory.STATUS]
+
+    def _can_ko(self, battle, att, dfn, att_own: bool, hits: int = 1) -> bool:
+        hp = dfn.current_hp_fraction
+        return any(hits * self._hit(battle, att, dfn, m, att_own) >= hp for m in self._attacks(att))
+
+    def _predict_foe_move(self, battle, active, foe):
+        """The player's move as the AI predicts it: its strongest hit on our active (CFRU runs its
+        own scorer on the player's moves; strongest-hit is the attack-or-nothing reading of it)."""
+        atk = self._attacks(foe)
+        return max(atk, key=lambda m: self._hit(battle, foe, active, m, False)) if atk else None
+
+    def _switch_in(self, battle, mon, foe) -> tuple[int, set]:
+        """CalcMostSuitableMonToSwitchInto for one bench mon: (score, flags)."""
+        score, flags = 0, set()
+        if stat(mon, "spe", True, battle) >= stat(foe, "spe", False, battle):
+            score, flags = score + 14, flags | {"outspeeds"}
+        if self._can_ko(battle, mon, foe, True):
+            score, flags = score + 31, flags | {"ko"}
+            if any(m.priority > 0 and self._hit(battle, mon, foe, m, True) >= foe.current_hp_fraction for m in self._attacks(mon)):
+                score, flags = score + 8, flags | {"revenge"}
+                if "outspeeds" not in flags:
+                    score, flags = score + 14, flags | {"outspeeds"}
+        elif self._can_ko(battle, mon, foe, True, hits=2):
+            score, flags = score + 2, flags | {"2hko"}
+        elif not self._attacks(mon):
+            return -1, flags
+        hp = mon.current_hp_fraction
+        faints = weak = normal = 0
+        for m in sorted(self._attacks(foe), key=lambda m: -m.priority):
+            d = self._hit(battle, foe, mon, m, False)
+            if d >= hp:
+                faints = 1
+                if "outspeeds" in flags and m.priority > 0:
+                    flags.discard("outspeeds")
+                break
+            if 2 * d >= hp:
+                weak = 1
+            elif 3 * d >= hp:
+                normal += 1
+        if faints and "outspeeds" not in flags:
+            score, flags = max(score - 39, 0), flags | {"faints"}
+        elif faints and "ko" not in flags:
+            score = max(score - 15, 0)
+        elif faints or weak:
+            score = max(score - 1, 0)
+        elif not normal:
+            score, flags = score + 17, flags | {"resists"}
+        else:
+            phys = any(m.category == MoveCategory.PHYSICAL for m in self._attacks(foe))
+            spec = any(m.category == MoveCategory.SPECIAL for m in self._attacks(foe))
+            if not (phys and stat(mon, "def", True) <= stat(foe, "atk", False)) and \
+                    not (spec and stat(mon, "spd", True) <= stat(foe, "spa", False)):
+                score, flags = score + 2, flags | {"walls"}
+        return score, flags
+
+    def _ranked_switches(self, battle) -> list[tuple]:
+        """Bench mons best first as (mon, score, flags); equal scores: the one that does not faint,
+        else a coin flip (CFRU's 50%)."""
+        foe = battle.opponent_active_pokemon
+        rows = [(m, *self._switch_in(battle, m, foe)) for m in battle.available_switches]
+        rows = [(m, s, f, "faints" in f, random.random()) for m, s, f in rows]
+        rows.sort(key=lambda r: (-r[1], r[3], r[4]))
+        return [r[:3] for r in rows]
+
+    def _wont_take_much(self, battle, mon, flags, active, foe, move) -> bool:
+        """PredictedMoveWontDoTooMuchToMon."""
+        if "faints" in flags:
             return False
-        if best_score >= BASE_SCORE + self.ko_bonus:
-            return False
-        if any(active.boosts.get(s, 0) <= -3 for s in ("atk", "spa", "def", "spd")):
+        if move is None or "resists" in flags or move.id == "suckerpunch":
             return True
-        matchup = self._matchup(active, opponent)
-        if matchup >= SWITCH_MATCHUP_THRESHOLD:
+        d, hp = self._hit(battle, foe, mon, move, False), mon.current_hp_fraction
+        if d >= hp:
             return False
-        better = [
-            m
-            for m in battle.available_switches
-            if self._matchup(m, opponent) > matchup + 0.5
-        ]
-        if not better:
-            return False
-        if self._incoming_ko_risk(active, opponent) and best_score < BASE_SCORE + 10:
+        if 2 * d < hp:
             return True
-        return matchup < SWITCH_MATCHUP_THRESHOLD
+        return 2 * d >= 1 and any(m.id in RECOVERY or self._heal_fraction(m) for m in mon.moves.values()) \
+            and stat(mon, "spe", True, battle) > stat(foe, "spe", False, battle)
+
+    def _switch_target(self, battle: Battle, active: Pokemon, foe: Pokemon, best_score: int):
+        """ShouldSwitch: the bench mon to switch to, or None to stay in."""
+        if battle.trapped or not battle.available_switches or not self.switching:
+            return None
+        ranked = self._ranked_switches(battle)
+        top2 = ranked[:2]
+        move = self._predict_foe_move(battle, active, foe)
+        fresh = active.first_turn
+        ability = (active.ability or "").replace(" ", "").lower()
+        we_ko = self._can_ko(battle, active, foe, True)
+        they_ko = move is not None and self._hit(battle, foe, active, move, False) >= active.current_hp_fraction
+        faster = stat(active, "spe", True, battle) > stat(foe, "spe", False, battle)
+        boosted = any(v > 0 for v in active.boosts.values())
+
+        # absorb the predicted move (Flash Fire, Volt / Water Absorb, Dry Skin, Sap Sipper ...)
+        absorbers = ABSORB.get(move.type) if move is not None else None
+        if absorbers and not fresh and ability not in absorbers and not (faster and we_ko) \
+                and not (not they_ko and we_ko and boosted):
+            for mon, _, _ in ranked:
+                if (mon.ability or "").replace(" ", "").lower() in absorbers:
+                    if mon.current_hp_fraction >= 1 and mon.ability in ("voltabsorb", "waterabsorb", "dryskin") \
+                            and 2 * self._hit(battle, foe, active, move, False) < active.current_hp_fraction:
+                        continue  # a full-HP healer gains nothing from a hit the active takes twice
+                    return mon
+        # only bad moves left: go to a mon that outspeeds or walls and takes the hit
+        if best_score <= 0 and not fresh:
+            for mon, _, f in top2:
+                if f & {"outspeeds", "walls", "resists"} and self._wont_take_much(battle, mon, f, active, foe, move):
+                    return mon
+        # annoying residual damage: Toxic past six turns (urgent: the best mon, whatever it is)
+        if active.status == Status.TOX and active.status_counter > 6 and ability != "poisonheal" and not we_ko:
+            return ranked[0][0]
+        # avoid death: slower, the predicted hit KOs, not nearly dead already
+        if not fresh and they_ko and not faster and not (active.status == Status.PAR and active.current_hp_fraction < 1 / 3) \
+                and (active.current_hp_fraction > 0.2 or ranked[0][1] >= 70):
+            for mon, _, f in ranked:
+                if (f & {"outspeeds", "walls", "resists"} and effectiveness(move, mon) == 0) or \
+                        ((f & {"walls", "resists"} or {"ko", "outspeeds"} <= f) and self._wont_take_much(battle, mon, f, active, foe, move)):
+                    return mon
+        damager = len(self._attacks(active)) >= 3
+        # offensive stats at -3 with only that kind of attack, and the foe cannot KO us
+        if not fresh and damager:
+            cats = {m.category for m in self._attacks(active)}
+            low = (active.boosts.get("atk", 0) <= -3 and cats == {MoveCategory.PHYSICAL}) or \
+                (active.boosts.get("spa", 0) <= -3 and cats == {MoveCategory.SPECIAL}) or \
+                (active.boosts.get("atk", 0) <= -3 and active.boosts.get("spa", 0) <= -3)
+            if low and not self._can_ko(battle, foe, active, False):
+                mon, _, f = ranked[0]
+                if f & {"walls", "resists"} or ("outspeeds" in f and self._wont_take_much(battle, mon, f, active, foe, move)):
+                    return mon
+        # save the sweeper for later: it cannot KO, and it would die or is doing nothing useful
+        if not fresh and damager and not we_ko and active.status not in (Status.FRZ, Status.PAR):
+            heals = any(m.id in RECOVERY or self._heal_fraction(m) for m in active.moves.values())
+            setup = any(self._self_boosts(m) for m in active.moves.values())
+            r = random.randrange(4)
+            if (self._can_ko(battle, foe, active, False) and not heals) or (
+                    not boosted and not setup and ("ko" in ranked[0][2] or (
+                        r & 1 and (not self._can_ko(battle, active, foe, True, hits=2) or r & 2)
+                        and not self._resists_all(battle, active, foe)))):
+                if self._can_ko(battle, foe, active, False):
+                    for mon, _, f in top2:
+                        if {"ko", "outspeeds"} <= f and self._wont_take_much(battle, mon, f, active, foe, move):
+                            return mon
+                for mon, _, f in ranked:
+                    if "resists" in f:
+                        return mon
+        return None
+
+    def _resists_all(self, battle, mon, foe) -> bool:
+        return all(3 * self._hit(battle, foe, mon, m, False) < mon.current_hp_fraction for m in self._attacks(foe))
 
     def _best_switch(self, battle: Battle) -> BattleOrder | None:
-        opponent = battle.opponent_active_pokemon
-        switches = battle.available_switches
-        if not switches:
+        if not battle.available_switches:
             return None
-        if opponent is None:
-            return self.create_order(random.choice(switches))
-        best = max(switches, key=lambda m: self._switch_score(m, opponent, battle))
-        return self.create_order(best)
-
-    def _switch_score(self, mon: Pokemon, opponent: Pokemon, battle: Battle) -> float:
-        score = self._matchup(mon, opponent) * 10
-        score += mon.current_hp_fraction * 4
-        for cond, stacks in battle.side_conditions.items():
-            if cond == SideCondition.STEALTH_ROCK:
-                score -= 2 * mon.damage_multiplier(PokemonType.ROCK)
-            elif cond == SideCondition.SPIKES:
-                score -= 0.8 * stacks
-        return score
+        if battle.opponent_active_pokemon is None:
+            return self.create_order(random.choice(battle.available_switches))
+        return self.create_order(self._ranked_switches(battle)[0][0])
 
     # --- damage / matchup ---
 

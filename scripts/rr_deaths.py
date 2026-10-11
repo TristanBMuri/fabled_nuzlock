@@ -119,7 +119,7 @@ def main() -> None:
     print(f"death weight {args.death_weight}, preserve {args.preserve}, matchup {args.matchup}, field-aware {not args.blind_field}, enemy AI {args.ai}")
     srng = random.Random(f"{boss}-seeds-0")
     seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(n)]
-    all_deaths, wins, clean, lengths = [], 0, 0, []
+    all_deaths, wins, clean, lengths, switches = [], 0, 0, [], 0
     for i in range(n):
         import numpy as np
         random.seed(sum(seeds[i]) + (7919 if args.ai == "tiebreak" else 0))
@@ -134,8 +134,10 @@ def main() -> None:
             x["battle"], x["won"] = i, st["winner"] == "p1"
         all_deaths += d
         lengths.append(st["turn"])
+        h = sb.history["p1"]  # the enemy's voluntary switches: every switch-in but the lead and the post-faint ones
+        switches += sum(x.startswith("|switch|p2a") for x in h) - 1 - sum(x.startswith("|faint|p2a") for x in h) + (st["winner"] == "p1")
         sb.close()
-    print(f"\n{boss}: {wins}/{n} wins, {clean} deathless, {len(all_deaths)} deaths ({len(all_deaths) / n:.1f} per fight), fights last {sum(lengths) / n:.0f} turns")
+    print(f"\n{boss}: {wins}/{n} wins, {clean} deathless, {len(all_deaths)} deaths ({len(all_deaths) / n:.1f} per fight), fights last {sum(lengths) / n:.0f} turns, enemy switches {switches / n:.1f} per fight")
     C = collections.Counter
     counters = {
         "deaths by enemy mon": C(x["enemy"] for x in all_deaths).most_common(),
@@ -152,7 +154,7 @@ def main() -> None:
         variant = f"dw{args.death_weight:g}" + "".join(f"_{f}" for f, on in (("preserve", args.preserve), ("matchup", args.matchup), ("blind", args.blind_field)) if on) + ("" if args.ai == "base" else f"_ai-{args.ai}")
         out = ROOT / "logs" / f"deaths_{re.sub(r'[^a-z0-9]+', '_', boss.lower()).strip('_')}_{variant}.json"
         out.write_text(json.dumps({"boss": boss, "variant": variant, "source": source, "team": r["best_team"], "n": n, "wins": wins,
-                                   "deathless": clean, "turns": sum(lengths) / n, "deaths": all_deaths,
+                                   "deathless": clean, "turns": sum(lengths) / n, "enemy_switches": switches / n, "deaths": all_deaths,
                                    "counters": {k: [[str(a), b] for a, b in v] for k, v in counters.items()}}))
         print(f"wrote {out}")
     bridge.close()

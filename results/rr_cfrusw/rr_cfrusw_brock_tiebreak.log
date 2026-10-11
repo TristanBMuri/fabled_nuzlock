@@ -1,0 +1,13 @@
+team: [('dewott', 'Timid', 'Torrent', ['waterpulse', 'aerialace', 'revenge', 'watergun']), ('watchog', 'Adamant', 'Analytic', ['headbutt', 'crunch', 'lowkick', 'hypnosis']), ('raticatealola', 'Adamant', 'Gluttony', ['hyperfang', 'knockoff', 'thief', 'feintattack']), ('nuzleaf', 'Jolly', 'Chlorophyll', ['suckerpunch', 'razorleaf', 'flash', 'thief']), ('leavanny', 'Adamant', 'Swarm', ['lunge', 'razorleaf', 'slash', 'pounce']), ('linoone', 'Adamant', 'Pickup', ['headbutt', 'playrough', 'thief', 'tackle'])]
+enemy: [('Hippopotas', 'berryjuice', 'sandstream', 'bulldoze,rocktomb,toxic,slackoff'), ('Cacnea', 'eviolite', 'sandrush', 'poweruppunch,bulletseed,thunderpunch,pinmissile'), ('Lunatone', 'lumberry', 'levitate', 'ancientpower,psybeam,hiddenpowerground,icywind'), ('Lileep', 'oranberry', 'suctioncups', 'stockpile,recover,hiddenpowerrock,megadrain'), ('Archen', 'iapapaberry', 'defeatist', 'wingattack,rocktomb,bulldoze,facade'), ('Varoom', 'airballoon', 'overcoat', 'bulldoze,gyroball,toxic,protect')]
+death weight 6.0, preserve False, matchup True, field-aware True, enemy AI tiebreak
+
+BROCK: 29/30 wins, 3 deathless, 70 deaths (2.3 per fight), fights last 27 turns, enemy switches 2.7 per fight
+deaths by enemy mon: [('Cacnea', 30), ('Archen', 16), ('Lileep', 14), ('Varoom', 6), ('Lunatone', 4)]
+deaths by enemy move: [('Cacnea Pin Missile', 13), ('Archen Wing Attack', 11), ('Lileep Mega Drain', 8), ('Cacnea Bullet Seed', 8), ('Lileep Hidden Power', 5), ('Cacnea residual/other', 5), ('Cacnea Power-Up Punch', 4), ('Varoom Bulldoze', 3)]
+which of ours: [('Watchog', 17), ('Linoone', 14), ('Leavanny', 14), ('Dewott', 9), ('Nuzleaf', 9), ('Raticate', 7)]
+HP before the killing hit: [('low (<0.5)', 67), ('half+ (0.5-0.9)', 2), ('full (>=0.9)', 1)]
+switched in that turn: [('was in', 48), ('switched in', 22)]
+fight outcome: [('won', 64), ('lost', 6)]
+by turn: [(0, 3), (5, 8), (10, 14), (15, 15), (20, 20), (25, 10)]
+wrote /home/tristan/CodingProjects/nuzlock_rl/logs/deaths_brock_dw6_matchup_ai-tiebreak.json

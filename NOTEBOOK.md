@@ -1955,3 +1955,37 @@ Together: the switching rule is both the part the result is sensitive to and the
 the port gets most wrong. A2.2 (decision replay against the ROM) is now urgent, and the
 first port fixes are the switch triggers and the switch-in choice (AI_DIFF.md §3 items
 3–4), then the tier ladder (item 1), each accepted by a paired rerun of this table.
+
+## 2026-10-12 — CFRU switching in the AI port (AI_DIFF.md §3 items 3–4)
+
+`ai_util/rr_ai.py` switches the CFRU way now (`ai_switching.c`, singles, smart AI): the
+switch-in is scored by damage calc (`CalcMostSuitableMonToSwitchInto`: outspeeds +14, KOs
++31, priority revenge kill +8, 2HKO +2, resists all +17, walls +2, faints −39 / −15 if it
+outspeeds), which is also who comes in after every faint; the triggers are absorbing the
+predicted move, only bad moves left, Toxic past six turns, avoiding a predicted KO when
+slower, −3 offence, saving the sweeper; the type-matchup switch is gone, and a mon with
+only dumped moves clicks the least bad one instead of switching. Damage is the calc bot's
+model at its mean roll against the player's real moves; the player's predicted move is
+its strongest hit. Not ported: Wish / Perish / locked moves / Yawn / sleep / hazard
+removers, the fighting-style classes (damager = 3+ attacks), the absorb-switch memory.
+
+Same teams, seeds and config as the A2.3 table; the search's enemy model is the new port
+too, except in the noswitch row (`results/rr_cfrusw/`):
+
+  variant    Brock wins  deathless  deaths   Misty wins  deathless  deaths   enemy switches/fight (B / M)
+  base         29/30        2         76       17/30        1        126     2.6 / 2.4
+  tiebreak     29/30        3         70       22/30        1        111     2.7 / 2.0
+  noswitch     13/30        0        139       10/30        0        148     0.0 / 0.8 (Flip Turn)
+  old port     30/30        7         37       30/30        9         41     (results/rr_aisens/ base)
+
+**The CFRU-switching enemy is far harder**: Misty's cover team falls from 30/30 to 17–22/30
+and 1.4 → 3.7–4.2 deaths per fight (Mantine 7 → 44–53 kills: it comes in on whatever it
+outspeeds in rain and Hurricanes it), Brock doubles its deaths (Cacnea 16 → 28). A traced
+fight (Misty, seed 1) reads like the game: Politoed Flip Turns into Mantine, which
+one-shots Hariyama; Clodsire comes in on Crobat; every revenge kill is the bench mon that
+outspeeds and KOs. The noswitch row (the post-faint choice is still CFRU's) shows most of
+the damage is the switch-in choice, and that a search modelling a switcher plays worse
+against one that does not. So every cover / box / early-boss number before this commit
+was against an enemy that sent in the wrong mon; they have to be rerun before anything
+else is tuned. Next on the AI: the tier ladder (AI_DIFF.md §3 item 1); A2.2 (ROM replay)
+stays the real check of both.

@@ -1,0 +1,13 @@
+team: [('grimer', 'Adamant', 'Stench', ['poisonfang', 'dig', 'thunderpunch', 'thief']), ('gyarados', 'Jolly', 'Intimidate', ['thrash', 'icefang', 'bite', 'icywind']), ('hariyama', 'Adamant', 'Thick Fat', ['vitalthrow', 'dig', 'thunderpunch', 'upperhand']), ('parasect', 'Adamant', 'Dry Skin', ['leechlife', 'dig', 'crosspoison', 'spore']), ('toucannon', 'Adamant', 'Frisk', ['beakblast', 'uturn', 'steelwing', 'roost']), ('crobat', 'Adamant', 'Infiltrator', ['poisonfang', 'pluck', 'uturn', 'roost'])]
+enemy: [('Politoed', 'iapapaberry', 'drizzle', 'flipturn,scald,earthquake,toxic'), ('Ludicolo', 'sitrusberry', 'swiftswim', 'gigadrain,scald,aurorabeam,thunderpunch'), ('Mantine', 'wacanberry', 'swiftswim', 'scald,hurricane,roost,hiddenpowergrass'), ('Clodsire', 'blacksludge', 'waterabsorb', 'poisonjab,bulldoze,recover,toxic'), ('Starmie', 'mysticwater', 'analytic', 'scald,thunderbolt,psyshock,aurorabeam'), ('Toxicroak', 'lifeorb', 'dryskin', 'swordsdance,drainpunch,poisonjab,suckerpunch')]
+death weight 6.0, preserve False, matchup True, field-aware True, enemy AI tiebreak
+
+MISTY: 22/30 wins, 1 deathless, 111 deaths (3.7 per fight), fights last 34 turns, enemy switches 2.0 per fight
+deaths by enemy mon: [('Mantine', 44), ('Ludicolo', 20), ('Toxicroak', 17), ('Starmie', 17), ('Clodsire', 7), ('Politoed', 6)]
+deaths by enemy move: [('Mantine Hurricane', 27), ('Toxicroak Poison Jab', 12), ('Mantine Scald', 12), ('Starmie Psyshock', 9), ('Ludicolo Thunder Punch', 8), ('Ludicolo Aurora Beam', 7), ('Clodsire Poison Jab', 7), ('Toxicroak Sucker Punch', 4)]
+which of ours: [('Grimer', 23), ('Hariyama', 22), ('Gyarados', 22), ('Toucannon', 19), ('Crobat', 15), ('Parasect', 10)]
+HP before the killing hit: [('low (<0.5)', 96), ('half+ (0.5-0.9)', 9), ('full (>=0.9)', 6)]
+switched in that turn: [('was in', 84), ('switched in', 27)]
+fight outcome: [('won', 63), ('lost', 48)]
+by turn: [(0, 13), (5, 23), (10, 22), (15, 20), (20, 15), (25, 8), (30, 10)]
+wrote /home/tristan/CodingProjects/nuzlock_rl/logs/deaths_misty_dw6_matchup_ai-tiebreak.json

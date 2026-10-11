@@ -170,7 +170,9 @@ relative-level mons). Routing 1 hd; run layer large, after F.
 result is sensitive to the AI's switching (no-switch enemy: Brock 37 → 85 deaths) and
 the port's switching is not CFRU's. Next: port CFRU's switch triggers + switch-in
 choice, then the tier ladder (AI_DIFF.md §3), each paired against `results/rr_aisens/`;
-A2.2 needs the user's ROM recordings.
+A2.2 needs the user's ROM recordings. **Switching ported the same day** (NOTEBOOK.md):
+Misty's cover team 30/30 → 17/30, Brock's deaths 37 → 76. Every RR table before it is
+against the old AI: rerun the cover pool / boxes / early bosses, then the tier ladder.
 
 
 A2.1 + A2.3 (AI sensitivity, read-through) → B1 (matrix calibration) → B2/B3

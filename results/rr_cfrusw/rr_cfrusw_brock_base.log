@@ -1,0 +1,13 @@
+team: [('dewott', 'Timid', 'Torrent', ['waterpulse', 'aerialace', 'revenge', 'watergun']), ('watchog', 'Adamant', 'Analytic', ['headbutt', 'crunch', 'lowkick', 'hypnosis']), ('raticatealola', 'Adamant', 'Gluttony', ['hyperfang', 'knockoff', 'thief', 'feintattack']), ('nuzleaf', 'Jolly', 'Chlorophyll', ['suckerpunch', 'razorleaf', 'flash', 'thief']), ('leavanny', 'Adamant', 'Swarm', ['lunge', 'razorleaf', 'slash', 'pounce']), ('linoone', 'Adamant', 'Pickup', ['headbutt', 'playrough', 'thief', 'tackle'])]
+enemy: [('Hippopotas', 'berryjuice', 'sandstream', 'bulldoze,rocktomb,toxic,slackoff'), ('Cacnea', 'eviolite', 'sandrush', 'poweruppunch,bulletseed,thunderpunch,pinmissile'), ('Lunatone', 'lumberry', 'levitate', 'ancientpower,psybeam,hiddenpowerground,icywind'), ('Lileep', 'oranberry', 'suctioncups', 'stockpile,recover,hiddenpowerrock,megadrain'), ('Archen', 'iapapaberry', 'defeatist', 'wingattack,rocktomb,bulldoze,facade'), ('Varoom', 'airballoon', 'overcoat', 'bulldoze,gyroball,toxic,protect')]
+death weight 6.0, preserve False, matchup True, field-aware True, enemy AI base
+
+BROCK: 29/30 wins, 2 deathless, 76 deaths (2.5 per fight), fights last 27 turns, enemy switches 2.6 per fight
+deaths by enemy mon: [('Cacnea', 28), ('Archen', 15), ('Lileep', 13), ('Lunatone', 12), ('Varoom', 7), ('Hippopotas', 1)]
+deaths by enemy move: [('Cacnea Pin Missile', 12), ('Archen Wing Attack', 10), ('Cacnea Bullet Seed', 8), ('Cacnea Power-Up Punch', 7), ('Lileep Mega Drain', 7), ('Varoom Bulldoze', 4), ('Lunatone residual/other', 4), ('Lileep Hidden Power', 4)]
+which of ours: [('Leavanny', 19), ('Watchog', 14), ('Raticate', 12), ('Dewott', 11), ('Linoone', 11), ('Nuzleaf', 9)]
+HP before the killing hit: [('low (<0.5)', 68), ('half+ (0.5-0.9)', 7), ('full (>=0.9)', 1)]
+switched in that turn: [('was in', 67), ('switched in', 9)]
+fight outcome: [('won', 70), ('lost', 6)]
+by turn: [(0, 2), (5, 8), (10, 12), (15, 24), (20, 14), (25, 12), (30, 4)]
+wrote /home/tristan/CodingProjects/nuzlock_rl/logs/deaths_brock_dw6_matchup.json

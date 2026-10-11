@@ -343,6 +343,10 @@ to search play — three times now: E8, EVs, moves).
 
 ## Radical Red (2026-10-10/12)
 
+**2026-10-12: the enemy AI now switches the CFRU way** (`data/rr/AI_DIFF.md`, NOTEBOOK.md
+2026-10-12): Misty's cover team fell 30/30 → 17/30, Brock's deaths doubled. The numbers
+below were measured against the old port and need rerunning.
+
 The question the project exists for. State (NOTEBOOK.md → Radical Red
 entries, newest last): real pools and TMs, legal moves, arenas, no EVs /
 items, a random starter. Boss #1 Brendan is solved (30 boxes: 100% wins,
