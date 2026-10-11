@@ -1836,8 +1836,17 @@ Crobat race Mantine, Hariyama the race-winner tier) against 60 / 53 / 50 / 43
 Misty was 67–80% with 0.4–0.5 deaths per mon. The deaths that remain are
 Starmie (11) and Clodsire (8), both with duel-winning counters in the pool
 (Ekans, Paras, Morelull; Kricketot, Mudbray, Smoochum) that the cover did not
-take because something else already answered them on paper. Brock's cover run
-is still in flight.
+take because something else already answered them on paper. **Brock** under
+the same run: the best six is again the fast-stage team (Dewott / Watchog /
+Alolan Raticate / Nuzleaf / Leavanny / Linoone), 30/30, 0.21 deaths per mon,
+23% deathless — the same numbers as before the chooser, with the other five
+candidates at 100 / 97 / 97 / 90 / 57%; the cover six (Chingling, Patrat,
+Poochyena, Alolan Rattata, Tarountula, Yungoos) is one of those five (the log
+does not say which: per-team lines are now printed, UI_TODO item 1). Cacnea
+(16) and Archen (6) are the killers; their duel-winning counters (Galarian
+Ponyta, Kricketot, Cubchoo; Shinx, Kricketot, Poochyena) are in the pool. So
+the cover chooser decides Misty and leaves Brock where it was: Brock's
+problem is the play against Cacnea under sand, not the six.
 
 **Cover chooser, sampled boxes** (30 boxes per boss, a random starter plus one
 encounter per open location drawn by rarity, n=6 per box; same play config;

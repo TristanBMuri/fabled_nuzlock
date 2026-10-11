@@ -276,9 +276,13 @@ def _run_boss(args, name: str) -> dict:
         print(f"{name}: cover team {cteam}", flush=True)
         top = list(dict.fromkeys([cteam] + top))[:TOP]
     results, attr, clean = [], {}, {}
+    labels = {team: "greedy", ranked[0]: "fast"}
+    if args.chooser == "cover":
+        labels[cteam] = "cover"
     for t in top:
         w, d, pr, attr[t], clean[t] = searched(ctx, t)
         results.append((w, -d, t, d))
+        print(f"{name}: C {labels.get(t, 'top'):<6} {list(t)}: win {w:.0%} deaths/mon {d:.2f} deathless {clean[t]:.0%}", flush=True)
     results.sort(reverse=True)
     w, _, t, d = results[0]
     print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} deathless {clean[t]:.0%} "
