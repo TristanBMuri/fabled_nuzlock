@@ -1885,3 +1885,36 @@ in the pool". Two data fixes on the way (986dda0, 31edf3f): the ROM dump's
 hand-fixed bosses, and the enemy AI crashed on a Metronome-called Hyper
 Beam's recharge turn. #14 Lass Relli has no team in either source; #8 and
 #11–13 are doubles.
+
+## Full circle: the matrix was going to be a model (2026-10-11, evening, reflection)
+
+The user's original idea for the piece that reads an enemy line-up and finds
+the answers in the box was a learned one — an AI, a model trained on fights.
+What ended up carrying the evening's result is `ai_util/matchup.py`: a
+hits-to-KO table read off the calc bot's damage model, two hand-written tiers
+(safe, race), a greedy set cover. A matrix again.
+
+How it got there is the project's own history repeating itself. From-scratch
+PPO capped at 14% against SimpleHeuristics; behaviour cloning reached 40% and
+no more data or capacity moved it; search over the engine was the one thing
+that jumped (52 → 95% clears). Every learned component oscillated around its
+init and could not say why it chose; every explicit model could be read,
+argued with, and fixed in an afternoon. The Gyarados-versus-Mantine "2 of 3"
+cell was caught because a human looked at it and said it made no sense (no
+Roost, no speed order). A learned chooser would have made the same mistake
+silently, and we would have measured a win rate instead of finding a bug.
+
+So the structure had to be explicit first. Not because learning is wrong here
+but because without a readable baseline there is no way to tell a better
+model from a different one. The matrix is now the interface: the cover
+chooser, the switch rule, the threat report and the coming routing pass all
+read cells. What fills a cell can change.
+
+Where a learned piece earns its place is exactly the next step (TODO.md B1):
+the duel calibration produces labelled pairs — features from the real sets
+and the field, outcome from the engine — and a confusion table per tier. If
+the hand-written tiers calibrate, the table stays. If the false cells pile up
+and every fix is another special case, that is the signal to fit a small
+model on the duel data, with the table as the baseline it has to beat and
+the cells as the thing it fills. The idea was not wrong; it was early, and
+the way to make it right is to let the table tell us when.

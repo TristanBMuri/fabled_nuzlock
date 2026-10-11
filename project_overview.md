@@ -599,6 +599,12 @@ table (2026-09-16, pending) is E3c's measurement.
   blaming the observation.
 - **Imitation ceiling is real.** More data (91k→274k) and more capacity
   (256→512) did not move val CE. Beyond-teacher needs search/self-play.
+- **Explicit before learned.** The threat/counter piece was meant to be a
+  model and became a readable hits-to-KO matrix (`ai_util/matchup.py`); it
+  beat Misty 30/30 and its errors were found by reading cells. A learned
+  version is allowed only once the explicit one is calibrated (duel data,
+  TODO.md B1) so "better" can be told from "different" (NOTEBOOK 2026-10-11
+  "Full circle").
 - **RL finetune from BC oscillates around init.** Fresh value head knocks
   the policy off its init before the critic catches up.
 - **Check metric polarity.** `_win_rate` returned losses; "MaxBP beats
