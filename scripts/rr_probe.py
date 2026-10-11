@@ -191,6 +191,44 @@ def pools() -> tuple[dict, dict]:
     return out, known
 
 
+def sample_box(rng: random.Random, t: int, known: dict) -> list[tuple[str, str]]:
+    """A run's box at trainer t (user decision 2026-10-11: random, one encounter per open
+    location, drawn by the tracker's rarity): per location one method a run would use
+    (grass by day or night, a rod or Surf once in hand, equal odds) and one species from it
+    by rarity among those at or under the cap; a species already in the box is re-rolled
+    up to three times (dupes clause); plus one random starter and the gifts / trades in
+    hand. Returns [(species id, where)]."""
+    enc = json.load(open(RR / "tracker_encounters.json"))
+    order = json.load(open(RR / "order.json"))
+    e = order["entries"][t]
+    dex9 = GenData.from_gen(9).pokedex
+    box = [(rng.choice(STARTERS), "starter")]
+    have = {box[0][0]}
+    for l in [x for x in enc["locations"] if not x["postgame"]][:e["reach"] + 1]:
+        methods = {m: [x for x in tb if int(x["levels"].split("-")[0]) <= e["cap"]
+                       and to_id_str(x["species"]) in known and to_id_str(x["species"]) in dex9]
+                   for m, tb in l["methods"].items()
+                   if (0 if m.startswith("grass") else order["gates"].get(m, 999)) <= t}
+        methods = {m: tb for m, tb in methods.items() if tb}
+        if not methods:
+            continue
+        for _ in range(4):
+            meth = rng.choice(sorted(methods))
+            tb = methods[meth]
+            pick = rng.choices(tb, weights=[float(x["rarity"].rstrip("%")) or 1 for x in tb])[0]
+            sp = to_id_str(pick["species"])
+            if sp not in have:
+                break
+        if sp not in have:
+            have.add(sp)
+            box.append((sp, f"{l['name']} / {meth} {pick['rarity']}"))
+    for g in order.get("gifts", []):
+        if g["t"] <= t and (g["level"] or 0) <= e["cap"] and g["species"] in known and g["species"] not in have:
+            have.add(g["species"])
+            box.append((g["species"], g["how"]))
+    return box
+
+
 def where(species: str, t: int) -> str:
     """The first open location and method (by trainer t) that offers `species` at or under
     the cap: the encounter-routing answer for a counter."""

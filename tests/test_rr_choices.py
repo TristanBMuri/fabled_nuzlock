@@ -23,3 +23,14 @@ def test_ability_prefers_an_immunity_to_the_boss_and_the_gym_weather():
     assert rp.choose_ability("jynx", KNOWN, {"Water", "Ice"}, rain) == "Dry Skin"       # Water immunity vs Misty
     assert rp.choose_ability("jynx", KNOWN, {"Rock"}, {}) == KNOWN["jynx"]["abilities"]["0"]  # nothing to gain: slot 0
     assert rp.choose_ability("gyarados", KNOWN, {"Water"}, {}) == "Intimidate"
+
+
+def test_sample_box_is_one_encounter_per_open_location():
+    import random
+    by, known = rp.pools()
+    _, cap, pool, t = by["MISTY"]
+    box = rp.sample_box(random.Random(3), t, known)
+    places = [w.split(" / ")[0] for s, w in box if "/" in w]
+    assert len(places) == len(set(places)) and 10 <= len(box) <= 30
+    assert box[0][1] == "starter" and box[0][0] in rp.STARTERS
+    assert all(s in pool for s, w in box[1:]) and len({s for s, _ in box}) == len(box)  # catchable, no dupes
