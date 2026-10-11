@@ -2,7 +2,9 @@
 search, turn by turn — both actives with HP, every candidate's rollout value, the pick, and
 what the engine did. For judging decisions, not aggregates.
 
-  uv run python scripts/rr_trace.py BROCK [--source results/rr_bench_field.jsonl] [--battle 0] [--preserve]
+  uv run python scripts/rr_trace.py BROCK [--source results/rr_bench_field.jsonl] [--battle 0] [--preserve] [--json]
+
+`--json` also writes logs/trace_<boss>_<battle>.json for the dashboard (ui/).
 """
 
 import argparse
@@ -39,6 +41,7 @@ def main() -> None:
     ap.add_argument("--preserve", action="store_true")
     ap.add_argument("--matchup", action="store_true")
     ap.add_argument("--death-weight", type=float, default=0.5)
+    ap.add_argument("--json", action="store_true", help="also write logs/trace_<boss>_<battle>.json")
     args = ap.parse_args()
     gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(ROOT / "data/rr/hardcore_rules.json"))["banned_moves"]}
     if args.preserve or args.matchup:
@@ -65,10 +68,15 @@ def main() -> None:
     random.seed(sum(seed))
     searcher.rng = np.random.default_rng(seed)
     sb = SimBattle(bridge, rp.FMT, pack_team(party), enemy_packed, full_info=True, arena=arena, seed=seed)
-    shown = 0
+    shown, turns = 0, []
+    mon = lambda p: {"species": p.species, "hp": round(p.current_hp_fraction if p.current_hp or p.fainted else 1.0, 3),  # unseen enemy: full
+                     "status": p.status.name if p.status else None, "boosts": {k: v for k, v in p.boosts.items() if v}}
     while not sb.ended and sb.turn < 100:
         m = sb.mirrors["p1"]
         me, opp = m.active_pokemon, m.opponent_active_pokemon
+        rec = {"turn": sb.turn, "ours": mon(me), "theirs": mon(opp), "bench": [mon(p) for p in m.available_switches],
+               "their_bench": [mon(p) for p in m.opponent_team.values() if p is not opp and not p.fainted],
+               "candidates": {}, "pick": None, "forced": True}
         ch = {}
         if sb.pending["p2"]:
             ch["p2"] = sb.choice("p2", enemy)
@@ -81,13 +89,27 @@ def main() -> None:
                 ranked = sorted(searcher.last_scores.items(), key=lambda kv: -kv[1])
                 print("     search: " + "  ".join(f"{k.replace('move ', '').replace('switch ', 'sw:')}={v:+.2f}" for k, v in ranked))
             print(f"     pick: {ch['p1']}" + ("  (forced / only option)" if not searcher.searched_last else ""))
+            rec.update(pick=ch["p1"], forced=not searcher.searched_last,
+                       candidates={k: round(v, 3) for k, v in searcher.last_scores.items()} if searcher.searched_last else {})
         sb.step(ch)
         new = sb.history["p1"][shown:]
         shown = len(sb.history["p1"])
-        ev = [l for l in new if SHOW.match(l)]
-        print("     " + " | ".join(re.sub(r"\|p([12])a: ([^|]+)", r" \2", l)[1:].replace("|", " ").strip() for l in ev))
+        ev = [re.sub(r"\|p([12])a: ([^|]+)", r" \2", l)[1:].replace("|", " ").strip() for l in new if SHOW.match(l)]
+        print("     " + " | ".join(ev))
+        rec.update(events=ev, deaths=[l.split(": ", 1)[1] for l in new if l.startswith("|faint|p1a: ")])
+        turns.append(rec)
     st = sb.state()
     print(f"\nresult: {'WIN' if st['winner'] == 'p1' else 'LOSS'} in {st['turn']} turns; ours left: {[(x['species'], x['hp']) for x in st['p1'] if not x['fainted']]}; theirs left: {[(x['species'], x['hp']) for x in st['p2'] if not x['fainted']]}")
+    if args.json:
+        out = ROOT / "logs" / f"trace_{re.sub(r'[^a-z0-9]+', '_', args.boss.lower()).strip('_')}_{args.battle}.json"
+        out.write_text(json.dumps({
+            "boss": args.boss, "battle": args.battle, "seed": seed, "source": None if args.team else args.source, "team": team,
+            "flags": {"preserve": args.preserve, "matchup": args.matchup, "death_weight": args.death_weight}, "cap": cap, "arena": arena,
+            "ours": [{"species": x.species, "nature": x.nature, "ability": x.ability, "moves": x.moves} for x in party],
+            "theirs": tp.enemy_sets(enemy_packed), "turns": turns,
+            "result": {"won": st["winner"] == "p1", "turns": st["turn"], "ours_left": [x["species"] for x in st["p1"] if not x["fainted"]],
+                       "theirs_left": [x["species"] for x in st["p2"] if not x["fainted"]]}}))
+        print(f"wrote {out}")
     sb.close()
     bridge.close()
 

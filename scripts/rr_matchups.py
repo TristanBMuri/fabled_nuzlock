@@ -6,10 +6,13 @@ shows whether a deathless answer to each enemy mon exists at all.
 
   uv run python scripts/rr_matchups.py BROCK --team applin,sandshrewalola,furret,skwovet,gumshoos,linoonegalar
   uv run python scripts/rr_matchups.py BROCK --pool            # every catchable species: safe answers per enemy mon
+
+`--json` also writes logs/matrix_<boss>_<team|pool>.json for the dashboard (ui/).
 """
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -22,15 +25,15 @@ def main() -> None:
     import rr_probe as rp
     import rr_team_probe as tp
     import gauntlet
-    from gauntlet import pack_team
     from poke_env.data import to_id_str
-    from ai_util.matchup import pair, safe
-    from ai_util.sim import SimBattle, SimBridge
+    from ai_util.matchup import safe
+    from ai_util.sim import SimBridge
 
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("boss")
     ap.add_argument("--team", help="comma-separated pool species (pre-evolution ids)")
     ap.add_argument("--pool", action="store_true", help="every catchable species, summarised per enemy mon")
+    ap.add_argument("--json", action="store_true", help="also write logs/matrix_<boss>_<team|pool>.json")
     args = ap.parse_args()
     gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(ROOT / "data/rr/hardcore_rules.json"))["banned_moves"]}
     by, known = rp.pools()
@@ -44,20 +47,15 @@ def main() -> None:
     mons = {sp: tp.build_mon(sp, cap, known, t, boss_types, arena) for sp in species}
     mons = {sp: m for sp, m in mons.items() if m is not None}
     bridge = SimBridge(showdown=str(rp.FORK))
-    rows = {}
-    for i in range(0, len(mons), 6):  # six of ours per battle; read both mirrors' real stats, never play
-        chunk = list(mons)[i:i + 6]
-        sb = SimBattle(bridge, rp.FMT, pack_team([mons[s] for s in chunk]), enemy_packed, full_info=True, arena=arena)
-        b = sb.mirrors["p1"]
-        ours = {p.species: p for p in b.team.values()}
-        theirs = list(b.opponent_team.values())
-        for sp in chunk:
-            me = next((p for p in ours.values() if p.species == to_id_str(mons[sp].species)), None)
-            if me is None:
-                continue
-            rows[sp] = (mons[sp], {opp.species: pair(me, opp, b) for opp in theirs})
-        sb.close()
+    grid = tp.cells(bridge, mons, enemy_packed, arena)  # six of ours per dummy battle, never played
+    rows = {sp: (mons[sp], grid[sp]) for sp in mons if sp in grid}
     bridge.close()
+    if args.json:
+        out = ROOT / "logs" / f"matrix_{re.sub(r'[^a-z0-9]+', '_', args.boss.lower()).strip('_')}_{'team' if args.team else 'pool'}.json"
+        out.write_text(json.dumps({"boss": args.boss, "cap": cap, "arena": arena, "enemy": tp.enemy_sets(enemy_packed), "team": list(rows),
+                                   "sets": [{"species": m.species, "nature": m.nature, "ability": m.ability, "moves": m.moves} for m, _ in rows.values()],
+                                   "matrix": grid}))
+        print(f"wrote {out}")
     enemies = [p.split("|")[0] for p in enemy_packed.split("]")]
     ids = [to_id_str(e) for e in enemies]
     print(f"{args.boss}: cap {cap}, arena {arena}. cell = hits we need / hits they need (> = we move first, h = they heal); * = safe (ai_util.matchup.safe)")

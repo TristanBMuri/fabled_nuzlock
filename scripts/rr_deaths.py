@@ -4,7 +4,9 @@ died, to which enemy mon and move, at what HP before the hit (one-shot from full
 on the turn it switched in or not, and whether it was our last mon (no choice left). The
 question it answers: are deaths decisions or attrition?
 
-  uv run python scripts/rr_deaths.py MISTY 12 [--source results/rr_bench_field.jsonl] [--death-weight 2.0]
+  uv run python scripts/rr_deaths.py MISTY 12 [--source results/rr_bench_field.jsonl] [--death-weight 2.0] [--json]
+
+`--json` also writes logs/deaths_<boss>_<variant>.json for the dashboard (ui/).
 """
 
 import collections
@@ -78,6 +80,7 @@ def main() -> None:
     ap.add_argument("--preserve", action="store_true", help="calc bot retreats low / badly poisoned mons (calc_bot.PRESERVE)")
     ap.add_argument("--matchup", action="store_true", help="calc bot switches on the matchup matrix (calc_bot.MATCHUP)")
     ap.add_argument("--blind-field", action="store_true", help="calc bot ignores weather / terrain (calc_bot.FIELD_AWARE = False)")
+    ap.add_argument("--json", action="store_true", help="also write logs/deaths_<boss>_<variant>.json")
     args = ap.parse_args()
     boss, n, source = args.boss, args.n, args.source
     gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(ROOT / "data/rr/hardcore_rules.json"))["banned_moves"]}
@@ -126,13 +129,24 @@ def main() -> None:
         sb.close()
     print(f"\n{boss}: {wins}/{n} wins, {clean} deathless, {len(all_deaths)} deaths ({len(all_deaths) / n:.1f} per fight), fights last {sum(lengths) / n:.0f} turns")
     C = collections.Counter
-    print("deaths by enemy mon:", C(x["enemy"] for x in all_deaths).most_common())
-    print("deaths by enemy move:", C(f"{x['enemy']} {x['move']}" for x in all_deaths).most_common(8))
-    print("which of ours:", C(x["ours"] for x in all_deaths).most_common())
-    print("HP before the killing hit:", C("full (>=0.9)" if x["hp_before"] >= 0.9 else "half+ (0.5-0.9)" if x["hp_before"] >= 0.5 else "low (<0.5)" for x in all_deaths).most_common())
-    print("died the turn it switched in:", sum(x["switched_in_this_turn"] for x in all_deaths), "of", len(all_deaths))
-    print("deaths in won fights:", sum(x["won"] for x in all_deaths), "| in lost fights:", sum(not x["won"] for x in all_deaths))
-    print("by turn:", C(min(x["turn"] // 5 * 5, 30) for x in all_deaths).most_common())
+    counters = {
+        "deaths by enemy mon": C(x["enemy"] for x in all_deaths).most_common(),
+        "deaths by enemy move": C(f"{x['enemy']} {x['move']}" for x in all_deaths).most_common(8),
+        "which of ours": C(x["ours"] for x in all_deaths).most_common(),
+        "HP before the killing hit": C("full (>=0.9)" if x["hp_before"] >= 0.9 else "half+ (0.5-0.9)" if x["hp_before"] >= 0.5 else "low (<0.5)" for x in all_deaths).most_common(),
+        "switched in that turn": C("switched in" if x["switched_in_this_turn"] else "was in" for x in all_deaths).most_common(),
+        "fight outcome": C("won" if x["won"] else "lost" for x in all_deaths).most_common(),
+        "by turn": sorted(C(min(x["turn"] // 5 * 5, 30) for x in all_deaths).items()),
+    }
+    for k, v in counters.items():
+        print(f"{k}:", v)
+    if args.json:
+        variant = f"dw{args.death_weight:g}" + "".join(f"_{f}" for f, on in (("preserve", args.preserve), ("matchup", args.matchup), ("blind", args.blind_field)) if on)
+        out = ROOT / "logs" / f"deaths_{re.sub(r'[^a-z0-9]+', '_', boss.lower()).strip('_')}_{variant}.json"
+        out.write_text(json.dumps({"boss": boss, "variant": variant, "source": source, "team": r["best_team"], "n": n, "wins": wins,
+                                   "deathless": clean, "turns": sum(lengths) / n, "deaths": all_deaths,
+                                   "counters": {k: [[str(a), b] for a, b in v] for k, v in counters.items()}}))
+        print(f"wrote {out}")
     bridge.close()
 
 

@@ -15,3 +15,6 @@ pokemon-showdown/
 models/
 data/teams/gauntlet_harvest/
 pokemon-showdown-rr/
+
+# dashboard data, rebuilt by ui/build.py
+ui/data.json

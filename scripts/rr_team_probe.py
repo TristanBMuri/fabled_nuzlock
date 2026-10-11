@@ -33,6 +33,7 @@ import argparse
 import collections
 import json
 import multiprocessing as mp
+import os
 import random
 import sys
 import time
@@ -49,6 +50,35 @@ from gauntlet import STATS, Mon, encounter_moves, evolve, pack_team  # noqa: E40
 
 SHORT, TOP = 24, 6
 GREEDY_N, SUBSETS = 4, 150
+
+
+def events_path(out: str) -> Path:
+    return Path(out).with_suffix(".events.jsonl")
+
+
+def emit(args, kind: str, **data) -> None:
+    """One structured event for the dashboard (ui/, UI_TODO.md) next to --out: a single
+    O_APPEND write per line, so the workers' lines never interleave. No --out, no events."""
+    if args.out:
+        line = json.dumps({"t": round(time.time(), 1), "kind": kind, **data}) + "\n"
+        fd = os.open(events_path(args.out), os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
+        try:
+            os.write(fd, line.encode())
+        finally:
+            os.close(fd)
+
+
+def enemy_sets(packed: str) -> list[dict]:
+    return [{"species": f[0], "id": to_id_str(f[0]), "item": f[2], "ability": f[3], "moves": f[4].split(","), "level": int(f[10] or 0)}
+            for f in (x.split("|") for x in packed.split("]"))]
+
+
+def cells(bridge, mons: dict, enemy_packed: str, arena: dict | None) -> dict:
+    """{ours: {enemy id: pair + safe / race}}: the matchup matrix as data (ai_util.matchup)."""
+    from ai_util.matchup import race, rows_for, safe
+    rows = rows_for(bridge, rp.FMT, mons, enemy_packed, arena)
+    return {s: {e: {**p, "hit": round(p["hit"], 3), "take": round(p["take"], 3), "safe": safe(p), "race": race(p)} for e, p in r.items()}
+            for s, r in rows.items()}
 
 
 def progress(st: dict) -> float:
@@ -112,10 +142,13 @@ def play(bridge, brain, enemy, party: list[Mon], enemy_packed: str, n: int, sear
 
 def run_boss(args, name: str) -> dict:
     try:
-        return _run_boxes(args, name) if args.boxes else _run_boss(args, name)
+        out = _run_boxes(args, name) if args.boxes else _run_boss(args, name)
+        emit(args, "boss_done", boss=name, row=out["rows"][0])
+        return out
     except Exception as e:
         import traceback
         print(f"{name} FAILED: {type(e).__name__}: {e}\n{traceback.format_exc()[-800:]}", flush=True)
+        emit(args, "boss_failed", boss=name, error=f"{type(e).__name__}: {e}")
         return {"rows": []}
 
 
@@ -148,6 +181,8 @@ def setup(args, name: str):
     enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
     calc = calc_brain()
     width = tuple(int(x) for x in args.search.split(","))
+    emit(args, "boss_start", boss=name, trainer=progress, cap=cap, pool=len(pool), arena=arena, unmodelled=unmodelled,
+         enemy=enemy_sets(enemy_packed), boss_types=sorted(boss_types))
     return SimpleNamespace(name=name, args=args, known=known, cap=cap, pool=pool, progress=progress, arena=arena,
                            unmodelled=unmodelled, enemy_packed=enemy_packed, enemy_species=enemy_species,
                            boss_types=boss_types, bridge=SimBridge(showdown=str(rp.FORK)), enemy=enemy, calc=calc,
@@ -254,6 +289,10 @@ def sets_of(ctx, team) -> list[dict]:
     return [{"species": ctx.mons[s].species, "nature": ctx.mons[s].nature, "ability": ctx.mons[s].ability, "moves": ctx.mons[s].moves} for s in team]
 
 
+def matrix(ctx, team) -> dict:
+    return cells(ctx.bridge, {s: ctx.mons[s] for s in team}, ctx.enemy_packed, ctx.arena)
+
+
 def _run_boss(args, name: str) -> dict:
     """The planned-pool probe: the best six in everything catchable."""
     ctx = setup(args, name)
@@ -264,6 +303,7 @@ def _run_boss(args, name: str) -> dict:
     short = [sp for _, sp in solo[:SHORT]]
     print(f"{name}: A solo scores for {len(solo)} species in {time.time() - ctx.t0:.0f}s; top: "
           + ", ".join(f"{sp} {pr:.2f}" for pr, sp in solo[:8]), flush=True)
+    emit(args, "stage_a", boss=name, starter=starter, scored=len(solo), top=[(sp, round(pr, 3)) for pr, sp in solo[:SHORT]])
     team = greedy(ctx, short)
     for _ in range(SUBSETS):
         team_value(ctx, tuple(sorted(ctx.rng.sample(short, 6))))
@@ -271,10 +311,13 @@ def _run_boss(args, name: str) -> dict:
     print(f"{name}: B {len(ctx.team_score)} teams scored in {time.time() - ctx.t0:.0f}s; greedy {team} "
           f"({ctx.team_score[team]:.2f}); best fast {ranked[0]} ({ctx.team_score[ranked[0]]:.2f})", flush=True)
     top = list(dict.fromkeys([team] + ranked))[:TOP]
+    cteam = None
     if args.chooser == "cover":
         cteam = cover_team(ctx, short + [sp for sp in pool if sp not in short])
         print(f"{name}: cover team {cteam}", flush=True)
         top = list(dict.fromkeys([cteam] + top))[:TOP]
+    emit(args, "stage_b", boss=name, scored=len(ctx.team_score), greedy=[list(team), round(ctx.team_score[team], 3)],
+         fast=[list(ranked[0]), round(ctx.team_score[ranked[0]], 3)], cover=list(cteam) if cteam else None)
     results, attr, clean = [], {}, {}
     labels = {team: "greedy", ranked[0]: "fast"}
     if args.chooser == "cover":
@@ -283,6 +326,8 @@ def _run_boss(args, name: str) -> dict:
         w, d, pr, attr[t], clean[t] = searched(ctx, t)
         results.append((w, -d, t, d))
         print(f"{name}: C {labels.get(t, 'top'):<6} {list(t)}: win {w:.0%} deaths/mon {d:.2f} deathless {clean[t]:.0%}", flush=True)
+        emit(args, "team", boss=name, label=labels.get(t, "top"), team=list(t), sets=sets_of(ctx, t), win=w, deaths_per_mon=d,
+             deathless=clean[t], deaths_by=dict(attr[t][0]), kos_on=dict(attr[t][1]), matrix=matrix(ctx, t))
     results.sort(reverse=True)
     w, _, t, d = results[0]
     print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} deathless {clean[t]:.0%} "
@@ -290,6 +335,7 @@ def _run_boss(args, name: str) -> dict:
     print(f"{name:<10} sets: " + ", ".join(f"{show(ctx.mons[s])} {ctx.mons[s].moves}" for s in t), flush=True)
     threats = threats_of(ctx, attr[t], pool)
     say_threats(ctx, threats)
+    emit(args, "threats", boss=name, team=list(t), threats=threats)
     repaired = None
     extra = [sp for th in threats for sp, *_ in th["counters"] if sp not in short]  # counters the shortlist lacked
     if args.repair and extra:
@@ -301,6 +347,7 @@ def _run_boss(args, name: str) -> dict:
         taken = [sp for sp in extra if sp in rteam]
         rw, rd, _, _, rc = searched(ctx, rteam) if rteam != t else (w, d, None, None, clean[t])
         repaired = {"team": list(rteam), "win": rw, "deaths_per_mon": rd, "deathless": rc, "counters_offered": extra, "counters_taken": taken}
+        emit(args, "repaired", boss=name, **repaired, sets=sets_of(ctx, rteam))
         print(f"{name:<10} repaired: counters offered {extra}, taken {taken}: win {rw:5.0%} deaths/mon {rd:.2f} deathless {rc:.0%} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - ctx.t0:.0f}s)", flush=True)
     rows = [{"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser, "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena,
              "unmodelled": ctx.unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d, "deathless": clean[t], "n": args.n_search,
@@ -318,6 +365,7 @@ def _run_boxes(args, name: str) -> dict:
     ctx = setup(args, name)
     solo, solo_vs = solo_stage(ctx, ctx.pool + [sp for sp in rp.STARTERS if sp not in ctx.pool])
     print(f"{name}: A solo scores for {len(solo)} species (pool + starters) in {time.time() - ctx.t0:.0f}s", flush=True)
+    emit(args, "stage_a", boss=name, scored=len(solo), top=[(sp, round(pr, 3)) for pr, sp in solo[:SHORT]])
     boxes, missing = [], collections.Counter()
     for i in range(args.boxes):
         box = rp.sample_box(random.Random(f"{name}-box-{args.seed}-{i}"), ctx.progress, ctx.known)
@@ -329,6 +377,7 @@ def _run_boxes(args, name: str) -> dict:
             for sp, _, _, wh in th["counters"][:1]:
                 missing[(th["enemy"], sp, wh)] += 1
         boxes.append({"box": box, "team": list(team), "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl, "threats": threats})
+        emit(args, "box", boss=name, i=i, of=args.boxes, **boxes[-1], deaths_by=dict(attr[0]), matrix=matrix(ctx, team))
         print(f"{name:<10} box {i + 1:>2}/{args.boxes}: {len(box)} mons, team {list(team)} -> win {w:5.0%} deaths/mon {d:.2f} deathless {cl:.0%}; "
               + "; ".join(f"{th['enemy']} killed {th['deaths']}, missing " + (", ".join(f"{sp} ({wh})" for sp, _, _, wh in th["counters"][:1]) or "no counter in the pool") for th in threats)
               + f"  ({time.time() - ctx.t0:.0f}s)", flush=True)
@@ -366,6 +415,9 @@ def main() -> None:
     args = ap.parse_args()
     names = [b.strip() for b in args.bosses.split(",")]
     t0 = time.time()
+    if args.out:
+        events_path(args.out).unlink(missing_ok=True)
+    emit(args, "start", config=vars(args), bosses=names, mode="boxes" if args.boxes else "pool", pid=os.getpid())
     if args.workers > 1:
         with mp.get_context("spawn").Pool(min(args.workers, len(names))) as pool:
             parts = pool.starmap(run_boss, [(args, n) for n in names])
@@ -374,6 +426,7 @@ def main() -> None:
     rows = [r for p in parts for r in p["rows"]]
     if args.out:
         Path(args.out).write_text("".join(json.dumps(r) + "\n" for r in rows))
+    emit(args, "end", minutes=round((time.time() - t0) / 60, 1))
     mode = "boxes" if args.boxes else "pool"
     print(f"\nRadical Red best-six probe ({mode}) | legal moves only: {args.legal} | arena effects: {args.arena} | field-aware calc bot: {not args.blind_field} | chooser {args.chooser} | matchup play {args.matchup} | death weight {args.death_weight} | seeded | "
           f"search {args.search} x n={args.n_search} | no EVs, no items | enemy = RR AI, full info | {(time.time() - t0) / 60:.0f} min")

@@ -1,5 +1,12 @@
 # Run overview web UI — todo (2026-10-11)
 
+**Built 2026-10-11: `ui/`** (`ui/build.py` + `ui/index.html`). Serve with
+`uv run python ui/build.py --serve` → http://localhost:8765 (data.json is rebuilt on
+every fetch; the page refetches every 30 s). Only runs started after this have an
+events file; older logs are not parsed. Tabs: Runs (cards, per-boss / per-box
+tables, matrix per team and box), Compare, Deaths, Traces, Matrices; the
+"results/" box adds the history. The plan below is kept as the spec.
+
 A local page that shows how every Radical Red run is going, in detail, instead
 of `scripts/rr_status.py`'s one line per log. Governing constraint still holds
 (CLAUDE.md: minimal code): one static HTML file with vanilla JS, one small
@@ -49,12 +56,11 @@ that; the page refetches a JSON file every 30 s.
 - **Death analysis as data.** `rr_deaths.py` writes its counters to JSON next
   to the log.
 - **Matrix as data.** `rr_matchups.py --json` writes the rows.
-- **Generator** `scripts/rr_dashboard.py`: folds `logs/*.events.jsonl`,
-  `results/*.jsonl`, traces, death summaries and the process list into
-  `logs/dashboard.json` (runs → bosses → boxes, plus traces / deaths /
-  matrices by key). Idempotent; run it under `watch -n 30` or from the page's
-  own refresh via a tiny `--serve` loop.
-- **Page** `scripts/dashboard.html`: fetches `dashboard.json`, renders the
+- **Generator** `ui/build.py`: folds `logs/*.events.jsonl` and
+  `results/*.events.jsonl`, traces, death summaries, matrices and the process list into
+  `data.json` (runs → bosses → boxes, plus traces / deaths /
+  matrices). `--serve` rebuilds it on every fetch.
+- **Page** `ui/index.html`: fetches `data.json`, renders the
   panels above; tables sortable, matrix as a coloured grid, trace as a
   scrollable list, charts as plain divs with widths (no chart library).
 
@@ -67,6 +73,8 @@ that; the page refetches a JSON file every 30 s.
 4. Trace viewer and death panels.
 5. Comparisons and history.
 
-Serve with `python -m http.server 8765 --directory logs` and open
-`http://localhost:8765/dashboard.html` (the page lives next to the JSON so
-fetch works without CORS). Ports 8000–8007 belong to the old project.
+Serve with `uv run python ui/build.py --serve` and open `http://localhost:8765/`.
+Ports 8000–8007 belong to the old project. Producers: `rr_team_probe.py --out X.jsonl`
+writes `X.events.jsonl` next to it; `rr_trace.py`, `rr_deaths.py`, `rr_matchups.py`
+take `--json` and write `logs/trace_* / deaths_* / matrix_*.json`. To keep a run in
+the history, move its `.events.jsonl` to `results/` with the `.jsonl`.
