@@ -1837,4 +1837,28 @@ Misty was 67–80% with 0.4–0.5 deaths per mon. The deaths that remain are
 Starmie (11) and Clodsire (8), both with duel-winning counters in the pool
 (Ekans, Paras, Morelull; Kricketot, Mudbray, Smoochum) that the cover did not
 take because something else already answered them on paper. Brock's cover run
-and the 30-box runs are still in flight.
+is still in flight.
+
+**Cover chooser, sampled boxes** (30 boxes per boss, a random starter plus one
+encounter per open location drawn by rarity, n=6 per box; same play config;
+`results/rr_cover_boxes.log`):
+
+  boss    cap  mean win  boxes >=50%  deaths/mon  deathless  most missed counter
+  Brock    16     66%        80%        0.63         3%      Galarian Ponyta vs Cacnea x16, Alolan Sandshrew vs Lileep x15
+  Misty    28     58%        67%        0.68         5%      Bramblin vs Mantine x20, Ekans vs Starmie x14
+
+Against the starterless greedy boxes (Brock 70 / 83 / 0.67, Misty 44 / 53 /
+0.81) Misty's box number moved up 14 points and Brock's did not move; the
+deathless rate per box stays near zero on both, because a rarity-drawn box
+mostly lacks the counters the cover wants (the "most missed" column is what
+routing would have to go and catch: at Misty a Mantine answer was absent from
+20 of 30 boxes). That is the gap between the planned pool (30/30) and a run.
+
+**The other early bosses** (planned pool, n=30, same config; `results/
+rr_cover_early_*.log`): #2 Lass Anne, #4 Catcher Sammy, #7 Lass Sally and
+#15 Camper Ethan are all 30/30 with no deaths, and every candidate six did the
+same — before Brock the early game is not the problem. Two data fixes on the
+way (986dda0, 31edf3f): the ROM dump's 12-character names ("Drain Kiss",
+"None" items) only resolved for the twelve hand-fixed bosses, and the enemy
+AI crashed on a Metronome-called Hyper Beam's recharge turn. #14 Lass Relli
+has no team in either source. Falkner, Archer, the Rival and the Grunt follow.

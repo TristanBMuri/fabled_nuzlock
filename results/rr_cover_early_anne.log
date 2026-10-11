@@ -1,0 +1,11 @@
+#2: trainer #2, cap 16, pool 79 species; arena {'ai_permanent': True}; not modelled: []
+#2: starter charmander; boss attacks with ['Fighting', 'Flying', 'Normal']
+#2: A solo scores for 80 species in 2s; top: wurmple 2.00, scatterbug 2.00, caterpie 2.00, budew 2.00, abra 2.00, hoothoot 1.55, sandygast 1.54, sentret 1.44
+#2: B 278 teams scored in 20s; greedy ('abra', 'budew', 'caterpie', 'hoothoot', 'scatterbug', 'wurmple') (2.00); best fast ('abra', 'budew', 'caterpie', 'hoothoot', 'scatterbug', 'wurmple') (2.00)
+#2: cover team ('abra', 'hoothoot', 'pidgey', 'pikipek', 'scatterbug', 'wurmple')
+#2         legal=True  best team under search: win  100% deaths/mon 0.00 deathless 100% ['abra', 'hoothoot', 'pidgey', 'pikipek', 'scatterbug', 'wurmple']  (others: 100%, 100%, 100%, 100%, 100%)  (1568s)
+#2         sets: kadabra(Modest/Synchronize) ['confusion', 'flash', 'hiddenpower', 'teleport'], noctowl(Modest/Tinted Lens) ['aircutter', 'flash', 'echoedvoice', 'hypnosis'], pidgeotto(Adamant/Frisk) ['takedown', 'dualwingbeat', 'quickattack', 'tackle'], trumbeak(Jolly/Frisk) ['pluck', 'rocksmash', 'echoedvoice', 'dualwingbeat'], vivillon(Modest/Shield Dust) ['aircutter', 'strugglebug', 'flash', 'sleeppowder'], beautifly(Modest/Swarm) ['signalbeam', 'airslash', 'flash', 'stunspore']
+
+Radical Red best-six probe (pool) | legal moves only: True | arena effects: True | field-aware calc bot: True | chooser cover | matchup play True | death weight 6.0 | seeded | search 9,8 x n=30 | no EVs, no items | enemy = RR AI, full info | 26 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  #2          16  100%       0.00  100%  abra, hoothoot, pidgey, pikipek, scatterbug, wurmple  | -
