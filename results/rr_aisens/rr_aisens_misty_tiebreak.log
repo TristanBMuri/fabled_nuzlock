@@ -1,0 +1,13 @@
+team: [('grimer', 'Adamant', 'Stench', ['poisonfang', 'dig', 'thunderpunch', 'thief']), ('gyarados', 'Jolly', 'Intimidate', ['thrash', 'icefang', 'bite', 'icywind']), ('hariyama', 'Adamant', 'Thick Fat', ['vitalthrow', 'dig', 'thunderpunch', 'upperhand']), ('parasect', 'Adamant', 'Dry Skin', ['leechlife', 'dig', 'crosspoison', 'spore']), ('toucannon', 'Adamant', 'Frisk', ['beakblast', 'uturn', 'steelwing', 'roost']), ('crobat', 'Adamant', 'Infiltrator', ['poisonfang', 'pluck', 'uturn', 'roost'])]
+enemy: [('Politoed', 'iapapaberry', 'drizzle', 'flipturn,scald,earthquake,toxic'), ('Ludicolo', 'sitrusberry', 'swiftswim', 'gigadrain,scald,aurorabeam,thunderpunch'), ('Mantine', 'wacanberry', 'swiftswim', 'scald,hurricane,roost,hiddenpowergrass'), ('Clodsire', 'blacksludge', 'waterabsorb', 'poisonjab,bulldoze,recover,toxic'), ('Starmie', 'mysticwater', 'analytic', 'scald,thunderbolt,psyshock,aurorabeam'), ('Toxicroak', 'lifeorb', 'dryskin', 'swordsdance,drainpunch,poisonjab,suckerpunch')]
+death weight 6.0, preserve False, matchup True, field-aware True, enemy AI tiebreak
+
+MISTY: 29/30 wins, 7 deathless, 58 deaths (1.9 per fight), fights last 32 turns
+deaths by enemy mon: [('Starmie', 17), ('Toxicroak', 12), ('Clodsire', 12), ('Ludicolo', 9), ('Mantine', 6), ('Politoed', 2)]
+deaths by enemy move: [('Clodsire residual/other', 7), ('Starmie Aurora Beam', 6), ('Toxicroak Poison Jab', 6), ('Starmie Thunderbolt', 6), ('Starmie Psyshock', 5), ('Ludicolo Thunder Punch', 5), ('Mantine Scald', 5), ('Toxicroak Sucker Punch', 4)]
+which of ours: [('Toucannon', 14), ('Hariyama', 14), ('Gyarados', 11), ('Grimer', 10), ('Parasect', 5), ('Crobat', 4)]
+HP before the killing hit: [('low (<0.5)', 43), ('half+ (0.5-0.9)', 9), ('full (>=0.9)', 6)]
+switched in that turn: [('was in', 48), ('switched in', 10)]
+fight outcome: [('won', 52), ('lost', 6)]
+by turn: [(0, 2), (5, 16), (10, 12), (15, 9), (20, 6), (25, 9), (30, 4)]
+wrote /home/tristan/CodingProjects/nuzlock_rl/logs/deaths_misty_dw6_matchup_ai-tiebreak.json

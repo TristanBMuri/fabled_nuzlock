@@ -85,7 +85,11 @@ STATUS_BLOCK_ABILITIES = {
 
 
 class RadicalRedAI(Player):
-    """CFRU-style singles heuristics player."""
+    """CFRU-style singles heuristics player. `ko_bonus` / `switching` are per instance so the
+    sensitivity check (TODO.md A2.3) can perturb the real enemy and keep the search's model."""
+
+    ko_bonus = KO_BONUS
+    switching = True
 
     def choose_move(self, battle: AbstractBattle) -> BattleOrder:
         if battle.wait:
@@ -211,7 +215,7 @@ class RadicalRedAI(Player):
 
         if move.category != MoveCategory.STATUS:
             if dmg >= hp_left * 0.92:
-                bonus += KO_BONUS
+                bonus += self.ko_bonus
                 if move.priority > 0:
                     bonus += 4
             else:
@@ -340,9 +344,9 @@ class RadicalRedAI(Player):
     def _should_switch(
         self, battle: Battle, active: Pokemon, opponent: Pokemon, best_score: int
     ) -> bool:
-        if battle.trapped or not battle.available_switches:
+        if not self.switching or battle.trapped or not battle.available_switches:
             return False
-        if best_score >= BASE_SCORE + KO_BONUS:
+        if best_score >= BASE_SCORE + self.ko_bonus:
             return False
         if any(active.boosts.get(s, 0) <= -3 for s in ("atk", "spa", "def", "spd")):
             return True

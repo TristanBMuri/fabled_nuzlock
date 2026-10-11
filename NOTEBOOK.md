@@ -1918,3 +1918,40 @@ and every fix is another special case, that is the signal to fit a small
 model on the duel data, with the table as the baseline it has to beat and
 the cells as the thing it fills. The idea was not wrong; it was early, and
 the way to make it right is to let the table tell us when.
+
+## 2026-10-12 — Is the result robust to the enemy AI port? (TODO.md A2.1, A2.3)
+
+**A2.3, sensitivity.** The cover-pool teams (`results/rr_cover_pool.jsonl`) replayed
+under search (9,8, matchup, death weight 6), n=30 on paired seeds, with the *real*
+enemy perturbed and the search's model of it left at the base port
+(`rr_deaths.py --ai`; logs and the dashboard JSON in `results/rr_aisens/`):
+
+  variant    Brock wins  deathless  deaths   Misty wins  deathless  deaths
+  base         30/30        7         37       30/30        9         41
+  tiebreak     30/30       10         30       29/30        7         58   (AI tie-break RNG reseeded = noise floor)
+  ko+50        30/30        7         37       30/30        9         41   (identical: KO +30 already dominates)
+  ko-50        30/30        6         46       30/30        8         49
+  noswitch     27/30        3         85       29/30        9         51
+
+The noise floor is wide (Misty 41 vs 58 deaths from the tie-break alone), so the KO
+weight is inside it. Switching is not: an enemy that never switches voluntarily, played
+by a search that expects it to, more than doubles Brock's deaths (37 → 85, Cacnea 16 →
+34, Lileep 5 → 18) and loses 3 fights; Misty moves within the noise. So the result
+depends on the AI's switching shape, and the search's enemy model being wrong costs
+more than any play lever measured so far.
+
+**A2.1, read-through.** `data/rr/AI_DIFF.md`: the port against CFRU's
+`src/Battle_AI/` (fetched from GitHub; RR 4.1's own changes and its trainers' AI flags
+are unverified). The port is not the CFRU AI in the places that matter: CFRU scores in
+small tiers (KO first +9, recover / protect +7 when a damage-calc check passes, Toxic
+or safe setup +5, strongest attack +2, other attacks 0), so status and recovery beat
+every non-KO attack, where ours lets a big attack beat Toxic and Slack Off; CFRU has
+**no type-matchup switch** (it switches to absorb a predicted move, to dodge a predicted
+KO when slower, on a Toxic counter > 6) and picks the switch-in by damage calc (+31 KOs,
++14 outspeeds, −39 dies), which is also who comes in after every faint; Power-Up Punch
+and Stockpile are invisible to our setup check; hardcore bosses use no items.
+
+Together: the switching rule is both the part the result is sensitive to and the part
+the port gets most wrong. A2.2 (decision replay against the ROM) is now urgent, and the
+first port fixes are the switch triggers and the switch-in choice (AI_DIFF.md §3 items
+3–4), then the tier ladder (item 1), each accepted by a paired rerun of this table.

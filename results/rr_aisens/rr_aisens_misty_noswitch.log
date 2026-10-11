@@ -1,0 +1,13 @@
+team: [('grimer', 'Adamant', 'Stench', ['poisonfang', 'dig', 'thunderpunch', 'thief']), ('gyarados', 'Jolly', 'Intimidate', ['thrash', 'icefang', 'bite', 'icywind']), ('hariyama', 'Adamant', 'Thick Fat', ['vitalthrow', 'dig', 'thunderpunch', 'upperhand']), ('parasect', 'Adamant', 'Dry Skin', ['leechlife', 'dig', 'crosspoison', 'spore']), ('toucannon', 'Adamant', 'Frisk', ['beakblast', 'uturn', 'steelwing', 'roost']), ('crobat', 'Adamant', 'Infiltrator', ['poisonfang', 'pluck', 'uturn', 'roost'])]
+enemy: [('Politoed', 'iapapaberry', 'drizzle', 'flipturn,scald,earthquake,toxic'), ('Ludicolo', 'sitrusberry', 'swiftswim', 'gigadrain,scald,aurorabeam,thunderpunch'), ('Mantine', 'wacanberry', 'swiftswim', 'scald,hurricane,roost,hiddenpowergrass'), ('Clodsire', 'blacksludge', 'waterabsorb', 'poisonjab,bulldoze,recover,toxic'), ('Starmie', 'mysticwater', 'analytic', 'scald,thunderbolt,psyshock,aurorabeam'), ('Toxicroak', 'lifeorb', 'dryskin', 'swordsdance,drainpunch,poisonjab,suckerpunch')]
+death weight 6.0, preserve False, matchup True, field-aware True, enemy AI noswitch
+
+MISTY: 29/30 wins, 9 deathless, 51 deaths (1.7 per fight), fights last 29 turns
+deaths by enemy mon: [('Toxicroak', 15), ('Starmie', 11), ('Clodsire', 11), ('Mantine', 7), ('Ludicolo', 4), ('Politoed', 3)]
+deaths by enemy move: [('Toxicroak Poison Jab', 6), ('Toxicroak Sucker Punch', 6), ('Starmie Psyshock', 5), ('Clodsire Poison Jab', 5), ('Starmie Thunderbolt', 4), ('Mantine Scald', 4), ('Clodsire residual/other', 4), ('Ludicolo Thunder Punch', 3)]
+which of ours: [('Toucannon', 12), ('Gyarados', 12), ('Hariyama', 11), ('Grimer', 9), ('Crobat', 5), ('Parasect', 2)]
+HP before the killing hit: [('low (<0.5)', 35), ('half+ (0.5-0.9)', 13), ('full (>=0.9)', 3)]
+switched in that turn: [('was in', 40), ('switched in', 11)]
+fight outcome: [('won', 45), ('lost', 6)]
+by turn: [(0, 1), (5, 16), (10, 10), (15, 5), (20, 10), (25, 7), (30, 2)]
+wrote /home/tristan/CodingProjects/nuzlock_rl/logs/deaths_misty_dw6_matchup_ai-noswitch.json

@@ -166,6 +166,13 @@ relative-level mons). Routing 1 hd; run layer large, after F.
 
 ## Order
 
+**2026-10-12:** A2.1 + A2.3 done (NOTEBOOK.md 2026-10-12, `data/rr/AI_DIFF.md`): the
+result is sensitive to the AI's switching (no-switch enemy: Brock 37 → 85 deaths) and
+the port's switching is not CFRU's. Next: port CFRU's switch triggers + switch-in
+choice, then the tier ladder (AI_DIFF.md §3), each paired against `results/rr_aisens/`;
+A2.2 needs the user's ROM recordings.
+
+
 A2.1 + A2.3 (AI sensitivity, read-through) → B1 (matrix calibration) → B2/B3
 → C1 (player items) → D1/D2 → D3 (box milestone) → E steps 1–2 → A1/A3 as
 the ROM evidence arrives → F doubles → G routing. Every step is paired on

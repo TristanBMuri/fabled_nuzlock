@@ -1,0 +1,13 @@
+team: [('grimer', 'Adamant', 'Stench', ['poisonfang', 'dig', 'thunderpunch', 'thief']), ('gyarados', 'Jolly', 'Intimidate', ['thrash', 'icefang', 'bite', 'icywind']), ('hariyama', 'Adamant', 'Thick Fat', ['vitalthrow', 'dig', 'thunderpunch', 'upperhand']), ('parasect', 'Adamant', 'Dry Skin', ['leechlife', 'dig', 'crosspoison', 'spore']), ('toucannon', 'Adamant', 'Frisk', ['beakblast', 'uturn', 'steelwing', 'roost']), ('crobat', 'Adamant', 'Infiltrator', ['poisonfang', 'pluck', 'uturn', 'roost'])]
+enemy: [('Politoed', 'iapapaberry', 'drizzle', 'flipturn,scald,earthquake,toxic'), ('Ludicolo', 'sitrusberry', 'swiftswim', 'gigadrain,scald,aurorabeam,thunderpunch'), ('Mantine', 'wacanberry', 'swiftswim', 'scald,hurricane,roost,hiddenpowergrass'), ('Clodsire', 'blacksludge', 'waterabsorb', 'poisonjab,bulldoze,recover,toxic'), ('Starmie', 'mysticwater', 'analytic', 'scald,thunderbolt,psyshock,aurorabeam'), ('Toxicroak', 'lifeorb', 'dryskin', 'swordsdance,drainpunch,poisonjab,suckerpunch')]
+death weight 6.0, preserve False, matchup True, field-aware True, enemy AI ko+50
+
+MISTY: 30/30 wins, 9 deathless, 41 deaths (1.4 per fight), fights last 29 turns
+deaths by enemy mon: [('Starmie', 11), ('Clodsire', 8), ('Mantine', 7), ('Toxicroak', 7), ('Politoed', 5), ('Ludicolo', 3)]
+deaths by enemy move: [('Starmie Psyshock', 5), ('Starmie Thunderbolt', 4), ('Mantine Scald', 4), ('Politoed Flip Turn', 4), ('Toxicroak Sucker Punch', 3), ('Clodsire residual/other', 3), ('Clodsire Poison Jab', 3), ('Mantine Hurricane', 3)]
+which of ours: [('Toucannon', 13), ('Hariyama', 10), ('Gyarados', 8), ('Grimer', 5), ('Crobat', 4), ('Parasect', 1)]
+HP before the killing hit: [('low (<0.5)', 31), ('half+ (0.5-0.9)', 7), ('full (>=0.9)', 3)]
+switched in that turn: [('was in', 31), ('switched in', 10)]
+fight outcome: [('won', 41)]
+by turn: [(0, 1), (5, 16), (10, 10), (15, 4), (20, 6), (25, 2), (30, 2)]
+wrote /home/tristan/CodingProjects/nuzlock_rl/logs/deaths_misty_dw6_matchup_ai-ko+50.json

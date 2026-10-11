@@ -6,6 +6,9 @@ question it answers: are deaths decisions or attrition?
 
   uv run python scripts/rr_deaths.py MISTY 12 [--source results/rr_bench_field.jsonl] [--death-weight 2.0] [--json]
 
+`--ai` perturbs the enemy AI port for the sensitivity check (TODO.md A2.3): the real enemy changes, the
+search keeps the base port as its model: noswitch (no voluntary switches), ko+50 / ko-50 (KO_BONUS x1.5 / x0.5), tiebreak (its tie-break RNG reseeded; engine seeds unchanged).
+
 `--json` also writes logs/deaths_<boss>_<variant>.json for the dashboard (ui/).
 """
 
@@ -80,6 +83,7 @@ def main() -> None:
     ap.add_argument("--preserve", action="store_true", help="calc bot retreats low / badly poisoned mons (calc_bot.PRESERVE)")
     ap.add_argument("--matchup", action="store_true", help="calc bot switches on the matchup matrix (calc_bot.MATCHUP)")
     ap.add_argument("--blind-field", action="store_true", help="calc bot ignores weather / terrain (calc_bot.FIELD_AWARE = False)")
+    ap.add_argument("--ai", choices=("base", "noswitch", "ko+50", "ko-50", "tiebreak"), default="base", help="enemy AI variant (A2.3)")
     ap.add_argument("--json", action="store_true", help="also write logs/deaths_<boss>_<variant>.json")
     args = ap.parse_args()
     boss, n, source = args.boss, args.n, args.source
@@ -103,21 +107,25 @@ def main() -> None:
     print("enemy:", [(x.split("|")[0], x.split("|")[2], x.split("|")[3], x.split("|")[4]) for x in enemy_packed.split("]")])
     bridge = SimBridge(showdown=str(rp.FORK))
     enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
+    real = RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50)  # p2; the search keeps the base port
+    real.switching = args.ai != "noswitch"
+    real.ko_bonus = {"ko+50": 45, "ko-50": 15}.get(args.ai, real.ko_bonus)
+    opponent = player_brain(real) if args.ai in ("noswitch", "ko+50", "ko-50") else enemy
     calc = calc_brain()
     if args.preserve or args.matchup or args.blind_field:
         import ai_util.calc_bot as cb
         cb.PRESERVE, cb.MATCHUP, cb.FIELD_AWARE = args.preserve, args.matchup, not args.blind_field
     searcher = Searcher(None, enemy, k=9, rollouts=8, rollout=calc, seed=0, death_weight=args.death_weight)
-    print(f"death weight {args.death_weight}, preserve {args.preserve}, matchup {args.matchup}, field-aware {not args.blind_field}")
+    print(f"death weight {args.death_weight}, preserve {args.preserve}, matchup {args.matchup}, field-aware {not args.blind_field}, enemy AI {args.ai}")
     srng = random.Random(f"{boss}-seeds-0")
     seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(n)]
     all_deaths, wins, clean, lengths = [], 0, 0, []
     for i in range(n):
         import numpy as np
-        random.seed(sum(seeds[i]))
+        random.seed(sum(seeds[i]) + (7919 if args.ai == "tiebreak" else 0))
         searcher.rng = np.random.default_rng(seeds[i])
         sb = SimBattle(bridge, rp.FMT, pack_team(party), enemy_packed, full_info=True, arena=arena, seed=seeds[i])
-        sb.play({"p1": searcher, "p2": enemy}, 100)
+        sb.play({"p1": searcher, "p2": opponent}, 100)
         st = sb.state()
         wins += st["winner"] == "p1"
         d = deaths_in(sb.history["p1"])
@@ -141,7 +149,7 @@ def main() -> None:
     for k, v in counters.items():
         print(f"{k}:", v)
     if args.json:
-        variant = f"dw{args.death_weight:g}" + "".join(f"_{f}" for f, on in (("preserve", args.preserve), ("matchup", args.matchup), ("blind", args.blind_field)) if on)
+        variant = f"dw{args.death_weight:g}" + "".join(f"_{f}" for f, on in (("preserve", args.preserve), ("matchup", args.matchup), ("blind", args.blind_field)) if on) + ("" if args.ai == "base" else f"_ai-{args.ai}")
         out = ROOT / "logs" / f"deaths_{re.sub(r'[^a-z0-9]+', '_', boss.lower()).strip('_')}_{variant}.json"
         out.write_text(json.dumps({"boss": boss, "variant": variant, "source": source, "team": r["best_team"], "n": n, "wins": wins,
                                    "deathless": clean, "turns": sum(lengths) / n, "deaths": all_deaths,
