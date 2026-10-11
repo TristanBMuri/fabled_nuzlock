@@ -155,7 +155,7 @@ def dmg_frac(att, dfn, move, att_own: bool, battle=None) -> float:
     if att.status == Status.BRN and phys:
         mod *= 0.5
     fmod, acc = field_mod(att, dfn, move, battle)
-    return base * mod * fmod / hp * (move.accuracy or 1 if acc is None else acc)
+    return base * mod * fmod / hp * ((move.accuracy or 1) if acc is None else acc)  # the field may override accuracy
 
 
 def threat(opp, mon, battle=None) -> float:

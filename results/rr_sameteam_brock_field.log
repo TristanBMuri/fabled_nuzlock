@@ -1,0 +1,12 @@
+team: [('kadabra', 'Timid', 'Synchronize', ['confusion', 'flash', 'hiddenpower', 'thief']), ('sudowoodo', 'Adamant', 'Sturdy', ['rockthrow', 'woodhammer', 'slam', 'thief']), ('psyduck', 'Modest', 'Damp', ['waterpulse', 'flash', 'confusion', 'watergun']), ('furret', 'Adamant', 'Adaptability', ['headbutt', 'thief', 'scratch', 'quickattack']), ('leavanny', 'Adamant', 'Swarm', ['lunge', 'razorleaf', 'slash', 'pounce']), ('snubbull', 'Adamant', 'Intimidate', ['covet', 'thunderfang', 'icefang', 'firefang'])]
+enemy: [('Hippopotas', 'berryjuice', 'sandstream', 'bulldoze,rocktomb,toxic,slackoff'), ('Cacnea', 'eviolite', 'sandrush', 'poweruppunch,bulletseed,thunderpunch,pinmissile'), ('Lunatone', 'lumberry', 'levitate', 'ancientpower,psybeam,hiddenpowerground,icywind'), ('Lileep', 'oranberry', 'suctioncups', 'stockpile,recover,hiddenpowerrock,megadrain'), ('Archen', 'iapapaberry', 'defeatist', 'wingattack,rocktomb,bulldoze,facade'), ('Varoom', 'airballoon', 'overcoat', 'bulldoze,gyroball,toxic,protect')]
+death weight 0.5, preserve False, matchup False, field-aware True
+
+BROCK: 12/12 wins, 2 deathless, 22 deaths (1.8 per fight), fights last 21 turns
+deaths by enemy mon: [('Cacnea', 11), ('Varoom', 8), ('Lunatone', 2), ('Hippopotas', 1)]
+deaths by enemy move: [('Varoom Bulldoze', 7), ('Cacnea Pin Missile', 5), ('Cacnea Bullet Seed', 4), ('Cacnea Power-Up Punch', 1), ('Hippopotas residual/other', 1), ('Lunatone residual/other', 1), ('Varoom residual/other', 1), ('Cacnea residual/other', 1)]
+which of ours: [('Sudowoodo', 8), ('Leavanny', 5), ('Furret', 3), ('Psyduck', 3), ('Snubbull', 3)]
+HP before the killing hit: [('low (<0.5)', 22)]
+died the turn it switched in: 3 of 22
+deaths in won fights: 22 | in lost fights: 0
+by turn: [(10, 7), (15, 5), (5, 5), (20, 3), (25, 1), (0, 1)]

@@ -77,6 +77,7 @@ def main() -> None:
     ap.add_argument("--death-weight", type=float, default=0.5, help="the searcher's death penalty (outcome_value; 0.5 = the probe's)")
     ap.add_argument("--preserve", action="store_true", help="calc bot retreats low / badly poisoned mons (calc_bot.PRESERVE)")
     ap.add_argument("--matchup", action="store_true", help="calc bot switches on the matchup matrix (calc_bot.MATCHUP)")
+    ap.add_argument("--blind-field", action="store_true", help="calc bot ignores weather / terrain (calc_bot.FIELD_AWARE = False)")
     args = ap.parse_args()
     boss, n, source = args.boss, args.n, args.source
     gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(ROOT / "data/rr/hardcore_rules.json"))["banned_moves"]}
@@ -100,11 +101,11 @@ def main() -> None:
     bridge = SimBridge(showdown=str(rp.FORK))
     enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
     calc = calc_brain()
-    if args.preserve or args.matchup:
+    if args.preserve or args.matchup or args.blind_field:
         import ai_util.calc_bot as cb
-        cb.PRESERVE, cb.MATCHUP = args.preserve, args.matchup
+        cb.PRESERVE, cb.MATCHUP, cb.FIELD_AWARE = args.preserve, args.matchup, not args.blind_field
     searcher = Searcher(None, enemy, k=9, rollouts=8, rollout=calc, seed=0, death_weight=args.death_weight)
-    print(f"death weight {args.death_weight}, preserve {args.preserve}, matchup {args.matchup}")
+    print(f"death weight {args.death_weight}, preserve {args.preserve}, matchup {args.matchup}, field-aware {not args.blind_field}")
     srng = random.Random(f"{boss}-seeds-0")
     seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(n)]
     all_deaths, wins, clean, lengths = [], 0, 0, []

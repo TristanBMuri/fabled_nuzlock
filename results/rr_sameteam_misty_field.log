@@ -1,0 +1,12 @@
+team: [('phantump', 'Adamant', 'Natural Cure', ['shadowclaw', 'hornleech', 'dig', 'willowisp']), ('toucannon', 'Adamant', 'Frisk', ['beakblast', 'uturn', 'steelwing', 'roost']), ('raticate', 'Adamant', 'Run Away', ['hyperfang', 'dig', 'crunch', 'zenheadbutt']), ('jynx', 'Modest', 'Dry Skin', ['psyshock', 'icywind', 'flash', 'psybeam']), ('boltund', 'Adamant', 'Strong Jaw', ['spark', 'dig', 'icefang', 'thunderfang']), ('zangoose', 'Adamant', 'Tough Claws', ['crushclaw', 'dig', 'thunderpunch', 'slash'])]
+enemy: [('Politoed', 'iapapaberry', 'drizzle', 'flipturn,scald,earthquake,toxic'), ('Ludicolo', 'sitrusberry', 'swiftswim', 'gigadrain,scald,aurorabeam,thunderpunch'), ('Mantine', 'wacanberry', 'swiftswim', 'scald,hurricane,roost,hiddenpowergrass'), ('Clodsire', 'blacksludge', 'waterabsorb', 'poisonjab,bulldoze,recover,toxic'), ('Starmie', 'mysticwater', 'analytic', 'scald,thunderbolt,psyshock,aurorabeam'), ('Toxicroak', 'lifeorb', 'dryskin', 'swordsdance,drainpunch,poisonjab,suckerpunch')]
+death weight 0.5, preserve False, matchup False, field-aware True
+
+MISTY: 9/12 wins, 1 deathless, 37 deaths (3.1 per fight), fights last 28 turns
+deaths by enemy mon: [('Ludicolo', 13), ('Mantine', 12), ('Clodsire', 5), ('Starmie', 3), ('Toxicroak', 3), ('Politoed', 1)]
+deaths by enemy move: [('Mantine Scald', 7), ('Ludicolo Giga Drain', 5), ('Ludicolo Thunder Punch', 4), ('Mantine Hurricane', 3), ('Ludicolo Aurora Beam', 3), ('Clodsire residual/other', 2), ('Starmie Thunderbolt', 2), ('Toxicroak Sucker Punch', 2)]
+which of ours: [('Jynx', 8), ('Boltund', 7), ('Zangoose', 7), ('Raticate', 6), ('Toucannon', 5), ('Phantump', 4)]
+HP before the killing hit: [('low (<0.5)', 33), ('half+ (0.5-0.9)', 3), ('full (>=0.9)', 1)]
+died the turn it switched in: 1 of 37
+deaths in won fights: 19 | in lost fights: 18
+by turn: [(30, 7), (15, 6), (20, 6), (5, 6), (10, 5), (25, 5), (0, 2)]

@@ -1,0 +1,12 @@
+team: [('arbok', 'Adamant', 'Intimidate', ['poisonjab', 'crunch', 'dig', 'rest']), ('houndstone', 'Adamant', 'Sand Rush', ['phantomforce', 'playrough', 'crunch', 'rest']), ('granbull', 'Adamant', 'Intimidate', ['playrough', 'outrage', 'brickbreak', 'rest']), ('tatsugiri', 'Modest', 'Storm Drain', ['muddywater', 'dragonbreath', 'icywind', 'rest']), ('volbeat', 'Timid', 'Prankster', ['thunderbolt', 'signalbeam', 'brickbreak', 'roost']), ('boltund', 'Adamant', 'Strong Jaw', ['spark', 'dig', 'crunch', 'rest'])]
+enemy: [('Rotom-Frost', 'iciumz', 'levitate', 'thunderbolt,blizzard,freezedry,nastyplot'), ('Electrode-Hisui', 'lifeorb', 'reckless', 'chloroblast,voltswitch,hiddenpowerice,explosion'), ('Raichu-Alola', 'focussash', 'surgesurfer', 'risingvoltage,psyshock,nastyplot,surf'), ('Hitmonlee', 'electricseed', 'unburden', 'knockoff,closecombat,rockslide,bulkup'), ('Pawmot', 'punchingglove', 'ironfist', 'plasmafists,machpunch,icepunch,closecombat'), ('Ampharos', 'ampharosite', 'plus', 'voltswitch,dragonpulse,focusblast,hiddenpowergrass')]
+death weight 0.5, preserve False, matchup False, field-aware False
+
+LT. SURGE: 9/12 wins, 0 deathless, 54 deaths (4.5 per fight), fights last 20 turns
+deaths by enemy mon: [('Electrode', 16), ('Pawmot', 14), ('Rotom', 12), ('Ampharos', 6), ('Hitmonlee', 3), ('Raichu', 3)]
+deaths by enemy move: [('Rotom Freeze-Dry', 8), ('Pawmot Close Combat', 6), ('Electrode Explosion', 6), ('Pawmot Plasma Fists', 6), ('Electrode Chloroblast', 4), ('Rotom Thunderbolt', 4), ('Electrode Hidden Power', 4), ('Ampharos Hidden Power', 3)]
+which of ours: [('Arbok', 11), ('Volbeat', 10), ('Tatsugiri', 10), ('Boltund', 8), ('Houndstone', 8), ('Granbull', 7)]
+HP before the killing hit: [('low (<0.5)', 47), ('half+ (0.5-0.9)', 4), ('full (>=0.9)', 3)]
+died the turn it switched in: 12 of 54
+deaths in won fights: 36 | in lost fights: 18
+by turn: [(5, 18), (15, 15), (10, 8), (0, 7), (20, 4), (25, 2)]

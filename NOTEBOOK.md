@@ -1737,3 +1737,81 @@ time, with heavy losses; from the best planned team, Misty 80% and Surge
 67-90% (bot-dependent). The next levers, in order: the paired field-vs-blind
 rerun; duel-based counters in the box report (what to route for); the
 boost-aware threat (C4); doubles (C6) before anything past Erika.
+
+## Why not deathless: deaths, matchups, the cover chooser (2026-10-11/12, `results/rr_deaths_*`, `results/rr_sameteam_*`, `results/rr_bench2_*`, `results/rr_boss1_*`)
+
+The user's question: a deathless Brock from real boxes with perfect
+information should be possible — if the approach cannot, rethink it.
+
+**Boss #1 Brendan is solved**: planned team 30/30 deathless; 30 sampled boxes
+100% wins, 87% deathless, 0.03 deaths per mon (`rr_boss1_*`). Every entry up
+to Misty now resolves to a dump set (`rr_probe.boss_team` by name or `#index`;
+`parse_dump` keeps "Max Level − n" mons; four of the first nineteen are
+doubles, not playable yet).
+
+**Deaths classified** (`scripts/rr_deaths.py`, 12 seeded fights of the best
+planned team, search k9 r8, arena, legal): Brock 11/12 wins, 0 deathless, 34
+deaths — all 34 below half HP, Lunatone 12 / Cacnea 10 / Varoom's Toxic 4;
+Misty 8/12, 1 deathless, 47 deaths — 37 below half, Ludicolo 17 / Toxicroak
+12 / Mantine 11, 31 after turn 20. Attrition, not surprise: mons stay in
+until low and die, because the search values a death at 0.5 × 1/6 ≈ 0.08
+against a win at 1 (death weight 2.0: identical 34 deaths — every rollout is
+finished by a calc bot that never retreats).
+
+**The trace** (`scripts/rr_trace.py`, every candidate's rollout value per
+turn, Brock seed 0): a switch dance into Varoom's Protect / Toxic (turns 1-7),
+Gumshoos at 27% poisoned kept in for Rock Tomb (+0.82 vs switch −0.36) and
+dying to poison, two mons switched into a +3 Cacnea, twenty turns of Metal
+Claw into Stockpile + Recover with every candidate at +0.75.
+
+**Matchups with perfect information** (`ai_util/matchup.py`, `scripts/
+rr_matchups.py`): hits to KO each way from the calc bot's model on the real
+sets under the field. Brock's pool has 15-57 safe answers per mon and four
+species (Axew, Bibarel, Cubchoo, Kadabra) cover all six; the probe's best
+team had one answer to Cacnea and one to Lileep. The worst Brock box (0%)
+held Chimchar — its only answer to Cacnea and Varoom — and the greedy chooser
+left it in the box; the best box left Raboot, Spidops and Alolan Grimer out.
+The first "safe" rule (KO in ≤2, survive ≥3) was wrong twice: it ignored speed
+order and recovery (Gyarados "2/3" vs Roost Mantine was no answer) and it
+threw away one-shots that absorb one hit (Zangoose, Boltund, Luxio vs
+Mantine). Now: `safe` charges the hits absorbed before our last one with a
+hit to spare, healers must fall before they heal; `race` is the looser tier
+(we land the KO first); `cover()` fills safe answers first, race-winners
+second. Misty's pool under the strict rule: Mantine 1 answer (Pachirisu),
+Starmie 1 (Parasect), Ludicolo 2 (Parasect, Leavanny) — the routing answer in
+its sharpest form; under `race`, Zangoose / Boltund / Luxio / Hariyama also
+answer Mantine.
+
+**Levers on the same teams and seeds** (12 fights):
+
+  Misty                       wins  deathless  deaths      Brock                 wins  deathless  deaths
+  baseline (dw 0.5)            8       1        47         baseline              11      0        34
+  preserve rule                9       5        28         death weight 2.0      11      0        34
+  matchup switch + dw 6       12       5        17         preserve              11      1        32
+                                                           matchup switch        11      1        40
+                                                           matchup + dw 6        11      1        30
+
+Retreating low / poisoned mons and pricing a death like a loss turned Misty
+from 8/12 into 12/12 with a third of the deaths; at Brock the team has no
+Lunatone answer, so no policy fixes it — the chooser must. Matchup switching
+without a target made Brock worse (40): switching is only good into a
+race-winner, which is what the rule now requires.
+
+**The field model** (`calc_bot.FIELD_AWARE`), exactly paired at n=30 but with
+each bot choosing its own team: Brock 100/100 (clean 23 vs 43%), Misty 67 vs
+57, Surge 77 vs 93, Erika 93 vs 100. Same team, same seeds, 12 fights:
+field-aware 22 vs blind 7 deaths at Brock, 25 vs 13 at Erika, 37 vs 44 at
+Misty, 58 vs 54 at Surge. The numbers the model changes are all correct
+(Sand Rush Cacnea 20 → 40 speed, −33% special on Rock in sand, +30% Grass in
+Grassy Terrain); the damage comes from the old switch logic turning a more
+pessimistic picture into switch-in deaths. A precedence bug meant the rain
+accuracy override never applied (fixed). The same comparison under the
+matchup rule is running.
+
+**Also**: 23 of 27 starters were missing from the mod tables (the extraction
+took encounter and boss species only) — the box runs fielded a starter in 2
+of 90 boxes; fixed, every run before c1a2e57 is starterless. The RR AI port
+breaks ties with the global `random`: seeded per battle since 7a6675b. The
+cover + matchup + death-weight-6 runs on Brock and Misty (pool n=30, 30
+boxes) are the next numbers; `scripts/rr_status.py` and `UI_TODO.md` are the
+run overview and its web successor.

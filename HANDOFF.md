@@ -341,21 +341,21 @@ brain's block ranking does not transfer to search play at Cynthia),
 20% / 40%; anything scored by the fast brain at the League transfers badly
 to search play — three times now: E8, EVs, moves).
 
-## Radical Red (2026-10-10/11)
+## Radical Red (2026-10-10/12)
 
 The question the project exists for. State (NOTEBOOK.md → Radical Red
-entries, newest last): with real pools and TMs, legal moves, arenas, no EVs /
-items, the best planned team beats **Brock 100%, Misty 80%, Lt. Surge 67-90%,
-Erika 100%** (n=30, field-aware calc bot); from a **rarity-sampled box** (the
-milestone form, `--boxes`) the chooser wins Brock 70%, Misty 44%, Surge 49%
-of fights on average, with half the party lost even in wins. The battler's
-field model (weather / terrain / Tailwind in `calc_bot`) moved Misty +37; the
-chooser names threats and counters with where to catch them
-(`rr_postmortem.attribution`, `duel()`, `rp.where`); natures, abilities, a
-random starter and gifts are in. Open, in order: the exactly paired
-field-vs-blind rerun (the RR AI's global random is seeded per battle only
-since 7a6675b), duel counters in the box report, the boost-aware threat,
-doubles. Plan: `~/.claude/plans/flickering-painting-valley.md`.
+entries, newest last): real pools and TMs, legal moves, arenas, no EVs /
+items, a random starter. Boss #1 Brendan is solved (30 boxes: 100% wins,
+87% deathless). Brock: planned team 100% with 0.13-0.21 deaths per mon,
+boxes 70%; Misty: planned 57-80%, boxes 44% (starterless runs). **Why not
+deathless** (2026-10-11): attrition — mons kept in below half HP because the
+search prices a death at ≈0.08 of a win and its rollout brain never retreats;
+and teams without a safe answer to one enemy mon (Lunatone, Mantine). The
+answer under test: `ai_util/matchup.py` (hits-to-KO matrix on the real sets,
+`safe` / `race` tiers, `cover()` chooser), `calc_bot.MATCHUP` switching,
+`--death-weight 6`. Same team and seeds at Misty: 8/12 → 12/12 wins, 47 → 17
+deaths. Open: the cover runs (`logs/rr_cover_*`), the field model's switch
+behaviour, doubles, route trainers.
 Pieces: `pokemon-showdown-rr/` (ignored; clone + `node build` +
 `config/custom-formats.ts` as README → Setup for the main clone),
 `scripts/build_rr.py` → `data/rr/` (`order.json` incl. gifts, `tms.json` are
