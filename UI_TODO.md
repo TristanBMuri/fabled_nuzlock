@@ -5,7 +5,9 @@
 every fetch; the page refetches every 30 s). Only runs started after this have an
 events file; older logs are not parsed. Tabs: Runs (cards, per-boss / per-box
 tables, matrix per team and box), Compare, Deaths, Traces, Matrices; the
-"results/" box adds the history. The plan below is kept as the spec.
+"results/" box adds the history. Traces → "watch" opens the fight in Showdown's own
+replay viewer (`/replay?file=…&turn=N`, p1's protocol log; sprites and the viewer load
+from play.pokemonshowdown.com, so it needs internet). The plan below is kept as the spec.
 
 A local page that shows how every Radical Red run is going, in detail, instead
 of `scripts/rr_status.py`'s one line per log. Governing constraint still holds

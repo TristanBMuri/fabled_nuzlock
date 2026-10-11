@@ -77,9 +77,10 @@ button:hover { background: var(--surface-2); }
 .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); align-items: center; }
 .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; }
 /* trace */
-.turn { display: grid; grid-template-columns: 44px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.turn { display: grid; grid-template-columns: 56px 1fr; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--line); }
 .turn.death { border-left: 3px solid var(--bad); padding-left: 8px; }
 .tno { font-family: var(--mono); font-weight: 600; color: var(--ink-2); }
+.tno a { color: var(--blue); font-weight: 400; text-decoration: none; white-space: nowrap; }
 .act { display: grid; grid-template-columns: 1fr auto 1fr; gap: 10px; align-items: center; }
 .hp { display: grid; gap: 2px; font-size: 12px; } .hp .bar { height: 8px; }
 .cand { display: grid; grid-template-columns: minmax(110px, max-content) 1fr 1fr 4em; gap: 2px 0; align-items: center; font-size: 12px; font-family: var(--mono); margin-top: 6px; }
@@ -104,7 +105,7 @@ dialog::backdrop { background: rgb(0 0 0 / .4); }
 <dialog id="dlg"><div class="row" style="justify-content:space-between"><h3 id="dlgt"></h3><button data-act="close">close</button></div><div id="dlgb" style="margin-top:10px"></div></dialog>
 <script>
 const TABS = [["runs", "Runs"], ["compare", "Compare"], ["deaths", "Deaths"], ["traces", "Traces"], ["matrices", "Matrices"]];
-const S = { data: null, open: new Set(), sort: {}, cmp: [null, null], trace: null, matrix: null, hist: false };
+const S = { data: null, open: new Set(), sort: {}, cmp: [null, null], matrix: null, hist: false };
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pct = x => x == null ? "–" : Math.round(x * 100) + "%";
@@ -333,13 +334,19 @@ function hpHTML(p, right = false) {
 function renderTraces() {
   const ts = (S.data?.traces || []).filter(d => S.hist || d.file.startsWith("logs/"));
   if (!ts.length) return `<div class="empty">No traces. <code>uv run python scripts/rr_trace.py BROCK --source … --json</code> writes one.</div>`;
-  const t = ts.find(x => x.file === S.trace) || ts[0];
-  const pick = `<div class="panel row" style="margin-bottom:12px"><select data-trace>${ts.map(x => `<option value="${esc(x.file)}" ${x === t ? "selected" : ""}>${esc(x.boss)} · battle ${x.battle} · ${x.result.won ? "WIN" : "LOSS"} (${esc(x.file)})</option>`).join("")}</select>
-    <span class="small muted">${Object.entries(t.flags).map(([k, v]) => `${k} ${v}`).join(" · ")} · source ${esc(t.source || "--team")}</span></div>`;
+  return ts.slice().sort((a, b) => a.boss.localeCompare(b.boss) || a.battle - b.battle).map(traceCard).join("");
+}
+function traceCard(t) {  // one fight; the turn-by-turn breakdown is folded away until asked for
+  const key = "turns|" + t.file, open = S.open.has(key);
   const deaths = t.turns.reduce((a, x) => a + x.deaths.length, 0);
-  const head = `<div class="panel" style="margin-bottom:12px"><div class="row"><h3>${esc(t.boss)} · battle ${t.battle}</h3><span class="pill ${t.result.won ? "running" : "failed"}">${t.result.won ? "WIN" : "LOSS"}</span>
+  const watch = (turn, label) => t.log ? `<a href="replay?file=${encodeURIComponent(t.file)}${turn ? "&turn=" + turn : ""}" target="_blank" rel="noopener">${label}</a>` : "";
+  const head = `<div class="row"><h3>${esc(t.boss)} · battle ${t.battle}</h3><span class="pill ${t.result.won ? "running" : "failed"}">${t.result.won ? "WIN" : "LOSS"}</span>
+    ${t.log ? `<button data-act="watch" data-href="replay?file=${esc(encodeURIComponent(t.file))}">▶ watch in Showdown's viewer</button>` : `<span class="small muted">no log in this trace (re-run rr_trace.py --json to watch it)</span>`}
     <span class="small muted">${t.result.turns} turns · ${deaths} of ours fainted · ours left ${esc(t.result.ours_left.join(", ") || "none")} · theirs left ${esc(t.result.theirs_left.join(", ") || "none")}</span></div>
-    <div class="cols" style="margin-top:8px"><div><h4>ours</h4>${setHTML(t.ours)}</div><div><h4>theirs</h4>${setHTML(t.theirs)}</div></div></div>`;
+    <div class="row small muted" style="margin-top:2px">${esc(t.file)} · ${Object.entries(t.flags).map(([k, v]) => `${k} ${v}`).join(" · ")} · source ${esc(t.source || "--team")}</div>
+    <div class="cols" style="margin-top:8px"><div><h4>ours</h4>${setHTML(t.ours)}</div><div><h4>theirs</h4>${setHTML(t.theirs)}</div></div>
+    <button data-act="toggle" data-key="${esc(key)}" style="margin-top:10px">${open ? "▾ hide" : "▸ show"} turn by turn (${t.turns.length} steps${deaths ? `, ${deaths} deaths` : ""})</button>`;
+  if (!open) return `<div class="panel" style="margin-bottom:12px">${head}</div>`;
   const turns = t.turns.map(x => {
     const cs = Object.entries(x.candidates).sort((a, b) => b[1] - a[1]), mx = Math.max(1e-9, ...cs.map(([, v]) => Math.abs(v)));
     const cand = cs.length ? `<div class="cand">${cs.map(([k, v]) => {
@@ -347,11 +354,12 @@ function renderTraces() {
       return `<span class="${on ? "pick" : ""}">${on ? "▶ " : ""}${esc(k.replace("move ", "").replace("switch ", "→ "))}</span><span class="neg">${v < 0 ? `<i style="width:${-v / mx * 100}%"></i>` : ""}</span><span class="pos">${v > 0 ? `<i style="width:${v / mx * 100}%"></i>` : ""}</span><span style="text-align:right" class="${on ? "pick" : ""}">${v >= 0 ? "+" : ""}${v.toFixed(2)}</span>`; }).join("")}</div>`
       : `<div class="small muted" style="margin-top:4px">${x.pick ? "pick " + esc(x.pick) + " (forced / only option)" : "no choice this step"}</div>`;
     const bench = x.bench.length || x.their_bench.length ? `<div class="row small muted" style="margin-top:4px;justify-content:space-between"><span>bench ${x.bench.map(p => `${esc(p.species)} ${pct(p.hp)}`).join(", ") || "–"}</span><span>${x.their_bench.map(p => `${esc(p.species)} ${pct(p.hp)}`).join(", ") || "–"}</span></div>` : "";
-    return `<div class="turn ${x.deaths.length ? "death" : ""}"><div class="tno">T${x.turn}</div><div><div class="act">${hpHTML(x.ours)}<span class="muted small">vs</span>${hpHTML(x.theirs, true)}</div>${bench}${cand}
+    return `<div class="turn ${x.deaths.length ? "death" : ""}"><div class="tno">T${x.turn}${x.turn ? `<div class="small">${watch(x.turn, "▶ watch")}</div>` : ""}</div><div><div class="act">${hpHTML(x.ours)}<span class="muted small">vs</span>${hpHTML(x.theirs, true)}</div>${bench}${cand}
       <div class="ev">${x.events.map(e => `<span class="${/^faint/.test(e) ? "f" : ""}">${esc(e)}</span>`).join("")}</div>
       ${x.deaths.length ? `<div class="small down" style="margin-top:4px">✝ ${esc(x.deaths.join(", "))} fainted</div>` : ""}</div></div>`;
   }).join("");
-  return pick + head + `<div class="panel">${turns}</div>`;
+  return `<div class="panel" style="margin-bottom:12px">${head}<div style="margin-top:8px">${turns}</div>
+    <button data-act="toggle" data-key="${esc(key)}" style="margin-top:10px">▴ hide turn by turn (${esc(t.boss)} · battle ${t.battle})</button></div>`;
 }
 
 // ---------- matrices ----------
@@ -389,6 +397,7 @@ document.addEventListener("click", e => {
   const a = e.target.closest("[data-act]");
   if (!a) return;
   if (a.dataset.act === "close") return $("dlg").close();
+  if (a.dataset.act === "watch") return window.open(a.dataset.href, "_blank", "noopener");
   if (a.dataset.act === "toggle") { S.open.has(a.dataset.key) ? S.open.delete(a.dataset.key) : S.open.add(a.dataset.key); return render(); }
   if (a.dataset.act === "mx-team") {
     e.stopPropagation();
@@ -399,7 +408,6 @@ document.addEventListener("click", e => {
 document.addEventListener("change", e => {
   if (e.target.id === "hist") { S.hist = e.target.checked; return render(); }
   if (e.target.dataset.cmp) { S.cmp[+e.target.dataset.cmp] = e.target.value || null; return render(); }
-  if ("trace" in e.target.dataset) { S.trace = e.target.value; return render(); }
   if ("matrix" in e.target.dataset) { S.matrix = e.target.value; return render(); }
 });
 window.addEventListener("hashchange", render);

@@ -4,7 +4,8 @@ what the engine did. For judging decisions, not aggregates.
 
   uv run python scripts/rr_trace.py BROCK [--source results/rr_bench_field.jsonl] [--battle 0] [--preserve] [--json]
 
-`--json` also writes logs/trace_<boss>_<battle>.json for the dashboard (ui/).
+`--json` also writes logs/trace_<boss>_<battle>.json for the dashboard (ui/), with p1's
+protocol log for Showdown's replay viewer (Traces → watch).
 """
 
 import argparse
@@ -107,6 +108,7 @@ def main() -> None:
             "flags": {"preserve": args.preserve, "matchup": args.matchup, "death_weight": args.death_weight}, "cap": cap, "arena": arena,
             "ours": [{"species": x.species, "nature": x.nature, "ability": x.ability, "moves": x.moves} for x in party],
             "theirs": tp.enemy_sets(enemy_packed), "turns": turns,
+            "log": [x for x in sb.history["p1"] if not x.startswith(("|request|", "|error|"))],  # p1's protocol: the replay viewer's input
             "result": {"won": st["winner"] == "p1", "turns": st["turn"], "ours_left": [x["species"] for x in st["p1"] if not x["fainted"]],
                        "theirs_left": [x["species"] for x in st["p2"] if not x["fainted"]]}}))
         print(f"wrote {out}")

@@ -5,6 +5,9 @@ from logs/ and results/ into one object for ui/index.html.
   uv run python ui/build.py               # writes ui/data.json once
   uv run python ui/build.py --serve       # http://localhost:8765, data.json rebuilt on every fetch
 
+`/replay?file=logs/trace_x.json[&turn=N]` (served mode) plays a trace's protocol log in
+Showdown's replay viewer (play.pokemonshowdown.com/js/replay-embed.js: needs internet).
+
 Ports 8000-8007 belong to the old project.
 """
 
@@ -13,11 +16,19 @@ import functools
 import http.server
 import json
 import subprocess
+import urllib.parse
 from pathlib import Path
 
 UI = Path(__file__).resolve().parent
 ROOT = UI.parent
 DIRS = ("logs", "results")
+REPLAY = """<!doctype html><meta charset="utf-8"><title>{title}</title>
+<div class="wrapper replay-wrapper" style="max-width:1180px;margin:0 auto"><div class="battle"></div><div class="battle-log"></div>
+<div class="replay-controls"></div><div class="replay-controls-2"></div></div>
+<script type="text/plain" class="battle-log-data">{log}</script>
+<script src="https://play.pokemonshowdown.com/js/replay-embed.js"></script>
+<script>const init = window.onload; window.onload = () => {{ init(); if ({turn}) Replays.battle.seekTurn({turn}, true); }};</script>
+"""
 
 
 def read_events(path: Path) -> list[dict]:
@@ -65,20 +76,42 @@ def build() -> dict:
         for kind, glob in (("traces", "trace_*.json"), ("deaths", "deaths_*.json"), ("matrices", "matrix_*.json")):
             for f in sorted((ROOT / where).glob(glob)):
                 try:
-                    data[kind].append({"file": f"{where}/{f.name}", "mtime": f.stat().st_mtime, **json.loads(f.read_text())})
+                    d = json.loads(f.read_text())
+                    d["log"] = "log" in d  # the replay route reads the log itself; the page only needs to know
+                    data[kind].append({"file": f"{where}/{f.name}", "mtime": f.stat().st_mtime, **d})
                 except json.JSONDecodeError:
                     pass
     data["runs"].sort(key=lambda r: -r["updated"])
     return data
 
 
+def replay(query: str) -> str | None:
+    """Showdown's downloaded-replay page for one trace file (only files the globs list)."""
+    q = urllib.parse.parse_qs(query)
+    name = q.get("file", [""])[0]
+    if name not in {f"{w}/{f.name}" for w in DIRS for f in (ROOT / w).glob("trace_*.json")}:
+        return None
+    t = json.loads((ROOT / name).read_text())
+    if "log" not in t:
+        return None
+    turn = int(q.get("turn", ["0"])[0] or 0)
+    log = "\n".join(t["log"]).replace("</", "<\\/")  # the viewer turns \/ back into /
+    return REPLAY.format(title=f"{t['boss']} battle {t['battle']}", log=log, turn=turn)
+
+
 class Handler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
-        if self.path.split("?")[0] != "/data.json":
+        path, _, query = self.path.partition("?")
+        if path == "/replay":
+            page = replay(query)
+            return self.send_body(page.encode(), "text/html") if page else self.send_error(404, "no such trace (or it has no log)")
+        if path != "/data.json":
             return super().do_GET()
-        body = json.dumps(build()).encode()
+        self.send_body(json.dumps(build()).encode(), "application/json")
+
+    def send_body(self, body: bytes, kind: str) -> None:
         self.send_response(200)
-        self.send_header("Content-Type", "application/json")
+        self.send_header("Content-Type", kind)
         self.send_header("Cache-Control", "no-store")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
