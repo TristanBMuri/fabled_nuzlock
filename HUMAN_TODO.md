@@ -1,38 +1,16 @@
 # Human todo (2026-10-10)
 
-Things Claude cannot do from inside the container. Tick them off and say so in chat;
-everything after them (remote add, branch rename, push, tags) is done from here.
+Things only you can decide or do. Tick them off and say so in chat.
 
-## Remote setup — status 2026-10-11
+## Remote setup — done 2026-10-11
 
-Done from here: `origin` = https://github.com/TristanBMuri/fabled_nuzlock.git,
-branch renamed to `main`, the September README/PLAN.md from GitHub merged in
-(local wins; PLAN.md came along as the original plan). **The push was rejected
-by GitHub**: five old versions of `data/teams/gauntlet_harvest/battles.jsonl`
-in the history are 119–135 MB each (GitHub's limit is 100 MB per file), so the
-harvest history must be purged before the first push — decision 4 below, now
-forced. The purge is a history rewrite, which the agent is not allowed to run
-unasked. A full backup bundle of the repo as it is now sits at
-`/tmp/claude-1001/.../scratchpad/nuzlock_rl_pre_filter.bundle` (copy it
-somewhere safe first if you want a belt and braces).
-
-Either say "purge the harvest history" in chat (the agent runs the commands
-below), or run them yourself on the host:
-
-```bash
-cd ~/CodingProjects/nuzlock_rl && FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch -f --index-filter 'git rm -r -q --cached --ignore-unmatch data/teams/gauntlet_harvest' --prune-empty --tag-name-filter cat -- --all
-```
-```bash
-cd ~/CodingProjects/nuzlock_rl && git for-each-ref --format='%(refname)' refs/original/ | xargs -n1 git update-ref -d && git reflog expire --expire=now --all && git gc --prune=now --aggressive
-```
-```bash
-cd ~/CodingProjects/nuzlock_rl && git push -u origin main --force --tags
-```
-(`--force` because the rewritten `main` no longer shares history with the
-4 commits on GitHub; their content is already merged into ours.) Expected pack
-after the purge: well under 100 MB; the 44 MB `results/rr_probe.log` stays.
-
-Also still yours: the `ssh-add` note is moot (HTTPS works from the host).
+`origin` = https://github.com/TristanBMuri/fabled_nuzlock.git, branch `main`
+(tracking), tags `pre-cleanup` / `cleanup-done` pushed. The harvest history
+was purged (five 119–135 MB versions of `battles.jsonl` were over GitHub's
+limit): 102 commits rewritten, pack 13.4 → 4.1 MB, forced push over the four
+September commits whose content is merged in (PLAN.md kept at the root).
+A bundle of the pre-purge repo is in the agent's scratchpad for this session
+only. Pushes run from here via the host's git; no SSH key needed (HTTPS).
 
 ## Clean-up decisions
 
