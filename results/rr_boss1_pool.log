@@ -1,0 +1,10 @@
+#1: trainer #1, cap 16, pool 79 species; arena {'ai_permanent': True}; not modelled: []
+#1: starter snivy; boss attacks with ['Dark', 'Fighting', 'Fire', 'Flying', 'Grass', 'Ground', 'Normal', 'Rock', 'Steel', 'Water']
+#1: A solo scores for 80 species in 2s; top: kricketot 2.00, zigzagoon 1.12, pikipek 0.71, hoothoot 0.63, sandygast 0.62, sentret 0.57, scatterbug 0.56, pidgey 0.48
+#1: B 279 teams scored in 16s; greedy ('hoothoot', 'kricketot', 'pikipek', 'sandygast', 'sentret', 'zigzagoon') (2.00); best fast ('hoothoot', 'kricketot', 'pikipek', 'sandygast', 'sentret', 'zigzagoon') (2.00)
+#1         legal=True  best team under search: win  100% deaths/mon 0.00 deathless 100% ['hoothoot', 'kricketot', 'pikipek', 'sandygast', 'sentret', 'zigzagoon']  (others: 100%, 100%, 100%, 100%, 100%)  (1196s)
+#1         sets: noctowl(Modest/Tinted Lens) ['aircutter', 'flash', 'echoedvoice', 'hypnosis'], kricketune(Adamant/Technician) ['bugbite', 'rocktomb', 'tackle', 'pounce'], trumbeak(Jolly/Frisk) ['pluck', 'rocksmash', 'echoedvoice', 'dualwingbeat'], sandygast(Modest/Water Compaction) ['ominouswind', 'mudshot', 'absorb', 'willowisp'], furret(Adamant/Adaptability) ['headbutt', 'scratch', 'quickattack', 'foresight'], linoone(Adamant/Pickup) ['headbutt', 'playrough', 'tackle', 'odorsleuth']
+
+Radical Red best-six probe (pool) | legal moves only: True | arena effects: True | field-aware calc bot: True | seeded | search 9,8 x n=30 | no EVs, no items | enemy = RR AI, full info | 20 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  #1          16  100%       0.00  100%  hoothoot, kricketot, pikipek, sandygast, sentret, zigzagoon  | -

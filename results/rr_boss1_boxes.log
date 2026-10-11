@@ -1,0 +1,37 @@
+#1: trainer #1, cap 16, pool 79 species; arena {'ai_permanent': True}; not modelled: []
+#1: A solo scores for 106 species (pool + starters) in 2s
+#1         box  1/30: 7 mons, team ['bidoof', 'binacle', 'oshawott', 'patrat', 'spinarak', 'starly'] -> win  100% deaths/mon 0.00 deathless 100%;   (74s)
+#1         box  2/30: 7 mons, team ['bidoof', 'burmytrash', 'froakie', 'panpour', 'tentacool', 'zigzagoongalar'] -> win  100% deaths/mon 0.00 deathless 100%;   (192s)
+#1         box  3/30: 7 mons, team ['chespin', 'marill', 'sandshrewalola', 'sentret', 'tentacool', 'weedle'] -> win  100% deaths/mon 0.00 deathless 100%;   (292s)
+#1         box  4/30: 7 mons, team ['cubchoo', 'psyduck', 'rattataalola', 'sentret', 'sobble', 'tentacool'] -> win  100% deaths/mon 0.03 deathless 83%; Meditite killed 1, missing starly (ROUTE 22 / grass_day 20%)  (371s)
+#1         box  5/30: 7 mons, team ['bidoof', 'charmander', 'morelull', 'sentret', 'shroomish', 'tentacool'] -> win  100% deaths/mon 0.06 deathless 67%; Meditite killed 1, missing starly (ROUTE 22 / grass_day 20%); Corphish killed 1, missing snover (VIRIDIAN CITY / grass_day 2%)  (480s)
+#1         box  6/30: 7 mons, team ['bidoof', 'meditite', 'nincada', 'pikipek', 'piplup', 'psyduck'] -> win  100% deaths/mon 0.03 deathless 83%; Corphish killed 1, missing snover (VIRIDIAN CITY / grass_day 2%)  (550s)
+#1         box  7/30: 7 mons, team ['bidoof', 'mudkip', 'pidgey', 'pikipek', 'psyduck', 'wurmple'] -> win  100% deaths/mon 0.00 deathless 100%;   (602s)
+#1         box  8/30: 7 mons, team ['binacle', 'patrat', 'pidgey', 'psyduck', 'sentret', 'tepig'] -> win  100% deaths/mon 0.08 deathless 67%; Meditite killed 1, missing starly (ROUTE 22 / grass_day 20%); Corphish killed 1, missing snover (VIRIDIAN CITY / grass_day 2%)  (656s)
+#1         box  9/30: 7 mons, team ['chikorita', 'meditite', 'patrat', 'starly', 'tentacool', 'yungoos'] -> win  100% deaths/mon 0.03 deathless 83%; Meditite killed 1, missing hoothoot (ROUTE 1 / grass_night 10%)  (744s)
+#1         box 10/30: 7 mons, team ['budew', 'caterpie', 'mareep', 'rattata', 'sentret', 'totodile'] -> win  100% deaths/mon 0.08 deathless 83%; Meditite killed 1, missing starly (ROUTE 22 / grass_day 20%); Numel killed 1, missing patrat (VIRIDIAN CITY / grass_day 10%)  (832s)
+#1         box 11/30: 7 mons, team ['ponytagalar', 'poochyena', 'psyduck', 'rowlet', 'tentacool', 'weedle'] -> win  100% deaths/mon 0.00 deathless 100%;   (885s)
+#1         box 12/30: 7 mons, team ['corphish', 'marill', 'mudkip', 'scraggy', 'shinx', 'tentacool'] -> win  100% deaths/mon 0.00 deathless 100%;   (1007s)
+#1         box 13/30: 7 mons, team ['mankey', 'patrat', 'scorbunny', 'sentret', 'weedle', 'zigzagoon'] -> win  100% deaths/mon 0.06 deathless 67%; Meditite killed 2, missing starly (ROUTE 22 / grass_day 20%)  (1049s)
+#1         box 14/30: 7 mons, team ['pidgey', 'psyduck', 'spearow', 'tentacool', 'toedscool', 'treecko'] -> win  100% deaths/mon 0.00 deathless 100%;   (1116s)
+#1         box 15/30: 7 mons, team ['bidoof', 'binacle', 'lillipup', 'meowth', 'nincada', 'turtwig'] -> win  100% deaths/mon 0.00 deathless 100%;   (1208s)
+#1         box 16/30: 7 mons, team ['rowlet', 'sentret', 'sewaddle', 'starly', 'tentacool', 'zigzagoongalar'] -> win  100% deaths/mon 0.06 deathless 67%; Numel killed 1, missing patrat (VIRIDIAN CITY / grass_day 10%); Corphish killed 1, missing snover (VIRIDIAN CITY / grass_day 2%)  (1252s)
+#1         box 17/30: 7 mons, team ['bidoof', 'corphish', 'nincada', 'sentret', 'sobble', 'tentacool'] -> win  100% deaths/mon 0.00 deathless 100%;   (1318s)
+#1         box 18/30: 7 mons, team ['bidoof', 'oshawott', 'poochyena', 'skwovet', 'spearow', 'tentacool'] -> win  100% deaths/mon 0.00 deathless 100%;   (1377s)
+#1         box 19/30: 7 mons, team ['bidoof', 'caterpie', 'mareep', 'sandshrewalola', 'tentacool', 'turtwig'] -> win  100% deaths/mon 0.03 deathless 83%; Treecko killed 1, missing wurmple (VIRIDIAN FOREST / grass_night 20%)  (1547s)
+#1         box 20/30: 7 mons, team ['bulbasaur', 'mareep', 'meditite', 'sandshrewalola', 'scraggy', 'shroomish'] -> win  100% deaths/mon 0.00 deathless 100%;   (1675s)
+#1         box 21/30: 7 mons, team ['budew', 'oshawott', 'pawmi', 'sentret', 'wurmple', 'yungoos'] -> win  100% deaths/mon 0.06 deathless 67%; Meditite killed 1, missing starly (ROUTE 22 / grass_day 20%); Treecko killed 1, missing weedle (VIRIDIAN FOREST / grass_day 20%)  (1747s)
+#1         box 22/30: 7 mons, team ['chikorita', 'mareep', 'morelull', 'rattata', 'sewaddle', 'zigzagoon'] -> win  100% deaths/mon 0.06 deathless 67%; Meditite killed 1, missing starly (ROUTE 22 / grass_day 20%); Corphish killed 1, missing snover (VIRIDIAN CITY / grass_day 2%)  (1808s)
+#1         box 23/30: 7 mons, team ['bulbasaur', 'patrat', 'pidgey', 'shinx', 'tentacool', 'wurmple'] -> win  100% deaths/mon 0.08 deathless 67%; Numel killed 2, missing zigzagoon (ROUTE 1 / grass_day 20%); Meditite killed 1, missing starly (ROUTE 22 / grass_day 20%)  (1879s)
+#1         box 24/30: 7 mons, team ['rattata', 'sandshrewalola', 'sentret', 'tentacool', 'turtwig', 'weedle'] -> win  100% deaths/mon 0.03 deathless 83%; Corphish killed 1, missing snover (VIRIDIAN CITY / grass_day 2%)  (1934s)
+#1         box 25/30: 7 mons, team ['bidoof', 'marill', 'rattata', 'scatterbug', 'tentacool', 'turtwig'] -> win  100% deaths/mon 0.03 deathless 83%; Meditite killed 1, missing starly (ROUTE 22 / grass_day 20%)  (2035s)
+#1         box 26/30: 7 mons, team ['corphish', 'marill', 'meditite', 'popplio', 'scraggy', 'tentacool'] -> win  100% deaths/mon 0.00 deathless 100%;   (2155s)
+#1         box 27/30: 7 mons, team ['kricketot', 'popplio', 'rattata', 'sandshrewalola', 'tentacool', 'zigzagoon'] -> win  100% deaths/mon 0.00 deathless 100%;   (2198s)
+#1         box 28/30: 7 mons, team ['sentret', 'shinx', 'shroomish', 'snivy', 'tentacool', 'yungoos'] -> win  100% deaths/mon 0.03 deathless 83%; Meditite killed 1, missing starly (ROUTE 22 / grass_day 20%)  (2254s)
+#1         box 29/30: 7 mons, team ['charmander', 'morelull', 'scraggy', 'sentret', 'surskit', 'tentacool'] -> win  100% deaths/mon 0.03 deathless 83%; Meditite killed 1, missing starly (ROUTE 22 / grass_day 20%)  (2313s)
+#1         box 30/30: 7 mons, team ['budew', 'marill', 'ponyta', 'sewaddle', 'smoliv', 'tentacool'] -> win  100% deaths/mon 0.00 deathless 100%;   (2415s)
+#1         30 boxes: mean win 100%, boxes with a >=50% team 100%, deaths/mon 0.03, deathless wins 87%; most missed: starly vs Meditite (ROUTE 22 / grass_day 20%) x11, snover vs Corphish (VIRIDIAN CITY / grass_day 2%) x6, patrat vs Numel (VIRIDIAN CITY / grass_day 10%) x2
+
+Radical Red best-six probe (boxes) | legal moves only: True | arena effects: True | field-aware calc bot: True | seeded | search 9,8 x n=6 | no EVs, no items | enemy = RR AI, full info | 40 min
+  boss       cap mean win  >=50% d/mon clean  most missed counter (vs)
+  #1          16     100%   100%  0.03   87%  starly vs Meditite (ROUTE 22 / grass_day 20%) x11
