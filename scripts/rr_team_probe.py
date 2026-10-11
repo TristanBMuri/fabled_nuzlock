@@ -138,7 +138,7 @@ def setup(args, name: str):
         cb.FIELD_AWARE = False
     srng = random.Random(f"{name}-seeds-{args.seed}")
     seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(max(args.n_solo, args.n_team, args.n_search))]
-    enemy_packed, dump_cap, enemy_species = rp.boss_team(name)
+    enemy_packed, dump_cap, enemy_species = rp.boss_team(int(name[1:]) if name.startswith("#") else name)
     cap = max(cap, dump_cap)
     md = rp.load_game("rr")["moves"]
     boss_types = {md[mv]["type"] for mon in enemy_packed.split("]") for mv in mon.split("|")[4].split(",") if mv in md}

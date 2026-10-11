@@ -87,12 +87,60 @@ DUMP_ID = {"BROCK": "0x19e", "MISTY": "0x19f", "LT. SURGE": "0x1a0", "ERIKA": "0
            "AGATHA": "0x53", "LANCE": "0x56"}
 
 
-def boss_team(name: str) -> tuple[str, int, list[str]]:
-    """Packed team, max level and species for a boss's first fight, from the dump
-    (data/rr/trainers_hardcore.json: parsed by scripts/build_rr.py, EVs assumed from the nature)."""
-    dump = {t["id"]: t for t in json.load(open(RR / "trainers_hardcore.json"))}
-    t = dump[DUMP_ID[name]]
-    return t["packed"], t["cap"], [m["species"] for m in t["mons"]]
+def pack_trainer(t: dict, cap: int | None) -> str:
+    """A dump trainer's packed team; a mon with a relative level ("Max Level - n") gets cap + n."""
+    spread = lambda e: ",".join(str(e[k]) for k in ("hp", "atk", "def", "spa", "spd", "spe"))
+    parts = []
+    for d in t["mons"]:
+        lv = d["level"] if d["level"] is not None else (cap or 0) + (d.get("offset") or 0)
+        parts.append("|".join([d["species"], "", to_id_str(d["item"]), to_id_str(d["ability"]),
+                               ",".join(to_id_str(x) for x in d["moves"]), d["nature"], spread(d["evs"]), d["gender"],
+                               spread(d["ivs"]), "", str(lv), ""]))
+    return "]".join(parts)
+
+
+def boss_team(name: str | int) -> tuple[str, int, list[str]]:
+    """Packed team, max level and species for a trainer-order entry (by name = first entry
+    with that name, or by index) from the dump: the twelve big bosses by dump id, every
+    other entry by matching the tracker block's species against dump trainers of that
+    class name (the rival's variant = the one the tracker shows); relative levels resolve
+    against the entry's cap."""
+    dump = json.load(open(RR / "trainers_hardcore.json"))
+    order = json.load(open(RR / "order.json"))["entries"]
+    t_idx = name if isinstance(name, int) else next(i for i, e in enumerate(order) if e["name"] == name)
+    entry = order[t_idx]
+    if entry["name"] in DUMP_ID:
+        tr = next(x for x in dump if x["id"] == DUMP_ID[entry["name"]])
+    else:
+        block = block_of(entry)
+        want = {to_id_str(p["species"]) for p in block["pokemon"]} if block else set()
+        last = to_id_str(entry["name"].replace("(REMATCH)", "").split("&")[0].split()[-1])
+        cands = [x for x in dump if want and {to_id_str(m["species"]) for m in x["mons"]} == want] or \
+                [x for x in dump if {"relli": "reli"}.get(last, last) in to_id_str(x["name"])]  # the tracker's "Relli" is the dump's "Reli"
+        if not cands:
+            raise KeyError(f"no dump trainer for #{t_idx} {entry['name']}")
+        tr = max(cands, key=lambda x: (len(want & {to_id_str(m["species"]) for m in x["mons"]}), x["relative"]))
+    cap = entry["cap"] if tr["relative"] else max(entry["cap"], tr["cap"] or 0)
+    return pack_trainer(tr, entry["cap"]), cap, [m["species"] for m in tr["mons"]]
+
+
+def block_of(entry: dict) -> dict | None:
+    """The tracker block for a trainer-order entry: its name's first block in a first-fight
+    category (not rematches / post-game), preferring one whose title names the location."""
+    bosses = json.load(open(RR / "tracker_bosses.json"))["hardcore"]
+    name = entry["name"].replace("(REMATCH)", "").strip().upper()
+    words = name.replace("&", " ").split()
+    hits = []
+    for c in bosses["categories"]:
+        if c["name"] in ("Kanto Rematch", "Postgame"):
+            continue
+        for x in c["bosses"]:
+            segs = [t.strip().upper() for t in x["title"].split("·")]  # "VIRIDIAN FOREST · LASS · ANNE", "GYM LEADER · BROCK"
+            tail = " ".join(segs[1:]) if len(segs) > 1 else segs[0]
+            if tail == name or (segs[-1] == words[-1] and (len(words) == 1 or words[0] in tail)):
+                hits.append(x)
+    loc = entry["location"].split()[0].upper()
+    return next((x for x in hits if loc in x["title"].upper()), hits[0] if hits else None)
 
 
 ARENA = {"DESOLATE LAND": ("weather", "desolateland"), "PRIMORDIAL SEA": ("weather", "primordialsea"),
@@ -157,37 +205,34 @@ def choose_ability(species: str, known: dict, boss_types: set, arena: dict) -> s
 
 
 def pools() -> tuple[dict, dict]:
-    """{boss name: (block, cap, [species ids catchable before it], trainer index)} from the
+    """{boss name or "#index": (block, cap, [species ids catchable before it], trainer index)} from the
     tracker export and data/rr/order.json: every encounter at a location open by that fight
     (order.json `reach`) whose method is in hand (grass always; rods and Surf from `gates`)
     and whose lowest level is at or under the cap, plus the gifts and in-game trades in hand
     (order.json `gifts`). The starter is drawn by the caller (STARTERS); statics, fossils,
     rarity and the one-encounter-per-route rule are not in it."""
     enc = json.load(open(RR / "tracker_encounters.json"))
-    bosses = json.load(open(RR / "tracker_bosses.json"))["hardcore"]
     order = json.load(open(RR / "order.json"))
     locs = [l for l in enc["locations"] if not l["postgame"]]
     known = load_game("rr")["species"]
     dex9 = GenData.from_gen(9).pokedex
     # the first fight of each boss: leaders from "Kanto Leaders" (not "Kanto Rematch"), the League from
     # "Indigo League", rivals from "Rivals"; the first block of a title within its category
-    by_title = {}
-    for c in bosses["categories"]:
-        if c["name"] not in ("Kanto Leaders", "Indigo League", "Rivals", "Team Rocket"):
-            continue
-        for x in c["bosses"]:
-            by_title.setdefault(x["title"].split("·")[-1].strip(), x)
     out = {}
     for t, e in enumerate(order["entries"]):
-        if e["name"] not in by_title or e["name"] in out or not e["cap"]:
+        block = block_of(e)
+        if (block is None and e["name"] not in DUMP_ID) or not e["cap"]:
             continue
+        block = block or {"battleEffect": e.get("effect", ""), "pokemon": []}
         pool = {g["species"] for g in order.get("gifts", []) if g["t"] <= t and (g["level"] or 0) <= e["cap"]}
         for l in locs[:e["reach"] + 1]:
             for meth, tb in l["methods"].items():
                 if (0 if meth.startswith("grass") else order["gates"].get(meth, 999)) > t:
                     continue
                 pool |= {to_id_str(x["species"]) for x in tb if int(x["levels"].split("-")[0]) <= e["cap"]}
-        out[e["name"]] = (by_title[e["name"]], e["cap"], sorted(s for s in pool if s in known and s in dex9), t)
+        row = (block, e["cap"], sorted(s for s in pool if s in known and s in dex9), t)
+        out.setdefault(e["name"], row)
+        out[f"#{t}"] = row
     return out, known
 
 

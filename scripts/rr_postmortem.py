@@ -54,7 +54,7 @@ def main() -> None:
     by, known = rp.pools()
     block, cap, pool, t = by[boss]
     arena, _ = rp.arena(block.get("battleEffect", ""))
-    enemy_packed, dump_cap, species = rp.boss_team(boss)
+    enemy_packed, dump_cap, species = rp.boss_team(int(boss[1:]) if boss.startswith("#") else boss)
     party = []
     for sp in r["best_team"]:
         ev = evolve(sp, cap, None, caught_level=5, trainer_idx=None)

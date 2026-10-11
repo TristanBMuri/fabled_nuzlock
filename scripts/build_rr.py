@@ -92,8 +92,10 @@ def parse_dump() -> None:
             for l in lines[1:]:
                 if l.startswith("Ability: "):
                     d["ability"] = l[9:].strip()
-                elif l.startswith("Level: "):
-                    d["level"] = int(l[7:]) if l[7:].strip().isdigit() else None
+                elif l.startswith("Level: "):  # "17" or "Max Level - 2" (hardcore: the segment's cap minus n)
+                    lv = l[7:].strip()
+                    d["level"] = int(lv) if lv.isdigit() else None
+                    d["offset"] = -int(lv.split("-")[1]) if lv.startswith("Max Level -") else (0 if lv == "Max Level" else None)
                 elif l.endswith(" Nature"):
                     d["nature"] = l[:-7].strip()
                 elif l.startswith("- "):
@@ -102,20 +104,21 @@ def parse_dump() -> None:
                     for part in l[5:].split("/"):
                         v, k = part.strip().split(" ", 1)
                         d["ivs"][{"HP": "hp", "Atk": "atk", "Def": "def", "SpA": "spa", "SpD": "spd", "Spe": "spe"}[k]] = int(v)
-            if d["level"] is None or not d["moves"]:
+            if (d["level"] is None and d.get("offset") is None) or not d["moves"]:
                 continue
             d["evs"] = trainer_evs(m[1])
             mons.append(d)
         if not mons:
             continue
         spread = lambda e: ",".join(str(e[k]) for k in STATS)
+        fixed = [d["level"] for d in mons if d["level"] is not None]
         packed = "]".join("|".join([d["species"], "", to_id_str(d["item"]), to_id_str(d["ability"]),
                                     ",".join(to_id_str(x) for x in d["moves"]), d["nature"], spread(d["evs"]), d["gender"],
-                                    spread(d["ivs"]), "", str(d["level"]), ""]) for d in mons)
-        out.append({"name": m[1].strip(), "id": m[2], "cap": max(d["level"] for d in mons), "n": len(mons),
-                    "mons": mons, "packed": packed})
+                                    spread(d["ivs"]), "", str(d["level"] or 0), ""]) for d in mons)  # 0 = relative: see rr_probe.pack_trainer
+        out.append({"name": m[1].strip(), "id": m[2], "cap": max(fixed) if fixed else None, "relative": len(fixed) < len(mons),
+                    "n": len(mons), "mons": mons, "packed": packed})
     (RR / "trainers_hardcore.json").write_text(json.dumps(out))
-    print(f"data/rr/trainers_hardcore.json: {len(out)} trainers from the dump")
+    print(f"data/rr/trainers_hardcore.json: {len(out)} trainers from the dump ({sum(t['relative'] for t in out)} with levels relative to the cap)")
     mod = json.loads(subprocess.run(["node", "-e", "const {Dex}=require(process.argv[1]+'/dist/sim');const d=Dex.mod('gen9rr');"
                                      "console.log(JSON.stringify({items:d.items.all().map(x=>x.id),moves:d.moves.all().map(x=>x.id),species:d.species.all().map(x=>x.id)}))",
                                      str(FORK)], capture_output=True, text=True, check=True).stdout)
