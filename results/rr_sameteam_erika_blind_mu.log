@@ -1,0 +1,12 @@
+team: [('ledian', 'Adamant', 'Swarm', ['lunge', 'brickbreak', 'dig', 'roost']), ('unfezant', 'Adamant', 'Frisk', ['bravebird', 'facade', 'uturn', 'roost']), ('rapidash', 'Adamant', 'Flash Fire', ['firelash', 'megahorn', 'playrough', 'rest']), ('slowbrogalar', 'Modest', 'Quick Draw', ['shellsidearm', 'psychic', 'icebeam', 'slackoff']), ('stunfiskgalar', 'Jolly', 'Filter', ['dig', 'flashcannon', 'rockslide', 'rest']), ('crobat', 'Jolly', 'Infiltrator', ['bravebird', 'poisonfang', 'shadowball', 'roost'])]
+enemy: [('Ogerpon-Cornerstone', 'cornerstonemask', 'sturdy', 'ivycudgel,uturn,powerwhip,knockoff'), ('Hawlucha', 'grassyseed', 'unburden', 'swordsdance,acrobatics,closecombat,stoneedge'), ('Sceptile', 'sceptilite', 'overgrow', 'swordsdance,bulletseed,dracobarrage,highhorsepower'), ('Toxtricity', 'lifeorb', 'punkrock', 'boomburst,voltswitch,overdrive,hiddenpowergrass'), ('Slowbro-Galar', 'blacksludge', 'regenerator', 'thunderwave,sludgebomb,flamethrower,teleport'), ('Kartana', 'lifeorb', 'beastboost', 'swordsdance,grassyglide,cut,sacredsword')]
+death weight 6.0, preserve False, matchup True, field-aware False
+
+ERIKA: 10/12 wins, 3 deathless, 24 deaths (2.0 per fight), fights last 31 turns
+deaths by enemy mon: [('Slowbro', 9), ('Ogerpon', 5), ('Kartana', 4), ('Sceptile', 3), ('Hawlucha', 2), ('Toxtricity', 1)]
+deaths by enemy move: [('Slowbro Sludge Bomb', 5), ('Slowbro Flamethrower', 4), ('Kartana Cut', 3), ('Ogerpon Knock Off', 2), ('Hawlucha Stone Edge', 2), ('Ogerpon Ivy Cudgel', 2), ('Sceptile Draco Barrage', 2), ('Ogerpon Power Whip', 1)]
+which of ours: [('Rapidash', 7), ('Crobat', 5), ('Slowbro', 5), ('Stunfisk', 3), ('Ledian', 2), ('Unfezant', 2)]
+HP before the killing hit: [('low (<0.5)', 20), ('half+ (0.5-0.9)', 3), ('full (>=0.9)', 1)]
+died the turn it switched in: 5 of 24
+deaths in won fights: 12 | in lost fights: 12
+by turn: [(30, 9), (25, 4), (10, 3), (5, 3), (15, 3), (20, 2)]

@@ -1805,8 +1805,19 @@ Misty, 58 vs 54 at Surge. The numbers the model changes are all correct
 (Sand Rush Cacnea 20 → 40 speed, −33% special on Rock in sand, +30% Grass in
 Grassy Terrain); the damage comes from the old switch logic turning a more
 pessimistic picture into switch-in deaths. A precedence bug meant the rain
-accuracy override never applied (fixed). The same comparison under the
-matchup rule is running.
+accuracy override never applied (fixed). Under the matchup rule (same team,
+same seeds, death weight 6; `results/rr_sameteam_*_mu.log`) the picture
+splits: Erika field-aware 12/12, 12 deaths vs blind 10/12, 24 deaths (3
+deathless each); Brock field-aware 11/12, 37 deaths, 0 deathless vs blind
+12/12, 20 deaths, 2 deathless. At Erika the model now pays off (Grassy
+Terrain Grass damage read right, and switching only into race-winners); at
+Brock the field model still doubles the deaths, all of them below half HP and
+11 of 37 the turn the mon switched in, with Cacnea (19) and the three Rock
+mons it under-rates us against under sand (Lunatone, Lileep, Archen: 12)
+doing the killing. Brock's sand is the case where a correct, more pessimistic
+model makes the search retreat into a bench that has no answer; the verdict
+on field-aware as the default waits for the cover-chooser runs, which are the
+first with a bench built to have one.
 
 **Also**: 23 of 27 starters were missing from the mod tables (the extraction
 took encounter and boss species only) — the box runs fielded a starter in 2
