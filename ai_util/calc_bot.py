@@ -210,8 +210,8 @@ class CalcPlayer(Player):
             if first or not we_die:
                 return self.create_order(mv)
         if MATCHUP and not first and battle.available_switches:
-            from ai_util.matchup import pair, safe
-            if not safe(pair(me, opp, battle)):
+            from ai_util.matchup import pair, race
+            if not race(pair(me, opp, battle)):
                 cand = self.matchup_switch(battle, opp, battle.available_switches)
                 if cand is not None:
                     return self.create_order(cand)
@@ -236,11 +236,11 @@ class CalcPlayer(Player):
         """The bench mon that is the safe answer to `opp` (ai_util.matchup) and survives the
         switch-in hit with room, best edge first; None when nobody qualifies. A boosted enemy
         gets only answers that are safe against its boosted stats (pair() uses them)."""
-        from ai_util.matchup import edge, pair, safe
+        from ai_util.matchup import edge, pair, race
         best, best_e = None, None
         for m in switches:
             p = pair(m, opp, battle)
-            if safe(p) and p["take"] < m.current_hp_fraction / 2:
+            if race(p) and p["take"] < m.current_hp_fraction / 2:  # wins the race even after the switch-in hit
                 e = edge(p)
                 if best is None or e > best_e:
                     best, best_e = m, e

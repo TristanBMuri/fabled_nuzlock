@@ -44,24 +44,39 @@ def safe(p: dict) -> bool:
     return True
 
 
+def race(p: dict) -> bool:
+    """Looser than safe: we land the KO before they land theirs (one hit of margin, not two),
+    healers still falling before they heal. A one-shot that absorbs one hit counts."""
+    if p["ko_them"] > SAFE_OURS + 1:
+        return False
+    absorbed = p["ko_them"] - (1 if p["faster"] else 0)
+    if p["ko_us"] < absorbed + 1:
+        return False
+    if p.get("heals") and not (p["ko_them"] <= 1 or (p["ko_them"] <= 2 and p["faster"])):
+        return False
+    return True
+
+
 def edge(p: dict) -> float:
     return min(p["ko_us"], 9) - min(p["ko_them"], 9) + (0.5 if p["faster"] else 0.0)
 
 
 def cover(rows: dict, enemies: list[str], k: int = 6) -> list:
-    """rows: {candidate: {enemy: pair}}. Greedy set cover: the candidate that is the safe answer
-    to most uncovered enemies (ties by total edge), until every enemy has one or none is left;
-    enemies nobody answers safely get the best edge; the remaining slots go to total edge."""
+    """rows: {candidate: {enemy: pair}}. Greedy set cover in two tiers: the candidate that is
+    the safe answer to most uncovered enemies, then the race-winner to most, ties by total
+    edge, until every enemy has one or none is left; enemies nobody answers get the best
+    edge; the remaining slots go to total edge."""
     team, uncovered = [], set(enemies)
     while len(team) < k and uncovered:
         def gain(c):
             return (sum(safe(rows[c][e]) for e in uncovered if e in rows[c]),
+                    sum(race(rows[c][e]) for e in uncovered if e in rows[c]),
                     sum(edge(rows[c][e]) for e in enemies if e in rows[c]))
         best = max((c for c in rows if c not in team), key=gain, default=None)
-        if best is None or gain(best)[0] == 0:
+        if best is None or gain(best)[:2] == (0, 0):
             break
         team.append(best)
-        uncovered -= {e for e in uncovered if e in rows[best] and safe(rows[best][e])}
+        uncovered -= {e for e in uncovered if e in rows[best] and race(rows[best][e])}
     for e in sorted(uncovered):  # no safe answer in the pool: the least bad one
         if len(team) >= k:
             break
