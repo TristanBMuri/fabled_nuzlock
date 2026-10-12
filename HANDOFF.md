@@ -1,4 +1,69 @@
-# HANDOFF — state of the project as of 2026-10-10
+# HANDOFF — state of the project as of 2026-10-12
+
+## Next task (2026-10-12): make the whole pipeline faster
+
+Every experiment is gated on wall-clock: the BDSP benchmark (20 episodes through
+Cynthia, `--search 9,8 --search-all --deep 9,16`) takes ~90 min on 7 workers, an RR box
+run 2–3 h. Goal: the same results in a fraction of the time. Two rules:
+
+1. **Profile before changing anything.** Measure where an episode's time goes (risk
+   queries vs. searched battles vs. deep search vs. Node-bridge IPC / fork replay vs.
+   `rows_for`). Suspected biggest cost: `plan_gauntlet.choose_party` scores the base
+   party plus *every single swap* with the box, each by `env.risk()` = 8 simulated
+   battles, before every trainer; with a 38-mon box that is ~190 candidates ≈ 1,500
+   battles per trainer. Since 2026-10-12 the base is the matchup-cover six
+   (`cover_base`), so most swaps are likely redundant (prune to swaps the matrix rates
+   safe / race against some enemy, or score swaps only at breakpoints). Other levers to
+   measure, not assume: `--search-all` (rollout search on every route trainer), the
+   rollout count, the RR AI / Gen 4 AI per-call cost inside rollouts (both recompute
+   damage calcs every turn: cacheable per state), process-level parallelism.
+2. **Every speed-up must be shown to change nothing (or be accepted as a change).**
+   The 20-episode table is far too noisy to catch a regression (±2 cleared, ±1.9
+   deaths, ±15 points of clear rate between identical runs). Use paired comparisons on
+   the same seeds, as the 2026-10-10 clean-up was accepted: `league_test.py --vs`
+   against the saved League openers for the League, `rr_deaths.py` (fixed team, paired
+   seeds, `--json`) for RR bosses, and for the route layer a paired replay of the same
+   episode seeds old vs new code (party chosen, battles won, deaths per trainer).
+   A speed-up that changes decisions (pruning swaps) is a behaviour change: measure it
+   against the paired baseline and record it in NOTEBOOK.md like any lever.
+
+Keep CLAUDE.md's constraint: minimal code. Profiling is a script or a flag, not a
+framework; a cache is a dict.
+
+## What changed on 2026-10-11/12 (details in NOTEBOOK.md, newest last)
+
+- **RR enemy AI = CFRU's** (`ai_util/rr_ai.py`, `data/rr/AI_DIFF.md`): switching from
+  `ai_switching.c` (damage-calc switch-in score, also after faints) and the move-score
+  tier ladder by fighting-style class. A no-switch enemy doubles Brock's deaths, so the
+  AI's shape matters. RR tables rerun on it (`results/rr_cfru_*`): Misty pool 73% / 3%
+  deathless (was 100 / 30), boxes 51%; Brock pool 100% / 63% deathless; the early bosses
+  stay 30/30. Unverified against the ROM (A2.2 needs the user's emulator recordings).
+- **BDSP enemy AI = Gen 4 (Platinum) trainer AI** (`ai_util/bdsp_ai.py`, `--enemy bdsp`;
+  default is still SimpleHeuristics): Basic + EvalAttack + Expert, Gen 4 switching and
+  the post-KO pick, from pret/pokeplatinum. All trainers get those three flags (our data
+  has no per-trainer AI flags). The enemy sees only revealed player moves (no
+  `--full-info`, as in the benchmark).
+- **BDSP team building fixed** (`plan_gauntlet.cover_base`): the base party was
+  top-6-by-level = the first six caught (the level rule puts the whole box at the cap)
+  and single swaps only moved one slot — Bibarel / Kricketune at Volkner with 38 in the
+  box. Now the base is the matchup cover (`ai_util/matchup.cover`) from the whole box
+  against the next trainer (all of the League at its opener), then single swaps.
+  Every BDSP table before 2026-10-12 is on the old planner.
+- **League = `locked`** (was `no_heal` in `order.json`): party locked from Aaron to
+  Cynthia, full heal (HP, status, PP) between fights, the dead stay dead (PP carried
+  before).
+- **Dashboard** (`ui/`, `uv run python ui/build.py --serve`, :8765): RR probe runs plus BDSP
+  gauntlet runs (`plan_gauntlet.py --out logs/X.jsonl` → `X.events.jsonl`: per-episode
+  progress strips with deaths, deadliest trainers, deaths by species). Every Champion
+  fight is recorded as `logs/trace_X_s<seed>_404.json`, watchable in Showdown's replay
+  viewer from the episode row or the Traces tab. Compare / Deaths / Traces / Matrices are
+  otherwise fed by the RR scripts only.
+- **Pending when this was written:** the first BDSP benchmarks on the new planner,
+  `logs/bdsp_gen4ai` (Gen 4 AI) vs `logs/bdsp_heuristic` (SimpleHeuristics), 20 episodes,
+  seed 300, slice 405. Their numbers go into NOTEBOOK.md and the line below.
+
+## Before 2026-10-11
+
 
 Read this first. `project_overview.md` is the plan, `NOTEBOOK.md` is the
 full lab notebook (chronological, with every number), `results/` holds the
