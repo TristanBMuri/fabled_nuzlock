@@ -29,6 +29,7 @@ from nuzlocke_env import ORDER  # noqa: E402
 
 def run_jobs(args, jobs: list[tuple[str, int]]) -> list[dict]:
     """One env (one sim) for this worker's (snapshot, replay) jobs."""
+    pg.apply(args)  # --enemy / --swaps (2026-10-12: --enemy was not applied here before)
     env, rows = pg.make_env(args), []
     for path, j in jobs:
         t0 = time.time()

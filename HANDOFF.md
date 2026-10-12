@@ -1,34 +1,43 @@
 # HANDOFF — state of the project as of 2026-10-12
 
-## Next task (2026-10-12): make the whole pipeline faster
+## Next task (2026-10-12): make the whole pipeline faster — progress
 
-Every experiment is gated on wall-clock: the BDSP benchmark (20 episodes through
-Cynthia, `--search 9,8 --search-all --deep 9,16`) takes ~90 min on 7 workers, an RR box
-run 2–3 h. Goal: the same results in a fraction of the time. Two rules:
+The goal and the two rules stand (profile first; every speed-up shown to change nothing on
+paired seeds, or accepted as a change). Done on 2026-10-12 (NOTEBOOK.md → "Speed-up 1–3",
+"Where a BDSP episode's time goes"):
 
-1. **Profile before changing anything.** Measure where an episode's time goes (risk
-   queries vs. searched battles vs. deep search vs. Node-bridge IPC / fork replay vs.
-   `rows_for`). Suspected biggest cost: `plan_gauntlet.choose_party` scores the base
-   party plus *every single swap* with the box, each by `env.risk()` = 8 simulated
-   battles, before every trainer; with a 38-mon box that is ~190 candidates ≈ 1,500
-   battles per trainer. Since 2026-10-12 the base is the matchup-cover six
-   (`cover_base`), so most swaps are likely redundant (prune to swaps the matrix rates
-   safe / race against some enemy, or score swaps only at breakpoints). Other levers to
-   measure, not assume: `--search-all` (rollout search on every route trainer), the
-   rollout count, the RR AI / Gen 4 AI per-call cost inside rollouts (both recompute
-   damage calcs every turn: cacheable per state), process-level parallelism.
-2. **Every speed-up must be shown to change nothing (or be accepted as a change).**
-   The 20-episode table is far too noisy to catch a regression (±2 cleared, ±1.9
-   deaths, ±15 points of clear rate between identical runs). Use paired comparisons on
-   the same seeds, as the 2026-10-10 clean-up was accepted: `league_test.py --vs`
-   against the saved League openers for the League, `rr_deaths.py` (fixed team, paired
-   seeds, `--json`) for RR bosses, and for the route layer a paired replay of the same
-   episode seeds old vs new code (party chosen, battles won, deaths per trainer).
-   A speed-up that changes decisions (pruning swaps) is a behaviour change: measure it
-   against the paired baseline and record it in NOTEBOOK.md like any lever.
+- **RR: the unit of work is a pool job** (`scripts/rr_team_probe.py`: `fan` / `_POOL`, one
+  boss context per worker). Boxes (`box_job`), a boss's stages A + B (`prelude_job`), every
+  (team, battle) of stage C (`battle_job`) and the threat duels (`threats_job`) are each
+  seeded on their own, so they spread over `--workers` (20 is the approved count, ~30 GB)
+  with identical results: the box table 165 → 22 min, the pool table 151 → 25 min, both
+  identical to the saved rows on every box / team / threat (`results/rr_cfru_*_par.*`).
+  The early-boss table is the acceptance of the three-phase version (pending at hand-off
+  time; see the notebook's last entry).
+- **The damage formula is memoised** (`calc_bot.dmg_frac` → `_DMG`, exact by construction:
+  the key is every input). -16% on a searched battle, same turns; applies to the calc bot,
+  the RR AI and the Gen 4 AI alike.
+- **Nothing to gain in the bridge**: Showdown's `Battle.choose` is 1.1 ms per turn in pure
+  Node and the packaging 0.025 ms; a rollout turn costs the engine + ~0.4 ms of AIs + 0.2
+  ms of mirror feeding. V8 GC flags change nothing.
+- **BDSP, measured** (one timed Gen 4 AI episode, seed 300): 2129 s = party choice 1632 s
+  (46,614 risk queries × 8 fast battles; grows with the box, ~6 × box candidates per
+  trainer) + fights 496 s (395 fights, 14 deep). `--workers 20` (one episode each) bounds
+  the benchmark by the slowest episode, ~36 min instead of 99.
+- **`--swaps hard`** (`plan_gauntlet.py`, default `all` = unchanged behaviour): score the
+  single swaps only when the cover six's own query is not clean (a loss, a death or HP <
+  DEEP_HP: the deep-search trigger, already cached). A decision change: measure it with
+  the full 20-episode Gen 4 AI table on 20 workers against `results/bdsp_gen4ai.*` — the
+  paired route check is the events file (party fielded, result and deaths per trainer and
+  seed; compare script: per seed, first trainer where the fielded party differs), the
+  League is unaffected (the block query is always "hard"). Record the table in the notebook
+  and let the user accept it.
+- `league_test.py` now applies `--enemy` (it was parsed and ignored before; every League
+  replay so far was against SimpleHeuristics) through `plan_gauntlet.apply(args)`.
 
-Keep CLAUDE.md's constraint: minimal code. Profiling is a script or a flag, not a
-framework; a cache is a dict.
+Still open: the BDSP swap scoring is the only big lever left and it is a behaviour change;
+within an episode nothing exact is large (the memo is in; the engine is the floor). For RR
+nothing structural is left: a table's wall-clock is its battles / 20.
 
 ## What changed on 2026-10-11/12 (details in NOTEBOOK.md, newest last)
 

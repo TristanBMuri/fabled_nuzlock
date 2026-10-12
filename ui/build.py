@@ -98,6 +98,8 @@ def fold(path: Path, where: str, ps: str) -> dict:
             b[{"team": "teams", "box": "boxes"}[e["kind"]]].append(e)
         elif b is not None:
             b[e["kind"]] = e
+    for b in bosses.values():
+        b["boxes"].sort(key=lambda e: e.get("i", 0))  # the workers finish boxes out of order
     end = next((e for e in events if e["kind"] == "end"), None)
     out = start["config"].get("out") or ""
     running = end is None and where == "logs" and bool(out) and Path(out).name in ps

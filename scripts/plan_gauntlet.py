@@ -35,6 +35,7 @@ from nuzlocke_env import DEEP_HP, EVOS, MAX_PARTY, ORDER, RISK_BATTLES, SLICE_LE
 from gauntlet import load_species, pack_team, trainer_mons  # noqa: E402
 
 HP_WEIGHT = 0.2  # margin tie-breaker weight in the party score (most candidates show 0 deaths at n=8)
+SWAPS = "all"  # --swaps: score every single swap, or (hard) only when the cover six's own query is not clean
 DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes of this process)
 DEATHS_BY_SPECIES: dict[str, int] = {}  # species -> deaths
 LOSSES_AT: dict[int, int] = {}  # trainer index -> lost battles
@@ -95,7 +96,10 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
     # puts everyone at the cap, and single swaps only ever moved one slot of it
     base = cover_base(env, alive)
     score = lambda p: party_score(env, p, lam)
-    front = sorted(swaps(base, alive), key=score, reverse=True)
+    # 2026-10-12: the swap scoring was 3/4 of an episode (~6 x box candidates x 8 battles per
+    # trainer); hard() is the deep-search trigger on the base party's own (cached) query
+    cands = swaps(base, alive) if SWAPS == "all" or hard(env, base) else [tuple(base)]
+    front = sorted(cands, key=score, reverse=True)
     if verbose:
         print(f"    {len(front)} candidates: best {score(front[0]):+.2f} "
               f"{[env.roster[i].species for i in front[0]]}"
@@ -208,7 +212,7 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple:
     deaths by species."""
     import runner
     global EVENTS
-    runner.ENEMY = args.enemy
+    apply(args)
     EVENTS = Path(args.out).with_suffix(".events.jsonl") if args.out else None
     runner.TRACES = EVENTS.parent if EVENTS is not None else None
     if args.harvest:
@@ -223,6 +227,14 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple:
               f"deaths {r['deaths']:2d}  {'CLEAR' if r['slice_clear'] else ''}  "
               f"({(time.time() - t0) / (n + 1):.0f}s/ep)", flush=True)
     return rows, DEATHS_AT, LOSSES_AT, env.n_deep, DEATHS_BY_SPECIES
+
+
+def apply(args: argparse.Namespace) -> None:
+    """The planner flags that live in module state (a worker calls it once; league_test.py too)."""
+    import runner
+    global SWAPS
+    runner.ENEMY = args.enemy
+    SWAPS = args.swaps
 
 
 def parser(doc: str = __doc__) -> argparse.ArgumentParser:
@@ -241,6 +253,9 @@ def parser(doc: str = __doc__) -> argparse.ArgumentParser:
                          "(the full-docs regime, project_overview.md 2); default: sets revealed in play, "
                          "stats estimated at 31 IV / 85 EV")
     ap.add_argument("--lam", type=float, default=1.0, help="death penalty weight in the party score")
+    ap.add_argument("--swaps", choices=["all", "hard"], default="all",
+                    help="score every single swap of the cover six (all), or only when the six's own risk "
+                         "query shows a loss, a death or HP < DEEP_HP (hard): 3/4 of an episode is swap scoring")
     ap.add_argument("--level-rule", choices=["match", "cap"], default="cap",
                     help="cap = next boss's max level (hardcore rule); match = max enemy seen")
     ap.add_argument("--level-margin", type=int, default=0,

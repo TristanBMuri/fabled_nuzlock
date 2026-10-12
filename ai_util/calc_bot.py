@@ -135,9 +135,29 @@ def field_mod(att, dfn, move, battle) -> tuple[float, float | None]:
     return mod, acc
 
 
+_DMG: dict = {}  # dmg_frac memo: both AIs ask the same question many times per turn and across rollouts
+
+
 def dmg_frac(att, dfn, move, att_own: bool, battle=None, with_acc: bool = True) -> float:
     """Expected fraction of dfn's max HP one use of move removes (accuracy included unless
-    `with_acc` is False: the damage if it hits); with `battle`, under its weather and terrain."""
+    `with_acc` is False: the damage if it hits); with `battle`, under its weather and terrain.
+    Memoised on everything the formula reads (2026-10-12: 13M calls per searched box, the
+    largest Python cost of a battle; the key is ~3 us, the formula ~10 us)."""
+    key = (move.id, move._base_power_override, att_own, with_acc, FIELD_AWARE,
+           att.species, att.level, att.status, tuple(att.types), tuple(att.base_stats.values()),
+           att.stats and tuple(att.stats.values()), tuple(att.boosts.values()), att.ability, att.item,
+           dfn.species, dfn.level, dfn.max_hp, tuple(dfn.types), tuple(dfn.base_stats.values()),
+           dfn.stats and tuple(dfn.stats.values()), tuple(dfn.boosts.values()), dfn.ability, dfn.item,
+           None if battle is None else (tuple(battle.weather), tuple(battle.fields)))
+    v = _DMG.get(key)
+    if v is None:
+        if len(_DMG) > 500_000:
+            _DMG.clear()
+        v = _DMG[key] = _dmg_frac(att, dfn, move, att_own, battle, with_acc)
+    return v
+
+
+def _dmg_frac(att, dfn, move, att_own: bool, battle=None, with_acc: bool = True) -> float:
     if move.category == MoveCategory.STATUS:
         return 0.0
     hp = max_hp(dfn, not att_own)

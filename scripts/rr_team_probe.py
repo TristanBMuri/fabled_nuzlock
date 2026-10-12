@@ -24,13 +24,17 @@ the custom arena rules, natures, the player's ability swaps.
 open location, a random starter, the gifts), the chooser (stage A ranking + greedy build)
 picks six from each box, the team plays under search; per box the killers and the pool
 species outside the box that beat them are reported (what the box was missing, where).
+The unit of work is seeded on its own and `--workers` spreads it: a box (--boxes), else a
+boss's stages A + B, then every (team, battle), then the threat duels (one bridge per worker
+per boss). 2026-10-12: 165 -> 22 min (boxes), 151 -> 25 min (pool) on 20 workers, identical.
 
   uv run python scripts/rr_team_probe.py --bosses "MISTY,LT. SURGE,ERIKA" --workers 3 --out logs/rr_team_probe.jsonl
-  uv run python scripts/rr_team_probe.py --bosses BROCK,MISTY --arena --legal --boxes 30 --workers 2 --out logs/rr_boxes.jsonl
+  uv run python scripts/rr_team_probe.py --bosses BROCK,MISTY --arena --legal --boxes 30 --workers 20 --out logs/rr_boxes.jsonl
 """
 
 import argparse
 import collections
+import contextlib
 import json
 import multiprocessing as mp
 import os
@@ -116,45 +120,46 @@ def play(bridge, brain, enemy, party: list[Mon], enemy_packed: str, n: int, sear
     for every team and variant (paired comparisons); it also seeds the RR AI's tie-breaks
     (it uses the global `random`; found 2026-10-11 when two "paired" runs ranked stage A
     differently) and the searcher's rollouts."""
+    return fold([one_battle(bridge, brain, enemy, party, enemy_packed, i, search, arena, seeds) for i in range(n)])
+
+
+def one_battle(bridge, brain, enemy, party: list[Mon], enemy_packed: str, i: int, search=None, arena=None, seeds=None) -> tuple:
+    """Battle i of play(): (won, deathless win, fainted fraction, progress, deaths by enemy mon,
+    enemy mons KO'd). Seeded on its own, so it is the unit of work the pool spreads."""
     from ai_util.sim import SimBattle
-    wins, deaths, prog, clean = 0, 0.0, 0.0, 0
+    sb = SimBattle(bridge, rp.FMT, pack_team(party), enemy_packed, full_info=True, arena=arena,
+                   seed=seeds[i] if seeds else None)
+    if seeds:  # pair everything: the engine (above), the RR AI's tie-breaks (global random), the searcher's rollouts
+        random.seed(sum(seeds[i]))
+        if search is not None:
+            import numpy as np
+            search.rng = np.random.default_rng(seeds[i])
+    sb.play({"p1": search or brain, "p2": enemy}, 100)
+    st = sb.state()
+    won = st["winner"] == "p1"
+    d, k, _ = attribution(sb.history["p1"])
+    sb.close()
+    return won, won and not any(m["fainted"] for m in st["p1"]), sum(m["fainted"] for m in st["p1"]) / len(st["p1"]), progress(st), d, k
+
+
+def fold(battles: list[tuple]) -> tuple:
+    """play()'s summary of one_battle() results, in battle order."""
+    n, wins, deaths, prog, clean = len(battles), 0, 0.0, 0.0, 0
     deaths_by, kos_on = collections.Counter(), collections.Counter()
-    for i in range(n):
-        sb = SimBattle(bridge, rp.FMT, pack_team(party), enemy_packed, full_info=True, arena=arena,
-                       seed=seeds[i] if seeds else None)
-        if seeds:  # pair everything: the engine (above), the RR AI's tie-breaks (global random), the searcher's rollouts
-            random.seed(sum(seeds[i]))
-            if search is not None:
-                import numpy as np
-                search.rng = np.random.default_rng(seeds[i])
-        sb.play({"p1": search or brain, "p2": enemy}, 100)
-        st = sb.state()
-        wins += st["winner"] == "p1"
-        clean += st["winner"] == "p1" and not any(m["fainted"] for m in st["p1"])
-        deaths += sum(m["fainted"] for m in st["p1"]) / len(st["p1"])
-        prog += progress(st)
-        d, k, _ = attribution(sb.history["p1"])
+    for won, cl, dfrac, pr, d, k in battles:
+        wins += won
+        clean += cl
+        deaths += dfrac
+        prog += pr
         deaths_by += d
         kos_on += k
-        sb.close()
     return wins / n, deaths / n, prog / n, (deaths_by, kos_on), clean / n
 
 
-def run_boss(args, name: str) -> dict:
-    try:
-        out = _run_boxes(args, name) if args.boxes else _run_boss(args, name)
-        emit(args, "boss_done", boss=name, row=out["rows"][0])
-        return out
-    except Exception as e:
-        import traceback
-        print(f"{name} FAILED: {type(e).__name__}: {e}\n{traceback.format_exc()[-800:]}", flush=True)
-        emit(args, "boss_failed", boss=name, error=f"{type(e).__name__}: {e}")
-        return {"rows": []}
-
-
-def setup(args, name: str):
+def setup(args, name: str, announce: bool = True):
     """Everything a boss run shares: the pool, cap, arena, the boss's sets and attack types,
-    the bridge, both brains, the searcher, and the paired battle seeds."""
+    the bridge, both brains, the searcher, and the paired battle seeds. announce=False: a
+    worker's copy (no boss_start event, no banner)."""
     from types import SimpleNamespace
     from ai_util.calc_bot import calc_brain
     from ai_util.evaluate import Searcher
@@ -165,7 +170,8 @@ def setup(args, name: str):
         raise KeyError(f"{name}: no team data (not a tracker boss block nor a dump id)")
     block, cap, pool, progress = by[name]
     arena, unmodelled = rp.arena(block.get("battleEffect", "")) if args.arena else ({}, [block.get("battleEffect", "")])
-    print(f"{name}: trainer #{progress}, cap {cap}, pool {len(pool)} species; arena {arena}; not modelled: {unmodelled}", flush=True)
+    if announce:
+        print(f"{name}: trainer #{progress}, cap {cap}, pool {len(pool)} species; arena {arena}; not modelled: {unmodelled}", flush=True)
     if args.legal:
         gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(rp.RR / "hardcore_rules.json"))["banned_moves"]}
     if args.blind_field or args.matchup:
@@ -181,8 +187,9 @@ def setup(args, name: str):
     enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
     calc = calc_brain()
     width = tuple(int(x) for x in args.search.split(","))
-    emit(args, "boss_start", boss=name, trainer=progress, cap=cap, pool=len(pool), arena=arena, unmodelled=unmodelled,
-         enemy=enemy_sets(enemy_packed), boss_types=sorted(boss_types))
+    if announce:
+        emit(args, "boss_start", boss=name, trainer=progress, cap=cap, pool=len(pool), arena=arena, unmodelled=unmodelled,
+             enemy=enemy_sets(enemy_packed), boss_types=sorted(boss_types))
     return SimpleNamespace(name=name, args=args, known=known, cap=cap, pool=pool, progress=progress, arena=arena,
                            unmodelled=unmodelled, enemy_packed=enemy_packed, enemy_species=enemy_species,
                            boss_types=boss_types, bridge=SimBridge(showdown=str(rp.FORK)), enemy=enemy, calc=calc,
@@ -212,7 +219,7 @@ def solo_stage(ctx, species: list[str]) -> tuple[list, dict]:
 
 def team_value(ctx, team: tuple) -> float:
     if team not in ctx.team_score:
-        ctx.team_score[team] = play(ctx.bridge, ctx.calc, ctx.enemy, [ctx.mons[s] for s in team], ctx.enemy_packed, ctx.args.n_team,
+        ctx.team_score[team] = play(ctx.bridge, ctx.calc, ctx.enemy, [mon_of(ctx, s) for s in team], ctx.enemy_packed, ctx.args.n_team,
                                     arena=ctx.arena, seeds=ctx.seeds)[2]
     return ctx.team_score[team]
 
@@ -240,8 +247,44 @@ def cover_team(ctx, species: list[str]) -> tuple:
 def searched(ctx, team: tuple):
     """(C) the team under calc + search, paired seeds: (win, deaths/mon, progress, attribution,
     deathless-win rate)."""
-    return play(ctx.bridge, ctx.calc, ctx.enemy, [ctx.mons[s] for s in team], ctx.enemy_packed, ctx.args.n_search,
-                search=ctx.searcher, arena=ctx.arena, seeds=ctx.seeds)
+    return searched_many(ctx, [team])[team]
+
+
+def searched_many(ctx, teams: list[tuple]) -> dict:
+    """searched() for several teams at once: every (team, battle) is a pool job when the main
+    process holds the pool (the stage-C fan-out), else they play here in order."""
+    n = ctx.args.n_search
+    battles = fan(battle_job, [(ctx.args, ctx.name, t, i) for t in teams for i in range(n)])
+    return {t: fold(battles[j * n:(j + 1) * n]) for j, t in enumerate(teams)}
+
+
+# The worker pool (main process only; a worker's is None, so fan() runs its jobs in place)
+# and the workers' boss contexts: a worker builds a boss's (bridge, brains, sets) once.
+_POOL = None
+_CTX: dict = {}
+_MAIN = False  # True in the main process (set in main; a spawned worker starts fresh)
+
+
+def fan(fn, jobs: list[tuple]) -> list:
+    return _POOL.starmap(fn, jobs) if _POOL is not None and len(jobs) > 1 else [fn(*j) for j in jobs]
+
+
+def worker_ctx(args, name: str):
+    """A worker's context for boss `name`: one at a time (a bridge is ~200 MB of Node; the jobs
+    are ordered by boss, so a worker switches rarely). The main process keeps its own per boss."""
+    ctx = _CTX.get(name)
+    if ctx is None:
+        for other in [k for k in _CTX if k != name] if not _MAIN else []:  # main keeps every boss's
+            _CTX.pop(other).bridge.close()
+        ctx = _CTX[name] = setup(args, name, announce=False)
+    return ctx
+
+
+def battle_job(args, name: str, team: tuple, i: int) -> tuple:
+    """Searched battle i of `team` against boss `name` (a pool job)."""
+    ctx = worker_ctx(args, name)
+    return one_battle(ctx.bridge, ctx.calc, ctx.enemy, [mon_of(ctx, s) for s in team], ctx.enemy_packed, i,
+                      search=ctx.searcher, arena=ctx.arena, seeds=ctx.seeds)
 
 
 def duel(ctx, sp: str, enemy_mon: str, n: int) -> tuple[float, float]:
@@ -286,44 +329,67 @@ def say_threats(ctx, threats: list[dict], tag: str = "") -> None:
 
 
 def sets_of(ctx, team) -> list[dict]:
-    return [{"species": ctx.mons[s].species, "nature": ctx.mons[s].nature, "ability": ctx.mons[s].ability, "moves": ctx.mons[s].moves} for s in team]
+    return [{"species": m.species, "nature": m.nature, "ability": m.ability, "moves": m.moves} for m in (mon_of(ctx, s) for s in team)]
 
 
 def matrix(ctx, team) -> dict:
-    return cells(ctx.bridge, {s: ctx.mons[s] for s in team}, ctx.enemy_packed, ctx.arena)
+    return cells(ctx.bridge, {s: mon_of(ctx, s) for s in team}, ctx.enemy_packed, ctx.arena)
 
 
-def _run_boss(args, name: str) -> dict:
-    """The planned-pool probe: the best six in everything catchable."""
-    ctx = setup(args, name)
-    starter = ctx.rng.choice(rp.STARTERS)  # one per run, at random across every generation
-    pool = sorted(set(ctx.pool) | {starter})
-    print(f"{name}: starter {starter}; boss attacks with {sorted(ctx.boss_types)}", flush=True)
-    solo, solo_vs = solo_stage(ctx, pool)
-    short = [sp for _, sp in solo[:SHORT]]
-    print(f"{name}: A solo scores for {len(solo)} species in {time.time() - ctx.t0:.0f}s; top: "
-          + ", ".join(f"{sp} {pr:.2f}" for pr, sp in solo[:8]), flush=True)
-    emit(args, "stage_a", boss=name, starter=starter, scored=len(solo), top=[(sp, round(pr, 3)) for pr, sp in solo[:SHORT]])
-    team = greedy(ctx, short)
-    for _ in range(SUBSETS):
-        team_value(ctx, tuple(sorted(ctx.rng.sample(short, 6))))
-    ranked = sorted((t for t in ctx.team_score if len(t) == 6), key=ctx.team_score.get, reverse=True)  # full teams only
-    print(f"{name}: B {len(ctx.team_score)} teams scored in {time.time() - ctx.t0:.0f}s; greedy {team} "
-          f"({ctx.team_score[team]:.2f}); best fast {ranked[0]} ({ctx.team_score[ranked[0]]:.2f})", flush=True)
-    top = list(dict.fromkeys([team] + ranked))[:TOP]
-    cteam = None
-    if args.chooser == "cover":
-        cteam = cover_team(ctx, short + [sp for sp in pool if sp not in short])
-        print(f"{name}: cover team {cteam}", flush=True)
-        top = list(dict.fromkeys([cteam] + top))[:TOP]
-    emit(args, "stage_b", boss=name, scored=len(ctx.team_score), greedy=[list(team), round(ctx.team_score[team], 3)],
-         fast=[list(ranked[0]), round(ctx.team_score[ranked[0]], 3)], cover=list(cteam) if cteam else None)
+# The planned-pool probe: the best six in everything catchable. Three fan-outs over all the
+# bosses at once (2026-10-12; bosses ran one after another before, each stage C serial):
+# prelude_job (stages A + B, one job per boss), battle_job (every team x battle index),
+# threats_job (the duels, one job per boss); the main process folds, prints and emits.
+
+
+def prelude_job(args, name: str) -> dict | None:
+    """Stages A and B for one boss: the starter, the solo ranking, the shortlist, the greedy /
+    fast / cover teams and the TOP list to play under search. None on failure."""
+    try:
+        ctx = worker_ctx(args, name)
+        starter = ctx.rng.choice(rp.STARTERS)  # one per run, at random across every generation
+        pool = sorted(set(ctx.pool) | {starter})
+        print(f"{name}: starter {starter}; boss attacks with {sorted(ctx.boss_types)}", flush=True)
+        solo, _ = solo_stage(ctx, pool)
+        short = [sp for _, sp in solo[:SHORT]]
+        print(f"{name}: A solo scores for {len(solo)} species in {time.time() - ctx.t0:.0f}s; top: "
+              + ", ".join(f"{sp} {pr:.2f}" for pr, sp in solo[:8]), flush=True)
+        emit(args, "stage_a", boss=name, starter=starter, scored=len(solo), top=[(sp, round(pr, 3)) for pr, sp in solo[:SHORT]])
+        team = greedy(ctx, short)
+        for _ in range(SUBSETS):
+            team_value(ctx, tuple(sorted(ctx.rng.sample(short, 6))))
+        ranked = sorted((t for t in ctx.team_score if len(t) == 6), key=ctx.team_score.get, reverse=True)  # full teams only
+        print(f"{name}: B {len(ctx.team_score)} teams scored in {time.time() - ctx.t0:.0f}s; greedy {team} "
+              f"({ctx.team_score[team]:.2f}); best fast {ranked[0]} ({ctx.team_score[ranked[0]]:.2f})", flush=True)
+        top = list(dict.fromkeys([team] + ranked))[:TOP]
+        cteam = None
+        if args.chooser == "cover":
+            cteam = cover_team(ctx, short + [sp for sp in pool if sp not in short])
+            print(f"{name}: cover team {cteam}", flush=True)
+            top = list(dict.fromkeys([cteam] + top))[:TOP]
+        emit(args, "stage_b", boss=name, scored=len(ctx.team_score), greedy=[list(team), round(ctx.team_score[team], 3)],
+             fast=[list(ranked[0]), round(ctx.team_score[ranked[0]], 3)], cover=list(cteam) if cteam else None)
+        labels = {team: "greedy", ranked[0]: "fast"}
+        if args.chooser == "cover":
+            labels[cteam] = "cover"
+        return {"starter": starter, "pool": pool, "short": short, "top": top, "labels": labels}
+    except Exception as e:
+        import traceback
+        print(f"{name} FAILED: {type(e).__name__}: {e}\n{traceback.format_exc()[-800:]}", flush=True)
+        return None
+
+
+def threats_job(args, name: str, deaths_by: dict, candidates: list[str], exclude: tuple = ()) -> list[dict]:
+    """threats_of() for one boss's best team (the duels; a pool job)."""
+    return threats_of(worker_ctx(args, name), (collections.Counter(deaths_by), None), candidates, exclude)
+
+
+def pool_row(args, ctx, pre: dict, played: dict, threats: list[dict]) -> dict:
+    """One boss's stage-C report and row from the fanned-out results (the main process)."""
+    name, top, labels, short, pool = ctx.name, pre["top"], pre["labels"], pre["short"], pre["pool"]
     results, attr, clean = [], {}, {}
-    labels = {team: "greedy", ranked[0]: "fast"}
-    if args.chooser == "cover":
-        labels[cteam] = "cover"
     for t in top:
-        w, d, pr, attr[t], clean[t] = searched(ctx, t)
+        w, d, pr, attr[t], clean[t] = played[t]
         results.append((w, -d, t, d))
         print(f"{name}: C {labels.get(t, 'top'):<6} {list(t)}: win {w:.0%} deaths/mon {d:.2f} deathless {clean[t]:.0%}", flush=True)
         emit(args, "team", boss=name, label=labels.get(t, "top"), team=list(t), sets=sets_of(ctx, t), win=w, deaths_per_mon=d,
@@ -332,8 +398,7 @@ def _run_boss(args, name: str) -> dict:
     w, _, t, d = results[0]
     print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} deathless {clean[t]:.0%} "
           f"{list(t)}  (others: {', '.join(f'{w_:.0%}' for w_, _, _, _ in results[1:])})  ({time.time() - ctx.t0:.0f}s)", flush=True)
-    print(f"{name:<10} sets: " + ", ".join(f"{show(ctx.mons[s])} {ctx.mons[s].moves}" for s in t), flush=True)
-    threats = threats_of(ctx, attr[t], pool)
+    print(f"{name:<10} sets: " + ", ".join(f"{show(mon_of(ctx, s))} {mon_of(ctx, s).moves}" for s in t), flush=True)
     say_threats(ctx, threats)
     emit(args, "threats", boss=name, team=list(t), threats=threats)
     repaired = None
@@ -349,48 +414,115 @@ def _run_boss(args, name: str) -> dict:
         repaired = {"team": list(rteam), "win": rw, "deaths_per_mon": rd, "deathless": rc, "counters_offered": extra, "counters_taken": taken}
         emit(args, "repaired", boss=name, **repaired, sets=sets_of(ctx, rteam))
         print(f"{name:<10} repaired: counters offered {extra}, taken {taken}: win {rw:5.0%} deaths/mon {rd:.2f} deathless {rc:.0%} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - ctx.t0:.0f}s)", flush=True)
-    rows = [{"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser, "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena,
-             "unmodelled": ctx.unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d, "deathless": clean[t], "n": args.n_search,
-             "all": [(list(t_), w_, d_, clean[t_]) for w_, _, t_, d_ in results], "threats": threats, "repaired": repaired,
-             "starter": starter, "sets": sets_of(ctx, t), "enemy": ctx.enemy_species, "pool": len(pool), "progress": ctx.progress, "shortlist": short}]
+    row = {"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser, "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena,
+           "unmodelled": ctx.unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d, "deathless": clean[t], "n": args.n_search,
+           "all": [(list(t_), w_, d_, clean[t_]) for w_, _, t_, d_ in results], "threats": threats, "repaired": repaired,
+           "starter": pre["starter"], "sets": sets_of(ctx, t), "enemy": ctx.enemy_species, "pool": len(pool), "progress": ctx.progress, "shortlist": short}
+    emit(args, "boss_done", boss=name, row=row)
     ctx.bridge.close()
-    return {"rows": rows}
+    return row
 
 
-def _run_boxes(args, name: str) -> dict:
-    """The sampled-box probe (the milestone): N boxes drawn by rarity (rr_probe.sample_box),
-    the chooser picks six from each (greedy on the calc bot), the team plays the boss under
-    search; per box the killers and the pool species *outside the box* that beat them — what
-    the box was missing and where it is caught."""
-    ctx = setup(args, name)
-    solo, solo_vs = solo_stage(ctx, ctx.pool + [sp for sp in rp.STARTERS if sp not in ctx.pool])
-    print(f"{name}: A solo scores for {len(solo)} species (pool + starters) in {time.time() - ctx.t0:.0f}s", flush=True)
-    emit(args, "stage_a", boss=name, scored=len(solo), top=[(sp, round(pr, 3)) for pr, sp in solo[:SHORT]])
-    boxes, missing = [], collections.Counter()
-    for i in range(args.boxes):
+def best_of(played: dict, top: list) -> tuple:
+    """The best team by (win, -deaths, team) — the order pool_row reports."""
+    return max(top, key=lambda t: (played[t][0], -played[t][1], t))
+
+
+def run_pool(args, names: list[str]) -> list[dict]:
+    ctxs = {}
+    for n in names:
+        try:
+            ctxs[n] = _CTX[n] = setup(args, n)  # the banner, boss_start; the fold's context (and the serial path's)
+        except KeyError as e:
+            print(f"{n} FAILED: {e}", flush=True)
+            emit(args, "boss_failed", boss=n, error=str(e))
+    names = [n for n in names if n in ctxs]
+    pres = dict(zip(names, fan(prelude_job, [(args, n) for n in names])))
+    names = [n for n in names if pres[n] is not None]
+    for n in set(ctxs) - set(names):
+        emit(args, "boss_failed", boss=n, error="prelude failed")
+    k, n_s = 0, args.n_search
+    battles = fan(battle_job, [(args, n, t, i) for n in names for t in pres[n]["top"] for i in range(n_s)])
+    played = {}
+    for n in names:
+        for t in pres[n]["top"]:
+            played[n, t] = fold(battles[k:k + n_s])
+            k += n_s
+    best = {n: best_of({t: played[n, t] for t in pres[n]["top"]}, pres[n]["top"]) for n in names}
+    threats = fan(threats_job, [(args, n, dict(played[n, best[n]][3][0]), pres[n]["pool"]) for n in names])
+    return [pool_row(args, ctxs[n], pres[n], {t: played[n, t] for t in pres[n]["top"]}, th) for n, th in zip(names, threats)]
+
+
+# The sampled-box probe (the milestone): N boxes per boss drawn by rarity (rr_probe.sample_box),
+# the chooser picks six from each, the team plays the boss under search; per box the killers
+# and the pool species *outside the box* that beat them — what the box was missing and where
+# it is caught. Every box is seeded on its own (sample, engine, AI tie-breaks, rollouts), so
+# the boxes are pool jobs spread over the workers (2026-10-12: 30 boxes x 2 bosses ran on 2
+# cores, 165 min); a worker builds a boss's context once and keeps it.
+
+
+def box_job(args, name: str, i: int) -> dict | None:
+    """One box: the chooser's six, the searched play, the threats. None on failure."""
+    try:
+        ctx = worker_ctx(args, name)
         box = rp.sample_box(random.Random(f"{name}-box-{args.seed}-{i}"), ctx.progress, ctx.known)
         species = [sp for sp, _ in box if mon_of(ctx, sp) is not None]
         team = cover_team(ctx, species) if args.chooser == "cover" else greedy(ctx, species)
         w, d, pr, attr, cl = searched(ctx, team)
         threats = threats_of(ctx, attr, ctx.pool, exclude=set(species))
-        for th in threats:
-            for sp, _, _, wh in th["counters"][:1]:
-                missing[(th["enemy"], sp, wh)] += 1
-        boxes.append({"box": box, "team": list(team), "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl, "threats": threats})
-        emit(args, "box", boss=name, i=i, of=args.boxes, **boxes[-1], deaths_by=dict(attr[0]), matrix=matrix(ctx, team))
+        out = {"box": box, "team": list(team), "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl, "threats": threats}
+        emit(args, "box", boss=name, i=i, of=args.boxes, **out, deaths_by=dict(attr[0]), matrix=matrix(ctx, team))
         print(f"{name:<10} box {i + 1:>2}/{args.boxes}: {len(box)} mons, team {list(team)} -> win {w:5.0%} deaths/mon {d:.2f} deathless {cl:.0%}; "
               + "; ".join(f"{th['enemy']} killed {th['deaths']}, missing " + (", ".join(f"{sp} ({wh})" for sp, _, _, wh in th["counters"][:1]) or "no counter in the pool") for th in threats)
               + f"  ({time.time() - ctx.t0:.0f}s)", flush=True)
-    wins = [b["win"] for b in boxes]
-    row = {"boss": name, "mode": "boxes", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser, "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena,
-           "n": args.n_search, "boxes": boxes, "mean_win": sum(wins) / len(wins), "p_clear": sum(w_ >= 0.5 for w_ in wins) / len(wins),
-           "mean_deaths": sum(b["deaths_per_mon"] for b in boxes) / len(boxes), "mean_deathless": sum(b["deathless"] for b in boxes) / len(boxes),
-           "missing": [(k, v) for k, v in missing.most_common(6)],
-           "enemy": ctx.enemy_species, "pool": len(ctx.pool), "progress": ctx.progress}
-    print(f"{name:<10} {args.boxes} boxes: mean win {row['mean_win']:.0%}, boxes with a >=50% team {row['p_clear']:.0%}, deaths/mon {row['mean_deaths']:.2f}, deathless wins {row['mean_deathless']:.0%}; "
-          f"most missed: " + ", ".join(f"{sp} vs {en} ({wh}) x{v}" for (en, sp, wh), v in row["missing"][:3]), flush=True)
+        return out
+    except Exception as e:
+        import traceback
+        print(f"{name} box {i + 1} FAILED: {type(e).__name__}: {e}\n{traceback.format_exc()[-800:]}", flush=True)
+        return None
+
+
+def boxes_start(args, name: str) -> dict | None:
+    """Per boss, before the box jobs: the banner, the boss_start event and the solo stage (A, a
+    few seconds; the dashboard's ranking). The row's header fields, or None without team data."""
+    try:
+        ctx = setup(args, name)
+    except KeyError as e:
+        print(f"{name} FAILED: {e}", flush=True)
+        emit(args, "boss_failed", boss=name, error=str(e))
+        return None
+    solo, _ = solo_stage(ctx, ctx.pool + [sp for sp in rp.STARTERS if sp not in ctx.pool])
+    print(f"{name}: A solo scores for {len(solo)} species (pool + starters) in {time.time() - ctx.t0:.0f}s", flush=True)
+    emit(args, "stage_a", boss=name, scored=len(solo), top=[(sp, round(pr, 3)) for pr, sp in solo[:SHORT]])
     ctx.bridge.close()
-    return {"rows": [row]}
+    return {"boss": name, "mode": "boxes", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser,
+            "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena, "n": args.n_search,
+            "enemy": ctx.enemy_species, "pool": len(ctx.pool), "progress": ctx.progress}
+
+
+def boxes_row(args, head: dict, boxes: list[dict | None]) -> dict:
+    """The boss's row from its boxes' results (failed boxes dropped and counted)."""
+    failed = sum(b is None for b in boxes)
+    boxes = [b for b in boxes if b is not None]
+    missing = collections.Counter()
+    for b in boxes:
+        for th in b["threats"]:
+            for sp, _, _, wh in th["counters"][:1]:
+                missing[(th["enemy"], sp, wh)] += 1
+    wins = [b["win"] for b in boxes]
+    row = {**head, "boxes": boxes, "failed": failed, "mean_win": sum(wins) / max(len(wins), 1), "p_clear": sum(w_ >= 0.5 for w_ in wins) / max(len(wins), 1),
+           "mean_deaths": sum(b["deaths_per_mon"] for b in boxes) / max(len(boxes), 1), "mean_deathless": sum(b["deathless"] for b in boxes) / max(len(boxes), 1),
+           "missing": [(k, v) for k, v in missing.most_common(6)]}
+    print(f"{head['boss']:<10} {len(boxes)} boxes{f' ({failed} failed)' if failed else ''}: mean win {row['mean_win']:.0%}, boxes with a >=50% team {row['p_clear']:.0%}, deaths/mon {row['mean_deaths']:.2f}, deathless wins {row['mean_deathless']:.0%}; "
+          f"most missed: " + ", ".join(f"{sp} vs {en} ({wh}) x{v}" for (en, sp, wh), v in row["missing"][:3]), flush=True)
+    emit(args, "boss_done", boss=head["boss"], row=row)
+    return row
+
+
+def run_boxes(args, names: list[str]) -> list[dict]:
+    heads = [h for h in (boxes_start(args, n) for n in names) if h]
+    results = fan(box_job, [(args, h["boss"], i) for h in heads for i in range(args.boxes)])
+    return [boxes_row(args, h, results[k * args.boxes:(k + 1) * args.boxes]) for k, h in enumerate(heads)]
 
 
 def main() -> None:
@@ -418,12 +550,13 @@ def main() -> None:
     if args.out:
         events_path(args.out).unlink(missing_ok=True)
     emit(args, "start", config=vars(args), bosses=names, mode="boxes" if args.boxes else "pool", pid=os.getpid())
-    if args.workers > 1:
-        with mp.get_context("spawn").Pool(min(args.workers, len(names))) as pool:
-            parts = pool.starmap(run_boss, [(args, n) for n in names])
-    else:
-        parts = [run_boss(args, n) for n in names]
-    rows = [r for p in parts for r in p["rows"]]
+    global _POOL, _MAIN
+    _MAIN = True
+    # bosses run in the main process one after another; the pool spreads their boxes (--boxes)
+    # or their stage-C battles (teams x n_search), the units that are seeded on their own
+    with (mp.get_context("spawn").Pool(args.workers) if args.workers > 1 else contextlib.nullcontext()) as _POOL:
+        rows = run_boxes(args, names) if args.boxes else run_pool(args, names)
+    _POOL = None
     if args.out:
         Path(args.out).write_text("".join(json.dumps(r) + "\n" for r in rows))
     emit(args, "end", minutes=round((time.time() - t0) / 60, 1))

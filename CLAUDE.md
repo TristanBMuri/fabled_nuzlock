@@ -31,10 +31,10 @@ The prior attempt lives at `~/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_
 ```bash
 uv sync                                            # deps; the Showdown clone: README → Setup
 uv run pytest -q                                   # 22 tests, ~2 s (node + built Showdown)
-# the benchmark table (~30 min, 10 workers x ~1 GB; check free -g first)
-uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 10
+# the benchmark table (~35 min, 20 workers x ~1 GB; check free -g first)
+uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 20
 # League levers: paired replay from the saved openers (~30 min)
-uv run python scripts/league_test.py --snapshots results/league_snapshots --replays 4 --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 10 --out logs/league_x.jsonl --vs results/league_base.jsonl
+uv run python scripts/league_test.py --snapshots results/league_snapshots --replays 4 --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 20 --out logs/league_x.jsonl --vs results/league_base.jsonl
 # the run dashboard (UI_TODO.md): probes with --out write <out>.events.jsonl
 uv run python ui/build.py --serve                  # http://localhost:8765
 ```

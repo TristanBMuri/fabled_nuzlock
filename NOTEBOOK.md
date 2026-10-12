@@ -2077,3 +2077,105 @@ Gyarados, Roserade, Mantine, Lapras the most killed). The jump from the 2026-09-
 confounds two changes (the cover base and the healed League); not separated — a paired
 League replay (`league_test.py --vs`) with and without the heal would split them.
 The benchmark is now "the League under the Gen 4 AI"; the route layer is a regression check.
+
+## 2026-10-12 — Speed-up 1: the RR box probe spread over workers (`results/rr_cfru_boxes_par.*`)
+
+The task from HANDOFF.md: the same results in a fraction of the wall-clock, every step
+shown to change nothing on paired seeds. First the structure, then the profile.
+
+**Where the RR box run's time went.** `rr_team_probe.py --boxes` pooled over *bosses*, so
+the 2026-10-12 table (Brock + Misty, 30 boxes each) ran on 2 cores for 165 min with 30
+boxes per boss one after another (Misty ~230 s, Brock ~310 s per box). A box is
+seeded on its own (the sample, the engine, the RR AI's tie-breaks, the searcher's
+rollouts), so a box is now a pool job (`box_job`; a worker builds the boss context once
+and keeps it, `_CTX`); the per-boss banner / solo stage run first in the main process
+(`boxes_start`), the row is folded from the jobs (`boxes_row`). The dashboard sorts a
+boss's boxes by index (the workers finish them out of order).
+
+**Acceptance (exact).** Two serial runs of Misty boxes 1–2 agree with each other and with
+the 2-worker run on team, win, deaths, deathless and threats; the full table on 20
+workers (`results/rr_cfru_boxes_par.{log,jsonl}`) matches `results/rr_cfru_boxes.jsonl`
+on all 60 boxes (team, win, deaths/mon, deathless, threats; compare script in the
+notebook's spirit: per box, per field):
+
+  run                       workers   min   Brock mean win / ≥50% / d/mon / deathless   Misty
+  2026-10-12 serial            2     165      75% / 93% / 0.54 / 11%                   51% / 53% / 0.72 / 4%
+  boxes as jobs               20      22      identical                                identical
+
+7.5x; 60 jobs on 20 workers is 3 rounds with Brock's longer boxes in the tail (30 workers
+would be 2 rounds, ~30 GB). Per-box time under 20-way contention equals the serial time
+(first finishers 233 s), so the machine is not the limit yet.
+
+**Profile of one Misty box** (wall-clock split, no profiler, n_search=2, measured while the
+20 workers ran): bridge `choose` 44% (1.0 ms per turn: the Node engine + the protocol
+round trip), the RR AI 24% (0.67 ms per decision), the calc bot 13% (0.33 ms), forks 3%,
+the rest (mirror feeding, attribution) 13%. Under cProfile the damage formula
+(`calc_bot.dmg_frac`, 13.4M calls per box, both AIs) is the largest Python item and a
+third of it is poke-env's `Move.entry` property chain. The searched play is 97% of a
+box; the threat duels most of the rest.
+
+**Speed-up 2: the pool probe's stage C as battle jobs** (`results/rr_cfru_pool_par.*`). The
+planned-pool form pooled over bosses too, and its time is stage C: up to seven teams × 30
+searched battles, one after another per boss (151 min for Brock + Misty on 2 cores). A
+searched battle is seeded on its own (engine seed, the AI's tie-breaks, the rollouts, all
+by battle index), so `one_battle` is the pool job and `searched_many` fans the teams' battles
+out at once (`fan` / `_POOL`; a worker keeps its boss context, `worker_ctx`). Stages A / B
+(~1 min per boss) and the threat duels stay in the main process. Acceptance: identical to
+`results/rr_cfru_pool.jsonl` on every team's win / deaths / deathless, the best team, the
+threats and the shortlist, for both bosses.
+
+  run                       workers   min   Brock best win / d/mon / deathless   Misty
+  2026-10-12 serial            2     151      100% / 0.08 / 63%                  73% / 0.57 / 3%
+  stage C as battle jobs      20      25      identical                          identical
+
+**The Node side is the engine.** One searched Misty battle: the `choose` round trip is 0.98
+ms per turn (6 KB reply), JSON parse 0.03 ms, feeding both mirrors 0.18 ms. In pure Node
+(random choices on the same matchup, the RR fork) `Battle.choose` is 1.09 ms per turn and
+sendUpdates + channel extraction + stringify 0.025 ms; a fork (toJSON → fromJSON) 1.5 ms.
+V8 young-generation flags (`--max-semi-space-size`) change nothing. Nothing to shave in the
+bridge; the engine's turn is the floor of a rollout turn.
+
+**Speed-up 3: the damage formula memoised** (`calc_bot.dmg_frac` → `_DMG`). Both AIs (the
+calc bot, the RR AI, the Gen 4 AI) ask the formula the same question many times per turn
+and across rollouts: 13.4M calls per searched Misty box, the largest Python item under
+cProfile (a third of it poke-env's `Move.entry` property chain). The memo key is every
+input the formula reads — move id and power override, each side's species, level, stats,
+base stats, boosts, status, types, ability and item, the weather and terrain, `att_own`,
+`with_acc`, `FIELD_AWARE` — so it is exact by construction (HP is not an input: the
+formula returns a fraction of max HP). Checks: the same searched Misty battle plays the
+same 25,048 turns in 46.5 s instead of 55.3 s (-16%, both under the 20-worker load);
+Misty boxes 1–2 identical to the serial baseline (team, win, deaths, threats).
+
+## 2026-10-12 — Where a BDSP episode's time goes (seed 300, Gen 4 AI, the benchmark flags)
+
+One timed full-game episode (wall-clock, no profiler, wrappers on the planner's party
+choice, the risk queries and the runner's fights; scratch script, numbers below):
+
+  total 2129 s = party choice 1632 s (77%) + fights 496 s (395 fights, 14 deep) + rest 1 s
+  party choice = cover base 5 s + risk queries 1614 s: 46,614 estimate() calls (8 fast
+  battles each) + 193 block calls at the League opener
+
+  trainers     fights   choose    fight   queries   box (alive)
+    0- 59        57       38 s     34 s     1,395     4-13
+   59-167       106      257 s     66 s     8,662    13-24
+  167-300       129      581 s    116 s    18,147    25-36
+  300-398        97      538 s    109 s    18,199    36-39
+  398-405         2      216 s     77 s       392    38-39   (the League opener's block query)
+
+The swap scoring grows with the box (≈ 6 × box candidates per trainer, each 8 battles) and
+is three quarters of the episode; search is a quarter. With one episode per worker (20
+workers, approved today) the benchmark is bounded by the slowest episode, ~36 min instead
+of 99; inside an episode the exact levers are small (the damage memo above applies to the
+calc bot and the Gen 4 AI; the Node turn is the floor), so the lever is the number of
+queries — a decision change, measured below.
+
+**Acceptance of 1–3 together: the early-boss table** (`results/rr_cfru_early_par.*`, the 8
+singles bosses #2–#16, 6 teams × 30 searched battles each, bosses one after another with
+their battles fanned out, the memo in): identical to `results/rr_cfru_early.jsonl` on every
+team's win / deaths / deathless, best team, threats and shortlist for all 8 bosses; 119 →
+40 min on 20 workers. Found on the way: a worker kept one context (a ~200 MB Node bridge)
+per boss it had seen — 121 bridges / 41 GB at 5 of 8 bosses — fixed: one context per
+worker, the previous bridge closed on a boss switch (`worker_ctx`). The per-boss serial
+chain (stages A + B, then the fan-out, then the duels, per boss) is what the three-phase
+version (`run_pool`: preludes, all battles, all duels, each one fan-out over every boss)
+removes; its acceptance is the same table again (`results/rr_cfru_early_par2.*`, below).
