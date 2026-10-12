@@ -1,0 +1,13 @@
+team: [('grimer', 'Adamant', 'Stench', ['poisonfang', 'dig', 'thunderpunch', 'thief']), ('gyarados', 'Jolly', 'Intimidate', ['thrash', 'icefang', 'bite', 'icywind']), ('hariyama', 'Adamant', 'Thick Fat', ['vitalthrow', 'dig', 'thunderpunch', 'upperhand']), ('parasect', 'Adamant', 'Dry Skin', ['leechlife', 'dig', 'crosspoison', 'spore']), ('toucannon', 'Adamant', 'Frisk', ['beakblast', 'uturn', 'steelwing', 'roost']), ('crobat', 'Adamant', 'Infiltrator', ['poisonfang', 'pluck', 'uturn', 'roost'])]
+enemy: [('Politoed', 'iapapaberry', 'drizzle', 'flipturn,scald,earthquake,toxic'), ('Ludicolo', 'sitrusberry', 'swiftswim', 'gigadrain,scald,aurorabeam,thunderpunch'), ('Mantine', 'wacanberry', 'swiftswim', 'scald,hurricane,roost,hiddenpowergrass'), ('Clodsire', 'blacksludge', 'waterabsorb', 'poisonjab,bulldoze,recover,toxic'), ('Starmie', 'mysticwater', 'analytic', 'scald,thunderbolt,psyshock,aurorabeam'), ('Toxicroak', 'lifeorb', 'dryskin', 'swordsdance,drainpunch,poisonjab,suckerpunch')]
+death weight 6.0, preserve False, matchup True, field-aware True, enemy AI noswitch
+
+MISTY: 6/30 wins, 0 deathless, 171 deaths (5.7 per fight), fights last 26 turns, enemy switches 0.6 per fight
+deaths by enemy mon: [('Mantine', 66), ('Toxicroak', 28), ('Ludicolo', 28), ('Politoed', 23), ('Starmie', 19), ('Clodsire', 7)]
+deaths by enemy move: [('Mantine Hurricane', 40), ('Mantine Scald', 24), ('Ludicolo Scald', 11), ('Toxicroak Sucker Punch', 11), ('Politoed Earthquake', 10), ('Toxicroak Poison Jab', 10), ('Starmie Thunderbolt', 8), ('Ludicolo Aurora Beam', 7)]
+which of ours: [('Hariyama', 30), ('Gyarados', 30), ('Crobat', 29), ('Grimer', 29), ('Toucannon', 29), ('Parasect', 24)]
+HP before the killing hit: [('low (<0.5)', 138), ('half+ (0.5-0.9)', 27), ('full (>=0.9)', 6)]
+switched in that turn: [('was in', 148), ('switched in', 23)]
+fight outcome: [('lost', 144), ('won', 27)]
+by turn: [(0, 15), (5, 24), (10, 26), (15, 37), (20, 34), (25, 19), (30, 16)]
+wrote /home/tristan/CodingProjects/nuzlock_rl/logs/deaths_misty_dw6_matchup_ai-noswitch.json

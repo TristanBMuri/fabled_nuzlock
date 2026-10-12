@@ -1,0 +1,13 @@
+team: [('grimer', 'Adamant', 'Stench', ['poisonfang', 'dig', 'thunderpunch', 'thief']), ('gyarados', 'Jolly', 'Intimidate', ['thrash', 'icefang', 'bite', 'icywind']), ('hariyama', 'Adamant', 'Thick Fat', ['vitalthrow', 'dig', 'thunderpunch', 'upperhand']), ('parasect', 'Adamant', 'Dry Skin', ['leechlife', 'dig', 'crosspoison', 'spore']), ('toucannon', 'Adamant', 'Frisk', ['beakblast', 'uturn', 'steelwing', 'roost']), ('crobat', 'Adamant', 'Infiltrator', ['poisonfang', 'pluck', 'uturn', 'roost'])]
+enemy: [('Politoed', 'iapapaberry', 'drizzle', 'flipturn,scald,earthquake,toxic'), ('Ludicolo', 'sitrusberry', 'swiftswim', 'gigadrain,scald,aurorabeam,thunderpunch'), ('Mantine', 'wacanberry', 'swiftswim', 'scald,hurricane,roost,hiddenpowergrass'), ('Clodsire', 'blacksludge', 'waterabsorb', 'poisonjab,bulldoze,recover,toxic'), ('Starmie', 'mysticwater', 'analytic', 'scald,thunderbolt,psyshock,aurorabeam'), ('Toxicroak', 'lifeorb', 'dryskin', 'swordsdance,drainpunch,poisonjab,suckerpunch')]
+death weight 6.0, preserve False, matchup True, field-aware True, enemy AI base
+
+MISTY: 19/30 wins, 0 deathless, 127 deaths (4.2 per fight), fights last 30 turns, enemy switches 2.2 per fight
+deaths by enemy mon: [('Mantine', 43), ('Ludicolo', 35), ('Starmie', 16), ('Toxicroak', 15), ('Politoed', 14), ('Clodsire', 4)]
+deaths by enemy move: [('Mantine Scald', 21), ('Mantine Hurricane', 19), ('Ludicolo Aurora Beam', 15), ('Ludicolo Scald', 13), ('Starmie Aurora Beam', 6), ('Starmie Thunderbolt', 6), ('Toxicroak Poison Jab', 6), ('Politoed Flip Turn', 5)]
+which of ours: [('Hariyama', 27), ('Gyarados', 27), ('Grimer', 22), ('Toucannon', 22), ('Crobat', 17), ('Parasect', 12)]
+HP before the killing hit: [('low (<0.5)', 112), ('half+ (0.5-0.9)', 12), ('full (>=0.9)', 3)]
+switched in that turn: [('was in', 105), ('switched in', 22)]
+fight outcome: [('lost', 66), ('won', 61)]
+by turn: [(0, 16), (5, 26), (10, 23), (15, 21), (20, 16), (25, 14), (30, 11)]
+wrote /home/tristan/CodingProjects/nuzlock_rl/logs/deaths_misty_dw6_matchup.json

@@ -1,0 +1,13 @@
+team: [('dewott', 'Timid', 'Torrent', ['waterpulse', 'aerialace', 'revenge', 'watergun']), ('watchog', 'Adamant', 'Analytic', ['headbutt', 'crunch', 'lowkick', 'hypnosis']), ('raticatealola', 'Adamant', 'Gluttony', ['hyperfang', 'knockoff', 'thief', 'feintattack']), ('nuzleaf', 'Jolly', 'Chlorophyll', ['suckerpunch', 'razorleaf', 'flash', 'thief']), ('leavanny', 'Adamant', 'Swarm', ['lunge', 'razorleaf', 'slash', 'pounce']), ('linoone', 'Adamant', 'Pickup', ['headbutt', 'playrough', 'thief', 'tackle'])]
+enemy: [('Hippopotas', 'berryjuice', 'sandstream', 'bulldoze,rocktomb,toxic,slackoff'), ('Cacnea', 'eviolite', 'sandrush', 'poweruppunch,bulletseed,thunderpunch,pinmissile'), ('Lunatone', 'lumberry', 'levitate', 'ancientpower,psybeam,hiddenpowerground,icywind'), ('Lileep', 'oranberry', 'suctioncups', 'stockpile,recover,hiddenpowerrock,megadrain'), ('Archen', 'iapapaberry', 'defeatist', 'wingattack,rocktomb,bulldoze,facade'), ('Varoom', 'airballoon', 'overcoat', 'bulldoze,gyroball,toxic,protect')]
+death weight 6.0, preserve False, matchup True, field-aware True, enemy AI noswitch
+
+BROCK: 16/30 wins, 0 deathless, 136 deaths (4.5 per fight), fights last 26 turns, enemy switches 0.0 per fight
+deaths by enemy mon: [('Cacnea', 53), ('Lileep', 30), ('Archen', 20), ('Lunatone', 18), ('Varoom', 12), ('Hippopotas', 3)]
+deaths by enemy move: [('Lileep Mega Drain', 21), ('Cacnea Power-Up Punch', 18), ('Cacnea Pin Missile', 15), ('Cacnea Bullet Seed', 12), ('Archen Wing Attack', 12), ('Varoom residual/other', 10), ('Lunatone Ancient Power', 10), ('Lileep Hidden Power', 8)]
+which of ours: [('Nuzleaf', 26), ('Dewott', 23), ('Raticate', 23), ('Linoone', 22), ('Leavanny', 21), ('Watchog', 21)]
+HP before the killing hit: [('low (<0.5)', 126), ('half+ (0.5-0.9)', 7), ('full (>=0.9)', 3)]
+switched in that turn: [('was in', 111), ('switched in', 25)]
+fight outcome: [('lost', 84), ('won', 52)]
+by turn: [(0, 11), (5, 28), (10, 22), (15, 16), (20, 25), (25, 19), (30, 15)]
+wrote /home/tristan/CodingProjects/nuzlock_rl/logs/deaths_brock_dw6_matchup_ai-noswitch.json

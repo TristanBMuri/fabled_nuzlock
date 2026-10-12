@@ -1989,3 +1989,31 @@ against one that does not. So every cover / box / early-boss number before this 
 was against an enemy that sent in the wrong mon; they have to be rerun before anything
 else is tuned. Next on the AI: the tier ladder (AI_DIFF.md §3 item 1); A2.2 (ROM replay)
 stays the real check of both.
+
+## 2026-10-12 — CFRU move scoring in the AI port (AI_DIFF.md §3 items 1, 2, 5)
+
+`ai_util/rr_ai.py` scores moves the CFRU way now: every move starts at 100, negatives are
+soft (−10, −15 immune, −20 absorbed, recovery −10 at full / −9 at ≥90%, a second Protect
+−6 half the time), positives are the tier ladder keyed by `PredictFightingStyle`
+(kill / setup_stats / setup_status / stall / support classes): KO first +9, slow KO +8
+(+6 for setup_stats, none with Protect in the set), desperation priority +9, strongest
+attack +2, other attacks 0; Toxic / paralysis / burn / sleep via `IncreaseStatusViability`
+(+5 for a setup_status mon), recovery by `ShouldRecover` (damage calc + speed order, the
+50% roll), setup by `ShouldTryToSetUpStat` (+2 stage cap; Power-Up Punch and Stockpile
+recognised), Protect by `ShouldProtect`, pivots by `ShouldPivot` (+9 / −9). The old
+continuous scores, the type-matchup helpers and the weather table are deleted. Not ported:
+predicted-switch exceptions, Destiny Bond, the long tail of rare effects (score 100).
+
+Same paired check as the switching entry (`results/rr_cfrutier/`):
+
+  variant    Brock wins  deathless  deaths   Misty wins  deathless  deaths
+  base         26/30        2         80       19/30        0        127
+  tiebreak     30/30        6         55       25/30        2        105
+  noswitch     16/30        0        136        6/30        0        171
+  switching only (base / tiebreak): Brock 76 / 70, Misty 126 / 111
+
+The move choices changed as CFRU says they should (a Brock trace: Varoom Toxics every
+new mon and Protects, Hippopotas Toxics, Lileep Stockpiles then drains, Cacnea opens with
+Power-Up Punch), but the totals sit inside the tie-break noise: the switching was the part
+that mattered. The read-through port is complete enough to rerun the RR tables on it;
+what is left is the ROM check (A2.2).

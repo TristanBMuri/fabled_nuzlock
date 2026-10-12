@@ -109,7 +109,7 @@ def main() -> None:
     enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
     real = RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50)  # p2; the search keeps the base port
     real.switching = args.ai != "noswitch"
-    real.ko_bonus = {"ko+50": 45, "ko-50": 15}.get(args.ai, real.ko_bonus)
+    real.ko_bonus = round(real.ko_bonus * {"ko+50": 1.5, "ko-50": 0.5}.get(args.ai, 1))
     opponent = player_brain(real) if args.ai in ("noswitch", "ko+50", "ko-50") else enemy
     calc = calc_brain()
     if args.preserve or args.matchup or args.blind_field:

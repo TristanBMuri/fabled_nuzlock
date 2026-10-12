@@ -23,7 +23,6 @@ from poke_env.battle.pokemon_type import PokemonType
 from poke_env.battle.side_condition import STACKABLE_CONDITIONS, SideCondition
 from poke_env.battle.status import Status
 from poke_env.battle.target import Target
-from poke_env.battle.weather import Weather
 from poke_env.player.battle_order import BattleOrder, DefaultBattleOrder
 from poke_env.player.player import Player
 
@@ -31,7 +30,7 @@ from ai_util.calc_bot import dmg_frac, effectiveness, stat
 
 # CFRU starts every legal move at 100. Dumped moves go to 0.
 BASE_SCORE = 100
-KO_BONUS = 30
+KO_BONUS = 9  # CFRU: a KO that goes first
 
 HAZARDS = {
     "stealthrock": SideCondition.STEALTH_ROCK,
@@ -68,18 +67,6 @@ ABSORB = {  # the abilities an absorb switch looks for, by the predicted move's 
 }
 PIVOTS = {"uturn", "voltswitch", "flipturn", "partingshot", "teleport"}
 FIRST_TURN_ONLY = {"fakeout", "firstimpression"}
-WEATHER_BOOST = {
-    Weather.SUNNYDAY: PokemonType.FIRE,
-    Weather.DESOLATELAND: PokemonType.FIRE,
-    Weather.RAINDANCE: PokemonType.WATER,
-    Weather.PRIMORDIALSEA: PokemonType.WATER,
-}
-WEATHER_CUT = {
-    Weather.SUNNYDAY: PokemonType.WATER,
-    Weather.DESOLATELAND: PokemonType.WATER,
-    Weather.RAINDANCE: PokemonType.FIRE,
-    Weather.PRIMORDIALSEA: PokemonType.FIRE,
-}
 STATUS_BLOCK_ABILITIES = {
     Status.PAR: {"limber", "comatose"},
     Status.BRN: {"waterveil", "waterbubble", "comatose", "thermalexchange"},
@@ -148,171 +135,308 @@ class RadicalRedAI(Player):
 
     # --- scoring (CFRU: negatives then positives) ---
 
-    def _score_move(
-        self, battle: Battle, active: Pokemon, opponent: Pokemon, move: Move
-    ) -> int:
-        score = BASE_SCORE
-        dumped = self._negatives(battle, active, opponent, move)
-        if dumped is not None:
-            return dumped
-        score += self._positives(battle, active, opponent, move)
-        return score
+    # --- scoring (CFRU ai_negatives.c / ai_positives.c / ai_advanced.c, singles) ---
+    # Every move starts at 100; negatives are soft (-10, -15 immune, -20 absorbed) so a bad move
+    # is still clicked when nothing else is; positives are small tiers keyed by the mon's
+    # fighting-style class: KO first +9, slow KO +8 / +6, strongest attack +2, other attacks 0,
+    # status / setup / recovery +4..+7 when their damage-calc check passes. Not ported: the
+    # predicted-switch exceptions, Destiny Bond / Sucker Punch interplay in the KO tier, the
+    # long tail of rare effects (screens, weather, Trick, Taunt ...: they score 100).
 
-    def _negatives(
-        self, battle: Battle, active: Pokemon, opponent: Pokemon, move: Move
-    ) -> int | None:
-        """Return 0 if the move should never be used, else None."""
+    def _class(self, mon) -> str:
+        """PredictFightingStyle, singles."""
+        attacks = status = screens = hazards = 0
+        boosting = healing = phazing = leech = protect = False
+        for m in mon.moves.values():
+            if m.id == "batonpass":
+                return "batonpass"
+            if m.id in ("haze", "clearsmog"):
+                return "phazer"
+            if m.id in ("wish", "healbell", "aromatherapy"):
+                return "cleric"
+            if m.id in ("meanlook", "block", "spiderweb", "bind", "wrap", "firespin", "whirlpool", "sandtomb",
+                        "clamp", "infestation", "magmastorm", "snaptrap", "thundercage"):
+                return "stall"
+            if mon.item in ("choiceband", "choicespecs", "choicescarf", "assaultvest"):
+                return "kill"
+            phazing |= m.id in ("roar", "whirlwind", "dragontail", "circlethrow")
+            screens += m.id in ("reflect", "lightscreen") or 2 * (m.id == "auroraveil")
+            leech |= m.id == "leechseed"
+            protect |= m.is_protect_move
+            healing |= m.id in RECOVERY or bool(m.heal) or m.id == "swallow"
+            if m.category != MoveCategory.STATUS:
+                attacks += 1
+            elif m.id in HAZARDS:
+                hazards += 1
+            elif self._self_boosts(m) or m.id == "stockpile":
+                boosting = True
+            else:
+                status += 1
+        if screens >= 2:
+            return "screens_sweeper" if attacks >= 2 else "screens"
+        if hazards:
+            return "phazer" if phazing else "hazards"
+        if attacks >= 3:
+            return "setup_stats" if boosting else "setup_status" if status or phazing else "kill"
+        if leech and protect:
+            return "stall"
+        if attacks >= 2 and (boosting or status or phazing):
+            return "setup_stats" if boosting else "setup_status"
+        return "stall"
+
+    def _status_viability(self, cls: str, boost: int, battle, active, foe) -> int:
+        """IncreaseStatusViability."""
+        if cls == "setup_stats":
+            return 3 if not self._can_ko(battle, foe, active, False, hits=2) else 0
+        return {"setup_status": 4 + boost, "stall": 3 + boost, "cleric": 3 + boost, "phazer": 4 + boost,
+                "screens": 2 + boost, "screens_sweeper": 2 + boost, "hazards": 3,
+                "batonpass": int(boost >= 3)}.get(cls, 0)
+
+    def _goes_first(self, battle, move, active, foe, foe_move) -> bool:
+        p, q = move.priority, foe_move.priority if foe_move is not None else 0
+        return p > q or (p == q and stat(active, "spe", True, battle) > stat(foe, "spe", False, battle))
+
+    def _foe_best(self, battle, active, foe) -> float:
+        return max((self._hit(battle, foe, active, m, False) for m in self._attacks(foe)), default=0.0)
+
+    def _should_recover(self, battle, active, foe, move, foe_move) -> bool:
+        """ShouldRecover: heal when it beats the foe's damage, by damage calc and speed order."""
+        hp = active.current_hp_fraction
+        heal = min(1.0 if move.id == "rest" else (move.heal or 0.5), 1 - hp)
+        d = self._foe_best(battle, active, foe)
+        if self._goes_first(battle, move, active, foe, foe_move):
+            if d >= hp and d < hp + heal:
+                return True
+            return 2 * d >= hp and heal > hp and random.random() < 0.5
+        return d < hp and 2 * d >= hp and hp - d + heal > d
+
+    def _setup_ok(self, battle, active, foe, move, foe_move, key: str, limit: int) -> bool:
+        """ShouldTryToSetUpStat (singles)."""
+        if (foe.ability or "") == "unaware":
+            return False
+        d = self._foe_best(battle, active, foe)
+        hp = active.current_hp_fraction
+        if self._goes_first(battle, move, active, foe, foe_move):
+            if d >= hp:
+                return False
+        elif 2 * d >= hp:
+            phys = foe_move is not None and foe_move.category == MoveCategory.PHYSICAL
+            return d < hp and ((key == "def" and phys) or (key == "spd" and not phys and foe_move is not None))
+        return active.boosts.get(key, 0) < limit
+
+    def _stat_viability(self, cls: str, battle, active, foe, move, foe_move, key: str, limit: int = 2, boost: int = 2) -> int:
+        """IncreaseStatViability."""
+        ok = self._setup_ok(battle, active, foe, move, foe_move, key, limit)
+        if cls in ("kill", "setup_stats"):
+            if ok:
+                return 3 + boost
+            return 1 if cls == "kill" and move.category != MoveCategory.STATUS and key in ("atk", "spa") else 0
+        if cls == "batonpass":
+            return 5 if ok else 0
+        return self._status_viability(cls, 1, battle, active, foe) if ok else 0
+
+    def _good_to_raise(self, key: str, active, foe, battle) -> bool:
+        """GoodIdeaToRaise*Against: the boosted stat has a use."""
+        cats = {m.category for m in self._attacks(active)}
+        foe_phys = sum(m.category == MoveCategory.PHYSICAL for m in self._attacks(foe))
+        foe_spec = sum(m.category == MoveCategory.SPECIAL for m in self._attacks(foe))
+        return {"atk": MoveCategory.PHYSICAL in cats, "spa": MoveCategory.SPECIAL in cats,
+                "def": foe_phys > foe_spec, "spd": foe_spec > foe_phys,
+                "spe": stat(active, "spe", True, battle) <= stat(foe, "spe", False, battle)}.get(key, False)
+
+    def _bad_status(self, status, foe, active) -> bool:
+        """BadIdeaTo{Poison,Paralyze,Burn,PutToSleep}: abilities and moves that profit from it."""
+        ab = (foe.ability or "").replace(" ", "").lower()
+        moves = set(foe.moves)
+        phys = any(m.category == MoveCategory.PHYSICAL for m in self._attacks(foe))
+        if ab in ("shedskin", "quickfeet") or "facade" in moves or "psychoshift" in moves:
+            return True
+        if ab == "guts" and phys or ab == "naturalcure" or ab == "hydration":
+            return True
+        if ab == "marvelscale" and any(m.category == MoveCategory.PHYSICAL for m in self._attacks(active)):
+            return True
+        if status in (Status.PSN, Status.TOX):
+            return ab in ("poisonheal", "magicguard") or (ab == "toxicboost" and phys)
+        if status == Status.PAR:
+            return "rest" in moves
+        if status == Status.BRN:
+            return ab == "magicguard" or (ab == "flareboost" and any(m.category == MoveCategory.SPECIAL for m in self._attacks(foe)))
+        if status == Status.SLP:
+            return ab == "earlybird"
+        return False
+
+    def _score_move(self, battle: Battle, active: Pokemon, opponent: Pokemon, move: Move) -> int:
+        return BASE_SCORE + self._negatives(battle, active, opponent, move) + self._positives(battle, active, opponent, move)
+
+    def _negatives(self, battle: Battle, active: Pokemon, opponent: Pokemon, move: Move) -> int:
+        """AIScript_Negatives, the cases that matter in singles."""
+        hp = active.current_hp_fraction
         if move.id in FIRST_TURN_ONLY and not active.first_turn:
-            return 0
+            return -10
         if move.is_protect_move and active.protect_counter > 0:
-            return 0
-
-        if move.category != MoveCategory.STATUS:
-            if effectiveness(move, opponent) == 0:
-                return 0
-        else:
-            if self._status_fails(battle, active, opponent, move):
-                return 0
-
-        if move.self_destruct and (
-            not self._would_ko(battle, active, opponent, move)
-            or self._n_remaining(battle.team) <= 1
-        ):
-            return 0
-
+            return -10 if active.protect_counter >= 2 or random.random() < 0.5 else 0
+        if move.category != MoveCategory.STATUS and effectiveness(move, opponent) == 0:
+            ab = (opponent.ability or "").replace(" ", "").lower()
+            return -20 if any(ab in s for s in ABSORB.values()) else -15
+        if move.category == MoveCategory.STATUS and self._status_fails(battle, active, opponent, move):
+            return -10
+        if move.id == "suckerpunch":
+            foe_move = self._predict_foe_move(battle, active, opponent)
+            if foe_move is None:
+                return -10
+        if move.self_destruct and self._n_remaining(battle.team) <= 1:
+            return -10
         boosts = self._self_boosts(move)
-        positives = [s for s, v in (boosts or {}).items() if v > 0]
-        if positives and all(active.boosts.get(s, 0) >= 6 for s in positives):
-            return 0
-
-        if move.weather and move.weather in battle.weather:
-            return 0
-        if move.terrain and move.terrain in battle.fields:
-            return 0
+        positives = [k for k, v in (boosts or {}).items() if v > 0]
+        if positives and all(active.boosts.get(k, 0) >= 6 for k in positives):
+            return -10
+        if move.id == "stockpile" and active.effects.get("stockpile3"):
+            return -10
+        if move.id in RECOVERY or move.heal:
+            if hp >= 1:
+                return -10
+            if hp >= 0.9:
+                return -9
+        if move.weather and move.weather in battle.weather or move.terrain and move.terrain in battle.fields:
+            return -10
         if move.id in SCREENS and SCREENS[move.id] in battle.side_conditions:
-            return 0
+            return -10
         if move.id in HAZARDS:
             cond = HAZARDS[move.id]
-            stacks = battle.opponent_side_conditions.get(cond, 0)
-            cap = STACKABLE_CONDITIONS.get(cond, 1)
-            if stacks >= cap or (
-                cond not in STACKABLE_CONDITIONS
-                and cond in battle.opponent_side_conditions
-            ):
-                return 0
+            if battle.opponent_side_conditions.get(cond, 0) >= STACKABLE_CONDITIONS.get(cond, 1):
+                return -10
         if move.id in HAZARD_REMOVAL and not battle.side_conditions:
-            return 0
+            return -10
+        if move.volatile_status is not None and move.volatile_status in opponent.effects:
+            return -10
+        return 0
 
-        vs = move.volatile_status
-        if vs is not None and vs in opponent.effects:
-            return 0
-        return None
-
-    def _positives(
-        self, battle: Battle, active: Pokemon, opponent: Pokemon, move: Move
-    ) -> int:
+    def _positives(self, battle: Battle, active: Pokemon, opponent: Pokemon, move: Move) -> int:
+        """AIScript_Positives + DamageMoveViabilityIncrease."""
+        cls = self._class(active)
+        foe_move = self._predict_foe_move(battle, active, opponent)
+        sv = lambda b: self._status_viability(cls, b, battle, active, opponent)
         bonus = 0
-        dmg = self._damage_fraction(battle, active, opponent, move)
-        hp_left = max(opponent.current_hp_fraction, 0.01)
-        our_hp = active.current_hp_fraction
-        matchup = self._matchup(active, opponent)
-
-        if move.category != MoveCategory.STATUS:
-            if dmg >= hp_left * 0.92:
-                bonus += self.ko_bonus
-                if move.priority > 0:
-                    bonus += 4
+        sec = (move.secondary or [{}])[0]
+        status = move.status
+        if status is None and sec.get("status") and sec.get("chance", 0) >= 75:
+            status = Status[sec["status"].upper()]
+        if status is not None and not self._bad_status(status, opponent, active):
+            if status in (Status.PSN, Status.TOX):
+                bonus += sv(2 if {"venoshock", "barbbarrage"} & set(active.moves) else 1)
+            elif status == Status.PAR:
+                me, them = stat(active, "spe", True, battle), stat(opponent, "spe", False, battle)
+                bonus += sv(2 if them >= me > them / 2 else 1)
+            elif status == Status.BRN:
+                phys = foe_move is not None and foe_move.category == MoveCategory.PHYSICAL
+                if phys and self._hit(battle, opponent, active, foe_move, False) >= active.current_hp_fraction:
+                    bonus += sv(3)
+                else:
+                    bonus += sv(2 if any(m.category == MoveCategory.PHYSICAL for m in self._attacks(opponent)) else 1)
+            elif status == Status.SLP:
+                if cls in ("setup_stats", "batonpass"):
+                    bonus += 9 if (move.accuracy or 1) >= 0.8 else sv(3)
+                elif cls == "setup_status":
+                    bonus += 8 if (move.accuracy or 1) >= 0.8 else sv(3)
+                else:
+                    bonus += sv(3)
+        heals = move.id in RECOVERY or move.heal or (move.drain and move.category != MoveCategory.STATUS)
+        if heals and self._should_recover(battle, active, opponent, move, foe_move):
+            if move.drain:
+                bonus += sv(2) if cls == "stall" else 3
             else:
-                bonus += int(min(dmg / hp_left, 1.5) * 18)
-            if effectiveness(move, opponent) > 1:
-                bonus += 4
-            elif 0 < effectiveness(move, opponent) < 1:
-                bonus -= 4
-            if move.recoil > 0:
-                bonus -= 2
-            if move.drain > 0 and our_hp < 0.7:
-                bonus += 4
-        else:
-            bonus += self._status_bonus(battle, active, opponent, move)
-
+                bonus += 8 if cls in ("stall", "phazer") else sv(3)
+        if move.is_protect_move and self._should_protect(battle, active, opponent, foe_move):
+            bonus += (7 if battle.opponent_active_pokemon and battle.trapped else 3) if cls == "stall" else sv(3)
         boosts = self._self_boosts(move)
-        if boosts and our_hp > 0.5 and matchup >= 0:
-            total = sum(v for v in boosts.values() if v > 0)
-            bonus += 6 + 3 * total
-            if battle.turn <= 2 or active.first_turn:
-                bonus += 4
-        elif boosts and our_hp < 0.4:
-            bonus -= 8
-
-        if move.id in HAZARDS:
-            n_opp = 6 - sum(1 for m in battle.opponent_team.values() if m.fainted)
-            if n_opp >= 3:
-                bonus += 10
-            elif n_opp >= 2:
-                bonus += 4
+        if move.id == "stockpile":
+            if {"swallow", "spitup"} & set(active.moves):
+                bonus += sv(2)
             else:
-                bonus -= 8
-
-        if move.id in HAZARD_REMOVAL and battle.side_conditions:
-            n_us = self._n_remaining(battle.team)
-            bonus += 8 if n_us >= 2 else -6
-
-        if move.id in SCREENS and our_hp > 0.4:
-            bonus += 6
-
-        heal = self._heal_fraction(move)
-        if heal > 0 or move.id in RECOVERY:
-            if our_hp < 0.35:
-                bonus += 14
-            elif our_hp < 0.55:
-                bonus += 6
-            else:
-                bonus -= 10
-            if move.id == "rest" and our_hp > 0.5:
-                bonus -= 12
-
-        if move.id in PIVOTS and matchup < 0 and battle.available_switches:
-            bonus += 8
-
-        if move.priority > 0 and self._incoming_ko_risk(active, opponent) and dmg > 0:
-            bonus += 6
-
-        if move.id in FIRST_TURN_ONLY and active.first_turn:
-            bonus += 12
-
-        acc = move.accuracy
-        if acc < 1:
-            bonus -= int((1 - acc) * 8)
+                boosts = {"def": 1, "spd": 1}
+        if move.category != MoveCategory.STATUS and sec.get("self", {}).get("boosts") and sec.get("chance", 0) >= 75:
+            boosts = sec["self"]["boosts"]  # Power-Up Punch and kin
+        if boosts:
+            ups = [k for k, v in boosts.items() if v > 0]
+            key = next((k for k in ("atk", "spa", "spe", "def", "spd") if k in ups and self._good_to_raise(k, active, opponent, battle)), None)
+            if key is not None:
+                bonus += self._stat_viability(cls, battle, active, opponent, move, foe_move, key)
+        if move.id in HAZARDS and cls not in ("kill",):
+            left = sum(1 for m in battle.opponent_team.values() if not m.fainted)
+            bonus += sv(2) if left > 2 else (sv(1) if cls == "stall" else 0)
+        if move.entry.get("selfSwitch") and move.id != "batonpass":
+            pivot = self._should_pivot(battle, active, opponent, move, foe_move, cls)
+            bonus += (3 if cls == "kill" else 9) if pivot == "pivot" else (-9 if pivot == "dont" else 0)
+        if move.category != MoveCategory.STATUS:
+            bonus += self._damage_tier(battle, active, opponent, move, foe_move, cls)
         return bonus
 
-    def _status_bonus(
-        self, battle: Battle, active: Pokemon, opponent: Pokemon, move: Move
-    ) -> int:
-        if move.status is None:
-            drops = move.boosts if move.target != Target.SELF else None
-            if drops and any(v < 0 for v in drops.values()):
-                return 5 if opponent.current_hp_fraction > 0.5 else 1
-            return 2
-        damaging = [m for m in battle.available_moves if m.base_power > 0]
-        if damaging:
-            best = max(
-                damaging,
-                key=lambda m: self._damage_fraction(battle, active, opponent, m),
-            )
-            if self._would_ko(battle, active, opponent, best) and self._faster(
-                active, opponent
-            ):
-                return -6
-        if opponent.current_hp_fraction < 0.25:
-            return -4
-        bonus = 8
-        if move.status in (Status.SLP, Status.TOX):
-            bonus += 3
-        if move.status == Status.PAR and not self._faster(active, opponent):
-            bonus += 4
-        if move.status == Status.BRN and opponent.base_stats["atk"] >= opponent.base_stats["spa"]:
-            bonus += 3
-        return bonus
+    def _damage_tier(self, battle, active, foe, move, foe_move, cls) -> int:
+        """DamageMoveViabilityIncrease (singles)."""
+        hp = foe.current_hp_fraction
+        d = self._hit(battle, active, foe, move, True)
+        kos = d >= hp
+        first = self._goes_first(battle, move, active, foe, foe_move)
+        has_protect = any(m.is_protect_move for m in active.moves.values())
+        dies = foe_move is not None and self._hit(battle, foe, active, foe_move, False) >= active.current_hp_fraction
+        if kos and first and ((move.accuracy or 1) >= 0.7 or dies):
+            return self.ko_bonus
+        if kos and not first and not has_protect:
+            return {"setup_stats": 6}.get(cls, 8)
+        attacks = self._attacks(active)
+        fast = [m for m in attacks if self._goes_first(battle, m, active, foe, foe_move)]
+        if dies and not has_protect and fast and cls not in ("stall", "phazer", "hazards") and \
+                move is max(fast, key=lambda m: min(self._hit(battle, active, foe, m, True), hp)):
+            return self.ko_bonus
+        strongest = max(attacks, key=lambda m: (min(self._hit(battle, active, foe, m, True), hp), m.priority, m.accuracy or 1))
+        if move is strongest:
+            if kos and cls in ("stall", "phazer"):
+                return 8
+            return 4 if kos and cls == "hazards" else 2
+        return 0
+
+    def _should_protect(self, battle, active, foe, foe_move) -> bool:
+        """ShouldProtect == USE_PROTECT (singles): the foe dies to residual damage, or would KO /
+        2HKO us while it takes residual damage."""
+        hurt = foe.status in (Status.PSN, Status.TOX, Status.BRN) or "leechseed" in str(foe.effects).lower()
+        if foe.status in (Status.PSN, Status.TOX, Status.BRN) and foe.current_hp_fraction <= 1 / 8:
+            return True
+        d = self._foe_best(battle, active, foe)
+        hp = active.current_hp_fraction
+        return hurt and 2 * d >= hp
+
+    def _should_pivot(self, battle, active, foe, move, foe_move, cls) -> str:
+        """ShouldPivot (singles), the branches that need no prediction of a switch: 'pivot',
+        'try' (no change) or 'dont' (-9)."""
+        if not battle.available_switches:
+            return "try"
+        damager = cls in ("kill", "setup_stats", "setup_status", "screens_sweeper")
+        flags = self._ranked_switches(battle)[0][2]
+        we_ko = self._can_ko(battle, active, foe, True)
+        we_2hko = self._can_ko(battle, active, foe, True, hits=2)
+        d, hp = self._foe_best(battle, active, foe), active.current_hp_fraction
+        boosted = damager and (active.boosts.get("atk", 0) > 0 or active.boosts.get("spa", 0) > 0)
+        if self._goes_first(battle, move, active, foe, foe_move):
+            if we_ko:
+                return "try"
+            if damager and we_2hko:
+                return "pivot" if d >= hp else "dont"
+            if not boosted and flags & {"walls", "resists"}:
+                return "try"
+            return "dont"
+        if d >= hp:
+            return "try"
+        if 2 * d >= hp:
+            if we_ko:
+                return "try"
+            return "pivot" if damager and "ko" in flags and flags & {"outspeeds", "walls", "resists"} else "dont"
+        if we_ko:
+            return "try" if not boosted else "dont"
+        if we_2hko:
+            return "pivot" if damager and "ko" in flags and flags & {"outspeeds", "walls", "resists"} else "dont"
+        if damager and {"ko", "outspeeds"} <= flags:
+            return "pivot"
+        return "try" if not boosted and flags & {"outspeeds", "walls", "resists"} else "dont"
 
     def _status_fails(
         self, battle: Battle, active: Pokemon, opponent: Pokemon, move: Move
@@ -430,7 +554,7 @@ class RadicalRedAI(Player):
             return False
         if 2 * d < hp:
             return True
-        return 2 * d >= 1 and any(m.id in RECOVERY or self._heal_fraction(m) for m in mon.moves.values()) \
+        return 2 * d >= 1 and any(m.id in RECOVERY or m.heal for m in mon.moves.values()) \
             and stat(mon, "spe", True, battle) > stat(foe, "spe", False, battle)
 
     def _switch_target(self, battle: Battle, active: Pokemon, foe: Pokemon, best_score: int):
@@ -458,7 +582,7 @@ class RadicalRedAI(Player):
                         continue  # a full-HP healer gains nothing from a hit the active takes twice
                     return mon
         # only bad moves left: go to a mon that outspeeds or walls and takes the hit
-        if best_score <= 0 and not fresh:
+        if best_score < BASE_SCORE and not fresh:
             for mon, _, f in top2:
                 if f & {"outspeeds", "walls", "resists"} and self._wont_take_much(battle, mon, f, active, foe, move):
                     return mon
@@ -485,7 +609,7 @@ class RadicalRedAI(Player):
                     return mon
         # save the sweeper for later: it cannot KO, and it would die or is doing nothing useful
         if not fresh and damager and not we_ko and active.status not in (Status.FRZ, Status.PAR):
-            heals = any(m.id in RECOVERY or self._heal_fraction(m) for m in active.moves.values())
+            heals = any(m.id in RECOVERY or m.heal for m in active.moves.values())
             setup = any(self._self_boosts(m) for m in active.moves.values())
             r = random.randrange(4)
             if (self._can_ko(battle, foe, active, False) and not heals) or (
@@ -511,88 +635,6 @@ class RadicalRedAI(Player):
             return self.create_order(random.choice(battle.available_switches))
         return self.create_order(self._ranked_switches(battle)[0][0])
 
-    # --- damage / matchup ---
-
-    def _damage_fraction(
-        self, battle: Battle, attacker: Pokemon, defender: Pokemon, move: Move
-    ) -> float:
-        if move.category == MoveCategory.STATUS or move.base_power <= 0:
-            if isinstance(move.damage, int) and move.damage > 0:
-                max_hp = defender.max_hp or self._est_hp(defender)
-                return move.damage / max(max_hp, 1)
-            return 0.0
-        power = move.base_power * move.expected_hits
-        if move.category == MoveCategory.PHYSICAL:
-            ratio = self._stat(attacker, "atk") / max(self._stat(defender, "def"), 1.0)
-        else:
-            ratio = self._stat(attacker, "spa") / max(self._stat(defender, "spd"), 1.0)
-        level = attacker.level or 100
-        base = ((2 * level / 5 + 2) * power * ratio) / 50 + 2
-        stab = attacker.stab_multiplier if move.type in attacker.types else 1.0
-        typ = effectiveness(move, defender)
-        weather_mult = self._weather_mult(battle, move)
-        acc = move.accuracy if move.accuracy else 1.0
-        dmg = base * stab * typ * weather_mult * acc
-        max_hp = defender.max_hp or self._est_hp(defender)
-        return dmg / max(max_hp, 1)
-
-    def _would_ko(
-        self, battle: Battle, attacker: Pokemon, defender: Pokemon, move: Move
-    ) -> bool:
-        return self._damage_fraction(battle, attacker, defender, move) >= (
-            defender.current_hp_fraction * 0.92 or 0.01
-        )
-
-    def _matchup(self, mon: Pokemon, opponent: Pokemon) -> float:
-        our_off = max((opponent.damage_multiplier(t) for t in mon.types if t), default=1.0)
-        their_off = max((mon.damage_multiplier(t) for t in opponent.types if t), default=1.0)
-        score = our_off - their_off
-        if self._faster(mon, opponent):
-            score += 0.15
-        else:
-            score -= 0.15
-        score += 0.3 * (mon.current_hp_fraction - opponent.current_hp_fraction)
-        return score
-
-    def _incoming_ko_risk(self, active: Pokemon, opponent: Pokemon) -> bool:
-        their_off = max(
-            (active.damage_multiplier(t) for t in opponent.types if t), default=1.0
-        )
-        if their_off >= 2 and not self._faster(active, opponent):
-            return active.current_hp_fraction < 0.55
-        return their_off >= 2 and active.current_hp_fraction < 0.35
-
-    @staticmethod
-    def _stat(mon: Pokemon, stat: str) -> float:
-        raw = (mon.stats or {}).get(stat)
-        if isinstance(raw, (int, float)) and raw > 0:
-            val = float(raw)
-        else:
-            level = mon.level or 100
-            val = ((2 * mon.base_stats[stat] + 31) * level) / 100 + 5
-        boost = mon.boosts.get(stat, 0)
-        if boost >= 0:
-            return val * (2 + boost) / 2
-        return val * 2 / (2 - boost)
-
-    @staticmethod
-    def _est_hp(mon: Pokemon) -> float:
-        level = mon.level or 100
-        return ((2 * mon.base_stats["hp"] + 31) * level) / 100 + level + 10
-
-    @staticmethod
-    def _faster(a: Pokemon, b: Pokemon) -> bool:
-        return RadicalRedAI._stat(a, "spe") > RadicalRedAI._stat(b, "spe")
-
-    @staticmethod
-    def _weather_mult(battle: Battle, move: Move) -> float:
-        for w in battle.weather:
-            if WEATHER_BOOST.get(w) == move.type:
-                return 1.5
-            if WEATHER_CUT.get(w) == move.type:
-                return 0.5
-        return 1.0
-
     @staticmethod
     def _self_boosts(move: Move) -> dict | None:
         if move.self_boost:
@@ -600,13 +642,6 @@ class RadicalRedAI(Player):
         if move.boosts and move.target == Target.SELF:
             return move.boosts
         return None
-
-    @staticmethod
-    def _heal_fraction(move: Move) -> float:
-        heal = move.entry.get("heal")
-        if heal:
-            return heal[0] / heal[1]
-        return 0.0
 
     @staticmethod
     def _n_remaining(team: dict) -> int:

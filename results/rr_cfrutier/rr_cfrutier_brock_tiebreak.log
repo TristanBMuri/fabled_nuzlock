@@ -1,0 +1,13 @@
+team: [('dewott', 'Timid', 'Torrent', ['waterpulse', 'aerialace', 'revenge', 'watergun']), ('watchog', 'Adamant', 'Analytic', ['headbutt', 'crunch', 'lowkick', 'hypnosis']), ('raticatealola', 'Adamant', 'Gluttony', ['hyperfang', 'knockoff', 'thief', 'feintattack']), ('nuzleaf', 'Jolly', 'Chlorophyll', ['suckerpunch', 'razorleaf', 'flash', 'thief']), ('leavanny', 'Adamant', 'Swarm', ['lunge', 'razorleaf', 'slash', 'pounce']), ('linoone', 'Adamant', 'Pickup', ['headbutt', 'playrough', 'thief', 'tackle'])]
+enemy: [('Hippopotas', 'berryjuice', 'sandstream', 'bulldoze,rocktomb,toxic,slackoff'), ('Cacnea', 'eviolite', 'sandrush', 'poweruppunch,bulletseed,thunderpunch,pinmissile'), ('Lunatone', 'lumberry', 'levitate', 'ancientpower,psybeam,hiddenpowerground,icywind'), ('Lileep', 'oranberry', 'suctioncups', 'stockpile,recover,hiddenpowerrock,megadrain'), ('Archen', 'iapapaberry', 'defeatist', 'wingattack,rocktomb,bulldoze,facade'), ('Varoom', 'airballoon', 'overcoat', 'bulldoze,gyroball,toxic,protect')]
+death weight 6.0, preserve False, matchup True, field-aware True, enemy AI tiebreak
+
+BROCK: 30/30 wins, 6 deathless, 55 deaths (1.8 per fight), fights last 27 turns, enemy switches 2.1 per fight
+deaths by enemy mon: [('Cacnea', 30), ('Lileep', 11), ('Lunatone', 8), ('Archen', 3), ('Hippopotas', 2), ('Varoom', 1)]
+deaths by enemy move: [('Cacnea Bullet Seed', 12), ('Cacnea Power-Up Punch', 10), ('Cacnea Pin Missile', 7), ('Lileep Mega Drain', 5), ('Lileep residual/other', 3), ('Lunatone residual/other', 3), ('Lunatone Ancient Power', 2), ('Archen Facade', 2)]
+which of ours: [('Leavanny', 11), ('Linoone', 11), ('Dewott', 10), ('Watchog', 8), ('Nuzleaf', 8), ('Raticate', 7)]
+HP before the killing hit: [('low (<0.5)', 55)]
+switched in that turn: [('was in', 40), ('switched in', 15)]
+fight outcome: [('won', 55)]
+by turn: [(0, 7), (5, 5), (10, 6), (15, 14), (20, 10), (25, 9), (30, 4)]
+wrote /home/tristan/CodingProjects/nuzlock_rl/logs/deaths_brock_dw6_matchup_ai-tiebreak.json
