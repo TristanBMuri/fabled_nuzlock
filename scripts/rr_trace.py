@@ -62,7 +62,7 @@ def main() -> None:
     bridge = SimBridge(showdown=str(rp.FORK))
     enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
     calc = calc_brain()
-    searcher = Searcher(None, enemy, k=9, rollouts=8, rollout=calc, seed=0, death_weight=args.death_weight)
+    searcher = Searcher(enemy, k=9, rollouts=8, rollout=calc, seed=0, death_weight=args.death_weight)
     srng = random.Random(f"{args.boss}-seeds-0")
     seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(args.battle + 1)]
     seed = seeds[args.battle]

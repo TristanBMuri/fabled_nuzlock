@@ -34,19 +34,21 @@ from poke_env.data import GenData, to_id_str  # noqa: E402
 
 
 def inject_mod_data() -> dict:
-    """poke-env's gen 9 tables gain the mod's own moves, species, items and abilities
-    (data/rr/mod_data.json, dumped from the fork by scripts/build_rr.py), so the battle
-    mirrors can hold what the engine plays (Dark Hole, Centiskorch-Sevii, ...).
-    Entries poke-env already has keep poke-env's version. Returns the counts added."""
+    """poke-env's gen 9 tables become the mod's (data/rr/mod_data.json, the fork's merged
+    gen9rr Dex dumped by scripts/build_rr.py), so the battle mirrors hold what the engine
+    plays: the mod's own moves and species (Dark Hole, Centiskorch-Sevii, ...) and its
+    changes to existing ones (2026-10-12, matrix calibration: 40 species with other types,
+    250 with other base stats, 134 moves with other power / type / accuracy; entries
+    poke-env already had kept poke-env's vanilla version before, so Arbok was Poison, not
+    Poison/Dark, in every damage calc). Returns {table: (added, replaced)}."""
     mod = json.load(open(ROOT / "data" / "rr" / "mod_data.json"))
     g = GenData.from_gen(9)
-    added = {}
+    counts = {}
     for table, mine in (("moves", g.moves), ("pokedex", g.pokedex)):
         src = mod["moves" if table == "moves" else "species"]
-        new = {k: v for k, v in src.items() if k not in mine}
-        mine.update(new)
-        added[table] = len(new)
-    return added
+        counts[table] = (len(set(src) - set(mine)), len(set(src) & set(mine)))
+        mine.update(src)
+    return counts
 
 
 MOD_ADDED = inject_mod_data()
@@ -356,7 +358,7 @@ def _run_boss(args, name: str, tms: bool) -> dict:
     width = tuple(int(x) for x in args.search.split(",")) if args.search else None
     brains = {"calc": calc}
     if width:
-        brains["calc+search"] = Searcher(None, enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed)
+        brains["calc+search"] = Searcher(enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed)
     rows = []
     t0 = time.time()
     for tag, brain in brains.items():

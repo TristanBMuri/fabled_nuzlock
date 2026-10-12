@@ -68,8 +68,8 @@ decisions:
   → 95% clears; expert iteration v1: nothing).
 - poke-env pitfalls with same-species mons (team collapse, species-based
   mask/labels) and the server's 252-EV fill are documented in HANDOFF.md.
-  Use `ai_util.battler_policy.action_mask/order_to_action`, never
-  `SinglesEnv.get_action_mask/order_to_action` directly.
+  Use `ai_util.evaluate.action_mask` (identity-based), never
+  `SinglesEnv.get_action_mask` directly.
 
 ## Hard-won lessons from attempt #2 (do not relearn these)
 

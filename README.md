@@ -62,9 +62,8 @@ ai_util/sim_bridge.js    Node: Showdown's simulator over JSON lines (new / choos
 ai_util/sim.py           SimBridge, SimBattle (+ poke-env mirrors), dedupe_nicknames, player_brain
 ai_util/evaluate.py      evaluate() = P(win) / P(death_i) for a matchup; Searcher = rollout search
 ai_util/calc_bot.py      CalcPlayer: the damage-formula battler (the player brain)
-ai_util/battler_*.py, collect_game.py, pretrain_bc.py   the BC prior pipeline (off the path; HUMAN_TODO 5)
 scripts/gauntlet.py      the game folder, Mon / packed teams, movesets, items, evolution, abilities
-scripts/runner.py        SimBattleRunner: run(), estimate(), estimate_block(); harvest recording
+scripts/runner.py        SimBattleRunner: run(), estimate(), estimate_block(); champion traces
 scripts/nuzlocke_env.py  NuzlockeEnv: the run as a state machine (offers, party, fight, League block); Rules
 scripts/plan_gauntlet.py the scripted planner + the table
 scripts/league_test.py   the League replayed from saved openers, paired by box
@@ -72,5 +71,5 @@ scripts/build_*.py       rebuild data/bdsp/ from Bulbapedia / Serebii / the Show
 data/bdsp/               the game folder (trainers, order, encounters, learnsets, evolutions, species, moves, tms, items)
 tests/                   env rules, the sim bridge, the calc bot's stat model
 results/                 the logs behind every table + the League baseline and its 20 opener snapshots
-models/, logs/, data/teams/gauntlet_harvest/   gitignored: checkpoints, run logs, battle harvests
+logs/                    gitignored: run logs (models/, data/teams/: the deleted BC pipeline's files, if still on disk)
 ```

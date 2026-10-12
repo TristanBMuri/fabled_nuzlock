@@ -14,15 +14,30 @@ only. Pushes run from here via the host's git; no SSH key needed (HTTPS).
 
 ## Clean-up decisions
 
-5. **Behaviour-cloning pipeline** (`ai_util/collect_game.py`, `pretrain_bc.py`,
+5. **Behaviour-cloning pipeline** — **deleted 2026-10-12** (code under the `pre-cleanup` tag,
+   recipe in NOTEBOOK.md; `models/` and `data/teams/` on disk are yours to remove). Was:
+   (`ai_util/collect_game.py`, `pretrain_bc.py`,
    `battler_policy.py`, `battler_obs.py`, the prior branches in `evaluate.py` and the
    runner, `--harvest`): **delete** (recommended; the calc bot replaced the prior and
    the notebook holds the recipe) or **keep** as a trimmed fallback. Delete also drops
    torch and stable-baselines3 from the dependencies.
 
-6. **`no_AI_code_here/`** (your hand-written track): keep in the repo, move out, or delete.
+6. **`no_AI_code_here/`** — **decided 2026-10-12: leave it alone** (in the repo, untouched)
+   unless told otherwise or it becomes a problem.
 
-## Radical Red: what only you can answer (2026-10-10)
+## Radical Red: what only you can answer (2026-10-10) — answered 2026-10-12
+
+7. RR 4.1 Hardcore, species/dupes clause on, nothing else.
+8. Starter random across all nine generations (as the probes do); choosing it by some
+   learned process is a later idea.
+9. Singles only for now; doubles stay "not played" (TODO.md F later).
+10. The 95 mandatory bosses, expanding to route trainers when the capabilities are
+    there; optional bosses may be fought for their items.
+11. Natures free, any ability slot after Cerulean.
+12. First encounter only: the boxes mode is the real run, the planned pool an upper bound.
+
+All six match what the sim assumes today (`rr_probe.sample_box`, `choose_nature`,
+`choose_ability`). The original questions, for the record:
 
 The data is in hand (`data/rr/README.md`: official sheets, ROM dump, FireRed
 slot map, hardcore rules). These are the facts about *your* run that the docs

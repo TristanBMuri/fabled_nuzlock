@@ -1,28 +1,22 @@
 """The env's battles, in-process through ai_util.sim (no Showdown server).
 
-SimBattleRunner: player brain = SimpleHeuristics (default), the calc bot
-(policy='calc') or a BC prior at a path; search=(k, rollouts) plays boss fights
-with top-k rollout search (the compute dial); estimate() / estimate_block() are
-the death-probability queries the planner ranks parties by; run() plays one
-fight and returns the per-mon state after it.
-GAUNTLET_HARVEST=path records every (party, enemy, won) the env plays.
+SimBattleRunner: player brain = SimpleHeuristics (default) or the calc bot
+(policy='calc'); search=(k, rollouts) plays boss fights with top-k rollout
+search (the compute dial); estimate() / estimate_block() are the
+death-probability queries the planner ranks parties by; run() plays one fight
+and returns the per-mon state after it.
 """
 
 import json
-import os
 import sys
-import threading
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from ai_util.evaluate import Searcher, evaluate, heuristic_brain, prior_brain  # noqa: E402
+from ai_util.evaluate import Searcher, evaluate, heuristic_brain  # noqa: E402
 from ai_util.sim import SimBattle, SimBridge  # noqa: E402
 
 BATTLE_FORMAT = "gen8customgamenogimmicks"
-# Unset = no recording: the battler's data must follow the progression rule the run
-# layer plays under, so a harvest is always an explicit, fresh file.
-HARVEST = Path(os.environ["GAUNTLET_HARVEST"]) if os.environ.get("GAUNTLET_HARVEST") else None
 TRACES: Path | None = None  # dir: the champion fights' protocol logs as trace_*.json (ui/ Traces → watch)
 ENEMY = "heuristic"  # the enemy AI: poke-env's SimpleHeuristics, or "bdsp" = the Gen 4 trainer AI (ai_util/bdsp_ai.py)
 
@@ -38,8 +32,8 @@ def enemy_brain():
 class SimBattleRunner:
     """Same contract as BattleRunner, but battles run in-process through
     ai_util.sim (no Showdown server, ~100 battles/s). Player brain is
-    SimpleHeuristics (default) or the BC prior at `policy`, optionally with
-    top-k rollout search `search=(k, rollouts)` for boss fights."""
+    SimpleHeuristics (default) or the calc bot (`policy='calc'`), optionally
+    with top-k rollout search `search=(k, rollouts)` for boss fights."""
 
     def __init__(self, policy: str | None = None, search: tuple[int, int] | None = None,
                  max_turns: int = 100, full_info: bool = False):
@@ -47,26 +41,20 @@ class SimBattleRunner:
         self.bridge = SimBridge()
         self.enemy = enemy_brain()
         self.search = search  # default (k, rollouts) for boss fights; the compute dial
-        self.policy, self.calc = None, policy == "calc"
+        self.calc = policy == "calc"
         self._searchers: dict[tuple[int, int], object] = {}  # one Searcher per width
         if self.calc:  # the scripted damage-calc bot; search=(k, r) = all legal actions (up to k) as candidates
             from ai_util.calc_bot import calc_brain
             self.player = calc_brain()
-        elif policy:
-            import torch
-            from ai_util.battler_policy import load_policy
-            torch.set_num_threads(1)  # batch-1 MLP: the intra-op pool only adds overhead
-            self.policy = load_policy(policy, device="cpu")
-            self.player = prior_brain(self.policy)
         else:
             self.player = heuristic_brain()
 
     def searcher(self, width: tuple[int, int] | None):
-        """Search brain at `width` = (k, rollouts); None or no prior = the fast player."""
-        if width is None or (self.policy is None and not self.calc):
+        """Search brain at `width` = (k, rollouts); None or the heuristic player = no search."""
+        if width is None or not self.calc:
             return self.player
         if width not in self._searchers:
-            self._searchers[width] = Searcher(self.policy, self.enemy, k=width[0], rollouts=width[1],
+            self._searchers[width] = Searcher(self.enemy, k=width[0], rollouts=width[1],
                                               max_turns=self.max_turns,
                                               rollout=self.player if self.calc else None)
         return self._searchers[width]
@@ -170,21 +158,5 @@ def write_trace(record: dict, sb, st: dict, player_packed: str, enemy_packed: st
                    "ours_left": [m["species"] for m in st["p1"] if not m["fainted"]],
                    "theirs_left": [m["species"] for m in st["p2"] if not m["fainted"]]}}))
 
-
-_HARVEST_LOCK = None
-
-
-def record_battle(run_id: str, trainer_id: int | None, won: bool, player_packed: str, enemy_packed: str):
-    global _HARVEST_LOCK
-    if HARVEST is None:
-        return
-    if _HARVEST_LOCK is None:
-        _HARVEST_LOCK = threading.Lock()
-    HARVEST.parent.mkdir(parents=True, exist_ok=True)
-    line = json.dumps({"run_id": run_id, "trainer_id": trainer_id, "info": "full", "won": won,
-                       "player_team": player_packed, "enemy_team": enemy_packed}) + "\n"
-    with _HARVEST_LOCK:
-        with open(HARVEST, "a") as f:
-            f.write(line)
 
 

@@ -175,6 +175,12 @@ Misty's cover team 30/30 → 17/30, Brock's deaths 37 → 76. Every RR table bef
 against the old AI. **Tier ladder ported too** (NOTEBOOK.md): inside the noise. Next:
 rerun the cover pool / boxes / early bosses once on this port — **done** (NOTEBOOK.md:
 Misty 100 → 73%, Brock 100% with 63% deathless, early bosses unchanged); then A2.2 with ROM data.
+**B1 done** (`scripts/rr_matrix_calib.py`, `results/rr_matrix_calib.*`, NOTEBOOK.md last entry): safe
+cells win 85% of duels, race 56%, none 9%; 32 false safes (Air Balloon / Synchronoise, Toxic +
+Protect stall, two-turn moves), 56 false nones (the mirrors hold vanilla types / stats / moves
+for 40 / 250 / 134 entries the mod changed; the AI's wasted turns; the healer rule). Next, B2 in
+this order: mod data into the mirrors (`inject_mod_data` overrides existing entries) → enemy
+item → Toxic-stall flag → two-turn moves, each paired on the calibration and the cover runs.
 
 
 A2.1 + A2.3 (AI sensitivity, read-through) → B1 (matrix calibration) → B2/B3

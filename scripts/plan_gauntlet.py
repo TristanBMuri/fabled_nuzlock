@@ -90,7 +90,7 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
     alive = [i for i, m in enumerate(env.roster) if m.alive]
     if len(alive) <= MAX_PARTY:
         return alive  # nuzlocke rule: field everything you can
-    if fast:  # no risk queries: highest levels, for bulk harvesting (ties: catch order)
+    if fast:  # no risk queries: highest levels (ties: catch order)
         return sorted(alive, key=lambda i: -env.roster[i].level)[:MAX_PARTY]
     # 2026-10-12: the base was top-6-by-level, i.e. the first six caught once the level rule
     # puts everyone at the cap, and single swaps only ever moved one slot of it
@@ -217,8 +217,6 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple:
     apply(args)
     EVENTS = Path(args.out).with_suffix(".events.jsonl") if args.out else None
     runner.TRACES = EVENTS.parent if EVENTS is not None else None
-    if args.harvest:
-        runner.HARVEST = Path(args.harvest)
     env = make_env(args)
     t0, rows = time.time(), []
     for n, s in enumerate(seeds):
@@ -244,8 +242,7 @@ def parser(doc: str = __doc__) -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(description=doc, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--episodes", type=int, default=20)
     ap.add_argument("--seed", type=int, default=0)
-    ap.add_argument("--policy", help="'calc' for the damage-calc bot (ai_util/calc_bot.py), a BC prior's "
-                                     ".pt path, or omitted for SimpleHeuristics")
+    ap.add_argument("--policy", choices=["calc"], help="'calc' for the damage-calc bot (ai_util/calc_bot.py); omitted = SimpleHeuristics")
     ap.add_argument("--search", help="k,rollouts for boss fights, e.g. 9,8")
     ap.add_argument("--search-all", action="store_true", help="search on every trainer")
     ap.add_argument("--deep", help="k,rollouts at breakpoints and fights the risk query "
@@ -264,7 +261,7 @@ def parser(doc: str = __doc__) -> argparse.ArgumentParser:
     ap.add_argument("--level-margin", type=int, default=0,
                     help="player level = rule level + this (XP proxy)")
     ap.add_argument("--fast", action="store_true",
-                    help="no risk queries (highest-level party): bulk harvesting")
+                    help="no risk queries (highest-level party): the fast episode")
     ap.add_argument("--slice", type=int, default=SLICE_LEN,
                     help="trainers per episode (21 = through Roark, 59 = Gardenia, 167 = Maylene, 405 = the game)")
     ap.add_argument("--roster", type=int, default=Rules.box,
@@ -281,8 +278,6 @@ def parser(doc: str = __doc__) -> argparse.ArgumentParser:
                          "E9, data/bdsp/items.json)")
     ap.add_argument("--evs", choices=["flat", "trained"], default=Rules.evs,
                     help="player EVs: flat 85 each, or trained = 252 in the better attacking stat, 252 Spe, 4 HP")
-    ap.add_argument("--harvest", metavar="JSONL",
-                    help="record every battle's (party, enemy, won) here (same as GAUNTLET_HARVEST)")
     ap.add_argument("--workers", type=int, default=1,
                     help="episodes run in this many processes (one env + one sim each, ~1 GB; "
                          "check free -g first)")

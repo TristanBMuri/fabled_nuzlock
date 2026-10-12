@@ -193,7 +193,7 @@ def setup(args, name: str, announce: bool = True):
     return SimpleNamespace(name=name, args=args, known=known, cap=cap, pool=pool, progress=progress, arena=arena,
                            unmodelled=unmodelled, enemy_packed=enemy_packed, enemy_species=enemy_species,
                            boss_types=boss_types, bridge=SimBridge(showdown=str(rp.FORK)), enemy=enemy, calc=calc,
-                           searcher=Searcher(None, enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed, death_weight=args.death_weight),
+                           searcher=Searcher(enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed, death_weight=args.death_weight),
                            seeds=seeds, rng=random.Random(f"{name}-team-{args.seed}"), team_score={}, mons={}, t0=time.time())
 
 

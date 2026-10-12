@@ -35,7 +35,7 @@ paired seeds, or accepted as a change). Done on 2026-10-12 (NOTEBOOK.md → "Spe
   clean route trainers (`results/bdsp_gen4ai_swapshard2.*`): 17 min, 404.75 / 394.70 /
   3.80 / 75%, 3 route deaths (2 at Candice — the same process as `all` there — and 1 at a
   pruned route trainer). Recommendation: `all` stays the benchmark default, `hard` is the
-  development setting (2x); whether the table moves to `hard` is the user's call.
+  development setting (2x). **Decided 2026-10-12: the benchmark stays on `all`.**
 - The paired route check for any BDSP run is the events file: per seed and trainer the
   party fielded, the result, the deaths (the compare was a scratch script: per seed, the
   first trainer where the fielded party differs, the per-episode means, deaths before
@@ -43,8 +43,23 @@ paired seeds, or accepted as a change). Done on 2026-10-12 (NOTEBOOK.md → "Spe
 - `league_test.py` now applies `--enemy` (it was parsed and ignored before; every League
   replay so far was against SimpleHeuristics) through `plan_gauntlet.apply(args)`.
 
-Still open: the BDSP swap scoring is the only big lever left and it is a behaviour change
-(above); within an episode nothing exact is large (the memo is in; the engine is the
+User decisions 2026-10-12: the BC prior pipeline is deleted (HUMAN_TODO 5: `ai_util/battler_*`,
+`collect_game.py`, `pretrain_bc.py`, the prior branches, `--harvest`, torch and stable-baselines3;
+`action_mask` moved to `ai_util/evaluate.py`; `Searcher(enemy, ...)` lost its policy argument);
+`no_AI_code_here/` stays untouched; HUMAN_TODO 7–12 (the
+Radical Red run facts) are answered there and all match the sim's assumptions — the box
+draw with the dupes re-roll is the real run, the planned pool an upper bound, singles only,
+95 bosses (+ optional bosses for items), natures free, any ability after Cerulean.
+
+**B1 matrix calibration done** (`scripts/rr_matrix_calib.py`, `results/rr_matrix_calib.*`, 2 min):
+safe cells win 85% of duels, race 56%, none 9%; 32 false safes and 56 false nones named and
+traced (NOTEBOOK.md last entry). Biggest cause: `rr_probe.inject_mod_data` keeps poke-env's
+vanilla entries, so the mirrors and the damage formula use vanilla types / stats / moves for
+the 40 / 250 / 134 entries the mod changed (Arbok is Poison/Dark in RR). Next is B2 in the
+order the notebook gives, starting with that data fix (paired: calibration + cover runs).
+
+Still open: the BDSP swap scoring was the only big lever left and it is a behaviour change
+(above, declined); within an episode nothing exact is large (the memo is in; the engine is the
 floor); after it, an episode is the League opener's block query (193 candidates × 5 fights
 × 8) plus the deep-searched League fights. For RR nothing structural is left: a table's
 wall-clock is its battles / 20.
@@ -177,9 +192,6 @@ ai_util/evaluate.py     evaluate(): P(win), P(death_i), risk, HP left for one ma
                         numbers across candidates. outcome_value is the objective.
 ai_util/calc_bot.py     CalcPlayer: the damage-formula battler (KO check, switch out of a
                         lethal hit, set up when safe). The player brain: plan --policy calc.
-ai_util/battler_policy.py / battler_obs.py / collect_game.py / pretrain_bc.py
-                        the BC prior pipeline (identity-based action_mask lives in
-                        battler_policy). Off the path since the calc bot; HUMAN_TODO 5.
 data/bdsp/              the game folder: trainers.json, order.json (route order,
                         location + mandatory + locked per entry), encounters.json (gates =
                         first trainer of the location; per-method tables), learnsets
@@ -196,7 +208,7 @@ scripts/gauntlet.py     load_game() (cached, the only reader of the folder), Mon
                         fielding), evolve() with progression gates, ability slots.
 scripts/runner.py       SimBattleRunner: run(boss=, search=(k,r), carry=) -> (won, alive,
                         per-mon state), estimate() / estimate_block() = the risk queries,
-                        one Searcher per width; GAUNTLET_HARVEST recording.
+                        one Searcher per width; the champion traces.
 scripts/nuzlocke_env.py NuzlockeEnv: the run as a state machine. ENCOUNTER answers queued
                         offers (one per method), PRE_BATTLE builds the party and fights;
                         permadeath, graveyard, dupes clause, box cap, level rule applied on
@@ -205,7 +217,7 @@ scripts/nuzlocke_env.py NuzlockeEnv: the run as a state machine. ENCOUNTER answe
                         deep=(k,r) at breakpoints and risk-flagged fights, Rules, tracker().
 scripts/plan_gauntlet.py The scripted planner + the table: top-6-by-level + single swaps
                         scored by risk(); --slice, --policy, --search, --deep, --workers,
-                        --verbose, --harvest, --save-league DIR (pickles the opener state).
+                        --verbose, --save-league DIR (pickles the opener state).
 scripts/league_test.py  The League alone: replays Aaron .. Cynthia from saved openers R
                         times each, same flags; --vs pairs two variants by snapshot.
 tests/                  env rules (queue, dupes, box, League identity, level rule timing,

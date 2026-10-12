@@ -16,7 +16,7 @@ from gauntlet import (Mon, ability_slots, assign_items, encounter_moves, evolve,
                       load_encounters, load_evolutions, load_trainers, pack_team, player_evs,
                       roll_ability, trainer_mons)
 import runner
-from runner import SimBattleRunner, record_battle
+from runner import SimBattleRunner
 
 MAX_PARTY = 6
 
@@ -24,8 +24,8 @@ MAX_PARTY = 6
 @dataclass(frozen=True)
 class Rules:
     """The Nuzlocke ruleset, as a player would state it. Printed in every table
-    header; a change to any field is a progression change (regenerate the
-    harvest and re-clone the prior)."""
+    header; a change to any field is a progression change (every table before
+    it is on the old rules)."""
     level_rule: str = "cap"      # cap: every mon at the next boss's max level (hardcore); match: max enemy seen
     level_margin: int = 0        # levels above the rule (XP proxy)
     box: int = 50                # living mons the box holds (50 > starter + 45 areas = unbounded)
@@ -293,7 +293,6 @@ class NuzlockeEnv:
         if result is None:
             return None
         won, alive, state = result
-        record_battle(self.run_id, entry["trainer_id"], won, player_packed, enemy_packed)
         return won, alive, state
 
     # ------------------------------------------------------------------ step

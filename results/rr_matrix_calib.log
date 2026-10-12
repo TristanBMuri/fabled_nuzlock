@@ -1,0 +1,101 @@
+BROCK: trainer #6, cap 16, 132 candidates x 6 enemies, 20 seeds, arena {'ai_permanent': True, 'weather': 'sandstorm'}
+BROCK: no paper row for ['deerlingautumn', 'deerlingsummer']
+MISTY: trainer #18, cap 28, 219 candidates x 6 enemies, 20 seeds, arena {'ai_permanent': True, 'weather': 'raindance'}
+
+BROCK: 780 cells
+  tier  cells duel win  HP left win>=90% win<=10%  (HP left: mean over won duels)
+  safe    182      86%      65%      76%       7%
+  race    138      58%      40%      38%      20%
+  none    460      16%      43%       7%      73%
+  false safes (safe, duel < 50%): 20
+    chingling vs Hippopotas: duel 0%, paper 1/8 faster healer
+    chingling vs Archen: duel 0%, paper 2/4 faster
+    chingling vs Varoom: duel 0%, paper 1/99 faster
+    greavard vs Varoom: duel 0%, paper 1/5 faster
+    sandygast vs Varoom: duel 0%, paper 1/6 slower
+    swinub vs Varoom: duel 0%, paper 2/4 faster
+    toedscool vs Varoom: duel 0%, paper 2/6 faster
+    mudkip vs Varoom: duel 0%, paper 1/6 faster
+    turtwig vs Varoom: duel 0%, paper 1/12 faster
+    tarountula vs Hippopotas: duel 10%, paper 2/5 faster healer
+    weedle vs Hippopotas: duel 10%, paper 2/3 faster healer
+    litten vs Cacnea: duel 10%, paper 1/3 faster
+  false nones (none, duel >= 90%): 30
+    applin vs Hippopotas: duel 100%, paper 2/6 slower healer
+    burmy vs Lileep: duel 100%, paper 3/7 faster healer
+    burmysandy vs Lileep: duel 100%, paper 3/7 faster healer
+    burmytrash vs Lileep: duel 100%, paper 3/7 faster healer
+    caterpie vs Lileep: duel 100%, paper 3/6 faster healer
+    ledyba vs Lunatone: duel 100%, paper 2/1 faster
+    lillipup vs Lileep: duel 100%, paper 4/5 faster healer
+    meditite vs Lileep: duel 100%, paper 3/4 faster healer
+    meditite vs Varoom: duel 100%, paper 4/4 faster
+    meowthgalar vs Lileep: duel 100%, paper 3/7 faster healer
+    morelull vs Hippopotas: duel 100%, paper 2/5 slower healer
+    phantump vs Varoom: duel 100%, paper 4/8 faster
+
+MISTY: 1314 cells
+  tier  cells duel win  HP left win>=90% win<=10%  (HP left: mean over won duels)
+  safe     76      83%      57%      75%       9%
+  race    150      54%      47%      37%      28%
+  none   1088       7%      41%       2%      88%
+  false safes (safe, duel < 50%): 12
+    bonsly vs Clodsire: duel 0%, paper 2/3 faster healer
+    buizel vs Clodsire: duel 0%, paper 2/3 faster healer
+    chingling vs Clodsire: duel 0%, paper 2/4 faster healer
+    chingling vs Toxicroak: duel 0%, paper 1/3 slower
+    geodude vs Clodsire: duel 0%, paper 2/3 faster healer
+    patrat vs Clodsire: duel 0%, paper 2/3 faster healer
+    rattata vs Clodsire: duel 0%, paper 2/3 faster healer
+    klawf vs Clodsire: duel 15%, paper 2/3 faster healer
+    onix vs Clodsire: duel 15%, paper 2/3 faster healer
+    stunky vs Toxicroak: duel 15%, paper 2/3 faster
+    dunsparce vs Clodsire: duel 35%, paper 2/4 faster healer
+    pachirisu vs Mantine: duel 45%, paper 1/3 slower healer
+  false nones (none, duel >= 90%): 26
+    bellsprout vs Politoed: duel 100%, paper 4/3 faster
+    blipbug vs Clodsire: duel 100%, paper 3/4 faster healer
+    bramblin vs Mantine: duel 100%, paper 6/1 slower healer
+    buneary vs Politoed: duel 100%, paper 3/2 faster
+    ekans vs Starmie: duel 100%, paper 2/2 slower
+    grubbin vs Politoed: duel 100%, paper 2/2 slower
+    kricketot vs Politoed: duel 100%, paper 3/2 faster
+    kricketot vs Clodsire: duel 100%, paper 3/3 faster healer
+    magikarp vs Clodsire: duel 100%, paper 3/4 faster healer
+    morelull vs Starmie: duel 100%, paper 3/3 slower
+    nacli vs Clodsire: duel 100%, paper 3/2 faster healer
+    natu vs Politoed: duel 100%, paper 3/2 faster
+
+ALL: 2094 cells
+  tier  cells duel win  HP left win>=90% win<=10%  (HP left: mean over won duels)
+  safe    258      85%      63%      76%       7%
+  race    288      56%      44%      38%      24%
+  none   1548       9%      42%       4%      84%
+  false safes (safe, duel < 50%): 32
+    chingling vs Hippopotas: duel 0%, paper 1/8 faster healer
+    chingling vs Archen: duel 0%, paper 2/4 faster
+    chingling vs Varoom: duel 0%, paper 1/99 faster
+    greavard vs Varoom: duel 0%, paper 1/5 faster
+    sandygast vs Varoom: duel 0%, paper 1/6 slower
+    swinub vs Varoom: duel 0%, paper 2/4 faster
+    toedscool vs Varoom: duel 0%, paper 2/6 faster
+    mudkip vs Varoom: duel 0%, paper 1/6 faster
+    turtwig vs Varoom: duel 0%, paper 1/12 faster
+    bonsly vs Clodsire: duel 0%, paper 2/3 faster healer
+    buizel vs Clodsire: duel 0%, paper 2/3 faster healer
+    chingling vs Clodsire: duel 0%, paper 2/4 faster healer
+  false nones (none, duel >= 90%): 56
+    applin vs Hippopotas: duel 100%, paper 2/6 slower healer
+    burmy vs Lileep: duel 100%, paper 3/7 faster healer
+    burmysandy vs Lileep: duel 100%, paper 3/7 faster healer
+    burmytrash vs Lileep: duel 100%, paper 3/7 faster healer
+    caterpie vs Lileep: duel 100%, paper 3/6 faster healer
+    ledyba vs Lunatone: duel 100%, paper 2/1 faster
+    lillipup vs Lileep: duel 100%, paper 4/5 faster healer
+    meditite vs Lileep: duel 100%, paper 3/4 faster healer
+    meditite vs Varoom: duel 100%, paper 4/4 faster
+    meowthgalar vs Lileep: duel 100%, paper 3/7 faster healer
+    morelull vs Hippopotas: duel 100%, paper 2/5 slower healer
+    phantump vs Varoom: duel 100%, paper 4/8 faster
+
+matrix calibration | legal True | arena True | 20 seeds | calc bot vs RR AI, full info | 2.0 min

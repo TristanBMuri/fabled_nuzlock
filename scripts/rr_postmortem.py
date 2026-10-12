@@ -65,7 +65,7 @@ def main() -> None:
     print("enemy:", [(x.split("|")[0], x.split("|")[4]) for x in enemy_packed.split("]")])
     bridge = SimBridge(showdown=str(rp.FORK))
     enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
-    searcher = Searcher(None, enemy, k=9, rollouts=8, rollout=calc_brain(), seed=0)
+    searcher = Searcher(enemy, k=9, rollouts=8, rollout=calc_brain(), seed=0)
     killer, killed, kos_on, survivors, wins = (collections.Counter() for _ in range(4)), 0
     killer, killed, kos_on, survivors = killer
     for i in range(n):

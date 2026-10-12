@@ -1,17 +1,18 @@
-"""Line evaluator + top-k rollout search over the BC prior (roadmap step 1).
+"""Line evaluator + top-k rollout search over the engine (roadmap step 1).
 
 evaluate(): P(win) and P(death) per party mon for one (party, enemy) matchup
 under a brain, by Monte Carlo over fresh-seed battles in the in-process sim.
 This is the interface the run layer queries.
 
-Searcher: at each decision expand the prior's top-k actions, play each out
-`rollouts` times from a reseeded fork (prior vs enemy AI), pick the best
-risk-adjusted mean. The compute dial: k=1 is the prior, bigger is a boss fight.
+Searcher: at each decision every legal action (up to k) is a candidate; the
+`rollout` brain (the calc bot) plays each out `rollouts` times from a reseeded
+fork against the enemy AI; the best risk-adjusted mean wins. The compute dial.
+The BC prior that used to propose the top-k was deleted on 2026-10-12 (HUMAN_TODO 5;
+the recipe is in NOTEBOOK.md, the code under the `pre-cleanup` tag).
 
 CLI (no Showdown server needed):
-  uv run python ai_util/evaluate.py --check                       # heuristic mirror (~68.5%)
-  uv run python ai_util/evaluate.py --policy models/game_policy_best.pt          # prior (~70%)
-  uv run python ai_util/evaluate.py --policy models/game_policy_best.pt --search  # go/no-go
+  uv run python ai_util/evaluate.py --check                   # heuristic mirror (~68.5%)
+  uv run python ai_util/evaluate.py --policy calc --search    # the calc bot + search
 """
 
 import sys
@@ -26,38 +27,34 @@ import json
 import time
 
 import numpy as np
-import torch
 
-from ai_util.battler_obs import embed_battle
-from ai_util.battler_policy import PolicyPlayer, action_mask, load_policy
 from ai_util.sim import Brain, SimBattle, SimBridge, order_to_choice, player_brain
+from poke_env.battle import AbstractBattle
 from poke_env.environment import SinglesEnv
 from poke_env.player import SimpleHeuristicsPlayer
 
 GAME_FORMAT = "gen8customgamenogimmicks"
+N_ACTIONS = SinglesEnv.get_action_space_size(9)
+_SWITCH_ACTIONS = 6
+
+
+def action_mask(battle: AbstractBattle) -> np.ndarray:
+    """poke-env's mask with the switch slots decided by identity. poke-env marks
+    a slot legal when its *species* is among available switches, so with two of
+    a species (common in gauntlet parties) the active one is marked too and the
+    resulting order is rejected. Padded to N_ACTIONS (gen8 masks are 22-dim)."""
+    mask = np.array(SinglesEnv.get_action_mask(battle))
+    if len(mask) < N_ACTIONS:
+        mask = np.pad(mask, (0, N_ACTIONS - len(mask)))
+    if not battle.wait:
+        for i, p in enumerate(list(battle.team.values())[:_SWITCH_ACTIONS]):
+            mask[i] = int(not battle.trapped and any(p is s for s in battle.available_switches))
+    return mask
 
 
 def heuristic_brain() -> Brain:
     """SimpleHeuristics as a sim Brain: the enemy AI, and the default player."""
     return player_brain(SimpleHeuristicsPlayer(battle_format=GAME_FORMAT, start_listening=False, log_level=50))
-
-
-def prior_brain(policy) -> Brain:
-    return player_brain(PolicyPlayer(policy, deterministic=True, battle_format=GAME_FORMAT,
-                                     start_listening=False, log_level=50))
-
-
-def _obs_dict(policy, mirror) -> dict:
-    return {"observation": torch.as_tensor(embed_battle(mirror), device=policy.device).unsqueeze(0),
-            "action_mask": torch.as_tensor(action_mask(mirror), device=policy.device).unsqueeze(0)}
-
-
-def prior_probs(policy, mirror) -> tuple[np.ndarray, np.ndarray]:
-    with torch.no_grad():
-        od = _obs_dict(policy, mirror)
-        policy._mask = od["action_mask"]
-        probs = policy.get_distribution(od).distribution.probs[0].cpu().numpy()
-    return probs, od["action_mask"][0].cpu().numpy()
 
 
 def outcome_value(state: dict, side: str, death_weight: float = 0.5,
@@ -76,18 +73,18 @@ def outcome_value(state: dict, side: str, death_weight: float = 0.5,
 
 
 class Searcher:
-    """Top-k rollout search for one side; the enemy plays its fixed AI.
-    policy=None: every legal action is a candidate (up to k) and `rollout`
-    (a scripted brain such as the calc bot) plays the rollouts — no network.
+    """Top-k rollout search for one side; the enemy plays its fixed AI. Every
+    legal action is a candidate (up to k, the rollout brain's own choice first)
+    and `rollout` (a scripted brain such as the calc bot) plays the rollouts.
     Rollouts play to the end and the outcome is the value: a learned leaf
     value (twice) and a second ply (depth 2) were null (NOTEBOOK.md)."""
 
-    def __init__(self, policy, enemy: Brain, k: int = 3, rollouts: int = 8,
+    def __init__(self, enemy: Brain, k: int = 3, rollouts: int = 8,
                  max_turns: int = 100, importance: list[float] | None = None,
                  death_weight: float = 0.5, crn: bool = True, seed: int | None = None,
                  rollout: Brain | None = None):
-        self.policy, self.enemy = policy, enemy
-        self.prior = rollout or prior_brain(policy)
+        self.enemy = enemy
+        self.prior = rollout or heuristic_brain()
         self.k, self.rollouts, self.max_turns = k, rollouts, max_turns
         self.importance, self.death_weight = importance, death_weight
         # Common random numbers: rollout j uses the same engine seed for every
@@ -112,18 +109,13 @@ class Searcher:
         if m.wait:
             return "default"
         self.n_decisions += 1
-        if self.policy is None:
-            mask = action_mask(m)
-            probs = mask.astype(float) / max(mask.sum(), 1)
-            cands = [int(a) for a in range(len(mask)) if mask[a]]
-            # the rollout brain's own choice first: ties in the noisy rollout values
-            # go to it, not to whichever switch happens to come first (which stalled)
-            own = self.prior(sb, side)
-            cands.sort(key=lambda a: order_to_choice(SinglesEnv.action_to_order(np.int64(a), m)) != own)
-            cands = cands[:self.k]
-        else:
-            probs, mask = prior_probs(self.policy, m)
-            cands = [int(a) for a in np.argsort(-probs) if mask[a]][:self.k]
+        mask = action_mask(m)
+        cands = [int(a) for a in range(len(mask)) if mask[a]]
+        # the rollout brain's own choice first: ties in the noisy rollout values
+        # go to it, not to whichever switch happens to come first (which stalled)
+        own = self.prior(sb, side)
+        cands.sort(key=lambda a: order_to_choice(SinglesEnv.action_to_order(np.int64(a), m)) != own)
+        cands = cands[:self.k]
         if not cands:
             return "default"
         self.last_action = cands[0]
@@ -190,15 +182,11 @@ def evaluate(bridge: SimBridge, party: str | None, enemy: str | None, brain: Bra
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--pairs", default="models/gauntlet_holdout.json")
-    p.add_argument("--from-harvest", metavar="JSONL",
-                   help="sample pairs from the harvest jsonl like collect_game baseline "
-                        "(seed 0) instead of --pairs; --check here compares to the 68.5%% line")
     p.add_argument("--seed", type=int, default=0)
     p.add_argument("--n-pairs", type=int, default=100)
     p.add_argument("--offset", type=int, default=0)
     p.add_argument("--n", type=int, default=1, help="battles per pair")
-    p.add_argument("--policy", help="state_dict of the prior, or 'calc' for the damage-calc bot; omit for --check")
-    p.add_argument("--net-arch", default="256,256")
+    p.add_argument("--policy", choices=["calc"], help="'calc' for the damage-calc bot; omit for --check")
     p.add_argument("--check", action="store_true", help="SimpleHeuristics on both sides")
     p.add_argument("--search", action="store_true")
     p.add_argument("--k", type=int, default=3)
@@ -210,28 +198,19 @@ def main() -> None:
     p.add_argument("--full-info", action="store_true", help="the player knows the enemy's sets and stats")
     args = p.parse_args()
 
-    if args.from_harvest:
-        from ai_util.collect_game import sample_pairs
-        pairs = sample_pairs(args.from_harvest, args.n_pairs, args.seed)
-    else:
-        pairs = json.loads(Path(args.pairs).read_text())[args.offset:args.offset + args.n_pairs]
+    pairs = json.loads(Path(args.pairs).read_text())[args.offset:args.offset + args.n_pairs]
     bridge = SimBridge()
     enemy = heuristic_brain()
     searcher = None
     if args.check:
         brain, tag = heuristic_brain(), "heuristic"
     else:
-        if args.policy == "calc":
-            from ai_util.calc_bot import calc_brain
-            policy, fast, tag = None, calc_brain(), "calc"
-        else:
-            policy = load_policy(args.policy, [int(a) for a in args.net_arch.split(",")], device="cpu")
-            fast, tag = prior_brain(policy), "prior"
+        from ai_util.calc_bot import calc_brain
+        fast, tag = calc_brain(), "calc"
         if args.search:
-            searcher = Searcher(policy, enemy, k=args.k, rollouts=args.rollouts,
+            searcher = Searcher(enemy, k=args.k, rollouts=args.rollouts,
                                 max_turns=args.max_turns, death_weight=args.death_weight,
-                                crn=not args.no_crn, seed=args.seed,
-                                rollout=fast if policy is None else None)
+                                crn=not args.no_crn, seed=args.seed, rollout=fast)
             tag = f"{tag}+search k={args.k} r={args.rollouts}{' nocrn' if args.no_crn else ''}"
             brain = searcher
         else:

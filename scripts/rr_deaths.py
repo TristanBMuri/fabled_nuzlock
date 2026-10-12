@@ -115,7 +115,7 @@ def main() -> None:
     if args.preserve or args.matchup or args.blind_field:
         import ai_util.calc_bot as cb
         cb.PRESERVE, cb.MATCHUP, cb.FIELD_AWARE = args.preserve, args.matchup, not args.blind_field
-    searcher = Searcher(None, enemy, k=9, rollouts=8, rollout=calc, seed=0, death_weight=args.death_weight)
+    searcher = Searcher(enemy, k=9, rollouts=8, rollout=calc, seed=0, death_weight=args.death_weight)
     print(f"death weight {args.death_weight}, preserve {args.preserve}, matchup {args.matchup}, field-aware {not args.blind_field}, enemy AI {args.ai}")
     srng = random.Random(f"{boss}-seeds-0")
     seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(n)]

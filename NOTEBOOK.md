@@ -2229,3 +2229,106 @@ fielded. The headline metric (trainers cleared without a death) is what a route 
 hurts, so: **`all` stays the benchmark's default; `--swaps hard` is the development
 setting** (2x faster on 20 workers, 17 vs ~36 min, ~0.05 route deaths per run). The
 user decides whether the benchmark table itself moves to `hard`.
+
+## 2026-10-12 — Matrix calibration: are the safe cells safe? (TODO.md B1, `results/rr_matrix_calib.*`)
+
+The user's decisions first (HUMAN_TODO 7–12, all recorded there): RR 4.1 hardcore with the
+dupes clause, random starter across every generation, singles only, the 95 bosses (optional
+bosses for items later), natures free, any ability after Cerulean, first encounter only —
+every one is what the sim already assumes. The BDSP benchmark stays on `--swaps all`.
+
+**The question.** The cover chooser and the calc bot's switching trust `matchup.pair()`: a
+one-turn damage calc per (candidate, enemy mon) labelled safe / race / none. Nothing had
+scored those labels against play. `scripts/rr_matrix_calib.py` plays every cell: each
+stage-A candidate (pool + starters, built as the probes build them) against each enemy mon
+alone under the arena, the calc bot vs the RR AI, 20 paired seeds (the probe's), and
+tabulates the label against the duel. 4 ms a duel; Brock + Misty in 2 min serially.
+
+| boss | tier | cells | duel win | HP left (won) | win ≥ 90% | win ≤ 10% |
+|---|---|---|---|---|---|---|
+| Brock (132 cands) | safe | 182 | 86% | 65% | 76% | 7% |
+| | race | 138 | 58% | 40% | 38% | 20% |
+| | none | 460 | 16% | 43% | 7% | 73% |
+| Misty (219 cands) | safe | 76 | 83% | 57% | 75% | 9% |
+| | race | 150 | 54% | 47% | 37% | 28% |
+| | none | 1088 | 7% | 41% | 2% | 88% |
+
+The tiers order the cells correctly (safe 85%, race 56%, none 9% over both bosses) and
+the safe margin behaves (ko_us 3 → 83%, 4 → 89%, 5 → 90%). But one safe cell in six
+loses the duel outright, and 56 none cells win it ≥ 90% of the time: answers the chooser
+never sees. The false cells by name, traced turn by turn (seed 0):
+
+- **False safes, 32** (safe, duel < 50%). Brock: Varoom 10, Hippopotas 7; Misty:
+  Clodsire 9. Causes, in order of count:
+  1. **The enemy's item and conditional moves are not in the formula.** Varoom's Air
+     Balloon makes every Ground answer immune (Mudkip, Turtwig, Swinub, Sandygast,
+     Toedscool, Greavard: "1–2 hits" on paper, 0% in play); Chimecho's Synchronoise
+     reads as a one-hit KO and does nothing to a Steel/Poison. TODO.md C2.
+  2. **Toxic + Protect / Recover / Slack Off stall.** The healer rule passes a "2 hits,
+     faster" cell; Protect doubles the turns, Toxic + sandstorm chip finishes a mon that
+     cannot two-shot through it (Hippopotas / Berry Juice, Clodsire / Black Sludge, Varoom).
+  3. **Two-turn moves count as one hit.** Sudowoodo's Dig is "2/3 faster" on paper and
+     takes four turns while Clodsire's Toxic + Bulldoze (double damage on a digger) lands.
+  4. The 10–45% cells are rolls, crits and 95%-accuracy misses on thin margins (Weedle vs
+     Hippopotas wins seed 0 and 10% overall).
+- **False nones, 56** (none, duel ≥ 90%). Brock: Lileep 14 (healer rule), Archen 5;
+  Misty: Politoed 13, Clodsire 6. Causes:
+  1. **The mirrors carry vanilla data for species and moves the mod changed.**
+     `rr_probe.inject_mod_data` adds only entries poke-env lacks; for the rest poke-env's
+     gen 9 tables stand while the engine plays the mod's: **40 species with changed
+     types** (Arbok Poison→Poison/Dark: immune to Starmie's Psyshock, "2/2" → wins 100%;
+     Ledian Bug/Flying→Bug/Fighting: Ancient Power "113%" on paper, 37% in play), 250
+     with changed base stats, 446 with changed ability sets, and **134 moves with changed
+     power / type / accuracy** (Attack Order 90→120, Blaze Kick 90→100% accurate, ...).
+     Hidden Power's typed variants read as Normal 60. The formula's inputs are wrong for
+     those cells, both ways. Cheapest fix on the list: override the existing entries too.
+  2. **The enemy AI wastes turns.** Politoed opens with Toxic, Lileep with Stockpile /
+     Recover, so a "3 hits" answer gets its three hits; the healer rule discards Lileep's
+     answers wholesale (18 of Brock's 30 false nones carry the healer flag).
+  3. The formula undercounts some of our hits (Meditite's Force Palm 43% on paper, 61%
+     in play; its paralysis then costs Lileep a turn). Not pinned down; part of B2.
+
+**Verdict.** The matrix is a usable ranking (the chooser's safe tier wins 85% of its
+duels) with a ~15% lie rate at the top and a pool of discarded winners underneath. The
+first B2 term is not a tactic but data: the mod's own types / stats / moves in the mirrors
+(A1's "the mod's changed types", found from the inside). Then the enemy's item (Air
+Balloon, Sash, berries), then Toxic-stall as a "disables" flag, then two-turn moves. Each
+is accepted by this table improving and the cover runs not getting worse (paired).
+
+Caveat: the duel has no bench and no switching, so it scores the cell, not the fight;
+D1 (sand switch-ins) and D3 (boxes) stay the judges of play.
+
+## 2026-10-12 — The mod's data in the mirrors; the BC pipeline deleted (`results/rr_matrix_calib_mod.*`, `results/rr_moddata_pool*.*`)
+
+**Mod data.** `rr_probe.inject_mod_data` now replaces poke-env's gen 9 entries with the
+fork's merged gen9rr Dex (it only added the entries poke-env lacked before): 40 species
+with other types, 250 with other base stats, 446 with other ability sets, 134 moves with
+other power / type / accuracy. The calibration rerun on the same seeds: safe 85 → 86% of
+duels, race 56 → 60%, false safes 32 → 31, false nones 56 → 46 (Arbok vs Starmie is a
+safe cell now). Only the cells with a changed entry move, as expected.
+
+The paired cover pool run (`rr_team_probe --bosses BROCK,MISTY --arena --legal --chooser
+cover --matchup --death-weight 6 --n-search 30`, 20 workers, 26 min) against
+`results/rr_cfru_pool_par.*`:
+
+| boss | saved best | with the mod data |
+|---|---|---|
+| Brock | 100% / 0.08 deaths per mon / 63% deathless | 90% / 0.34 / 20% |
+| Misty | 73% / 0.57 / 3% | 90% / 0.49 / 0% |
+
+The calc bot plays stage A with the corrected data, so the shortlist, the greedy six and
+the cover six all change; no Brock team is in both runs. Misty's cover six is the same
+team both times and goes 63 → 90% under the corrected data. Brock's drop is a chooser
+shuffle to judge on the box milestone (30 boxes average over many sixes), not a known
+regression of the data; the saved best six is being replayed under the new data to
+settle it (next entry). The data is the engine's, so the fix stands either way.
+
+**The BC pipeline is deleted** (HUMAN_TODO 5, the user's decision): `ai_util/battler_obs.py`,
+`battler_policy.py`, `collect_game.py`, `pretrain_bc.py`, the prior branches in
+`evaluate.py` / `runner.py`, `--harvest` and the harvest recorder, torch and
+stable-baselines3 (711 lines, 1.5 GB of checkpoints and harvests left on disk, under
+`.gitignore`). `action_mask` (identity-based switch slots) moved to `ai_util/evaluate.py`;
+`Searcher(enemy, ...)` lost its policy argument. Exact: the pool run repeated on the
+tree after the deletion is identical to the one before it on every team, threat and
+shortlist (`results/rr_moddata_pool2.*` vs `rr_moddata_pool.*`); 38 tests pass; the
+recipe stays in this notebook, the code under the `pre-cleanup` tag.
