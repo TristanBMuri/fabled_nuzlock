@@ -23,6 +23,15 @@ BATTLE_FORMAT = "gen8customgamenogimmicks"
 # Unset = no recording: the battler's data must follow the progression rule the run
 # layer plays under, so a harvest is always an explicit, fresh file.
 HARVEST = Path(os.environ["GAUNTLET_HARVEST"]) if os.environ.get("GAUNTLET_HARVEST") else None
+ENEMY = "heuristic"  # the enemy AI: poke-env's SimpleHeuristics, or "bdsp" = the Gen 4 trainer AI (ai_util/bdsp_ai.py)
+
+
+def enemy_brain():
+    if ENEMY == "bdsp":
+        from ai_util.bdsp_ai import BDSPAI
+        from ai_util.sim import player_brain
+        return player_brain(BDSPAI(battle_format=BATTLE_FORMAT, start_listening=False, log_level=50))
+    return heuristic_brain()
 
 
 class SimBattleRunner:
@@ -35,7 +44,7 @@ class SimBattleRunner:
                  max_turns: int = 100, full_info: bool = False):
         self.max_turns, self.full_info = max_turns, full_info  # full_info: the player knows the enemy's sets
         self.bridge = SimBridge()
-        self.enemy = heuristic_brain()
+        self.enemy = enemy_brain()
         self.search = search  # default (k, rollouts) for boss fights; the compute dial
         self.policy, self.calc = None, policy == "calc"
         self._searchers: dict[tuple[int, int], object] = {}  # one Searcher per width

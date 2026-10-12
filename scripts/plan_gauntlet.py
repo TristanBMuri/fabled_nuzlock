@@ -20,6 +20,8 @@ Measured null and removed (results in the notebook): --refine / --climb,
 import argparse
 import functools
 import itertools
+import json
+import os
 import multiprocessing as mp
 import pickle
 import sys
@@ -36,6 +38,14 @@ HP_WEIGHT = 0.2  # margin tie-breaker weight in the party score (most candidates
 DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes of this process)
 DEATHS_BY_SPECIES: dict[str, int] = {}  # species -> deaths
 LOSSES_AT: dict[int, int] = {}  # trainer index -> lost battles
+EVENTS: Path | None = None  # --out X.jsonl -> X.events.jsonl: one JSON line per battle / episode (ui/)
+
+
+def emit(kind: str, **data) -> None:
+    """One dashboard event (ui/build.py folds them); workers append to the same file."""
+    if EVENTS is not None:
+        with EVENTS.open("a") as f:
+            f.write(json.dumps({"kind": kind, "t": time.time(), **data}) + "\n")
 
 
 def party_score(env: NuzlockeEnv, p, lam: float, n: int = RISK_BATTLES) -> float:
@@ -99,13 +109,14 @@ SNAPSHOT = ("run_id", "trainer_idx", "roster", "graveyard", "party", "_rival_fam
 def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool = False,
             save: Path | None = None) -> dict:
     env.reset(seed=seed)
-    return play(env, lam, verbose, fast, save)
+    return play(env, lam, verbose, fast, save, seed=seed)
 
 
-def play(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False, save: Path | None = None) -> dict:
+def play(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False, save: Path | None = None,
+         seed: int | None = None) -> dict:
     """The planner from the env's current state to the end of the run. save: pickle the
-    run state here at the League opener (once)."""
-    deaths, first_death_at, deaths_at = 0, None, {}
+    run state here at the League opener (once). seed: names the episode in the events."""
+    deaths, first_death_at, deaths_at, graves = 0, None, {}, []
     while not env.done:
         if env.phase == "ENCOUNTER":
             alts, catch = env.pending[0], env.can_catch
@@ -128,6 +139,7 @@ def play(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False, save: 
                 env.step(1 + i)
         alive_before = sum(m.alive for m in env.roster)
         t = env.trainer_idx
+        fielded = [f"{env.roster[i].species}@{env.roster[i].level}" for i in env.party]
         env.step(0)  # confirm -> battle
         died = alive_before - sum(m.alive for m in env.roster)
         deaths += died
@@ -136,6 +148,9 @@ def play(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False, save: 
             DEATHS_AT[t] = DEATHS_AT.get(t, 0) + died
             for m in env.graveyard[-died:]:
                 DEATHS_BY_SPECIES[m.species] = DEATHS_BY_SPECIES.get(m.species, 0) + 1
+                graves.append([t, m.species])
+        emit("battle", seed=seed, i=t, won=env.trainer_idx > t, party=fielded,
+             died=[m.species for m in env.graveyard[-died:]] if died else [], box=sum(m.alive for m in env.roster))
         if env.trainer_idx == t:
             LOSSES_AT[t] = LOSSES_AT.get(t, 0) + 1
         if died and first_death_at is None:
@@ -145,9 +160,12 @@ def play(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False, save: 
                   f"deaths {died} | {env.render()}")
     if verbose:
         print(f"  end of run at trainer {env.trainer_idx}:\n{env.tracker()}")
-    return {"cleared": env.trainer_idx, "deaths": deaths,
-            "cleared_no_death": env.trainer_idx if first_death_at is None else first_death_at,
-            "slice_clear": env.trainer_idx >= env.slice_len, "deaths_at": deaths_at}
+    r = {"cleared": env.trainer_idx, "deaths": deaths,
+         "cleared_no_death": env.trainer_idx if first_death_at is None else first_death_at,
+         "slice_clear": env.trainer_idx >= env.slice_len, "deaths_at": deaths_at}
+    emit("episode", seed=seed, cleared=r["cleared"], no_death=r["cleared_no_death"], deaths=deaths,
+         clear=r["slice_clear"], graves=graves, party=[f"{env.roster[i].species}@{env.roster[i].level}" for i in env.party])
+    return r
 
 
 def rules(args: argparse.Namespace) -> Rules:
@@ -167,8 +185,11 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple:
     """One env, the given episode seeds (a worker). Returns the per-episode rows,
     the death / loss histograms, the number of deep-search fights and the
     deaths by species."""
+    import runner
+    global EVENTS
+    runner.ENEMY = args.enemy
+    EVENTS = Path(args.out).with_suffix(".events.jsonl") if args.out else None
     if args.harvest:
-        import runner
         runner.HARVEST = Path(args.harvest)
     env = make_env(args)
     t0, rows = time.time(), []
@@ -228,6 +249,9 @@ def parser(doc: str = __doc__) -> argparse.ArgumentParser:
     ap.add_argument("--save-league", metavar="DIR",
                     help="pickle each episode's run state at the League opener to DIR/seed<N>.pkl "
                          "(the input of scripts/league_test.py)")
+    ap.add_argument("--enemy", choices=["heuristic", "bdsp"], default="heuristic",
+                    help="enemy AI: SimpleHeuristics or the Gen 4 trainer AI (ai_util/bdsp_ai.py)")
+    ap.add_argument("--out", help="X.jsonl: per-episode rows there, dashboard events in X.events.jsonl (ui/)")
     ap.add_argument("--verbose", action="store_true")
     return ap
 
@@ -236,6 +260,12 @@ def main() -> None:
     args = parser().parse_args()
     seeds = [args.seed + e for e in range(args.episodes)]
     t0 = time.time()
+    global EVENTS
+    if args.out:
+        EVENTS = Path(args.out).with_suffix(".events.jsonl")
+        EVENTS.unlink(missing_ok=True)
+        emit("start", mode="gauntlet", config=vars(args), bosses=[], pid=os.getpid(), seeds=seeds,
+             order=[[e["trainer_name"], e["location"], e["breakpoint"]] for e in ORDER[:args.slice]])
     if args.workers > 1:
         with mp.get_context("spawn").Pool(args.workers) as pool:
             parts = pool.starmap(run_episodes, [(args, seeds[i::args.workers])
@@ -271,6 +301,10 @@ def main() -> None:
     if by_species:
         print("  deaths by species: " + ", ".join(
             f"{sp} {d}" for sp, d in sorted(by_species.items(), key=lambda kv: -kv[1])[:12]))
+    if args.out:
+        Path(args.out).write_text("".join(json.dumps({k: v for k, v in r.items() if k != "deaths_at"}) + "\n" for r in rows))
+        emit("end", minutes=round((time.time() - t0) / 60, 1), cleared=k("cleared"), no_death=k("cleared_no_death"),
+             deaths=k("deaths"), clear=k("slice_clear"))
 
 
 if __name__ == "__main__":

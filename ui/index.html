@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Radical Red runs</title>
+<title>Nuzlocke runs</title>
 <!-- UI_TODO.md: fed by ui/build.py (data.json); served with `uv run python ui/build.py --serve` -->
 <style>
 :root {
@@ -93,11 +93,18 @@ button:hover { background: var(--surface-2); }
 dialog { border: 1px solid var(--line); border-radius: 10px; background: var(--surface); color: var(--ink); max-width: min(96vw, 1400px); padding: 14px; }
 dialog::backdrop { background: rgb(0 0 0 / .4); }
 .empty { color: var(--ink-3); padding: 24px; text-align: center; }
+/* gauntlet (BDSP planner) */
+.strip { position: relative; height: 14px; background: var(--surface-2); border-radius: 3px; min-width: 200px; }
+.strip > .p { position: absolute; left: 0; top: 0; bottom: 0; background: var(--blue); opacity: .45; border-radius: 3px; }
+.strip > .p.clear { background: var(--good); }
+.strip > .m { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--ink-3); opacity: .6; }
+.strip > .d { position: absolute; top: 1px; bottom: 1px; width: 3px; margin-left: -1px; background: var(--bad); border-radius: 1px; }
+.eps td { vertical-align: middle; }
 </style>
 </head>
 <body>
 <header>
-  <h1>Radical Red runs</h1>
+  <h1>Nuzlocke runs</h1>
   <nav id="tabs"></nav>
   <div class="status"><label><input type="checkbox" id="hist"> results/ (history)</label><span id="stamp">loading…</span></div>
 </header>
@@ -187,7 +194,54 @@ function headline(r) {
     return `<span class="chip" title="win / deaths per mon / deathless">${esc(b.name)} ${t ? `${pct(t.win)} · ${f2(t.deaths_per_mon)} · ${pct(t.deathless)}` : "–"}${st}</span>`;
   }).join("");
 }
+function gauntletCard(r) {
+  const open = S.open.has(r.id), c = r.config, s = r.summary, n = r.slice || c.slice;
+  const chips = [["enemy", c.enemy || "heuristic"], ["slice", c.slice], ["battler", c.policy || "SimpleHeuristics"], ["search", c.search], ["deep", c.deep],
+    ["episodes", c.episodes], ["seed", c.seed], ["workers", c.workers]].filter(([, v]) => v != null).map(([k, v]) => `<span class="chip">${k} ${esc(v)}</span>`).join("")
+    + (c.search_all ? `<span class="chip">--search-all</span>` : "");
+  const head = s.cleared == null ? `<span class="muted small">no finished episode yet</span>` :
+    `<span class="chip" title="mean trainers cleared">cleared ${s.cleared.toFixed(1)}/${n}</span><span class="chip" title="mean trainers cleared before the first death">no-death ${s.no_death.toFixed(1)}</span>
+     <span class="chip">deaths/run ${f2(s.deaths)}</span><span class="chip">clear rate ${pct(s.clear)}</span>${s.final ? "" : `<span class="muted small">over ${r.episodes_done} finished</span>`}`;
+  const body = open ? `<div class="body" style="display:grid;gap:14px">
+    ${s.cleared == null ? "" : `<div class="stats"><div><div class="muted">trainers cleared</div><div class="big">${s.cleared.toFixed(1)} <span class="muted small">/ ${n}</span></div></div>
+      <div><div class="muted">before first death</div><div class="big">${s.no_death.toFixed(1)}</div></div><div><div class="muted">deaths per run</div><div class="big">${f2(s.deaths)}</div></div>
+      <div><div class="muted">runs cleared</div><div class="big">${pct(s.clear)}</div></div><div><div class="muted">episodes</div><div class="big">${r.episodes_done}/${r.n_episodes}</div></div></div>`}
+    <div><h4>episodes · bar = progress, red = a death, grey lines = ${esc([...new Set(r.milestones.map(m => m[2].replace("_", " ")))].join(" / "))}</h4>${episodesHTML(r)}</div>
+    <div class="cols"><div><h4>deadliest trainers</h4>${trainersHTML(r)}</div>
+      <div><h4>deaths by species</h4>${r.species.length ? hbars(r.species.map(([sp, d]) => [sp, d, d]), r.species[0][1]) : `<span class="muted small">none yet</span>`}</div></div></div>` : "";
+  return `<div class="card"><div class="head" data-act="toggle" data-key="${esc(r.id)}">
+    <div class="row"><span class="name">${esc(r.id)}</span><span class="pill ${r.state}">${r.state}</span><span class="chip">BDSP gauntlet</span>
+      <span class="muted small">started ${when(r.started)} · updated ${ago(r.updated)}${r.minutes ? ` · ${r.minutes} min` : ""}</span></div>
+    <div class="row small">${chips}</div>
+    <div class="row" style="align-items:center"><div style="flex:1;min-width:160px">${bar(r.n_episodes ? r.episodes_done / r.n_episodes : 0)}</div><span class="small mono">${r.episodes_done}/${r.n_episodes} episodes</span></div>
+    <div class="row">${head}</div></div>${body}</div>`;
+}
+function episodesHTML(r) {
+  const n = r.slice || 1, order = r.trainers;
+  const ms = r.milestones.map(([i, name, b]) => `<i class="m" style="left:${i / n * 100}%" title="#${i} ${esc(name)} (${esc(b)})"></i>`).join("");
+  const name = i => (r.milestones.find(m => m[0] === i) || [])[1];
+  return `<div class="scroll"><table class="eps"><thead><tr><th class="n">seed</th><th style="width:60%">progress</th><th class="n">at</th><th class="n">deaths</th><th>state</th></tr></thead><tbody>
+    ${r.episodes.map(ep => {
+      const key = r.id + "|ep" + ep.seed, open = S.open.has(key), res = ep.result;
+      const ticks = ep.deaths.map(([i, sp]) => `<i class="d" style="left:${(i + .5) / n * 100}%" title="#${i}: ${esc(sp)}"></i>`).join("");
+      const st = res ? (res.clear ? `<span class="up">cleared</span>` : `<span class="down">ended at #${res.cleared}</span>`) : ep.at ? `<span class="muted">running</span>` : `<span class="muted">queued</span>`;
+      const detail = open ? `<tr class="detail"><td colspan="5"><div class="small" style="display:grid;gap:6px">
+        <div><b>party at the end</b> ${esc(ep.party.join(", ") || "–")}</div>
+        <div><b>deaths</b> ${ep.deaths.length ? ep.deaths.map(([i, sp]) => `${esc(sp)} <span class="muted">at #${i}${name(i) ? " " + esc(name(i)) : ""}</span>`).join(" · ") : "none"}</div></div></td></tr>` : "";
+      return `<tr class="click" data-act="toggle" data-key="${esc(key)}"><td class="n mono">${ep.seed}</td>
+        <td><div class="strip"><i class="p ${res?.clear ? "clear" : ""}" style="width:${Math.min(1, ep.at / n) * 100}%"></i>${ms}${ticks}</div></td>
+        <td class="n mono">${ep.at}</td><td class="n mono">${ep.deaths.length}</td><td class="small">${st}</td></tr>${detail}`;
+    }).join("")}</tbody></table></div><div class="small muted">click an episode for its deaths and final party</div>`;
+}
+function trainersHTML(r) {
+  const rows = r.trainers.filter(t => t.deaths || t.lost);
+  if (!rows.length) return `<span class="muted small">no deaths yet</span>`;
+  return `<div class="scroll"><table><thead><tr><th class="n">#</th><th>trainer</th><th>where</th><th class="n">deaths</th><th class="n">lost</th><th class="n">fought</th><th>our dead</th></tr></thead><tbody>
+    ${rows.map(t => `<tr><td class="n mono">${t.i}</td><td>${esc(t.name)}${t.breakpoint !== "none" ? ` <span class="chip">${esc(t.breakpoint.replace("_", " "))}</span>` : ""}</td><td class="small muted">${esc(t.location)}</td>
+      <td class="n">${t.deaths}</td><td class="n">${t.lost}</td><td class="n">${t.fought}</td><td class="small">${killers(t.killed)}</td></tr>`).join("")}</tbody></table></div>`;
+}
 function runCard(r) {
+  if (r.mode === "gauntlet") return gauntletCard(r);
   const open = S.open.has(r.id), failed = r.bosses.some(b => b.boss_failed);
   const prog = r.mode === "boxes" ? [r.boxes_done, r.n_boxes, "boxes"] : [r.bosses_done, r.n_bosses, "bosses"];
   return `<div class="card"><div class="head" data-act="toggle" data-key="${esc(r.id)}">

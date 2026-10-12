@@ -41,10 +41,54 @@ def read_events(path: Path) -> list[dict]:
     return out
 
 
+def fold_gauntlet(events: list[dict], start: dict, base: dict) -> dict:
+    """A BDSP planner run (plan_gauntlet.py --out): per episode its progress and deaths, per
+    trainer the deaths and lost battles, deaths by species. The battles themselves stay on disk."""
+    order = start.get("order", [])
+    eps = {s: {"seed": s, "at": 0, "deaths": [], "result": None, "party": []} for s in start.get("seeds", [])}
+    trainers, species = {}, {}
+    for e in events:
+        if e["kind"] == "battle":
+            ep = eps.setdefault(e["seed"], {"seed": e["seed"], "at": 0, "deaths": [], "result": None, "party": []})
+            ep["at"], ep["party"] = e["i"] + e["won"], e["party"]
+            tr = trainers.setdefault(e["i"], {"i": e["i"], "deaths": 0, "lost": 0, "fought": 0, "killed": {}})
+            tr["fought"] += 1
+            tr["lost"] += not e["won"]
+            for sp in e["died"]:
+                ep["deaths"].append([e["i"], sp])
+                tr["deaths"] += 1
+                tr["killed"][sp] = tr["killed"].get(sp, 0) + 1
+                species[sp] = species.get(sp, 0) + 1
+        elif e["kind"] == "episode":
+            eps.setdefault(e["seed"], {"seed": e["seed"], "deaths": [], "party": []}).update(
+                result=e, at=e["cleared"], party=e["party"])
+    for tr in trainers.values():
+        tr["name"], tr["location"], tr["breakpoint"] = (order[tr["i"]] if tr["i"] < len(order) else ["?", "?", "none"])
+    done = [ep["result"] for ep in eps.values() if ep["result"]]
+    mean = lambda k: sum(r[k] for r in done) / len(done) if done else None
+    end = next((e for e in events if e["kind"] == "end"), None)
+    return {**base, "n_episodes": len(eps), "episodes_done": len(done), "slice": len(order),
+            "milestones": [[i, n, b] for i, (n, loc, b) in enumerate(order) if b != "none"],
+            "summary": {"cleared": mean("cleared"), "no_death": mean("no_death"), "deaths": mean("deaths"),
+                        "clear": mean("clear"), "final": bool(end)},
+            "episodes": sorted(eps.values(), key=lambda ep: ep["seed"]),
+            "trainers": sorted(trainers.values(), key=lambda tr: (-tr["deaths"], -tr["lost"]))[:25],
+            "species": sorted(species.items(), key=lambda kv: -kv[1])[:20]}
+
+
 def fold(path: Path, where: str, ps: str) -> dict:
     """One run: its config, state and, per boss, every event in the order it came."""
     events = read_events(path)
     start = next((e for e in events if e["kind"] == "start"), {"config": {}, "bosses": [], "mode": "?", "t": 0})
+    if start["mode"] == "gauntlet":
+        end = next((e for e in events if e["kind"] == "end"), None)
+        out = start["config"].get("out") or ""
+        running = end is None and where == "logs" and bool(out) and Path(out).name in ps
+        base = {"id": f"{where}/{path.name.removesuffix('.events.jsonl')}", "where": where, "mode": "gauntlet",
+                "config": start["config"], "state": "done" if end else "running" if running else "stopped",
+                "started": start["t"], "updated": max((e["t"] for e in events), default=0),
+                "minutes": end and end["minutes"], "bosses": []}
+        return fold_gauntlet(events, start, base)
     bosses = {b: {"name": b, "teams": [], "boxes": []} for b in start["bosses"]}
     for e in events:
         b = bosses.setdefault(e.get("boss"), {"name": e.get("boss"), "teams": [], "boxes": []}) if "boss" in e else None
