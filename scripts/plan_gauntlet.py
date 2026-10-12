@@ -35,7 +35,7 @@ from nuzlocke_env import DEEP_HP, EVOS, MAX_PARTY, ORDER, RISK_BATTLES, SLICE_LE
 from gauntlet import load_species, pack_team, trainer_mons  # noqa: E402
 
 HP_WEIGHT = 0.2  # margin tie-breaker weight in the party score (most candidates show 0 deaths at n=8)
-SWAPS = "all"  # --swaps: score every single swap, or (hard) only when the cover six's own query is not clean
+SWAPS = "all"  # --swaps: score every single swap, or (hard) at breakpoints and when the cover six's own query is not clean
 DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes of this process)
 DEATHS_BY_SPECIES: dict[str, int] = {}  # species -> deaths
 LOSSES_AT: dict[int, int] = {}  # trainer index -> lost battles
@@ -98,7 +98,9 @@ def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False
     score = lambda p: party_score(env, p, lam)
     # 2026-10-12: the swap scoring was 3/4 of an episode (~6 x box candidates x 8 battles per
     # trainer); hard() is the deep-search trigger on the base party's own (cached) query
-    cands = swaps(base, alive) if SWAPS == "all" or hard(env, base) else [tuple(base)]
+    # at a breakpoint (gym, rival, the League opener) always; a route trainer only when hard()
+    cands = swaps(base, alive) if SWAPS == "all" or ORDER[env.trainer_idx]["breakpoint"] != "none" or hard(env, base) \
+        else [tuple(base)]
     front = sorted(cands, key=score, reverse=True)
     if verbose:
         print(f"    {len(front)} candidates: best {score(front[0]):+.2f} "
@@ -254,8 +256,9 @@ def parser(doc: str = __doc__) -> argparse.ArgumentParser:
                          "stats estimated at 31 IV / 85 EV")
     ap.add_argument("--lam", type=float, default=1.0, help="death penalty weight in the party score")
     ap.add_argument("--swaps", choices=["all", "hard"], default="all",
-                    help="score every single swap of the cover six (all), or only when the six's own risk "
-                         "query shows a loss, a death or HP < DEEP_HP (hard): 3/4 of an episode is swap scoring")
+                    help="score every single swap of the cover six (all), or only at breakpoints and when the "
+                         "six's own risk query shows a loss, a death or HP < DEEP_HP (hard): 3/4 of an episode "
+                         "is swap scoring; 2026-10-12: route-only pruning cost 4 deaths at Candice in 3 of 20 runs")
     ap.add_argument("--level-rule", choices=["match", "cap"], default="cap",
                     help="cap = next boss's max level (hardcore rule); match = max enemy seen")
     ap.add_argument("--level-margin", type=int, default=0,

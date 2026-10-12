@@ -2185,3 +2185,47 @@ again, now with all 8 bosses' preludes, then all 6 × 30 × 8 battles, then all 
 fan-out each — identical to `results/rr_cfru_early.jsonl` on every team, best team, threat
 and shortlist; 35 min (40 with the per-boss chain, 119 serial), 20 workers + 8 main-process
 bridges at ~24 GB. The RR tables now cost their battles / 20.
+
+## 2026-10-12 — `--swaps hard`: the swap scoring only at fights the cover six does not clear cleanly (`results/bdsp_gen4ai_swapshard.*`)
+
+The lever the timed episode points at: score the single swaps only when the cover six's own
+n=8 query shows a loss, a death or HP left < DEEP_HP (the deep-search trigger, cached, so it
+is free); otherwise field the six. Full game, 20 episodes, seed 300, Gen 4 AI, the benchmark
+flags, 20 workers:
+
+  swaps   workers   min    cleared   no-death   deaths/run   runs cleared   deaths before the League
+  all        7       99    404.65     403.00       3.95          65%              0 (40 episodes incl. the heuristic run)
+  hard      20       17    404.55     390.10       4.50          55%              4 (Candice #317, in 3 of 20 episodes: seeds 300, 301, 316)
+
+Paired by seed and trainer (events files): the fielded route party is the same in 55% of
+the 7,900 fights, differs in 45% (first at trainers 14–25: a swap with 0.2 × HP margin over
+the clean six), and the fight result is the same in 7,888 of 7,900. The League rows are
+within the noise floor (±2 cleared, ±1.9 deaths, ±15 points); the opener's block query is
+always "hard", so the League party choice is unchanged in kind. The signal is the route:
+four deaths at Candice in three of the 20 episodes, where the saved runs had none in 40 —
+sixes whose 8-battle query under the fast brain was clean lost mons in the real
+(deep-searched) hail fight. Three of 20 against 0 of 20 under the same enemy is suggestive, not decisive
+(a 5–8% per-episode event fits both). **Not accepted** (the flag stays `all`). Refinement
+run next: `hard` scores the swaps at every breakpoint (gym leaders, the rival, the League
+opener — where deep search already runs) and prunes only route trainers whose query is
+clean; the clean route fights are the bulk of the queries, so most of the saving should stay. Wall-clock for `all` on 20 workers is not measured; the timed episode (2129 s) puts it
+at ~36 min.
+
+**`hard` = breakpoints always + clean route trainers pruned** (`results/bdsp_gen4ai_swapshard2.*`,
+the flag's meaning from here on; same 20 seeds, 20 workers):
+
+  swaps                 min    cleared   no-death   deaths/run   runs cleared   route deaths
+  all (7 workers)        99    404.65     403.00       3.95          65%        0
+  hard, route-only       17    404.55     390.10       4.50          55%        4 (Candice ×4, 3 episodes)
+  hard, breakpoints      17    404.75     394.70       3.80          75%        3 (Candice ×2, #397 ×1)
+
+Same wall-clock: the clean route fights are the queries. The League rows are the best of
+the three and within the noise floor. At a breakpoint this mode scores exactly what `all`
+scores (same box, same cover base, same candidates), so its two Candice deaths are the
+same process as the saved run's zero — a noise-level difference at 20 episodes. The one
+death the pruning can own is #397 (seed 306, Crobat): a route trainer whose six was clean
+at n=8 and lost a mon in the fight; under `all` a swap with more HP margin may have been
+fielded. The headline metric (trainers cleared without a death) is what a route death
+hurts, so: **`all` stays the benchmark's default; `--swaps hard` is the development
+setting** (2x faster on 20 workers, 17 vs ~36 min, ~0.05 route deaths per run). The
+user decides whether the benchmark table itself moves to `hard`.

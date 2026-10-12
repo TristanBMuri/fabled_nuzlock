@@ -26,18 +26,33 @@ paired seeds, or accepted as a change). Done on 2026-10-12 (NOTEBOOK.md → "Spe
   the benchmark by the slowest episode, ~36 min instead of 99.
 - **`--swaps hard`** (`plan_gauntlet.py`, default `all` = unchanged behaviour): score the
   single swaps only when the cover six's own query is not clean (a loss, a death or HP <
-  DEEP_HP: the deep-search trigger, already cached). A decision change: measure it with
-  the full 20-episode Gen 4 AI table on 20 workers against `results/bdsp_gen4ai.*` — the
-  paired route check is the events file (party fielded, result and deaths per trainer and
-  seed; compare script: per seed, first trainer where the fielded party differs), the
-  League is unaffected (the block query is always "hard"). Record the table in the notebook
-  and let the user accept it.
+  DEEP_HP: the deep-search trigger, already cached). Measured (NOTEBOOK.md, last entry,
+  `results/bdsp_gen4ai_swapshard.*`): **17 min** for the 20-episode Gen 4 AI table on 20
+  workers (99 on 7 with `all`; ~36 estimated on 20); League rows within the noise floor
+  (404.55 / 390.10 / 4.50 / 55% vs 404.65 / 403.00 / 3.95 / 65%); the route party differs
+  in 45% of fights; **4 route deaths at Candice in 3 of 20 episodes** where the saved run had 0.
+  The flag's final form keeps the full swap scoring at every breakpoint and prunes only
+  clean route trainers (`results/bdsp_gen4ai_swapshard2.*`): 17 min, 404.75 / 394.70 /
+  3.80 / 75%, 3 route deaths (2 at Candice — the same process as `all` there — and 1 at a
+  pruned route trainer). Recommendation: `all` stays the benchmark default, `hard` is the
+  development setting (2x); whether the table moves to `hard` is the user's call.
+- The paired route check for any BDSP run is the events file: per seed and trainer the
+  party fielded, the result, the deaths (the compare was a scratch script: per seed, the
+  first trainer where the fielded party differs, the per-episode means, deaths before
+  the League).
 - `league_test.py` now applies `--enemy` (it was parsed and ignored before; every League
   replay so far was against SimpleHeuristics) through `plan_gauntlet.apply(args)`.
 
-Still open: the BDSP swap scoring is the only big lever left and it is a behaviour change;
-within an episode nothing exact is large (the memo is in; the engine is the floor). For RR
-nothing structural is left: a table's wall-clock is its battles / 20.
+Still open: the BDSP swap scoring is the only big lever left and it is a behaviour change
+(above); within an episode nothing exact is large (the memo is in; the engine is the
+floor); after it, an episode is the League opener's block query (193 candidates × 5 fights
+× 8) plus the deep-searched League fights. For RR nothing structural is left: a table's
+wall-clock is its battles / 20.
+
+Operational: wait on a job by the *python main's pid* (`ps -eo pid,comm,args`, comm =
+python3, the `--out` path in args) — `$!` after `setsid nohup … &` is the short-lived
+wrapper, and a `pgrep -f`/`grep` pattern in a watcher matches the watcher's own command
+line (both bit on 2026-10-12).
 
 ## What changed on 2026-10-11/12 (details in NOTEBOOK.md, newest last)
 
