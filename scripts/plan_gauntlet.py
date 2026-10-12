@@ -126,6 +126,8 @@ SNAPSHOT = ("run_id", "trainer_idx", "roster", "graveyard", "party", "_rival_fam
 def episode(env: NuzlockeEnv, seed: int, lam: float, verbose: bool, fast: bool = False,
             save: Path | None = None) -> dict:
     env.reset(seed=seed)
+    if EVENTS is not None:
+        env.trace_tag, env.trace_seed = f"{EVENTS.name.removesuffix('.events.jsonl')}_s{seed}", seed
     return play(env, lam, verbose, fast, save, seed=seed)
 
 
@@ -166,8 +168,10 @@ def play(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False, save: 
             for m in env.graveyard[-died:]:
                 DEATHS_BY_SPECIES[m.species] = DEATHS_BY_SPECIES.get(m.species, 0) + 1
                 graves.append([t, m.species])
+        trace = f"trace_{env.trace_tag}_{t}.json" if ORDER[t]["breakpoint"] == "champion" else None
         emit("battle", seed=seed, i=t, won=env.trainer_idx > t, party=fielded,
-             died=[m.species for m in env.graveyard[-died:]] if died else [], box=sum(m.alive for m in env.roster))
+             died=[m.species for m in env.graveyard[-died:]] if died else [], box=sum(m.alive for m in env.roster),
+             **({"trace": f"{EVENTS.parent.name}/{trace}"} if trace and EVENTS is not None else {}))
         if env.trainer_idx == t:
             LOSSES_AT[t] = LOSSES_AT.get(t, 0) + 1
         if died and first_death_at is None:
@@ -206,6 +210,7 @@ def run_episodes(args: argparse.Namespace, seeds: list[int]) -> tuple:
     global EVENTS
     runner.ENEMY = args.enemy
     EVENTS = Path(args.out).with_suffix(".events.jsonl") if args.out else None
+    runner.TRACES = EVENTS.parent if EVENTS is not None else None
     if args.harvest:
         runner.HARVEST = Path(args.harvest)
     env = make_env(args)

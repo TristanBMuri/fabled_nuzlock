@@ -227,8 +227,10 @@ function episodesHTML(r) {
       const st = res ? (res.clear ? `<span class="up">cleared</span>` : `<span class="down">ended at #${res.cleared}</span>`) : ep.at ? `<span class="muted">running</span>` : `<span class="muted">queued</span>`;
       const detail = open ? `<tr class="detail"><td colspan="5"><div class="small" style="display:grid;gap:6px">
         <div><b>party at the end</b> ${esc(ep.party.join(", ") || "–")}</div>
+        ${(ep.traces || []).map(([i, f, won]) => `<div><button data-act="watch" data-href="replay?file=${esc(encodeURIComponent(f))}">▶ watch #${i} ${esc(name(i) || "")} (${won ? "won" : "lost"})</button></div>`).join("")}
         <div><b>deaths</b> ${ep.deaths.length ? ep.deaths.map(([i, sp]) => `${esc(sp)} <span class="muted">at #${i}${name(i) ? " " + esc(name(i)) : ""}</span>`).join(" · ") : "none"}</div></div></td></tr>` : "";
-      return `<tr class="click" data-act="toggle" data-key="${esc(key)}"><td class="n mono">${ep.seed}</td>
+      const champ = (ep.traces || []).length ? ` <span title="champion fight recorded: open the episode to watch">▶</span>` : "";
+      return `<tr class="click" data-act="toggle" data-key="${esc(key)}"><td class="n mono">${ep.seed}${champ}</td>
         <td><div class="strip"><i class="p ${res?.clear ? "clear" : ""}" style="width:${Math.min(1, ep.at / n) * 100}%"></i>${ms}${ticks}</div></td>
         <td class="n mono">${ep.at}</td><td class="n mono">${ep.deaths.length}</td><td class="small">${st}</td></tr>${detail}`;
     }).join("")}</tbody></table></div><div class="small muted">click an episode for its deaths and final party</div>`;

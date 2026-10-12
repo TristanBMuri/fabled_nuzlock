@@ -23,6 +23,7 @@ BATTLE_FORMAT = "gen8customgamenogimmicks"
 # Unset = no recording: the battler's data must follow the progression rule the run
 # layer plays under, so a harvest is always an explicit, fresh file.
 HARVEST = Path(os.environ["GAUNTLET_HARVEST"]) if os.environ.get("GAUNTLET_HARVEST") else None
+TRACES: Path | None = None  # dir: the champion fights' protocol logs as trace_*.json (ui/ Traces → watch)
 ENEMY = "heuristic"  # the enemy AI: poke-env's SimpleHeuristics, or "bdsp" = the Gen 4 trainer AI (ai_util/bdsp_ai.py)
 
 
@@ -118,12 +119,14 @@ class SimBattleRunner:
         return wins / n, [d / n for d in deaths], progress / n
 
     def run(self, player_packed: str, enemy_packed: str, timeout: float = 0.0,
-            boss: bool = False, search: tuple[int, int] | None = None, carry: list | None = None):
+            boss: bool = False, search: tuple[int, int] | None = None, carry: list | None = None,
+            record: dict | None = None):
         """One battle. Returns (won, alive_mask, state) aligned to player_packed
         order — state = per-mon {hp, status, pp} after the fight, what the next
         no-heal fight starts from — or None on failure (bridge rebuilt).
         boss=True searches at the default width; search=(k, r) sets the width
-        for this fight (deeper at hard ones); carry = state to start from."""
+        for this fight (deeper at hard ones); carry = state to start from;
+        record = {"path", "boss", "battle", "flags"}: write the fight as a trace file."""
         if not player_packed or not enemy_packed:
             print("SimBattleRunner: empty packed team")
             return None
@@ -135,6 +138,8 @@ class SimBattleRunner:
             st = sb.state()
             won, dead = st["winner"] == "p1", [m["fainted"] for m in st["p1"]]
             state = [{"hp": m["hp"], "status": m.get("status", ""), "pp": m.get("pp")} for m in st["p1"]]
+            if record:
+                write_trace(record, sb, st, player_packed, enemy_packed)
             sb.close()
         except Exception as e:
             import traceback
@@ -147,6 +152,23 @@ class SimBattleRunner:
             self.bridge = SimBridge()
             return None
         return won, [not d for d in dead], state
+
+
+def sets(packed: str) -> list[dict]:
+    return [{"species": f[1] or f[0], "item": f[2], "ability": f[3], "moves": f[4].split(","), "nature": f[5],
+             "level": int(f[10] or 0)} for f in (x.split("|") for x in packed.split("]"))]
+
+
+def write_trace(record: dict, sb, st: dict, player_packed: str, enemy_packed: str) -> None:
+    """One fight in rr_trace.py's trace format, without the per-turn breakdown: the sets, the
+    result and p1's protocol log (what Showdown's replay viewer plays)."""
+    Path(record["path"]).write_text(json.dumps({
+        "boss": record["boss"], "battle": record["battle"], "flags": record.get("flags", {}), "source": record.get("source"),
+        "ours": sets(player_packed), "theirs": sets(enemy_packed), "turns": [],
+        "log": [x for x in sb.history["p1"] if not x.startswith(("|request|", "|error|"))],
+        "result": {"won": st["winner"] == "p1", "turns": st["turn"],
+                   "ours_left": [m["species"] for m in st["p1"] if not m["fainted"]],
+                   "theirs_left": [m["species"] for m in st["p2"] if not m["fainted"]]}}))
 
 
 _HARVEST_LOCK = None

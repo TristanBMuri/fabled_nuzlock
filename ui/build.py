@@ -51,6 +51,8 @@ def fold_gauntlet(events: list[dict], start: dict, base: dict) -> dict:
         if e["kind"] == "battle":
             ep = eps.setdefault(e["seed"], {"seed": e["seed"], "at": 0, "deaths": [], "result": None, "party": []})
             ep["at"], ep["party"] = e["i"] + e["won"], e["party"]
+            if e.get("trace"):
+                ep.setdefault("traces", []).append([e["i"], e["trace"], e["won"]])
             tr = trainers.setdefault(e["i"], {"i": e["i"], "deaths": 0, "lost": 0, "fought": 0, "killed": {}})
             tr["fought"] += 1
             tr["lost"] += not e["won"]

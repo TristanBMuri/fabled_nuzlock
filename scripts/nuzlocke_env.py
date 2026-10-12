@@ -15,6 +15,7 @@ from dataclasses import dataclass
 from gauntlet import (Mon, ability_slots, assign_items, encounter_moves, evolve, evolved_ability,
                       load_encounters, load_evolutions, load_trainers, pack_team, player_evs,
                       roll_ability, trainer_mons)
+import runner
 from runner import SimBattleRunner, record_battle
 
 MAX_PARTY = 6
@@ -68,6 +69,7 @@ class NuzlockeEnv:
         self.max_roster = rules.box  # living mons the box holds
         self.rng = random.Random(seed)
         self.runner = SimBattleRunner(policy=policy, search=search, full_info=full_info)
+        self.trace_tag, self.trace_seed = "run", 0  # names the recorded champion fights (runner.TRACES)
         self.encounters = load_encounters()["routes"]
         self._reset_state()
 
@@ -280,9 +282,14 @@ class NuzlockeEnv:
             width = self.deep
             self.n_deep += 1
         carry = self._carry_list(self.party)
-        result = self.runner.run(player_packed, enemy_packed, boss=boss, search=width, carry=carry)
+        record = None
+        if runner.TRACES is not None and entry["breakpoint"] == "champion":  # watchable in ui/
+            record = {"path": runner.TRACES / f"trace_{self.trace_tag}_{self.trainer_idx}.json",
+                      "boss": f"#{self.trainer_idx} {entry['trainer_name']}", "battle": self.trace_seed,
+                      "flags": {"run": self.trace_tag, "enemy": runner.ENEMY}, "source": self.trace_tag}
+        result = self.runner.run(player_packed, enemy_packed, boss=boss, search=width, carry=carry, record=record)
         if result is None:  # rebuild happened; retry once
-            result = self.runner.run(player_packed, enemy_packed, boss=boss, search=width, carry=carry)
+            result = self.runner.run(player_packed, enemy_packed, boss=boss, search=width, carry=carry, record=record)
         if result is None:
             return None
         won, alive, state = result
