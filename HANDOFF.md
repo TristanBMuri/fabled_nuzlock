@@ -58,9 +58,12 @@ framework; a cache is a dict.
   fight is recorded as `logs/trace_X_s<seed>_404.json`, watchable in Showdown's replay
   viewer from the episode row or the Traces tab. Compare / Deaths / Traces / Matrices are
   otherwise fed by the RR scripts only.
-- **Pending when this was written:** the first BDSP benchmarks on the new planner,
-  `logs/bdsp_gen4ai` (Gen 4 AI) vs `logs/bdsp_heuristic` (SimpleHeuristics), 20 episodes,
-  seed 300, slice 405. Their numbers go into NOTEBOOK.md and the line below.
+- **BDSP benchmark on the new planner** (20 episodes, seed 300, slice 405,
+  `results/bdsp_{gen4ai,heuristic}.*`): Gen 4 AI 404.65 cleared / 3.95 deaths / **65%**
+  runs cleared; SimpleHeuristics 404.95 / 1.85 / 95% (was 403.8 / 5.9 / 20% on 2026-09-23).
+  **No death before the League in 40 episodes**; Cynthia is the wall (63 deaths / 7 losses
+  under the Gen 4 AI). The jump confounds the cover base and the healed League. The
+  benchmark is now the League under `--enemy bdsp` (~95 min on 7 workers).
 
 ## Before 2026-10-11
 

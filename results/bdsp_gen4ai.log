@@ -1,0 +1,32 @@
+ep seed  304: cleared 405  no-death 404  deaths  3  CLEAR  (1989s/ep)
+ep seed  300: cleared 404  no-death 402  deaths  6    (2004s/ep)
+ep seed  303: cleared 405  no-death 402  deaths  3  CLEAR  (2010s/ep)
+ep seed  306: cleared 404  no-death 402  deaths  6    (2021s/ep)
+ep seed  302: cleared 405  no-death 404  deaths  1  CLEAR  (2029s/ep)
+ep seed  305: cleared 405  no-death 404  deaths  2  CLEAR  (2064s/ep)
+ep seed  301: cleared 405  no-death 402  deaths  3  CLEAR  (2103s/ep)
+ep seed  307: cleared 405  no-death 403  deaths  3  CLEAR  (1993s/ep)
+ep seed  308: cleared 404  no-death 404  deaths  6    (2020s/ep)
+ep seed  309: cleared 405  no-death 404  deaths  1  CLEAR  (2026s/ep)
+ep seed  312: cleared 404  no-death 402  deaths  6    (2038s/ep)
+ep seed  310: cleared 405  no-death 403  deaths  5  CLEAR  (2040s/ep)
+ep seed  311: cleared 405  no-death 404  deaths  2  CLEAR  (2050s/ep)
+ep seed  313: cleared 405  no-death 402  deaths  4  CLEAR  (2051s/ep)
+ep seed  314: cleared 405  no-death 404  deaths  4  CLEAR  (1897s/ep)
+ep seed  316: cleared 405  no-death 404  deaths  2  CLEAR  (1924s/ep)
+ep seed  319: cleared 404  no-death 402  deaths  6    (1927s/ep)
+ep seed  317: cleared 405  no-death 404  deaths  4  CLEAR  (1964s/ep)
+ep seed  315: cleared 404  no-death 402  deaths  6    (1969s/ep)
+ep seed  318: cleared 404  no-death 402  deaths  6    (1974s/ep)
+
+20 episodes | slice 405 | battler=calc search=9,8 (all) deep=9,16 lam=1.0 full_info=False | rules: level_rule=cap margin=0 box=50 dupes=True moveset=best4 tms=True evs=flat items=True | 7 workers, 99 min
+  trainers cleared        404.65
+  cleared without a death 403.00
+  deaths per run          3.95
+  slice clear rate        65%
+  deep-search fights      13.6 per run
+  deadliest trainers (deaths / lost battles over all episodes):
+    #404 Champion Cynthia       champion   deaths  63  lost  7  [Spiritomb@61, Roserade@60, Gastrodon@60, Lucario@63, Milotic@63, Garchomp@66]
+    #402 Elite Four Flint       elite_four deaths  11  lost  0  [Rapidash@58, Steelix@57, Drifblim@58, Lopunny@57, Infernape@61]
+    #403 Elite Four Lucian      elite_four deaths   5  lost  0  [Mr. Mime@59, Girafarig@59, Medicham@60, Alakazam@60, Bronzong@63]
+  deaths by species: staraptor 12, gyarados 12, roserade 11, mantine 8, lapras 8, gastrodon 4, bronzong 4, kricketune 3, honchkrow 2, torterra 2, infernape 2, garchomp 2

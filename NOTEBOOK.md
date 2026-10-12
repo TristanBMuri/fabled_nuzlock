@@ -2049,3 +2049,31 @@ The early singles bosses stay solved. The project's open question narrows to Mis
 correct AI: chooser and play against Mantine-in-rain and a Swords Dance Toxicroak, and
 whether the box can hold their counters (routing, TODO G). All of it rests on the port
 matching the ROM (A2.2).
+
+## 2026-10-12 — BDSP: Gen 4 enemy AI, team building by matchup cover, League locked + healed
+
+Three changes to what a BDSP run is (HANDOFF.md → "What changed on 2026-10-11/12"):
+the Gen 4 (Platinum) trainer AI as an optional enemy (`ai_util/bdsp_ai.py`, `--enemy
+bdsp`); the planner's base party by matchup cover over the whole box (`cover_base`;
+the old top-6-by-level base was catch order once the level rule puts the box at the
+cap: Bibarel / Kricketune / Staraptor fielded from Roark to Volkner with 38 in the box,
+one slot rotating); the League `locked` (was `no_heal`): party locked, full heal of HP /
+status / PP between fights (PP was carried).
+
+Full game, 20 episodes, seed 300, `--policy calc --search 9,8 --search-all --deep 9,16`,
+7 workers each (`results/bdsp_{heuristic,gen4ai}.{log,jsonl,events.jsonl}`; every
+Cynthia fight in `results/bdsp_traces/`, watchable in ui/):
+
+  enemy                cleared   no-death   deaths/run   runs cleared   min
+  SimpleHeuristics      404.95     403.30      1.85          95%          88
+  Gen 4 trainer AI      404.65     403.00      3.95          65%          99
+  (2026-09-23, old planner, PP carried: 403.8 / 368.0 / 5.9 / 20%, results/plan_league4_swap.log)
+
+**Not one death before the League in 40 episodes**: the route, every gym and the rival
+are solved under either enemy. All deaths are E4 + Cynthia; Cynthia alone is 25 deaths /
+1 loss (SimpleHeuristics) and 63 deaths / 7 losses (Gen 4 AI). The Gen 4 AI is the
+harder enemy where it matters: clears 95 → 65%, deaths at the League doubled (Staraptor,
+Gyarados, Roserade, Mantine, Lapras the most killed). The jump from the 2026-09-23 table
+confounds two changes (the cover base and the healed League); not separated — a paired
+League replay (`league_test.py --vs`) with and without the heal would split them.
+The benchmark is now "the League under the Gen 4 AI"; the route layer is a regression check.
