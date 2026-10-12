@@ -4,7 +4,7 @@ SimBattleRunner: player brain = SimpleHeuristics (default), the calc bot
 (policy='calc') or a BC prior at a path; search=(k, rollouts) plays boss fights
 with top-k rollout search (the compute dial); estimate() / estimate_block() are
 the death-probability queries the planner ranks parties by; run() plays one
-fight and returns the per-mon state the next no-heal fight starts from.
+fight and returns the per-mon state after it.
 GAUNTLET_HARVEST=path records every (party, enemy, won) the env plays.
 """
 
@@ -123,7 +123,7 @@ class SimBattleRunner:
             record: dict | None = None):
         """One battle. Returns (won, alive_mask, state) aligned to player_packed
         order — state = per-mon {hp, status, pp} after the fight, what the next
-        no-heal fight starts from — or None on failure (bridge rebuilt).
+        fight could start from (unused since the League heals fully) — or None on failure (bridge rebuilt).
         boss=True searches at the default width; search=(k, r) sets the width
         for this fight (deeper at hard ones); carry = state to start from;
         record = {"path", "boss", "battle", "flags"}: write the fight as a trace file."""

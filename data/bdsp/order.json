@@ -4425,7 +4425,7 @@
    "breakpoint": "elite_four",
    "location": "Pokemon League",
    "mandatory": true,
-   "no_heal": true
+   "locked": true
   },
   {
    "order_index": 402,
@@ -4437,7 +4437,7 @@
    "breakpoint": "elite_four",
    "location": "Pokemon League",
    "mandatory": true,
-   "no_heal": true
+   "locked": true
   },
   {
    "order_index": 403,
@@ -4449,7 +4449,7 @@
    "breakpoint": "elite_four",
    "location": "Pokemon League",
    "mandatory": true,
-   "no_heal": true
+   "locked": true
   },
   {
    "order_index": 404,
@@ -4461,7 +4461,7 @@
    "breakpoint": "champion",
    "location": "Pokemon League",
    "mandatory": true,
-   "no_heal": true
+   "locked": true
   }
  ]
 }

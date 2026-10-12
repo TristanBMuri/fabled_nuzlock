@@ -276,14 +276,14 @@ def main() -> None:
     used, order, unmatched = set(), [], []
     W["Jubilife_City_School"] = [{"class": "School Kid", "name": n, "mons": [(m["species"], m["level"]) for m in byid[i]["party"]]}
                                  for i, n in ((264, "Harrison"), (267, "Christine"))]
-    NO_HEAL = {186, 187, 188, 191}  # Bertha, Flint, Lucian, Cynthia: no Pokémon Center after Aaron
+    LOCKED = {186, 187, 188, 191}  # Bertha, Flint, Lucian, Cynthia: the party is locked after Aaron
     def take(tid, loc, bp, mandatory, wiki=None):
         t = byid[tid]; used.add(tid)
         lv = [m["level"] for m in t["party"]]
         order.append({"order_index": len(order), "trainer_id": tid, "trainer_name": t["trainer_label"],
                       "max_level": max(lv), "avg_level": round(sum(lv) / len(lv), 2), "team_size": len(lv),
                       "breakpoint": bp, "location": loc, "mandatory": mandatory,
-                      **({"no_heal": True} if tid in NO_HEAL else {})})
+                      **({"locked": True} if tid in LOCKED else {})})
     for v in V:
         if v[0] == "ID":
             _, tid, loc, bp = v

@@ -72,7 +72,7 @@ def swaps(base, alive):
 def cover_base(env: NuzlockeEnv, alive: list[int]) -> list[int]:
     """The six by matchup cover (ai_util.matchup.cover: safe answers first, then race-winners,
     then total edge) from the whole box against the next trainer's team, or against every
-    member of the no-heal block it opens (the League: that party is locked)."""
+    member of the locked block it opens (the League: that party is locked)."""
     from ai_util.matchup import cover, rows_for
     from runner import BATTLE_FORMAT
     mons = {i: env.roster[i] for i in alive}

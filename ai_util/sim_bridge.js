@@ -108,7 +108,7 @@ function handle(msg) {
     case 'new': {
       const e = { battle: null, out: { p1: [], p2: [] } };
       // carry: per p1 mon in team order {hp, status, pp} from a previous battle
-      // (the League: no heal between fights). The battle starts only once both
+      // (a fight that starts without a heal). The battle starts only once both
       // players are set, so p1's state is edited before p2 is added.
       e.battle = new Battle({ formatid: msg.format, seed: msg.seed, send: sender(e), p1: prepPlayer(msg.format, msg.p1) });
       if (msg.carry) {

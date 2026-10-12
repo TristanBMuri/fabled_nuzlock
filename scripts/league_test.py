@@ -1,4 +1,4 @@
-"""The League alone: replay the no-heal block (Aaron .. Cynthia) from run states
+"""The League alone: replay the locked block (Aaron .. Cynthia) from run states
 saved at its opener (`plan_gauntlet.py --save-league DIR`), R times each.
 
 Every variant is played from the same boxes, so a lever is compared on the

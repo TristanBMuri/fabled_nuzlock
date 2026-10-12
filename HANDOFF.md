@@ -67,6 +67,7 @@ the E4 costs ~5 deaths each. That table is the benchmark now.
 clears; its clone + search 385.5 / 196.1 / 17.9 / 30%). **The League is a
 no-heal block now** (`no_heal` entries; party locked; HP / status / PP
 carried through the sim bridge) — tables before this are on full heals.
+(2026-10-12: renamed `locked`; HP / status / PP fully healed between fights, party still locked.)
 
 ## Architecture (what each file is)
 
@@ -88,7 +89,7 @@ ai_util/battler_policy.py / battler_obs.py / collect_game.py / pretrain_bc.py
                         the BC prior pipeline (identity-based action_mask lives in
                         battler_policy). Off the path since the calc bot; HUMAN_TODO 5.
 data/bdsp/              the game folder: trainers.json, order.json (route order,
-                        location + mandatory + no_heal per entry), encounters.json (gates =
+                        location + mandatory + locked per entry), encounters.json (gates =
                         first trainer of the location; per-method tables), learnsets
                         (levelup + tm per species) / evolutions / species / moves,
                         tms.json (TM gates), items.json (held items: gate, copies, effect).
@@ -107,8 +108,8 @@ scripts/runner.py       SimBattleRunner: run(boss=, search=(k,r), carry=) -> (wo
 scripts/nuzlocke_env.py NuzlockeEnv: the run as a state machine. ENCOUNTER answers queued
                         offers (one per method), PRE_BATTLE builds the party and fights;
                         permadeath, graveyard, dupes clause, box cap, level rule applied on
-                        entering PRE_BATTLE (evolution, moves, EVs), the League as a no-heal
-                        block (party locked, PP carried), risk(n=) read-only and cached,
+                        entering PRE_BATTLE (evolution, moves, EVs), the League as a locked
+                        block (party locked, full heal between fights), risk(n=) read-only and cached,
                         deep=(k,r) at breakpoints and risk-flagged fights, Rules, tracker().
 scripts/plan_gauntlet.py The scripted planner + the table: top-6-by-level + single swaps
                         scored by risk(); --slice, --policy, --search, --deep, --workers,
@@ -273,8 +274,8 @@ boss's max level (14 = Roark). ~85 s/episode.
    (val CE 0.455) and search over the calc bot itself is the better line
    (probes: rival 0.03 deaths/mon; full game: route ≈ 1 death/run). The BC
    prior is no longer on the path; the battler is `--policy calc --search 9,8`.
-4. **The League** (`no_heal` block: party locked, PP carried, full heal
-   between fights, one cap 66): E4 costs 3 / 5 / 16 deaths per 10 runs,
+4. **The League** (`locked` block, was `no_heal`: party locked, full heal of HP / status /
+   PP between fights since 2026-10-12 (PP carried before), one cap 66): E4 costs 3 / 5 / 16 deaths per 10 runs,
    **Cynthia wipes 8 of 10** (2 of those 10 were crashes; box full of
    Crobats — see defects). **Benchmark on the fixed env (2026-09-23,
    `results/plan_league4_swap.log`): 403.8 / 368.0 / 5.9 deaths / 20% clears;

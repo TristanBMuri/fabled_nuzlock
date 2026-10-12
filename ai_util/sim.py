@@ -98,7 +98,7 @@ class SimBattle:
                  seed: list[int] | None = None, dedupe: bool = True, carry: list | None = None,
                  full_info: bool = False, arena: dict | None = None):
         """Packed teams; None lets the format's generator build one (randombattle).
-        carry: per p1 mon {hp, status, pp} to start from (no heal since the last fight).
+        carry: per p1 mon {hp, status, pp} to start from (a fight without a heal before it).
         full_info: each mirror knows the other side's whole team from turn one (sets,
         levels, items, abilities, real stats) — the full-docs regime, both ways.
         arena: field effects fixed for the fight — {weather, terrain, pseudo: [...],

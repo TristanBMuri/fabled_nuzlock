@@ -100,7 +100,7 @@ def test_locked_party_is_rebuilt_by_identity(env):
     from nuzlocke_env import ORDER
     env.reset(seed=6)
     env.slice_len = 405
-    env.trainer_idx = next(i for i in range(len(ORDER) - 1) if ORDER[i + 1].get("no_heal"))  # Aaron
+    env.trainer_idx = next(i for i in range(len(ORDER) - 1) if ORDER[i + 1].get("locked"))  # Aaron
     env.roster = [Mon("crobat", 66, ["bite"]), Mon("crobat", 66, ["bite"])]
     env.phase, env.party = "PRE_BATTLE", [0]
     run = env.runner.run
@@ -253,7 +253,7 @@ def test_league_carry_is_keyed_by_identity(env):
     `roster.index` used to return the first twin for both)."""
     env.reset(seed=6)
     env.slice_len = 405
-    env.trainer_idx = next(i for i in range(len(ORDER) - 1) if ORDER[i + 1].get("no_heal"))  # Aaron
+    env.trainer_idx = next(i for i in range(len(ORDER) - 1) if ORDER[i + 1].get("locked"))  # Aaron
     env.roster = [Mon("crobat", 66, ["bite"]), Mon("crobat", 66, ["bite"])]
     env.phase, env.party = "PRE_BATTLE", [0, 1]
     run = env.runner.run

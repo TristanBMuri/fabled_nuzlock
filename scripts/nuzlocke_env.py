@@ -189,10 +189,10 @@ class NuzlockeEnv:
     # ---------------------------------------------------------------- battle
     def _apply_level_rule(self, entry):
         self.max_enemy_level = max(self.max_enemy_level, entry["max_level"])
-        # a no-heal block (the League) has one cap: its highest level (Cynthia's
+        # the locked block (the League) has one cap: its highest level (Cynthia's
         # 66), reached before Aaron — there is no leveling between the E4 fights
         j = self.trainer_idx
-        while j + 1 < self.slice_len and ORDER[j + 1].get("no_heal"):
+        while j + 1 < self.slice_len and ORDER[j + 1].get("locked"):
             j += 1
         block_cap = max(ORDER[k]["max_level"] for k in range(self.trainer_idx, j + 1))
         self.max_enemy_level = max(self.max_enemy_level, block_cap)
@@ -220,7 +220,7 @@ class NuzlockeEnv:
 
     @property
     def party_locked(self) -> bool:
-        """Inside a no-heal block (the League after Aaron): the party stays as
+        """Inside the locked block (the League after Aaron): the party stays as
         fielded and starts each fight where the last one left it."""
         return self.carry is not None
 
@@ -237,19 +237,19 @@ class NuzlockeEnv:
         return pack_team(party), pack_team(enemy), entry
 
     def _block(self) -> list[int] | None:
-        """Indices of the no-heal block the next fight opens (Aaron + the rest of
+        """Indices of the locked block the next fight opens (Aaron + the rest of
         the League), or None: the party chosen here fights all of them."""
         i = self.trainer_idx
-        if self.party_locked or i + 1 >= self.slice_len or not ORDER[i + 1].get("no_heal"):
+        if self.party_locked or i + 1 >= self.slice_len or not ORDER[i + 1].get("locked"):
             return None
         j = i + 1
-        while j < self.slice_len and ORDER[j].get("no_heal"):
+        while j < self.slice_len and ORDER[j].get("locked"):
             j += 1
         return list(range(i, j))
 
     def risk(self, party_idx=None, n: int = RISK_BATTLES):
         """(P(win), [P(death_i)], mean HP fraction left) for a party (default:
-        current) vs the next trainer — or vs the whole no-heal block it opens —
+        current) vs the next trainer — or vs the whole locked block it opens —
         from n battles under the fast brain. Read-only; cached per (party, trainer, n)."""
         party_idx = tuple(self.party if party_idx is None else party_idx)
         key = (party_idx, self.trainer_idx, n)
@@ -341,7 +341,7 @@ class NuzlockeEnv:
         # the dead stay dead. `carry` marks the lock; its entries are empty (nothing carries).
         # Keyed by identity (Mon eq=False).
         self.carry = ({self.roster.index(m): {} for m, st in zip(party, state) if m.alive}
-                      if nxt.get("no_heal") else None)
+                      if nxt.get("locked") else None)
         if self.trainer_idx >= self.slice_len:
             self.done = True
             return
