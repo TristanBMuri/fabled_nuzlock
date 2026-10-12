@@ -2179,3 +2179,9 @@ worker, the previous bridge closed on a boss switch (`worker_ctx`). The per-boss
 chain (stages A + B, then the fan-out, then the duels, per boss) is what the three-phase
 version (`run_pool`: preludes, all battles, all duels, each one fan-out over every boss)
 removes; its acceptance is the same table again (`results/rr_cfru_early_par2.*`, below).
+
+**Three-phase pool mode accepted** (`results/rr_cfru_early_par2.*`): the early-boss table
+again, now with all 8 bosses' preludes, then all 6 × 30 × 8 battles, then all duels as one
+fan-out each — identical to `results/rr_cfru_early.jsonl` on every team, best team, threat
+and shortlist; 35 min (40 with the per-boss chain, 119 serial), 20 workers + 8 main-process
+bridges at ~24 GB. The RR tables now cost their battles / 20.
