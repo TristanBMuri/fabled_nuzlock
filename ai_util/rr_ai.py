@@ -383,13 +383,13 @@ class RadicalRedAI(Player):
             return self.ko_bonus
         if kos and not first and not has_protect:
             return {"setup_stats": 6}.get(cls, 8)
-        attacks = self._attacks(active)
+        attacks = [m for m in battle.available_moves if m.category != MoveCategory.STATUS]  # usable this turn
         fast = [m for m in attacks if self._goes_first(battle, m, active, foe, foe_move)]
         if dies and not has_protect and fast and cls not in ("stall", "phazer", "hazards") and \
-                move is max(fast, key=lambda m: min(self._hit(battle, active, foe, m, True), hp)):
+                move.id == max(fast, key=lambda m: min(self._hit(battle, active, foe, m, True), hp)).id:
             return self.ko_bonus
         strongest = max(attacks, key=lambda m: (min(self._hit(battle, active, foe, m, True), hp), m.priority, m.accuracy or 1))
-        if move is strongest:
+        if move.id == strongest.id:
             if kos and cls in ("stall", "phazer"):
                 return 8
             return 4 if kos and cls == "hazards" else 2
