@@ -249,8 +249,8 @@ def test_held_items_follow_the_route(env):
 
 
 def test_league_carry_is_keyed_by_identity(env):
-    """Two value-equal twins in the locked party each keep their own PP (Mon is
-    identity-compared; `roster.index` used to return the first twin for both)."""
+    """Two value-equal twins both stay in the locked party (Mon is identity-compared;
+    `roster.index` used to return the first twin for both)."""
     env.reset(seed=6)
     env.slice_len = 405
     env.trainer_idx = next(i for i in range(len(ORDER) - 1) if ORDER[i + 1].get("no_heal"))  # Aaron
@@ -263,7 +263,7 @@ def test_league_carry_is_keyed_by_identity(env):
         env.step(0)
     finally:
         env.runner.run = run
-    assert env.party_locked and env.carry == {0: {"pp": [3]}, 1: {"pp": [7]}}
+    assert env.party_locked and env.carry == {0: {}, 1: {}}  # locked, fully healed: nothing carries
 
 
 def test_level_rule_applies_on_entering_pre_battle(env):

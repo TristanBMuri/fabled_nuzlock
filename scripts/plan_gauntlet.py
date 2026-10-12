@@ -32,7 +32,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).parent))
 from nuzlocke_env import DEEP_HP, EVOS, MAX_PARTY, ORDER, RISK_BATTLES, SLICE_LEN, TRAINERS, NuzlockeEnv, Rules  # noqa: E402
-from gauntlet import load_species  # noqa: E402
+from gauntlet import load_species, pack_team, trainer_mons  # noqa: E402
 
 HP_WEIGHT = 0.2  # margin tie-breaker weight in the party score (most candidates show 0 deaths at n=8)
 DEATHS_AT: dict[int, int] = {}  # trainer index -> deaths (all episodes of this process)
@@ -69,14 +69,31 @@ def swaps(base, alive):
                             for o, b in itertools.product(base, box)]
 
 
+def cover_base(env: NuzlockeEnv, alive: list[int]) -> list[int]:
+    """The six by matchup cover (ai_util.matchup.cover: safe answers first, then race-winners,
+    then total edge) from the whole box against the next trainer's team, or against every
+    member of the no-heal block it opens (the League: that party is locked)."""
+    from ai_util.matchup import cover, rows_for
+    from runner import BATTLE_FORMAT
+    mons = {i: env.roster[i] for i in alive}
+    rows: dict = {i: {} for i in alive}
+    for k in env._block() or [env.trainer_idx]:
+        enemy = pack_team(trainer_mons(TRAINERS[ORDER[k]["trainer_id"]]))
+        for i, d in rows_for(env.runner.bridge, BATTLE_FORMAT, mons, enemy, None).items():
+            rows[i].update({f"{k}:{sp}": p for sp, p in d.items()})
+    enemies = sorted({e for d in rows.values() for e in d})
+    return sorted(cover({i: d for i, d in rows.items() if d}, enemies, MAX_PARTY))
+
+
 def choose_party(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False) -> list[int]:
     alive = [i for i, m in enumerate(env.roster) if m.alive]
     if len(alive) <= MAX_PARTY:
         return alive  # nuzlocke rule: field everything you can
-    by_level = sorted(alive, key=lambda i: -env.roster[i].level)
-    base = by_level[:MAX_PARTY]
-    if fast:  # no risk queries: highest levels, for bulk harvesting
-        return base
+    if fast:  # no risk queries: highest levels, for bulk harvesting (ties: catch order)
+        return sorted(alive, key=lambda i: -env.roster[i].level)[:MAX_PARTY]
+    # 2026-10-12: the base was top-6-by-level, i.e. the first six caught once the level rule
+    # puts everyone at the cap, and single swaps only ever moved one slot of it
+    base = cover_base(env, alive)
     score = lambda p: party_score(env, p, lam)
     front = sorted(swaps(base, alive), key=score, reverse=True)
     if verbose:
@@ -126,10 +143,10 @@ def play(env: NuzlockeEnv, lam: float, verbose: bool, fast: bool = False, save: 
                       f"{'caught ' + alts[pick].species if catch else 'no room'}  box {len(env.roster)}/{env.max_roster}")
             env.step(1 + pick if catch else 0)
             continue
-        if env.party_locked:  # the League: no heal, no swaps — the fielded party fights on
+        if env.party_locked:  # the League: no swaps, full heal between fights — the fielded party fights on
             if verbose:
                 print(f"  [locked] {ORDER[env.trainer_idx]['trainer_name']}: party fights on, "
-                      f"PP left {[sum(env.carry[i].get('pp') or []) for i in env.party if i in env.carry]}")
+                      f"healed")
         else:
             if save and env._block():
                 save.parent.mkdir(parents=True, exist_ok=True)

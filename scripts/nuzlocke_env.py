@@ -90,7 +90,7 @@ class NuzlockeEnv:
         self.phase = "ENCOUNTER"
         self.pending: list[list[Mon]] = []  # the offer being answered: one pick per method
         self._queue: list[dict] = []  # areas whose gate has arrived, rolled one at a time
-        self.carry: dict[int, dict] | None = None  # roster index -> {pp}: inside a no-heal block
+        self.carry: dict[int, dict] | None = None  # roster index -> {}: the League's locked party
         self.dropped: list[str] = []  # offers that found no box slot (species), this run
         self._route_cursor = 0  # routes consumed
         self.done = False
@@ -223,7 +223,7 @@ class NuzlockeEnv:
         return self.carry is not None
 
     def _carry_list(self, party_idx):
-        return [self.carry.get(i) for i in party_idx] if self.carry else None
+        return None  # the League heals fully between fights: nothing carries into a battle
 
     def _packed_matchup(self, party_idx):
         """(player_packed, enemy_packed, entry) for a candidate party vs the next
@@ -329,10 +329,11 @@ class NuzlockeEnv:
         self.trainer_idx += 1
         self._skip_other_rivals()
         nxt = ORDER[self.trainer_idx] if self.trainer_idx < self.slice_len else {}
-        # the League block: the party is locked (no box) and PP carries over; HP and
-        # status are restored between fights (Full Restores — items and money are
-        # out of scope, so healing between fights is free). Keyed by identity (Mon eq=False).
-        self.carry = ({self.roster.index(m): {"pp": st["pp"]} for m, st in zip(party, state) if m.alive}
+        # the League block: the party is locked (no box swaps) and fully healed between
+        # fights, HP, status and PP (2026-10-12, the user's rule: full heal, no swaps);
+        # the dead stay dead. `carry` marks the lock; its entries are empty (nothing carries).
+        # Keyed by identity (Mon eq=False).
+        self.carry = ({self.roster.index(m): {} for m, st in zip(party, state) if m.alive}
                       if nxt.get("no_heal") else None)
         if self.trainer_idx >= self.slice_len:
             self.done = True

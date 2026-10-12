@@ -86,7 +86,7 @@ class SimBattleRunner:
 
     def estimate_block(self, player_packed: str, enemies_packed: list[str], n: int = 8):
         """estimate() over the League block: the same party through every fight,
-        PP carried, HP / status restored between fights, the dead stay dead.
+        fully healed between fights (HP, status, PP), the dead stay dead.
         (P(all won), [P(death_i)], progress) — progress = fights won plus the
         lost fight's KOs, over the block (1.0 = cleared): the HP slot. When
         every party wipes (the fast brain at Cynthia) deaths are all 1 and
@@ -101,8 +101,8 @@ class SimBattleRunner:
                     sb.play({"p1": self.player, "p2": self.enemy}, self.max_turns)
                     st = sb.state()
                     sb.close()
-                    # between fights: HP / status restored (items), PP carried, the dead stay dead
-                    carry = [{"hp": 0 if m["fainted"] else None, "pp": m.get("pp")} for m in st["p1"]]
+                    # between fights: full heal (HP, status, PP), the dead stay dead
+                    carry = [{"hp": 0 if m["fainted"] else None} for m in st["p1"]]
                     if st["winner"] != "p1":
                         won = False
                         fights += sum(m["fainted"] for m in st["p2"]) / len(st["p2"])
