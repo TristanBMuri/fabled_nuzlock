@@ -1,0 +1,123 @@
+#5: trainer #5, cap 16, pool 105 species; arena {'ai_permanent': True}; not modelled: []
+#4: trainer #4, cap 16, pool 79 species; arena {'ai_permanent': True}; not modelled: []
+#4: starter litten; boss attacks with ['Bug', 'Electric', 'Flying', 'Grass', 'Ground', 'Normal', 'Poison', 'Psychic', 'Rock', 'Water']
+#5: starter sprigatito; boss attacks with ['Dark', 'Electric', 'Fighting', 'Fire', 'Flying', 'Grass', 'Normal', 'Rock']
+#7: trainer #7, cap 23, pool 115 species; arena {'ai_permanent': True}; not modelled: []
+#7: starter piplup; boss attacks with ['Electric', 'Fairy', 'Fire', 'Flying', 'Grass', 'Normal', 'Poison', 'Psychic', 'Steel']
+#15: trainer #15, cap 28, pool 163 species; arena {'ai_permanent': True}; not modelled: []
+#16: trainer #16, cap 28, pool 163 species; arena {'ai_permanent': True}; not modelled: []
+#15: starter bulbasaur; boss attacks with ['Dark', 'Electric', 'Fire', 'Ghost', 'Grass', 'Ice', 'Normal', 'Poison']
+#16: starter turtwig; boss attacks with ['Bug', 'Dragon', 'Electric', 'Fire', 'Ground', 'Normal', 'Poison', 'Steel']
+#2: trainer #2, cap 16, pool 79 species; arena {'ai_permanent': True}; not modelled: []
+#9: trainer #9, cap 23, pool 131 species; arena {'ai_permanent': True}; not modelled: []
+#2: starter charmander; boss attacks with ['Fighting', 'Flying', 'Normal']
+#9: starter snivy; boss attacks with ['Dark', 'Fire', 'Flying', 'Grass', 'Ground', 'Ice', 'Normal', 'Poison', 'Psychic', 'Rock']
+#10: trainer #10, cap 28, pool 163 species; arena {'ai_permanent': True}; not modelled: []
+#10: starter piplup; boss attacks with ['Dark', 'Electric', 'Fairy', 'Fighting', 'Fire', 'Grass', 'Ice', 'Normal', 'Poison', 'Steel', 'Water']
+#4: A solo scores for 80 species in 2s; top: wurmple 2.00, ponytagalar 2.00, kricketot 2.00, sentret 1.63, patrat 1.17, mienfoo 0.73, pidgey 0.66, yungoos 0.65
+#5: A solo scores for 106 species in 3s; top: kricketot 1.09, snubbull 0.64, sentret 0.63, hoothoot 0.57, rattata 0.54, wattrel 0.50, zigzagoon 0.47, patrat 0.47
+#7: A solo scores for 116 species in 3s; top: houndour 1.33, pawmi 0.44, yungoos 0.44, grubbin 0.43, seedot 0.39, slakoth 0.39, kricketot 0.38, ekans 0.37
+#2: A solo scores for 80 species in 2s; top: wurmple 2.00, budew 2.00, abra 1.62, hoothoot 1.56, sentret 1.44, morelull 1.43, caterpie 1.20, scatterbug 1.17
+#9: A solo scores for 132 species in 3s; top: zigzagoongalar 0.55, kricketot 0.54, nickit 0.49, chewtle 0.46, spearow 0.43, rattata 0.43, dunsparce 0.42, rattataalola 0.39
+#10: A solo scores for 164 species in 4s; top: ekans 0.47, pidove 0.40, spearow 0.39, spinarak 0.38, zubat 0.36, natu 0.33, kricketot 0.33, blipbug 0.31
+#15: A solo scores for 164 species in 4s; top: surskit 2.00, ekans 1.21, stunky 1.11, psyduck 1.07, scatterbug 1.03, wattrel 0.98, zigzagoongalar 0.91, rattata 0.82
+#16: A solo scores for 164 species in 4s; top: mudbray 0.72, rockruff 0.53, snubbull 0.52, mienfoo 0.50, phanpy 0.49, sentret 0.41, nickit 0.39, meowth 0.39
+#4: B 279 teams scored in 19s; greedy ('kricketot', 'mienfoo', 'patrat', 'ponytagalar', 'sentret', 'wurmple') (2.00); best fast ('kricketot', 'mienfoo', 'patrat', 'ponytagalar', 'sentret', 'wurmple') (2.00)
+#4: cover team ('hoothoot', 'kricketot', 'patrat', 'rattataalola', 'sentret', 'zigzagoon')
+#15: B 279 teams scored in 22s; greedy ('ekans', 'psyduck', 'scatterbug', 'stunky', 'surskit', 'wattrel') (2.00); best fast ('ekans', 'psyduck', 'scatterbug', 'stunky', 'surskit', 'wattrel') (2.00)
+#15: cover team ('houndour', 'makuhita', 'marill', 'psyduck', 'skwovet', 'stunky')
+#2: B 279 teams scored in 25s; greedy ('budew', 'caterpie', 'morelull', 'scatterbug', 'sentret', 'wurmple') (2.00); best fast ('budew', 'caterpie', 'morelull', 'scatterbug', 'sentret', 'wurmple') (2.00)
+#2: cover team ('abra', 'hoothoot', 'pidgey', 'scatterbug', 'shinx', 'wurmple')
+#7: B 279 teams scored in 28s; greedy ('grubbin', 'houndour', 'pawmi', 'seedot', 'slakoth', 'yungoos') (2.00); best fast ('grubbin', 'houndour', 'pawmi', 'seedot', 'slakoth', 'yungoos') (2.00)
+#7: cover team ('bonsly', 'chingling', 'ekans', 'houndour', 'nickit', 'skwovet')
+#5: B 279 teams scored in 32s; greedy ('kricketot', 'pikipek', 'ponyta', 'rattata', 'snubbull', 'wattrel') (2.00); best fast ('kricketot', 'pikipek', 'ponyta', 'rattata', 'snubbull', 'wattrel') (2.00)
+#5: cover team ('bonsly', 'chingling', 'hoothoot', 'patrat', 'shinx', 'zigzagoon')
+#9: B 279 teams scored in 35s; greedy ('kricketot', 'rattata', 'rattataalola', 'slakoth', 'spearow', 'zigzagoongalar') (1.79); best fast ('hoothoot', 'meowthalola', 'patrat', 'poochyena', 'rattata', 'zigzagoongalar') (1.92)
+#9: cover team ('bidoof', 'dunsparce', 'rattataalola', 'sawk', 'skwovet', 'throh')
+#16: B 279 teams scored in 40s; greedy ('mudbray', 'psyduck', 'rockruff', 'sentret', 'stunky', 'zigzagoon') (1.96); best fast ('mudbray', 'psyduck', 'rockruff', 'sentret', 'stunky', 'zigzagoon') (1.96)
+#16: cover team ('meowthgalar', 'phanpy', 'riolu', 'skwovet', 'teddiursa', 'throh')
+#10: B 279 teams scored in 44s; greedy ('blipbug', 'cutiefly', 'ekans', 'pidove', 'tentacool', 'wattrel') (1.96); best fast ('blipbug', 'cutiefly', 'ekans', 'pidove', 'tentacool', 'wattrel') (1.96)
+#10: cover team ('chewtle', 'chingling', 'ekans', 'lunatone', 'magikarp', 'tentacool')
+#7: C cover  ['bonsly', 'chingling', 'ekans', 'houndour', 'nickit', 'skwovet']: win 100% deaths/mon 0.00 deathless 100%
+#4: C cover  ['hoothoot', 'kricketot', 'patrat', 'rattataalola', 'sentret', 'zigzagoon']: win 100% deaths/mon 0.00 deathless 100%
+#15: C cover  ['houndour', 'makuhita', 'marill', 'psyduck', 'skwovet', 'stunky']: win 100% deaths/mon 0.00 deathless 100%
+#4: C fast   ['kricketot', 'mienfoo', 'patrat', 'ponytagalar', 'sentret', 'wurmple']: win 100% deaths/mon 0.00 deathless 100%
+#7: C fast   ['grubbin', 'houndour', 'pawmi', 'seedot', 'slakoth', 'yungoos']: win 100% deaths/mon 0.00 deathless 100%
+#4: C top    ['kricketot', 'patrat', 'pidgey', 'ponytagalar', 'sentret', 'wurmple']: win 100% deaths/mon 0.00 deathless 100%
+#15: C fast   ['ekans', 'psyduck', 'scatterbug', 'stunky', 'surskit', 'wattrel']: win 100% deaths/mon 0.00 deathless 100%
+#4: C top    ['kricketot', 'patrat', 'ponytagalar', 'sentret', 'wurmple', 'yungoos']: win 100% deaths/mon 0.00 deathless 100%
+#15: C top    ['ekans', 'psyduck', 'scatterbug', 'stunky', 'surskit', 'zigzagoongalar']: win 100% deaths/mon 0.00 deathless 100%
+#7: C top    ['grubbin', 'houndour', 'kricketot', 'pawmi', 'seedot', 'yungoos']: win 100% deaths/mon 0.00 deathless 100%
+#4: C top    ['kricketot', 'patrat', 'ponytagalar', 'rattata', 'sentret', 'wurmple']: win 100% deaths/mon 0.00 deathless 100%
+#5: C cover  ['bonsly', 'chingling', 'hoothoot', 'patrat', 'shinx', 'zigzagoon']: win 100% deaths/mon 0.01 deathless 93%
+#9: C cover  ['bidoof', 'dunsparce', 'rattataalola', 'sawk', 'skwovet', 'throh']: win 100% deaths/mon 0.12 deathless 43%
+#4: C top    ['kricketot', 'patrat', 'ponytagalar', 'sentret', 'starly', 'wurmple']: win 100% deaths/mon 0.00 deathless 100%
+#4         legal=True  best team under search: win  100% deaths/mon 0.00 deathless 100% ['kricketot', 'patrat', 'ponytagalar', 'sentret', 'wurmple', 'yungoos']  (others: 100%, 100%, 100%, 100%, 100%)  (904s)
+#4         sets: kricketune(Adamant/Technician) ['bugbite', 'rocktomb', 'tackle', 'pounce'], watchog(Adamant/Analytic) ['headbutt', 'crunch', 'lowkick', 'hypnosis'], ponytagalar(Adamant/Immunity) ['covet', 'flamewheel', 'stomp', 'willowisp'], furret(Adamant/Adaptability) ['headbutt', 'scratch', 'quickattack', 'foresight'], beautifly(Modest/Swarm) ['signalbeam', 'airslash', 'flash', 'stunspore'], gumshoos(Adamant/Stakeout) ['headbutt', 'crunch', 'rocktomb', 'tackle']
+#15: C top    ['ekans', 'psyduck', 'rattata', 'scatterbug', 'stunky', 'surskit']: win 100% deaths/mon 0.00 deathless 100%
+#16: C cover  ['meowthgalar', 'phanpy', 'riolu', 'skwovet', 'teddiursa', 'throh']: win 100% deaths/mon 0.09 deathless 70%
+#2: C cover  ['abra', 'hoothoot', 'pidgey', 'scatterbug', 'shinx', 'wurmple']: win 100% deaths/mon 0.00 deathless 100%
+#7: C top    ['grubbin', 'houndour', 'pawmi', 'rattataalola', 'seedot', 'yungoos']: win 100% deaths/mon 0.00 deathless 100%
+#15: C top    ['ekans', 'ponytagalar', 'psyduck', 'scatterbug', 'stunky', 'surskit']: win 100% deaths/mon 0.00 deathless 100%
+#7: C top    ['grubbin', 'houndour', 'nickit', 'pawmi', 'seedot', 'yungoos']: win 100% deaths/mon 0.01 deathless 97%
+#15: C top    ['ekans', 'mankey', 'psyduck', 'scatterbug', 'stunky', 'surskit']: win 100% deaths/mon 0.00 deathless 100%
+#15        legal=True  best team under search: win  100% deaths/mon 0.00 deathless 100% ['houndour', 'makuhita', 'marill', 'psyduck', 'skwovet', 'stunky']  (others: 100%, 100%, 100%, 100%, 100%)  (1338s)
+#15        sets: houndoom(Timid/Flash Fire) ['flameburst', 'crunch', 'thunderfang', 'inferno'], hariyama(Adamant/Thick Fat) ['vitalthrow', 'dig', 'knockoff', 'upperhand'], azumarill(Adamant/Sap Sipper) ['playrough', 'aquatail', 'bodyslam', 'covet'], golduck(Timid/Swift Swim) ['scald', 'zenheadbutt', 'dig', 'aquatail'], greedent(Adamant/Cheek Pouch) ['bodyslam', 'dig', 'crunch', 'rest'], skuntank(Jolly/Stench) ['knockoff', 'flamethrower', 'dig', 'toxic']
+#10: C cover  ['chewtle', 'chingling', 'ekans', 'lunatone', 'magikarp', 'tentacool']: win 93% deaths/mon 0.48 deathless 0%
+#9: C greedy ['kricketot', 'rattata', 'rattataalola', 'slakoth', 'spearow', 'zigzagoongalar']: win 100% deaths/mon 0.13 deathless 53%
+#7: C top    ['grubbin', 'houndour', 'pawmi', 'poochyena', 'seedot', 'yungoos']: win 100% deaths/mon 0.01 deathless 97%
+#7         legal=True  best team under search: win  100% deaths/mon 0.00 deathless 100% ['grubbin', 'houndour', 'pawmi', 'seedot', 'slakoth', 'yungoos']  (others: 100%, 100%, 100%, 100%, 100%)  (1579s)
+#7         sets: charjabug(Jolly/Swarm) ['spark', 'bugbite', 'bite', 'flash'], houndoom(Timid/Flash Fire) ['flameburst', 'crunch', 'thunderfang', 'inferno'], pawmo(Adamant/Volt Absorb) ['spark', 'dig', 'thief', 'bite'], nuzleaf(Adamant/Chlorophyll) ['suckerpunch', 'razorleaf', 'rocktomb', 'thief'], vigoroth(Jolly/Vital Spirit) ['slash', 'suckerpunch', 'rocktomb', 'uproar'], gumshoos(Adamant/Stakeout) ['headbutt', 'crunch', 'thunderfang', 'icefang']
+#16: C fast   ['mudbray', 'psyduck', 'rockruff', 'sentret', 'stunky', 'zigzagoon']: win 100% deaths/mon 0.03 deathless 83%
+#5: C fast   ['kricketot', 'pikipek', 'ponyta', 'rattata', 'snubbull', 'wattrel']: win 100% deaths/mon 0.06 deathless 80%
+#2: C fast   ['budew', 'caterpie', 'morelull', 'scatterbug', 'sentret', 'wurmple']: win 100% deaths/mon 0.02 deathless 90%
+#16: C top    ['mudbray', 'psyduck', 'sentret', 'stunky', 'tandemaus', 'zigzagoon']: win 100% deaths/mon 0.02 deathless 90%
+#9: C fast   ['hoothoot', 'meowthalola', 'patrat', 'poochyena', 'rattata', 'zigzagoongalar']: win 100% deaths/mon 0.18 deathless 33%
+#10: C fast   ['blipbug', 'cutiefly', 'ekans', 'pidove', 'tentacool', 'wattrel']: win 100% deaths/mon 0.12 deathless 60%
+#5: C top    ['kricketot', 'pikipek', 'ponyta', 'ponytagalar', 'rattata', 'wattrel']: win 100% deaths/mon 0.03 deathless 83%
+#2: C top    ['budew', 'morelull', 'sandygast', 'scatterbug', 'sentret', 'wurmple']: win 100% deaths/mon 0.02 deathless 90%
+#16: C top    ['mudbray', 'psyduck', 'sentret', 'slakoth', 'stunky', 'zigzagoon']: win 100% deaths/mon 0.02 deathless 90%
+#9: C top    ['hoothoot', 'meowthalola', 'slakoth', 'spearow', 'throh', 'zigzagoongalar']: win 100% deaths/mon 0.13 deathless 47%
+#2: C top    ['budew', 'morelull', 'nincada', 'scatterbug', 'sentret', 'wurmple']: win 100% deaths/mon 0.01 deathless 93%
+#5: C top    ['kricketot', 'litleo', 'pikipek', 'ponyta', 'rattata', 'wattrel']: win 100% deaths/mon 0.07 deathless 70%
+#16: C top    ['mudbray', 'nidoranf', 'phanpy', 'rattataalola', 'slakoth', 'zigzagoongalar']: win 100% deaths/mon 0.06 deathless 73%
+#10: C top    ['cutiefly', 'pidove', 'spinarak', 'tentacool', 'wurmple', 'zubat']: win 100% deaths/mon 0.27 deathless 13%
+#2: C top    ['budew', 'morelull', 'ponyta', 'scatterbug', 'sentret', 'wurmple']: win 100% deaths/mon 0.01 deathless 97%
+#9: C top    ['hoothoot', 'kricketot', 'mienfoo', 'rattataalola', 'tentacool', 'zigzagoon']: win 100% deaths/mon 0.26 deathless 20%
+#5: C top    ['kricketot', 'pikipek', 'ponyta', 'rattata', 'wattrel', 'wurmple']: win 97% deaths/mon 0.17 deathless 47%
+#16: C top    ['carnivine', 'glameow', 'pachirisu', 'phanpy', 'psyduck', 'snubbull']: win 100% deaths/mon 0.03 deathless 83%
+#16        legal=True  best team under search: win  100% deaths/mon 0.02 deathless 90% ['mudbray', 'psyduck', 'sentret', 'slakoth', 'stunky', 'zigzagoon']  (others: 100%, 100%, 100%, 100%, 100%)  (4456s)
+#16        sets: mudbray(Adamant/Own Tempo) ['highhorsepower', 'stomp', 'rocktomb', 'bulldoze'], golduck(Timid/Swift Swim) ['scald', 'zenheadbutt', 'dig', 'aquatail'], furret(Adamant/Adaptability) ['slam', 'dig', 'thief', 'headbutt'], vigoroth(Adamant/Vital Spirit) ['chipaway', 'suckerpunch', 'rocktomb', 'slash'], skuntank(Jolly/Stench) ['knockoff', 'flamethrower', 'dig', 'toxic'], linoone(Adamant/Pickup) ['headbutt', 'playrough', 'dig', 'thief']
+#16        threat Druddigon (2 of our deaths): counters nacli [wins the duel 100%, 100% HP left; MT MOON B1F / grass_day 20%], lunatone [wins the duel 100%, 86% HP left; MT MOON B2F / grass_night 4%], snubbull [wins the duel 100%, 63% HP left; ROUTE 22 / grass_day 10%]
+#16        threat Arcanine (1 of our deaths): counters mienfoo [wins the duel 100%, 64% HP left; ROUTE 1 / grass_day 10%], tentacool [wins the duel 100%, 60% HP left; PALLET TOWN / old_rod 70%], psyduck [wins the duel 100%, 58% HP left; ROUTE 22 / old_rod 70%]
+#9: C top    ['buneary', 'chewtle', 'grimeralola', 'sewaddle', 'throh', 'woobat']: win 100% deaths/mon 0.11 deathless 67%
+#9         legal=True  best team under search: win  100% deaths/mon 0.11 deathless 67% ['buneary', 'chewtle', 'grimeralola', 'sewaddle', 'throh', 'woobat']  (others: 100%, 100%, 100%, 100%, 100%)  (4849s)
+#9         sets: lopunny(Adamant/Cute Charm) ['jumpkick', 'return', 'bounce', 'quickattack'], drednaw(Adamant/Strong Jaw) ['razorshell', 'rocktomb', 'crunch', 'rockthrow'], grimeralola(Adamant/Poison Touch) ['poisonfang', 'thief', 'rocktomb', 'bite'], leavanny(Adamant/Swarm) ['lunge', 'razorleaf', 'slash', 'pounce'], throh(Adamant/Guts) ['vitalthrow', 'bodyslam', 'rocktomb', 'stormthrow'], swoobat(Modest/Unaware) ['aircutter', 'confusion', 'flash', 'roost']
+#9         threat Fearow (9 of our deaths): counters poochyena [wins the duel 100%, 65% HP left; ROUTE 1 / grass_night 20%], ekans [wins the duel 100%, 64% HP left; PEWTER CITY / grass_day 4%], lillipup [wins the duel 100%, 59% HP left; ROUTE 22 / grass_day 10%]
+#9         threat Houndour (4 of our deaths): counters wurmple [wins the duel 100%, 100% HP left; VIRIDIAN FOREST / grass_night 20%], seedot [wins the duel 100%, 100% HP left; ROUTE 1 / grass_night 8%], pansear [wins the duel 100%, 100% HP left; ROUTE 1 / grass_day 2%]
+#2: C top    ['budew', 'morelull', 'ponytagalar', 'scatterbug', 'sentret', 'wurmple']: win 100% deaths/mon 0.01 deathless 93%
+#2         legal=True  best team under search: win  100% deaths/mon 0.00 deathless 100% ['abra', 'hoothoot', 'pidgey', 'scatterbug', 'shinx', 'wurmple']  (others: 100%, 100%, 100%, 100%, 100%)  (4895s)
+#2         sets: kadabra(Modest/Synchronize) ['confusion', 'flash', 'hiddenpower', 'teleport'], noctowl(Modest/Tinted Lens) ['aircutter', 'flash', 'echoedvoice', 'hypnosis'], pidgeotto(Adamant/Frisk) ['takedown', 'dualwingbeat', 'quickattack', 'tackle'], vivillon(Modest/Shield Dust) ['aircutter', 'strugglebug', 'flash', 'sleeppowder'], luxio(Jolly/Intimidate) ['spark', 'bite', 'tackle', 'flash'], beautifly(Modest/Swarm) ['signalbeam', 'airslash', 'flash', 'stunspore']
+#10: C top    ['cutiefly', 'ekans', 'pidove', 'spearow', 'tentacool', 'wattrel']: win 100% deaths/mon 0.08 deathless 63%
+#5: C top    ['kricketot', 'pikipek', 'ponyta', 'rattata', 'starly', 'wattrel']: win 100% deaths/mon 0.08 deathless 70%
+#5         legal=True  best team under search: win  100% deaths/mon 0.01 deathless 93% ['bonsly', 'chingling', 'hoothoot', 'patrat', 'shinx', 'zigzagoon']  (others: 100%, 100%, 100%, 100%, 97%)  (5703s)
+#5         sets: sudowoodo(Adamant/Sturdy) ['rockthrow', 'woodhammer', 'slam', 'thief'], chimecho(Timid/Levitate) ['synchronoise', 'flash', 'astonish', 'psywave'], noctowl(Modest/Tinted Lens) ['aircutter', 'flash', 'echoedvoice', 'hypnosis'], watchog(Adamant/Analytic) ['headbutt', 'crunch', 'lowkick', 'hypnosis'], luxio(Jolly/Intimidate) ['spark', 'thief', 'tackle', 'flash'], linoone(Adamant/Pickup) ['headbutt', 'playrough', 'thief', 'tackle']
+#5         threat Yanma (1 of our deaths): counters starly [wins the duel 100%, 100% HP left; ROUTE 22 / grass_day 20%], scatterbug [wins the duel 100%, 100% HP left; VIRIDIAN FOREST / grass_day 10%], ponytagalar [wins the duel 100%, 100% HP left; ROUTE 2 / grass_night 10%]
+#5         threat Wattrel (1 of our deaths): counters wattrel [wins the duel 100%, 100% HP left; VIRIDIAN CITY / grass_night 8%], kricketot [wins the duel 100%, 100% HP left; VIRIDIAN FOREST / grass_night 10%], sentret [wins the duel 100%, 85% HP left; ROUTE 2 / grass_day 20%]
+#10: C top    ['cutiefly', 'ekans', 'pidove', 'tentacool', 'wattrel', 'zubat']: win 100% deaths/mon 0.13 deathless 57%
+#10: C top    ['cutiefly', 'ekans', 'nincada', 'pidove', 'tentacool', 'wattrel']: win 100% deaths/mon 0.10 deathless 57%
+#10        legal=True  best team under search: win  100% deaths/mon 0.08 deathless 63% ['cutiefly', 'ekans', 'pidove', 'spearow', 'tentacool', 'wattrel']  (others: 100%, 100%, 100%, 100%, 93%)  (7111s)
+#10        sets: ribombee(Modest/Swarm) ['bugbuzz', 'drainingkiss', 'flash', 'roost'], arbok(Adamant/Intimidate) ['poisonjab', 'crunch', 'dig', 'suckerpunch'], unfezant(Adamant/Frisk) ['drillpeck', 'slash', 'steelwing', 'roost'], fearow(Adamant/Frisk) ['aerialace', 'drillrun', 'steelwing', 'roost'], tentacruel(Modest/Clear Body) ['bubblebeam', 'sludge', 'icywind', 'waterpulse'], kilowattrel(Modest/Volt Absorb) ['airslash', 'flash', 'uproar', 'roost']
+#10        threat Clefable (5 of our deaths): counters ponyta [wins the duel 100%, 79% HP left; ROUTE 2 / grass_day 10%], tentacool [wins the duel 100%, 73% HP left; PALLET TOWN / old_rod 70%], ekans [wins the duel 100%, 71% HP left; PEWTER CITY / grass_day 4%]
+#10        threat Wartortle (4 of our deaths): counters tympole [wins the duel 100%, 100% HP left; MT MOON 1F / grass_night 10%], bramblin [wins the duel 100%, 100% HP left; FOREST EXPANSION / grass_day 4%], snover [wins the duel 100%, 99% HP left; VIRIDIAN CITY / grass_day 2%]
+
+Radical Red best-six probe (pool) | legal moves only: True | arena effects: True | field-aware calc bot: True | chooser cover | matchup play True | death weight 6.0 | seeded | search 9,8 x n=30 | no EVs, no items | enemy = RR AI, full info | 119 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  #2          16  100%       0.00  100%  abra, hoothoot, pidgey, scatterbug, shinx, wurmple  | -
+  #4          16  100%       0.00  100%  kricketot, patrat, ponytagalar, sentret, wurmple, yungoos  | -
+  #5          16  100%       0.01   93%  bonsly, chingling, hoothoot, patrat, shinx, zigzagoon  | -
+  #7          23  100%       0.00  100%  grubbin, houndour, pawmi, seedot, slakoth, yungoos  | -
+  #9          23  100%       0.11   67%  buneary, chewtle, grimeralola, sewaddle, throh, woobat  | -
+  #10         28  100%       0.08   63%  cutiefly, ekans, pidove, spearow, tentacool, wattrel  | -
+  #15         28  100%       0.00  100%  houndour, makuhita, marill, psyduck, skwovet, stunky  | -
+  #16         28  100%       0.02   90%  mudbray, psyduck, sentret, slakoth, stunky, zigzagoon  | -

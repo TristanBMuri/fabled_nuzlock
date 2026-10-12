@@ -2017,3 +2017,35 @@ new mon and Protects, Hippopotas Toxics, Lileep Stockpiles then drains, Cacnea o
 Power-Up Punch), but the totals sit inside the tie-break noise: the switching was the part
 that mattered. The read-through port is complete enough to rerun the RR tables on it;
 what is left is the ROM check (A2.2).
+
+## 2026-10-12 — The RR tables on the CFRU port (`results/rr_cfru_{pool,boxes,early}.*`)
+
+Same flags as the cover runs of 2026-10-11 (legal, arena, cover chooser, matchup play,
+death weight 6, search 9,8; pool n=30, boxes 30 × n=6), enemy = the port with CFRU
+switching and scoring (commits 1cd9bdd, c8f94e1, 091d70a). Old = `results/rr_cover_*`.
+
+  planned pool   win          deaths/mon     deathless    best six (new)
+  Brock          100 → 100%   0.21 → 0.08    23 → 63%     Bonsly, Budew, Kricketot, Patrat, Zigzagoon, Galarian Zigzagoon
+  Misty          100 →  73%   0.23 → 0.57    30 →  3%     Ekans, Ledyba, Smoochum, Spearow, Teddiursa, Zubat
+
+  boxes          mean win     ≥50% boxes     deaths/mon   deathless   most missed counter
+  Brock          66 → 75%     80 → 93%       0.63 → 0.54   3 → 11%    Sewaddle vs Lunatone ×19
+  Misty          58 → 51%     67 → 53%       0.68 → 0.72   5 →  4%    Bramblin vs Mantine ×17
+
+  early bosses (#2 #4 #5 #7 #9 #10 #15 #16): all still 30/30; deathless 100/100/93/100/
+  67/63/100/90% (was 100/100/100/100/73/93/100/80%).
+
+**Misty is the wall again.** Last night's 30/30 cover team (Grimer, Magikarp, Makuhita,
+Paras, Pikipek, Zubat) is 63% / 0.71 / 0% against the CFRU enemy; the best of the six
+candidates is 73% with 3% deathless. Toxicroak (27 deaths) and Mantine (25) are the
+killers, both brought in as revenge killers by the switch-in score; their duel counters
+in the pool (Pidove, Wattrel, Ekans; Bramblin 4%) are what routing would have to catch.
+**Brock got easier**, not harder: the old cover six is 93% / 3% deathless, but a different
+six (the "top" candidate) is 100% / 0.08 / 63% — under CFRU scoring the boss spends turns
+on Toxic / Stockpile / Protect that the old port spent attacking, which a fast six punishes.
+The best-of-six is picked on the same 30 seeds it is reported on (optimistic, as before).
+
+The early singles bosses stay solved. The project's open question narrows to Misty under a
+correct AI: chooser and play against Mantine-in-rain and a Swords Dance Toxicroak, and
+whether the box can hold their counters (routing, TODO G). All of it rests on the port
+matching the ROM (A2.2).

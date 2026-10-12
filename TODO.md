@@ -173,7 +173,8 @@ choice, then the tier ladder (AI_DIFF.md §3), each paired against `results/rr_a
 A2.2 needs the user's ROM recordings. **Switching ported the same day** (NOTEBOOK.md):
 Misty's cover team 30/30 → 17/30, Brock's deaths 37 → 76. Every RR table before it is
 against the old AI. **Tier ladder ported too** (NOTEBOOK.md): inside the noise. Next:
-rerun the cover pool / boxes / early bosses once on this port; then A2.2 with ROM data.
+rerun the cover pool / boxes / early bosses once on this port — **done** (NOTEBOOK.md:
+Misty 100 → 73%, Brock 100% with 63% deathless, early bosses unchanged); then A2.2 with ROM data.
 
 
 A2.1 + A2.3 (AI sensitivity, read-through) → B1 (matrix calibration) → B2/B3

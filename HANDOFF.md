@@ -344,8 +344,9 @@ to search play — three times now: E8, EVs, moves).
 ## Radical Red (2026-10-10/12)
 
 **2026-10-12: the enemy AI now switches the CFRU way** (`data/rr/AI_DIFF.md`, NOTEBOOK.md
-2026-10-12): Misty's cover team fell 30/30 → 17/30, Brock's deaths doubled. The numbers
-below were measured against the old port and need rerunning.
+2026-10-12) and scores moves by CFRU's tier ladder. Rerun on it (`results/rr_cfru_*`):
+Misty pool 73% / 3% deathless (was 100 / 30), boxes 51%; Brock pool 100% / 63% deathless,
+boxes 75%; the early bosses stay 30/30. The numbers below are on the old port.
 
 The question the project exists for. State (NOTEBOOK.md → Radical Red
 entries, newest last): real pools and TMs, legal moves, arenas, no EVs /
