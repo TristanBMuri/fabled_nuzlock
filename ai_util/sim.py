@@ -17,7 +17,7 @@ from collections import Counter
 from pathlib import Path
 from typing import Callable
 
-from poke_env.battle import Battle, Pokemon
+from poke_env.battle import Battle, Move, Pokemon
 from poke_env.data import GenData, to_id_str
 from poke_env.stats import compute_raw_stats
 from poke_env.player import Player
@@ -147,6 +147,11 @@ class SimBattle:
                 name = m.nickname or m.species
                 m.moves = [x for x in m.moves if to_id_str(x) in data.moves]  # a mod's own moves stay unknown
                 mon = Pokemon(gen=self.gen, teambuilder=m, name=name)
+                for ms in m.moves:  # a typed Hidden Power: poke-env keeps only "hiddenpower" (Normal); the engine plays the type
+                    if to_id_str(ms).startswith("hiddenpower") and to_id_str(ms) != "hiddenpower":
+                        mon._moves.base_moves.pop("hiddenpower", None)
+                        typed = Move("hiddenpower", raw_id=to_id_str(ms), gen=self.gen)
+                        mon._moves.base_moves[typed.id] = typed
                 raw = compute_raw_stats(to_id_str(m.species or m.nickname), list(m.evs), list(m.ivs),
                                         m.level or 100, (m.nature or "serious").lower(), data)
                 mon.stats = dict(zip(("hp", "atk", "def", "spa", "spd", "spe"), raw))

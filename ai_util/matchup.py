@@ -4,12 +4,17 @@ on (MATCHUP), `cover()` is what the planner picks a six with (--chooser cover), 
 reads a candidate list's rows off one dummy battle per six species (never played).
 
 A pair is *safe* when we KO in at most two hits and they need at least three on us; its
-*edge* is their hits minus ours, plus a half for moving first.
+*edge* is their hits minus ours, plus a half for moving first. 2026-10-13 (the matrix
+calibration, scripts/rr_matrix_calib.py): a healer costs one more hit unless it falls before
+it heals (it disqualified every slower answer before); Air Balloon pops on the first hit, so
+a Ground move lands from the second.
 """
 
+import copy
 import math
 
 from ai_util.calc_bot import dmg_frac, stat
+from poke_env.battle import PokemonType
 
 SAFE_OURS, SAFE_THEIRS = 2, 3
 HEALS = {"roost", "recover", "slackoff", "softboiled", "milkdrink", "synthesis", "moonlight", "morningsun",
@@ -23,38 +28,48 @@ def pair(me, opp, battle) -> dict:
     take = max((dmg_frac(opp, me, mv, False, battle) for mv in opp.moves.values()), default=0.0)
     their_hp = opp.current_hp_fraction if opp.current_hp else 1.0  # a benched enemy reads as unknown HP: full
     our_hp = me.current_hp_fraction if me.current_hp else 1.0
-    return {"ko_them": math.ceil(their_hp / hit) if hit > 0 else 99,
+    ko_them = math.ceil(their_hp / hit) if hit > 0 else 99
+    if opp.item == "airballoon" and hit > 0:  # the balloon pops on the first hit; Ground works from the second
+        bare = copy.copy(opp)
+        bare._item = None
+        ground = max((dmg_frac(me, bare, mv, True, battle) for mv in me.moves.values() if mv.type == PokemonType.GROUND), default=0.0)
+        if ground > hit:
+            ko_them = min(ko_them, 1 + math.ceil(max(their_hp - hit, 0) / ground))
+    return {"ko_them": ko_them,
             "ko_us": math.ceil(our_hp / take) if take > 0 else 99,
             "faster": stat(me, "spe", True, battle) > stat(opp, "spe", False, battle),
             "heals": any(mv.id in HEALS for mv in opp.moves.values()), "hit": hit, "take": take}
 
 
+def ours(p: dict) -> int:
+    """Hits to KO them; a healer (Roost / Recover / ...) costs one more unless it falls before
+    it heals: one hit, or two while moving first (2026-10-11: Gyarados "2/3" vs Roost Mantine
+    was no answer)."""
+    k = p["ko_them"]
+    if p.get("heals") and not (k <= 1 or (k <= 2 and p["faster"])):
+        k += 1
+    return k
+
+
 def safe(p: dict) -> bool:
     """We KO in at most two hits and survive the hits we absorb before our last one with one
     to spare (we absorb ko_them hits moving second, one fewer moving first; never fewer than
-    three to KO us); a healer (Roost / Recover / ...) must fall before it heals: one hit, or
-    two while moving first (2026-10-11: Gyarados "2/3" vs Roost Mantine was no answer)."""
-    if p["ko_them"] > SAFE_OURS:
+    three to KO us)."""
+    k = ours(p)
+    if k > SAFE_OURS:
         return False
-    absorbed = p["ko_them"] - (1 if p["faster"] else 0)
-    if p["ko_us"] < max(SAFE_THEIRS, absorbed + 2):
-        return False
-    if p.get("heals") and not (p["ko_them"] <= 1 or (p["ko_them"] <= 2 and p["faster"])):
-        return False
-    return True
+    absorbed = k - (1 if p["faster"] else 0)
+    return p["ko_us"] >= max(SAFE_THEIRS, absorbed + 2)
 
 
 def race(p: dict) -> bool:
-    """Looser than safe: we land the KO before they land theirs (one hit of margin, not two),
-    healers still falling before they heal. A one-shot that absorbs one hit counts."""
-    if p["ko_them"] > SAFE_OURS + 1:
+    """Looser than safe: we land the KO before they land theirs (one hit of margin, not two).
+    A one-shot that absorbs one hit counts."""
+    k = ours(p)
+    if k > SAFE_OURS + 1:
         return False
-    absorbed = p["ko_them"] - (1 if p["faster"] else 0)
-    if p["ko_us"] < absorbed + 1:
-        return False
-    if p.get("heals") and not (p["ko_them"] <= 1 or (p["ko_them"] <= 2 and p["faster"])):
-        return False
-    return True
+    absorbed = k - (1 if p["faster"] else 0)
+    return p["ko_us"] >= absorbed + 1
 
 
 def edge(p: dict) -> float:

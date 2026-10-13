@@ -1,0 +1,35 @@
+BROCK: trainer #6, cap 16, pool 105 species; arena {'ai_permanent': True, 'weather': 'sandstorm'}; not modelled: []
+MISTY: trainer #18, cap 28, pool 192 species; arena {'ai_permanent': True, 'weather': 'raindance'}; not modelled: []
+MISTY: starter totodile; boss attacks with ['Dark', 'Electric', 'Fighting', 'Flying', 'Grass', 'Ground', 'Ice', 'Normal', 'Poison', 'Psychic', 'Water']
+BROCK: starter oshawott; boss attacks with ['Bug', 'Electric', 'Fighting', 'Flying', 'Grass', 'Ground', 'Ice', 'Normal', 'Poison', 'Psychic', 'Rock', 'Steel']
+BROCK: A solo scores for 106 species in 3s; top: rattataalola 0.28, budew 0.27, zigzagoongalar 0.24, morelull 0.24, surskit 0.24, zigzagoon 0.24, cubchoo 0.23, yungoos 0.23
+MISTY: A solo scores for 193 species in 4s; top: yungoos 0.27, zangoose 0.23, skiddo 0.23, stunky 0.23, yamper 0.21, blipbug 0.21, grubbin 0.21, seviper 0.21
+MISTY: B 279 teams scored in 35s; greedy ('seviper', 'smoochum', 'stunky', 'yungoos', 'zangoose', 'zigzagoon') (1.07); best fast ('corphish', 'pikipek', 'sewaddle', 'smoochum', 'zangoose', 'zubat') (1.09)
+MISTY: cover team ('magikarp', 'makuhita', 'pidove', 'pikipek', 'smoochum', 'zubat')
+BROCK: B 279 teams scored in 42s; greedy ('rattataalola', 'seedot', 'sewaddle', 'snover', 'snubbull', 'zigzagoongalar') (1.42); best fast ('applin', 'oshawott', 'sandshrewalola', 'snubbull', 'zigzagoon', 'zigzagoongalar') (1.71)
+BROCK: cover team ('chingling', 'kricketot', 'poochyena', 'rattataalola', 'tarountula', 'yungoos')
+BROCK: C cover  ['chingling', 'kricketot', 'poochyena', 'rattataalola', 'tarountula', 'yungoos']: win 100% deaths/mon 0.22 deathless 27%
+BROCK: C greedy ['rattataalola', 'seedot', 'sewaddle', 'snover', 'snubbull', 'zigzagoongalar']: win 93% deaths/mon 0.33 deathless 10%
+BROCK: C fast   ['applin', 'oshawott', 'sandshrewalola', 'snubbull', 'zigzagoon', 'zigzagoongalar']: win 93% deaths/mon 0.24 deathless 27%
+BROCK: C top    ['cubchoo', 'lillipup', 'seedot', 'sewaddle', 'snubbull', 'zigzagoongalar']: win 93% deaths/mon 0.38 deathless 10%
+BROCK: C top    ['applin', 'oshawott', 'patrat', 'sandshrewalola', 'zigzagoon', 'zigzagoongalar']: win 97% deaths/mon 0.31 deathless 13%
+BROCK: C top    ['deerlingsummer', 'sandshrewalola', 'snover', 'snubbull', 'yungoos', 'zigzagoongalar']: win 90% deaths/mon 0.40 deathless 13%
+BROCK      legal=True  best team under search: win  100% deaths/mon 0.22 deathless 27% ['chingling', 'kricketot', 'poochyena', 'rattataalola', 'tarountula', 'yungoos']  (others: 97%, 93%, 93%, 93%, 90%)  (1103s)
+BROCK      sets: chimecho(Timid/Levitate) ['synchronoise', 'flash', 'astonish', 'psywave'], kricketune(Adamant/Technician) ['bugbite', 'rocktomb', 'tackle', 'pounce'], mightyena(Adamant/Intimidate) ['crunch', 'psychicfangs', 'thunderfang', 'suckerpunch'], raticatealola(Adamant/Gluttony) ['hyperfang', 'knockoff', 'thief', 'feintattack'], spidops(Adamant/Insomnia) ['bugbite', 'upperhand', 'thief', 'pounce'], gumshoos(Adamant/Stakeout) ['headbutt', 'crunch', 'rocktomb', 'thief']
+BROCK      threat Archen (13 of our deaths): counters shinx [wins the duel 100%, 100% HP left; VIRIDIAN CITY / grass_day 20%], kricketot [wins the duel 100%, 100% HP left; VIRIDIAN FOREST / grass_night 10%], poochyena [wins the duel 100%, 92% HP left; ROUTE 1 / grass_night 20%]
+BROCK      threat Cacnea (12 of our deaths): counters ledyba [wins the duel 100%, 85% HP left; VIRIDIAN FOREST / grass_day 5%], poochyena [wins the duel 100%, 75% HP left; ROUTE 1 / grass_night 20%], kricketot [wins the duel 100%, 71% HP left; VIRIDIAN FOREST / grass_night 10%]
+MISTY: C cover  ['magikarp', 'makuhita', 'pidove', 'pikipek', 'smoochum', 'zubat']: win 60% deaths/mon 0.77 deathless 0%
+MISTY: C greedy ['seviper', 'smoochum', 'stunky', 'yungoos', 'zangoose', 'zigzagoon']: win 27% deaths/mon 0.86 deathless 3%
+MISTY: C fast   ['corphish', 'pikipek', 'sewaddle', 'smoochum', 'zangoose', 'zubat']: win 63% deaths/mon 0.70 deathless 0%
+MISTY: C top    ['corphish', 'natu', 'sewaddle', 'smoochum', 'teddiursa', 'yamper']: win 53% deaths/mon 0.78 deathless 0%
+MISTY: C top    ['seviper', 'smoochum', 'yamper', 'yungoos', 'zangoose', 'zigzagoon']: win 40% deaths/mon 0.83 deathless 0%
+MISTY: C top    ['seviper', 'shroomish', 'smoochum', 'yungoos', 'zangoose', 'zigzagoon']: win 37% deaths/mon 0.87 deathless 0%
+MISTY      legal=True  best team under search: win   63% deaths/mon 0.70 deathless 0% ['corphish', 'pikipek', 'sewaddle', 'smoochum', 'zangoose', 'zubat']  (others: 60%, 53%, 40%, 37%, 27%)  (1102s)
+MISTY      sets: crawdaunt(Adamant/Hyper Cutter) ['razorshell', 'nightslash', 'dig', 'knockoff'], toucannon(Adamant/Frisk) ['beakblast', 'uturn', 'steelwing', 'roost'], leavanny(Adamant/Swarm) ['lunge', 'razorleaf', 'steelwing', 'pounce'], jynx(Modest/Dry Skin) ['psyshock', 'icywind', 'flash', 'psybeam'], zangoose(Adamant/Tough Claws) ['crushclaw', 'dig', 'thunderpunch', 'slash'], crobat(Adamant/Infiltrator) ['poisonfang', 'pluck', 'uturn', 'roost']
+MISTY      threat Mantine (50 of our deaths): counters bramblin [wins the duel 100%, 100% HP left; FOREST EXPANSION / grass_day 4%], chinchou [wins the duel 100%, 57% HP left; ROUTE 25 / old_rod 30%], chewtle [wins the duel 100%, 45% HP left; MT MOON 1F / grass_day 10%]
+MISTY      threat Starmie (31 of our deaths): counters paras [wins the duel 100%, 71% HP left; ROUTE 22 / grass_night 4%], morelull [wins the duel 100%, 60% HP left; ROUTE 22 / grass_day 10%], burmytrash [wins the duel 100%, 59% HP left; VIRIDIAN FOREST / grass_night 10%]
+
+Radical Red best-six probe (pool) | legal moves only: True | arena effects: True | field-aware calc bot: True | chooser cover | matchup play True | death weight 6.0 | seeded | search 9,8 x n=30 | no EVs, no items | enemy = RR AI, full info | 18 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  BROCK       16  100%       0.22   27%  chingling, kricketot, poochyena, rattataalola, tarountula, yungoos  | {'weather': 'sandstorm'}
+  MISTY       28   63%       0.70    0%  corphish, pikipek, sewaddle, smoochum, zangoose, zubat  | {'weather': 'raindance'}

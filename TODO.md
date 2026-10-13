@@ -178,9 +178,11 @@ Misty 100 → 73%, Brock 100% with 63% deathless, early bosses unchanged); then 
 **B1 done** (`scripts/rr_matrix_calib.py`, `results/rr_matrix_calib.*`, NOTEBOOK.md last entry): safe
 cells win 85% of duels, race 56%, none 9%; 32 false safes (Air Balloon / Synchronoise, Toxic +
 Protect stall, two-turn moves), 56 false nones (the mirrors hold vanilla types / stats / moves
-for 40 / 250 / 134 entries the mod changed; the AI's wasted turns; the healer rule). Next, B2 in
-this order: mod data into the mirrors (`inject_mod_data` overrides existing entries) → enemy
-item → Toxic-stall flag → two-turn moves, each paired on the calibration and the cover runs.
+for 40 / 250 / 134 entries the mod changed; the AI's wasted turns; the healer rule). **B2 done 2026-10-13** (NOTEBOOK.md): mod data in the mirrors; the formula's floors, items,
+abilities, Psyshock, charge moves, typed Hidden Power; the matrix's healer and Air Balloon
+rules. Safe cells 85 → 95% of duels, false safes 32 → 7. The box tables moved down because
+the RR AI port shares the formula (`results/rr_formula_split.log`). Next: the AI's free
+first turn (B3: the duel as the judge, or the port asked for its turn-1 move), then C1 items.
 
 
 A2.1 + A2.3 (AI sensitivity, read-through) → B1 (matrix calibration) → B2/B3

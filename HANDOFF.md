@@ -51,12 +51,22 @@ Radical Red run facts) are answered there and all match the sim's assumptions â€
 draw with the dupes re-roll is the real run, the planned pool an upper bound, singles only,
 95 bosses (+ optional bosses for items), natures free, any ability after Cerulean.
 
-**B1 matrix calibration done** (`scripts/rr_matrix_calib.py`, `results/rr_matrix_calib.*`, 2 min):
-safe cells win 85% of duels, race 56%, none 9%; 32 false safes and 56 false nones named and
-traced (NOTEBOOK.md last entry). Biggest cause: `rr_probe.inject_mod_data` keeps poke-env's
-vanilla entries, so the mirrors and the damage formula use vanilla types / stats / moves for
-the 40 / 250 / 134 entries the mod changed (Arbok is Poison/Dark in RR). Next is B2 in the
-order the notebook gives, starting with that data fix (paired: calibration + cover runs).
+**B1 matrix calibration done, B2 formula terms in** (`scripts/rr_matrix_calib.py`,
+`results/rr_matrix_calib*.*`, NOTEBOOK.md 2026-10-12/13): the paper tiers scored against
+duels (safe cells now win 95% of them, were 85%; 7 false safes, were 32) and the formula's
+first hit scored against the engine's (within a damage roll in 95% / 91% of cells at Brock,
+were 73%). Found and fixed on the way: the mirrors held vanilla data for the 40 / 250 / 134
+entries the mod changed (`rr_probe.inject_mod_data`); `dmg_frac` never floored (12% high at
+L13-16) and had no items or attack abilities (Eviolite, Life Orb, Choice, Technician, Sheer
+Force, Pure Power, Knock Off, Air Balloon, Psyshock, charge moves, typed Hidden Power); the
+matrix's healer rule and Air Balloon. **The RR tables moved down with the more accurate
+model** (boxes Brock 75 -> 70%, Misty 51 -> 40%): the same teams replayed on the same seeds
+drop the same way, and the split (`results/rr_formula_split.log`) puts it on the RR AI port,
+which scores with `dmg_frac` too and now computes damage the way the game does. BDSP paired:
+League rows within noise, 7 route deaths in 20 episodes where the saved run had 0 (the split
+for the Gen 4 AI is in the notebook). Every table before 2026-10-13 is on the old formula.
+Next (TODO.md): the enemy AI's free first turn (Stockpile / Toxic openings win 3-hit answers
+the paper discards) â€” ask the port, or a duel-based cover (B3).
 
 Still open: the BDSP swap scoring was the only big lever left and it is a behaviour change
 (above, declined); within an episode nothing exact is large (the memo is in; the engine is the

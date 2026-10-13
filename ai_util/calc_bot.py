@@ -12,6 +12,8 @@ expected hit. Beats SimpleHeuristics and the search line on the Edwin /
 rival probes (NOTEBOOK.md); the teacher for the next prior.
 """
 
+import math
+
 from poke_env.battle import Field, MoveCategory, PokemonType, SideCondition, Status, Weather
 from poke_env.data import GenData
 from poke_env.player import Player
@@ -80,8 +82,10 @@ ABILITY_IMMUNE_FLAG = {"soundproof": "sound", "bulletproof": "bullet"}
 
 
 def effectiveness(move, dfn) -> float:
-    """Type multiplier of `move` on `dfn`, zero when dfn's ability voids it (known under
-    full info; the game's AI never clicks Scald into Dry Skin, so neither may the model of it)."""
+    """Type multiplier of `move` on `dfn`, zero when dfn's ability or Air Balloon voids it (known
+    under full info; the game's AI never clicks Scald into Dry Skin, so neither may the model of it)."""
+    if move.type == PokemonType.GROUND and dfn.item == "airballoon":
+        return 0.0
     mult = dfn.damage_multiplier(move)
     ab = (dfn.ability or "").replace(" ", "").lower()
     if ab in ABILITY_IMMUNE_TYPE and move.type is not None and move.type.name.capitalize() == ABILITY_IMMUNE_TYPE[ab]:
@@ -157,27 +161,56 @@ def dmg_frac(att, dfn, move, att_own: bool, battle=None, with_acc: bool = True) 
     return v
 
 
+def _nfe(mon) -> bool:
+    return bool(GenData.from_gen(9).pokedex.get(mon.species, {}).get("evos"))
+
+
 def _dmg_frac(att, dfn, move, att_own: bool, battle=None, with_acc: bool = True) -> float:
+    """The engine's formula with its floors (level term, base, roll, STAB, type: unfloored it
+    read 12% high at L13-16), Technician / Sheer Force / Pure Power / Huge Power, Life Orb / Choice items,
+    Eviolite, Psyshock's defence, Knock Off's item bonus, a charge turn at half damage per turn (2026-10-12: the terms the matrix calibration
+    named, scripts/rr_matrix_calib.py; the first hit now lands within a roll of the paper in
+    95% of cells, was 73%)."""
     if move.category == MoveCategory.STATUS:
         return 0.0
     hp = max_hp(dfn, not att_own)
     if move.damage:  # Seismic Toss / Night Shade / fixed damage
         d = att.level if move.damage == "level" else float(move.damage)
         return min(d, hp) / hp * ((move.accuracy or 1) if with_acc else 1)
-    if not move.base_power:
+    bp = move.base_power
+    if not bp:
         return 0.0
+    if move.id == "knockoff" and dfn.item:
+        bp = int(bp * 1.5)
+    ab = _ability(att)
+    if ab == "technician" and bp <= 60:
+        bp = int(bp * 1.5)
+    if ab == "sheerforce" and (move.entry.get("secondary") or move.entry.get("secondaries")):
+        bp = int(bp * 1.3)
     phys = move.category == MoveCategory.PHYSICAL
     a = stat(att, "atk" if phys else "spa", att_own, battle)
-    d = stat(dfn, "def" if phys else "spd", not att_own, battle)
-    base = ((2 * att.level / 5 + 2) * move.base_power * a / d) / 50 + 2
-    mod = ROLL * (1.5 if move.type in att.types else 1.0) * effectiveness(move, dfn)
-    mod *= getattr(move, "expected_hits", 1) or 1
+    d = stat(dfn, move.entry.get("overrideDefensiveStat") or ("def" if phys else "spd"), not att_own, battle)  # Psyshock
+    if ab in ("purepower", "hugepower") and phys:
+        a *= 2
+    if att.item == "lifeorb" or (att.item == "choiceband" and phys) or (att.item == "choicespecs" and not phys):
+        a *= 1.3 if att.item == "lifeorb" else 1.5
+    if dfn.item == "eviolite" and _nfe(dfn):
+        d *= 1.5
+    base = math.floor(math.floor(math.floor(2 * att.level / 5 + 2) * bp * math.floor(a) / math.floor(d)) / 50) + 2
+    dmg = math.floor(base * ROLL)
+    if move.type in att.types:
+        dmg = math.floor(dmg * 1.5)
+    eff = effectiveness(move, dfn)
+    dmg = math.floor(dmg * eff) if eff else 0.0
+    mod = getattr(move, "expected_hits", 1) or 1
     if att.status == Status.BRN and phys:
         mod *= 0.5
+    if (move.entry.get("flags") or {}).get("charge") and not (move.id == "solarbeam" and battle is not None and set(battle.weather) & SUN):
+        mod *= 0.5  # a turn to charge: half the damage per turn
     fmod, acc = field_mod(att, dfn, move, battle)
     if not with_acc:
-        return base * mod * fmod / hp
-    return base * mod * fmod / hp * ((move.accuracy or 1) if acc is None else acc)  # the field may override accuracy
+        return dmg * mod * fmod / hp
+    return dmg * mod * fmod / hp * ((move.accuracy or 1) if acc is None else acc)  # the field may override accuracy
 
 
 def threat(opp, mon, battle=None) -> float:

@@ -1,0 +1,7 @@
+# Same teams, same seeds, one side on the committed formula (scratch replay_boxes*.py, 2026-10-13)
+enemy_old BROCK: saved win 75% d/mon 0.54 clean 11% | replayed win 77% d/mon 0.53 clean 12% (624s)
+enemy_old MISTY: saved win 51% d/mon 0.72 clean 4% | replayed win 45% d/mon 0.76 clean 3% (452s)
+bot_old BROCK: saved win 75% d/mon 0.54 clean 11% | replayed win 74% d/mon 0.54 clean 6% (744s)
+bot_old MISTY: saved win 51% d/mon 0.72 clean 4% | replayed win 33% d/mon 0.83 clean 2% (594s)
+both_new BROCK: 30 boxes, same teams | saved win 75% d/mon 0.54 clean 11% | replayed win 70% d/mon 0.57 clean 9% | 11 boxes worse, 8 better (663s)
+both_new MISTY: 30 boxes, same teams | saved win 51% d/mon 0.72 clean 4% | replayed win 39% d/mon 0.80 clean 3% | 15 boxes worse, 5 better (551s)

@@ -2332,3 +2332,92 @@ stable-baselines3 (711 lines, 1.5 GB of checkpoints and harvests left on disk, u
 tree after the deletion is identical to the one before it on every team, threat and
 shortlist (`results/rr_moddata_pool2.*` vs `rr_moddata_pool.*`); 38 tests pass; the
 recipe stays in this notebook, the code under the `pre-cleanup` tag.
+
+## 2026-10-13 — The formula's floors, items and abilities; two matrix rules (B2) (`results/rr_matrix_calib_formula.*`, `results/rr_formula_*`, `results/rr_matrix_boxes.*`, `results/bdsp_formula.*`)
+
+**The check.** `rr_matrix_calib.py` now also scores the formula itself: the first hit each
+side lands in a duel (its move and the fraction it took, averaged over the seeds that opened
+with the same move) against `dmg_frac` for that move, grouped by attacker ability, defender
+item and move. One seed alone reads ~8% low across the board (the seeds share their first
+roll), hence the mean. On the committed formula at Brock: median engine/paper 0.88, 73% of
+cells within a damage roll (±20%); Eviolite 0.62, Pure Power 1.57, a typed Hidden Power 1.93,
+Dig 0.63, Synchronoise 0. The 0.88 is the floors: the engine floors the level term, the base,
+the roll, STAB and the type multiplier, and at L13–16 `floor(2·16/5 + 2)` alone is 8 against
+8.4 (Axew's Breaking Swipe: 50% on paper, 43 / 43 / 47% in play).
+
+**The terms** (`calc_bot._dmg_frac`, `effectiveness`; `sim.py`), each named by a group above
+the band: the floors in the engine's order; Technician, Sheer Force, Pure / Huge Power; Life
+Orb, Choice Band / Specs, Eviolite (NFE by the dex's `evos`), Knock Off's item bonus; Air
+Balloon voids Ground; Psyshock hits Defence (`overrideDefensiveStat`); a charge move at half
+damage per turn; a typed Hidden Power from a packed set keeps its type in the full-info
+mirror (poke-env built `Move(retrieve_id)` and dropped it; the mod's own `hiddenpower` entry
+reads Water, which is wrong too). After them: median 1.00 / 0.99, 95% of our hits and 91% of
+theirs within a roll at Brock, 86% / 75% over both bosses; what is left is Synchronoise (type-
+conditional, 0), Bullet Seed (each hit floors), Drain Punch 1.27 (unexplained, n=104) and Dig
+2.0 (the check scores the full hit against the halved per-turn value: not an error).
+
+**Two matrix rules** (`matchup.pair` / `ours`): a healer costs one extra hit unless it falls
+before it heals (it disqualified every answer slower than two hits before); Air Balloon pops
+on the first hit, so a Ground move lands from the second (Toedscool "15 hits" beat Varoom in
+four turns: Mega Drain popped it, Mud-Slap finished). Calibration gain: +4 safe cells, false
+nones 64 → 58, false safes unchanged.
+
+**Calibration, both bosses, 20 seeds:**
+
+| | safe | race | none | false safes | false nones |
+|---|---|---|---|---|---|
+| committed (mod data) | 258 cells, 86% | 288, 60% | 1548, 9% | 31 | 46 |
+| + the formula | 195, 95% | 256, 72% | 1643, 11% | 7 | 64 |
+| + the matrix rules | 199, 95% | 260, 72% | 1635, 11% | 7 | 58 |
+
+Of the 7 false safes, 3 are Chimecho's Synchronoise. Of the 58 false nones, most are 2/2
+"slower" coin flips won on rolls (right to discard for a safe cover) and 3-hit answers to
+Lileep / Politoed / Clodsire that win because the enemy AI opens with Stockpile / Toxic /
+Recover: a free turn the paper does not model. Modelling the AI's first move is a decision
+for later (ask the port itself, or a duel-based cover: TODO.md B3).
+
+**The tables moved, down** (paired on the saved seeds, boxes drawn the same):
+
+| | Brock boxes: win / ≥50% / deaths per mon / deathless | Misty boxes |
+|---|---|---|
+| saved (`rr_cfru_boxes_par`) | 75% / 93% / 0.54 / 11% | 51% / 53% / 0.72 / 4% |
+| the formula | 71% / 87% / 0.57 / 5% | 39% / 43% / 0.79 / 1% |
+| + the matrix rules | 70% / 87% / 0.57 / 7% | 40% / 47% / 0.76 / 3% |
+
+The pool table's best six: Brock 100% / 0.22 / 27%, Misty 63% / 0.70 / 0% (the best six
+differs in every run; the number is the shortlist shuffle plus n=30 noise, which is why the
+boxes judge).
+
+**Why: the enemy got the formula too.** The saved run's 60 teams replayed unchanged on the
+same seeds (`results/rr_formula_split.log`, 180 battles per boss, SE ≈ 3.5 points):
+
+| who is on the new formula | Brock | Misty |
+|---|---|---|
+| nobody (the saved run) | 75% | 51% |
+| the calc bot and the matrix only | 77% | 45% |
+| the RR AI only | 74% | 33% |
+| both (the tree) | 70% | 39% |
+
+The chooser is not the cause (the same teams drop the same way). The RR AI port scores
+moves and switches with `dmg_frac`, so it now computes damage the way the game does; at Misty
+that is worth 12–18 points against us. The calc bot's own change is within the noise (−6 /
++6). CFRU's AI calculates with the real formula, so this is the game being harder than the
+old tables said, not a regression of the method; the tables are regenerated from here.
+
+**BDSP** (the Gen 4 AI and the calc bot share the formula; `results/bdsp_formula.*`, 38 min on
+20 workers, paired by events against `results/bdsp_gen4ai.*`): 404.60 cleared / 389.30
+no-death / 4.10 deaths / 60% runs cleared vs 404.65 / 403.00 / 3.95 / 65%. Cleared, deaths
+and the clear rate are within the noise floor; the route is not: **7 deaths before the League
+in 20 episodes where the saved run had 0** (Volkner 3, Candice 2, Cedric 2), the party fielded
+differs from trainer 16 on in every seed (73.5% of fights). Cynthia 65 deaths / 8 losses (63 /
+7). The same split as above runs for BDSP (the Gen 4 AI on the old formula, the calc bot on
+the new): see the line below.
+
+BDSP split (`results/bdsp_formula_enemyold.*`: the Gen 4 AI on the old formula, the calc bot
+and the searcher on the new, 38 min): 404.40 / 393.45 / 4.80 / 45%, **2 route deaths**
+(Fantina 1, Cedric 1), Cynthia 77 / 10. So of the 7 route deaths under the full change, the
+Gen 4 AI's better calc accounts for most (7 → 2 when it loses it) and the calc bot's own
+change for the rest (2 vs 0); every League row is within the noise floor (±2 cleared, ±1.9
+deaths, ±15 points) in all three configurations, Cynthia 63 / 65 / 77 deaths. Same reading
+as Radical Red: the enemy AI with the game's damage numbers is the harder opponent, and the
+benchmark from here is `results/bdsp_formula.*` (404.60 / 389.30 / 4.10 / 60%).
