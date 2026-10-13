@@ -7,16 +7,22 @@ A pair is *safe* when we KO in at most two hits and they need at least three on 
 *edge* is their hits minus ours, plus a half for moving first. 2026-10-13 (the matrix
 calibration, scripts/rr_matrix_calib.py): a healer costs one more hit unless it falls before
 it heals (it disqualified every slower answer before); Air Balloon pops on the first hit, so
-a Ground move lands from the second.
+a Ground move lands from the second; a resist berry halves the first hit of its type and is
+gone (hits_to_ko). Not a heal berry: counting Berry Juice / Oran / Iapapa as HP turned 2/6 cells
+into 3/6 "nones" that win every duel (false nones 58 -> 105); the tiers' cap on our hits is
+the question there, not the berry. A cell may instead be *judged by the duel* (B3,
+2026-10-13): `win` / `hp` from playing the one-on-one (rr_team_probe.duel) make its tiers —
+the paper discards 3-hit answers that win because the enemy AI opens with Stockpile / Toxic /
+Recover, and it cannot know; the duel does.
 """
 
 import copy
 import math
 
-from ai_util.calc_bot import dmg_frac, stat
-from poke_env.battle import PokemonType
+from ai_util.calc_bot import RESIST_BERRY, dmg_frac, stat
 
 SAFE_OURS, SAFE_THEIRS = 2, 3
+DUEL_SAFE, DUEL_SAFE_HP, DUEL_RACE = 0.9, 0.5, 0.5  # duel-judged cells: win rate (and HP left on a win) per tier
 HEALS = {"roost", "recover", "slackoff", "softboiled", "milkdrink", "synthesis", "moonlight", "morningsun",
          "shoreup", "rest", "wish", "lunarblessing", "strengthsap"}
 
@@ -28,17 +34,29 @@ def pair(me, opp, battle) -> dict:
     take = max((dmg_frac(opp, me, mv, False, battle) for mv in opp.moves.values()), default=0.0)
     their_hp = opp.current_hp_fraction if opp.current_hp else 1.0  # a benched enemy reads as unknown HP: full
     our_hp = me.current_hp_fraction if me.current_hp else 1.0
-    ko_them = math.ceil(their_hp / hit) if hit > 0 else 99
-    if opp.item == "airballoon" and hit > 0:  # the balloon pops on the first hit; Ground works from the second
+    ko_them = hits_to_ko(their_hp, hit, hit) if hit > 0 else 99
+    if opp.item == "airballoon" and hit > 0 or opp.item in RESIST_BERRY:  # spent on the first hit: full hits from the second
         bare = copy.copy(opp)
         bare._item = None
-        ground = max((dmg_frac(me, bare, mv, True, battle) for mv in me.moves.values() if mv.type == PokemonType.GROUND), default=0.0)
-        if ground > hit:
-            ko_them = min(ko_them, 1 + math.ceil(max(their_hp - hit, 0) / ground))
+        first = hit if opp.item == "airballoon" else max((dmg_frac(me, opp, mv, True, battle) for mv in me.moves.values()
+                                                         if mv.type == RESIST_BERRY[opp.item]), default=0.0)
+        rest = max((dmg_frac(me, bare, mv, True, battle) for mv in me.moves.values()), default=0.0)
+        if first > 0 and rest > hit:
+            ko_them = min(ko_them, hits_to_ko(their_hp, first, rest))
     return {"ko_them": ko_them,
             "ko_us": math.ceil(our_hp / take) if take > 0 else 99,
             "faster": stat(me, "spe", True, battle) > stat(opp, "spe", False, battle),
             "heals": any(mv.id in HEALS for mv in opp.moves.values()), "hit": hit, "take": take}
+
+
+def hits_to_ko(hp: float, first: float, rest: float) -> int:
+    """Hits that take `hp` to zero: `first` on the first, `rest` after it (an item spent on the
+    first hit: the balloon pops, the berry is eaten); 99 when nothing lands."""
+    if first == rest:
+        return math.ceil(hp / first) if first > 0 else 99
+    if first >= hp:
+        return 1
+    return 1 + math.ceil((hp - first) / rest - 1e-9) if rest > 0 else 99  # (1 - 1/6) / (1/6) = 5.000000000000001
 
 
 def ours(p: dict) -> int:
@@ -54,7 +72,9 @@ def ours(p: dict) -> int:
 def safe(p: dict) -> bool:
     """We KO in at most two hits and survive the hits we absorb before our last one with one
     to spare (we absorb ko_them hits moving second, one fewer moving first; never fewer than
-    three to KO us)."""
+    three to KO us). Duel-judged: wins almost always and comes out with half its HP."""
+    if "win" in p:
+        return p["win"] >= DUEL_SAFE and p["hp"] >= DUEL_SAFE_HP
     k = ours(p)
     if k > SAFE_OURS:
         return False
@@ -64,7 +84,9 @@ def safe(p: dict) -> bool:
 
 def race(p: dict) -> bool:
     """Looser than safe: we land the KO before they land theirs (one hit of margin, not two).
-    A one-shot that absorbs one hit counts."""
+    A one-shot that absorbs one hit counts. Duel-judged: wins more often than not."""
+    if "win" in p:
+        return p["win"] > DUEL_RACE
     k = ours(p)
     if k > SAFE_OURS + 1:
         return False
@@ -73,6 +95,8 @@ def race(p: dict) -> bool:
 
 
 def edge(p: dict) -> float:
+    if "win" in p:  # duel-judged: wins weighted up by the HP kept, losses count against (a liability on the bench)
+        return p["win"] * (1 + p["hp"]) - (1 - p["win"])
     return min(p["ko_us"], 9) - min(p["ko_them"], 9) + (0.5 if p["faster"] else 0.0)
 
 

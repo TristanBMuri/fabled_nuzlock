@@ -65,8 +65,21 @@ drop the same way, and the split (`results/rr_formula_split.log`) puts it on the
 which scores with `dmg_frac` too and now computes damage the way the game does. BDSP paired:
 League rows within noise, 7 route deaths in 20 episodes where the saved run had 0 (the split
 for the Gen 4 AI is in the notebook). Every table before 2026-10-13 is on the old formula.
-Next (TODO.md): the enemy AI's free first turn (Stockpile / Toxic openings win 3-hit answers
-the paper discards) — ask the port, or a duel-based cover (B3).
+**B3 run 2026-10-13, not adopted** (NOTEBOOK.md last entry, `results/rr_duel_boxes*.*`,
+`results/rr_berry_duel_boxes.*`): `--chooser duel` judges every cover cell by playing the
+one-on-one (`rr_team_probe.cover_team`, ~4 ms a duel; `matchup.safe / race / edge` read `win` /
+`hp` when a cell has them). Paired on the 30 boxes: Brock +5–7 points of wins, Misty 0 to −6
+with deaths up (+0.06–0.07 per mon, deathless 3% → 1–2%): Carnivine (a gift, in every box) wins
+its Politoed duel and is dead weight against Mantine / Clodsire / Toxicroak, and the cover's
+tiers have no term for a liability. The paper chooser stays the default; the flag stays.
+**Found on the way: Misty's Mantine holds a Wacan Berry** — every paper Electric one-shot on it
+landed at half. Resist berries are in the formula (`calc_bot.RESIST_BERRY`) and the matrix
+spends them like the balloon (`matchup.hits_to_ko`); Misty's race precision 71 → 78%, our first
+hit within a roll 87 → 90%. The enemy's heal berries as HP were tried and dropped (false nones
+58 → 105: the tiers' cap on our hits calls a 3/6 cell "none"). **The RR box baseline is now
+`results/rr_berry_boxes.*`** (paper chooser, the new formula); every table before it has the
+Wacan error in Misty's Electric cells. Next (TODO.md): C1 player items; the tiers' hit cap
+(a 3/6 cell is an answer) when the matrix comes up again.
 
 Still open: the BDSP swap scoring was the only big lever left and it is a behaviour change
 (above, declined); within an episode nothing exact is large (the memo is in; the engine is the

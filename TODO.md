@@ -181,8 +181,13 @@ Protect stall, two-turn moves), 56 false nones (the mirrors hold vanilla types /
 for 40 / 250 / 134 entries the mod changed; the AI's wasted turns; the healer rule). **B2 done 2026-10-13** (NOTEBOOK.md): mod data in the mirrors; the formula's floors, items,
 abilities, Psyshock, charge moves, typed Hidden Power; the matrix's healer and Air Balloon
 rules. Safe cells 85 → 95% of duels, false safes 32 → 7. The box tables moved down because
-the RR AI port shares the formula (`results/rr_formula_split.log`). Next: the AI's free
-first turn (B3: the duel as the judge, or the port asked for its turn-1 move), then C1 items.
+the RR AI port shares the formula (`results/rr_formula_split.log`). **B3 done 2026-10-13, not
+adopted** (NOTEBOOK.md): `--chooser duel` (every cover cell judged by the one-on-one) gains at
+Brock (+5–7 wins) and loses at Misty (deaths +0.07 per mon: Carnivine wins its one duel and is
+dead weight against three enemies); the paper chooser stays. Found on the way: Mantine's Wacan
+Berry — resist berries are in the formula and the matrix, heal berries tried and dropped (the
+tiers' cap on our hits, not the berry, is the open matrix question). New RR box baseline:
+`results/rr_berry_boxes.*`. Next: C1 items.
 
 
 A2.1 + A2.3 (AI sensitivity, read-through) → B1 (matrix calibration) → B2/B3

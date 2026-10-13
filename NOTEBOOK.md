@@ -2421,3 +2421,79 @@ change for the rest (2 vs 0); every League row is within the noise floor (±2 cl
 deaths, ±15 points) in all three configurations, Cynthia 63 / 65 / 77 deaths. Same reading
 as Radical Red: the enemy AI with the game's damage numbers is the harder opponent, and the
 benchmark from here is `results/bdsp_formula.*` (404.60 / 389.30 / 4.10 / 60%).
+
+## 2026-10-13 — The duel as the chooser's judge (B3); Mantine's Wacan Berry (`results/rr_duel_boxes*.*`, `results/rr_matrix_calib_{berry,resist}.*`, `results/rr_berry_boxes.*`, `results/rr_berry_duel_boxes.*`)
+
+**B3, as run.** `--chooser duel` (`rr_team_probe.cover_team`): the cover's rows are still read
+off the dummy battles, but every cell is then *judged by the duel* — `duel()` plays the
+one-on-one on `--n-duel` paired seeds (8 here; ~4 ms each, a whole box in seconds) and the
+cell's tiers come from it (`matchup.safe / race / edge` on `win` / `hp`: safe = wins ≥ 90% with
+half its HP left, race = wins more often than not, edge = win·(1 + HP left) − losses). The
+paper keeps its job in play (`--matchup` switching); only the chooser changes. The reason was
+the calibration's false nones: 3-hit answers to Lileep / Politoed / Clodsire that win because
+the enemy AI opens with Stockpile / Toxic / Recover, a free turn the paper cannot see and the
+duel plays.
+
+**Paired on the 30 boxes of `rr_matrix_boxes` (same seed, same boxes; the six differs in 27 / 29
+of them):**
+
+| | Brock: win / ≥50% / deaths per mon / deathless | Misty |
+|---|---|---|
+| paper chooser (`rr_matrix_boxes`) | 70% / 87% / 0.57 / 7% | 40% / 47% / 0.76 / 3% |
+| duel chooser (`rr_duel_boxes`) | 77% / 93% / 0.55 / 9% | 40% / 43% / 0.83 / 1% |
+| + the loss term in the edge (`rr_duel_boxes2`) | 75% / 90% / 0.55 / 9% | 40% / 43% / 0.83 / 1% |
+
+Paired differences (duel − paper, SE over the 30 boxes): Brock win +7.2 ± 4.4, deaths −0.02 ±
+0.03; Misty win 0.0 ± 4.7, deaths **+0.064 ± 0.035**, deathless −2.8 ± 1.4. Brock gains (the
+duel brings Binacle / Tentacool / Shinx / Houndour in for Starly / Tarountula; Lileep's and
+Cacnea's kills fall, Lunatone's rise); Misty does not: Carnivine (in every box: a gift) is the
+duel's safe answer to Politoed (100%, 60% HP) and a race against Ludicolo / Starmie, and loses
+0% to Mantine, Clodsire and Toxicroak — the chooser takes it in 19 of 29 differing boxes,
+mostly for Chewtle (the paper's and the duel's race answer to Mantine), and Mantine's kills go
+164 → 253. The loss term in the edge changed nothing at Misty (the same 30 sixes): Carnivine
+enters through the safe / race tiers, not the tie-break. **Verdict: not the default.** The
+chooser's problem at Misty is the team context the duel cannot see any more than the paper
+can — a mon that wins its one duel and is dead weight in front of the other three — and the
+cover's tiers have no term for a liability. The flag stays as the cheap way to ask the duel.
+
+**Found on the way: the paper's Electric one-shots on Mantine land at half.** The calibration's
+"race 1/2 slower" cells against Mantine (Thunder Punch / Spark / Thunder Fang, paper 1.01–1.58
+of its HP) lose the duel (5–50%), and the engine's first hit reads 0.44–0.68: Misty's Mantine
+holds a **Wacan Berry** (the first super-effective Electric hit halved, then eaten). The formula
+had no resist berries. Added (`calc_bot.RESIST_BERRY`, 18 berries, in `_dmg_frac`; the mirrors
+clear the item on `-enditem`, so the second hit is full) and the matrix spends it like the
+balloon (`matchup.hits_to_ko`: the first hit under the item, the rest without). Calibration,
+same 20 seeds (`rr_matrix_calib_resist`): Misty race cells 132 → 112 at 71 → 78% duel wins,
+false nones 26 → 27, Brock unchanged (no Wacan there); our first hit within a roll 87 → 90%
+over both bosses (Misty 81 → 86%, engine < 0.8× 8 → 4%).
+
+**Tried and dropped: the enemy's heal berry as HP.** Sitrus / Oran / Berry Juice / Iapapa as a
+heal eaten once at the threshold (`rr_matrix_calib_berry`) turned Brock's safe cells 156 → 123
+and the false nones 32 → 70: Hippopotas' Berry Juice makes a 2/6 cell 3/6, which the tiers
+call "none" (ours > 2) though it wins 100% of duels; Politoed's Iapapa is right half the time
+(7 demoted cells still win ≥ 90%, 6 lose). The mechanic is real; the tiers' cap on *our* hits
+is what breaks — a 3/6 is an answer — and that is a matrix question for later, not a berry one.
+
+**The tables on the new formula** (paired on the same boxes; every RR table before this one
+has the paper's Wacan error, which touches Misty's Electric cells only):
+
+| | Brock: win / ≥50% / deaths per mon / deathless | Misty |
+|---|---|---|
+| paper chooser, old formula (`rr_matrix_boxes`) | 70% / 87% / 0.57 / 7% | 40% / 47% / 0.76 / 3% |
+| paper chooser, Wacan in (`rr_berry_boxes`) — **the baseline from here** | 70% / 87% / 0.57 / 7% (identical: no berry at Brock) | 44% / 43% / 0.75 / 3% |
+| duel chooser, Wacan in (`rr_berry_duel_boxes`) | 75% / 90% / 0.55 / 9% | 38% / 33% / 0.82 / 2% |
+
+Paper, old → new at Misty: +3.9 ± 3.4 points of wins on 8 changed sixes — Chewtle in for Sentret
+five times: the paper no longer sells Normal types with Thunder Punch as Mantine answers.
+Duel − paper on the new formula: Brock +5.0 ± 4.8 wins, deaths −0.02 ± 0.03; Misty **−6.1 ± 6.0
+wins, deaths +0.070 ± 0.042**, Carnivine in 18 of 29 differing sixes for Chewtle (12), Mantine's
+kills 175 → 227. Same picture as on the old formula; the paper chooser stays the default.
+
+Also fixed on the way: `hits_to_ko`'s first draft computed the no-item case as 1 + ceil((hp −
+hit) / hit), and (1 − 1/6) / (1/6) is 5.000000000000001 in floating point — Psyduck's sixth hit
+on Lileep became a seventh and one Brock six changed. The no-item path is the old ceil(hp / hit)
+again, the item path carries an epsilon, and the Brock table is bit-identical across the formula
+change, as it must be (no berry at Brock).
+
+Operational: pair box tables by index on the `.jsonl` rows (`boxes[i]`, the fan-out keeps job
+order); the events file is in worker-finish order and carries the index as `i`.

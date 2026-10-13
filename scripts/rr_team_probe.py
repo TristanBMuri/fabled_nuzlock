@@ -235,13 +235,21 @@ def greedy(ctx, short: list[str], start: tuple = ()) -> tuple:
 
 
 def cover_team(ctx, species: list[str]) -> tuple:
-    """(B') the six by matchup cover (ai_util.matchup.cover): rows read off dummy battles."""
+    """(B') the six by matchup cover (ai_util.matchup.cover): rows read off dummy battles.
+    --chooser duel: every cell is judged by playing the one-on-one instead (duel(), n_duel
+    paired seeds; ~4 ms each) — the paper's tiers miss the enemy AI's free first turn, status
+    and items (TODO.md B3); the duel sees all of them."""
     from poke_env.data import to_id_str
     from ai_util.matchup import cover, rows_for
-    mons = {s: mon_of(ctx, s) for s in species}
-    rows = rows_for(ctx.bridge, rp.FMT, {s: m for s, m in mons.items() if m is not None}, ctx.enemy_packed, ctx.arena)
-    enemies = [to_id_str(x.split("|")[0]) for x in ctx.enemy_packed.split("]")]
-    return tuple(sorted(cover(rows, enemies, 6)))
+    mons = {s: m for s in species if (m := mon_of(ctx, s)) is not None}
+    rows = rows_for(ctx.bridge, rp.FMT, mons, ctx.enemy_packed, ctx.arena)
+    names = [x.split("|")[0] for x in ctx.enemy_packed.split("]")]
+    if ctx.args.chooser == "duel":
+        for s in mons:
+            for name in names:
+                w, h = duel(ctx, s, name, ctx.args.n_duel)
+                rows.setdefault(s, {}).setdefault(to_id_str(name), {}).update(win=w, hp=h)
+    return tuple(sorted(cover(rows, [to_id_str(n) for n in names], 6)))
 
 
 def searched(ctx, team: tuple):
@@ -363,15 +371,15 @@ def prelude_job(args, name: str) -> dict | None:
               f"({ctx.team_score[team]:.2f}); best fast {ranked[0]} ({ctx.team_score[ranked[0]]:.2f})", flush=True)
         top = list(dict.fromkeys([team] + ranked))[:TOP]
         cteam = None
-        if args.chooser == "cover":
+        if args.chooser in ("cover", "duel"):
             cteam = cover_team(ctx, short + [sp for sp in pool if sp not in short])
-            print(f"{name}: cover team {cteam}", flush=True)
+            print(f"{name}: {args.chooser} team {cteam}", flush=True)
             top = list(dict.fromkeys([cteam] + top))[:TOP]
         emit(args, "stage_b", boss=name, scored=len(ctx.team_score), greedy=[list(team), round(ctx.team_score[team], 3)],
              fast=[list(ranked[0]), round(ctx.team_score[ranked[0]], 3)], cover=list(cteam) if cteam else None)
         labels = {team: "greedy", ranked[0]: "fast"}
-        if args.chooser == "cover":
-            labels[cteam] = "cover"
+        if cteam is not None:
+            labels[cteam] = args.chooser
         return {"starter": starter, "pool": pool, "short": short, "top": top, "labels": labels}
     except Exception as e:
         import traceback
@@ -467,7 +475,7 @@ def box_job(args, name: str, i: int) -> dict | None:
         ctx = worker_ctx(args, name)
         box = rp.sample_box(random.Random(f"{name}-box-{args.seed}-{i}"), ctx.progress, ctx.known)
         species = [sp for sp, _ in box if mon_of(ctx, sp) is not None]
-        team = cover_team(ctx, species) if args.chooser == "cover" else greedy(ctx, species)
+        team = cover_team(ctx, species) if args.chooser in ("cover", "duel") else greedy(ctx, species)
         w, d, pr, attr, cl = searched(ctx, team)
         threats = threats_of(ctx, attr, ctx.pool, exclude=set(species))
         out = {"box": box, "team": list(team), "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl, "threats": threats}
@@ -531,7 +539,7 @@ def main() -> None:
     ap.add_argument("--n-solo", type=int, default=3)
     ap.add_argument("--n-team", type=int, default=4)
     ap.add_argument("--n-search", type=int, default=6)
-    ap.add_argument("--n-duel", type=int, default=4, help="duels per candidate when ranking counters to a threat")
+    ap.add_argument("--n-duel", type=int, default=4, help="duels per candidate when ranking counters to a threat (and per cell under --chooser duel)")
     ap.add_argument("--search", default="9,8")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--workers", type=int, default=6)
@@ -540,7 +548,8 @@ def main() -> None:
     ap.add_argument("--blind-field", action="store_true", help="the calc bot ignores weather / terrain (the pre-2026-10-11 bot)")
     ap.add_argument("--repair", action="store_true", help="offer the counters to the greedy build and play the result too")
     ap.add_argument("--boxes", type=int, default=0, help="sampled-box mode: N boxes per boss drawn by rarity, the chooser picks six from each")
-    ap.add_argument("--chooser", choices=("greedy", "cover"), default="greedy", help="six by calc-bot progress (greedy) or by matchup cover")
+    ap.add_argument("--chooser", choices=("greedy", "cover", "duel"), default="greedy",
+                    help="six by calc-bot progress (greedy), by matchup cover on the paper matrix (cover), or by cover with every cell judged by n-duel one-on-ones (duel)")
     ap.add_argument("--matchup", action="store_true", help="the calc bot (and so the rollouts) switches on the matchup matrix")
     ap.add_argument("--death-weight", type=float, default=0.5, help="search value: win +-1 minus this x the fainted fraction (6 = one death costs a win)")
     ap.add_argument("--out")

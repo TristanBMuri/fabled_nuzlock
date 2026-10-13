@@ -73,6 +73,12 @@ def max_hp(mon, own: bool) -> int:
     return ((2 * mon.base_stats["hp"] + ENEMY_IV + ENEMY_EV // 4) * mon.level) // 100 + mon.level + 10
 
 
+# the type-resist berries: the first super-effective hit of the type (Chilan: any Normal hit) is halved and the berry eaten
+RESIST_BERRY = {f"{n}berry": PokemonType[t] for n, t in (
+    ("chilan", "NORMAL"), ("occa", "FIRE"), ("passho", "WATER"), ("wacan", "ELECTRIC"), ("rindo", "GRASS"), ("yache", "ICE"),
+    ("chople", "FIGHTING"), ("kebia", "POISON"), ("shuca", "GROUND"), ("coba", "FLYING"), ("payapa", "PSYCHIC"), ("tanga", "BUG"),
+    ("charti", "ROCK"), ("kasib", "GHOST"), ("haban", "DRAGON"), ("colbur", "DARK"), ("babiri", "STEEL"), ("roseli", "FAIRY"))}
+
 # abilities that void a move: by the move's type, or by a move flag (sound, bullet)
 ABILITY_IMMUNE_TYPE = {"levitate": "Ground", "eartheater": "Ground",
                        "waterabsorb": "Water", "dryskin": "Water", "stormdrain": "Water",
@@ -168,7 +174,7 @@ def _nfe(mon) -> bool:
 def _dmg_frac(att, dfn, move, att_own: bool, battle=None, with_acc: bool = True) -> float:
     """The engine's formula with its floors (level term, base, roll, STAB, type: unfloored it
     read 12% high at L13-16), Technician / Sheer Force / Pure Power / Huge Power, Life Orb / Choice items,
-    Eviolite, Psyshock's defence, Knock Off's item bonus, a charge turn at half damage per turn (2026-10-12: the terms the matrix calibration
+    Eviolite, Psyshock's defence, Knock Off's item bonus, a charge turn at half damage per turn, a type-resist berry (2026-10-12: the terms the matrix calibration
     named, scripts/rr_matrix_calib.py; the first hit now lands within a roll of the paper in
     95% of cells, was 73%)."""
     if move.category == MoveCategory.STATUS:
@@ -202,6 +208,8 @@ def _dmg_frac(att, dfn, move, att_own: bool, battle=None, with_acc: bool = True)
         dmg = math.floor(dmg * 1.5)
     eff = effectiveness(move, dfn)
     dmg = math.floor(dmg * eff) if eff else 0.0
+    if RESIST_BERRY.get(dfn.item) == move.type and (eff > 1 or move.type == PokemonType.NORMAL):
+        dmg = math.floor(dmg * 0.5)  # 2026-10-13: Misty's Wacan Mantine took half of every paper Electric one-shot
     mod = getattr(move, "expected_hits", 1) or 1
     if att.status == Status.BRN and phys:
         mod *= 0.5

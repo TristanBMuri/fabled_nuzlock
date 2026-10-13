@@ -116,3 +116,25 @@ def test_field_effects_in_the_numbers():
     b._opponent_side_conditions = {SideCondition.TAILWIND: 1}
     assert stat(mantine, "spe", False, b) == 2 * stat(mantine, "spe", False)
     assert stat(jynx, "spe", True, b) == stat(jynx, "spe", True)
+
+
+def test_resist_berry_halves_the_first_hit():
+    from ai_util.calc_bot import dmg_frac
+    us = pack_team([Mon("shinx", 28, ["thunderfang", "bite"])])
+    them = pack_team([Mon("mantine", 27, ["scald"], item="wacanberry")])
+    bridge = SimBridge()
+    try:
+        sb = SimBattle(bridge, FMT, us, them, full_info=True)
+        b = sb.mirrors["p1"]
+        me, opp = b.active_pokemon, b.opponent_active_pokemon
+        fang = me.moves["thunderfang"]
+        held = dmg_frac(me, opp, fang, True, b, with_acc=False)
+        opp._item = None
+        bare = dmg_frac(me, opp, fang, True, b, with_acc=False)
+        assert bare >= 1.0 and abs(held / bare - 0.5) < 0.03  # a 4x one-shot on paper (exactly 96 of 96 HP), half of it through the berry
+        bite_bare = dmg_frac(me, opp, me.moves["bite"], True, b, with_acc=False)
+        opp._item = "wacanberry"
+        assert dmg_frac(me, opp, me.moves["bite"], True, b, with_acc=False) == bite_bare  # the wrong type: no effect
+        sb.close()
+    finally:
+        bridge.close()
