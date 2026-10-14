@@ -83,8 +83,16 @@ the Wacan error in Misty's Electric cells.
 carry applied on top). Paired: within the noise floor everywhere, the stallers kill less (NOTEBOOK.md
 last entry). **Baselines from here: `results/rr_pp_boxes.*` (RR boxes, paper chooser) and
 `results/bdsp_pp.*` (BDSP, Gen 4 AI: 404.60 / 391.60 / 4.45 / 65%)**; every earlier table has
-the PP Ups. Next (TODO.md): C1 player items; the tiers' hit cap (a 3/6 cell is an answer) when
-the matrix comes up again.
+the PP Ups.
+**C1 player items done (2026-10-14):** `data/rr/items.json` from the care-package tab and the
+overworld rewards (`build_rr.progression`, 27 items with the trainer index they are in hand
+at); the probe's final six hold one each (`rr_team_probe.team_mons`, `gauntlet.assign_items`,
+Eviolite only for a mon that still evolves). Paired on the same 60 sixes: Brock 74 → 83% wins /
+0.57 → 0.46 deaths per mon, Misty 41 → 53% / 0.78 → 0.70 — the largest lever since the cover
+chooser. **Items are the default (`--no-items` for the old regime); the RR box baseline is
+`results/rr_items_boxes.*`.** Next (TODO.md): resist berries through the matrix, the chooser
+and duels with items, then D1 (Brock under sand) and D3 (the box milestone); the tiers' hit cap
+(a 3/6 cell is an answer) when the matrix comes up again.
 
 Still open: the BDSP swap scoring was the only big lever left and it is a behaviour change
 (above, declined); within an episode nothing exact is large (the memo is in; the engine is the

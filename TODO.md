@@ -188,7 +188,11 @@ dead weight against three enemies); the paper chooser stays. Found on the way: M
 Berry — resist berries are in the formula and the matrix, heal berries tried and dropped (the
 tiers' cap on our hits, not the berry, is the open matrix question). **No PP Ups 2026-10-14** (the user's catch:
 Showdown's three PP Ups on every move, both sides; reset in the bridge; paired within noise,
-stallers kill less). Baselines: `results/rr_pp_boxes.*`, `results/bdsp_pp.*`. Next: C1 items.
+stallers kill less). Baselines: `results/rr_pp_boxes.*`, `results/bdsp_pp.*`. **C1 done
+2026-10-14** (NOTEBOOK.md): `data/rr/items.json` from the care packages + overworld; the final six
+hold one item each, default on. Brock 74 → 83%, Misty 41 → 53%, deaths down at both — the largest
+lever since the cover chooser. Baseline: `results/rr_items_boxes.*`. Next: resist berries via the
+matrix and the chooser / duels with items (C2 for the player side), then D1, D3.
 
 
 A2.1 + A2.3 (AI sensitivity, read-through) → B1 (matrix calibration) → B2/B3

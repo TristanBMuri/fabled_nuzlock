@@ -148,6 +148,21 @@ ALIASES = [  # places the item sheets name that are not encounter locations -> t
     (r"SS ANNE", "S.S. ANNE"), (r"VIRIDIAN FOREST", "VIRIDIAN FOREST")]
 NEVER = r"POST GAME|CANNOT BE FOUND|REMATCH|ONE ISLAND|ISLAND ONE|TWO ISLAND|THREE ISLAND|SEVII|EMBER"
 TUTORS_GONE = "FFEFEFEF"  # grey font on a tutor's location in the sheet: not there in hardcore
+NOT_HARDCORE = {"FFFFC2C2", "FFD2EFFF"}  # care-package fills: red = not in hardcore, blue = not in MGM + hardcore
+# The held items the care packages and the overworld hand out that gauntlet.item_value can price
+# (2026-10-14, TODO.md C1): a type booster is x1.2 on its type, a heal berry / Leftovers / Shell
+# Bell a flat value, Eviolite x1.5 for a mon that still evolves, Choice items a locked x1.5.
+# Not priced (left out): resist berries (the matrix knows them, the item model does not), Choice
+# Scarf, Light Ball / Thick Club, Black Sludge, Air Balloon and the weather rocks (not in hardcore).
+HELD = {**{to_id_str(n): {"type": t, "mult": 1.2} for n, t in (
+    ("Mystic Water", "Water"), ("Never-Melt Ice", "Ice"), ("Poison Barb", "Poison"), ("Sharp Beak", "Flying"),
+    ("Silver Powder", "Bug"), ("Soft Sand", "Ground"), ("Spell Tag", "Ghost"), ("Twisted Spoon", "Psychic"),
+    ("Magnet", "Electric"), ("Hard Stone", "Rock"), ("Miracle Seed", "Grass"), ("Dragon Fang", "Dragon"),
+    ("Black Glasses", "Dark"), ("Black Belt", "Fighting"), ("Charcoal", "Fire"), ("Silk Scarf", "Normal"),
+    ("Metal Coat", "Steel"), ("Pixie Plate", "Fairy"))},
+    "oranberry": {"flat": 1.05}, "sitrusberry": {"flat": 1.15}, "berryjuice": {"flat": 1.15}, "shellbell": {"flat": 1.08},
+    "leftovers": {"flat": 1.25}, "expertbelt": {"flat": 1.1}, "lifeorb": {"flat": 1.2}, "eviolite": {"flat": 1.5, "nfe": True},
+    "choiceband": {"category": "Physical", "mult": 1.5, "lock": True}, "choicespecs": {"category": "Special", "mult": 1.5, "lock": True}}
 
 
 MOVES_KNOWN = set(json.load(open(RR / "moves.json"))) if (RR / "moves.json").exists() else set()
@@ -273,6 +288,63 @@ def progression() -> None:
                           "how": f"trade: give {tr['give']} at {tr['location']}"})
     (RR / "order.json").write_text(json.dumps({"entries": entries, "gates": gates, "gifts": gifts}, indent=0))
     (RR / "tms.json").write_text(json.dumps(tms))
+    # held items (data/rr/items.json, the BDSP format: gauntlet.assign_items): the care packages
+    # (the sheet's tab, stage headers in play order, red / blue fills left out, x10 = six holders)
+    # and the overworld's single held items (a boss's reward: after that boss; nothing EV-gated)
+    held, prev = {}, 0
+
+    def stage_when(header: str) -> int | None:
+        """The trainer index a care-package stage is in hand at: "DEFEATING X" / "... AFTER X" is the
+        first trainer so named from the previous stage on (the grunts repeat), plus one; a place is
+        the first trainer it is open at ("EXITING" it: the next place; "AFTER FIRST MANDATORY TRAINER":
+        plus one). Stages are in play order, so the index never goes back."""
+        h = _norm(header)
+        if re.search(NEVER, h):
+            return None
+        left, _, cond = h.partition(" AFTER ")
+        name = h.removeprefix("DEFEATING ").split(" IN ")[0].strip() if h.startswith("DEFEATING ") else \
+            cond.removeprefix("DEFEATING ").strip() if cond and not cond.startswith(("EXITING", "FIRST")) else None
+        if name:
+            i = next((i for i, e in enumerate(entries) if _norm(e["name"]) == name and i >= prev), None)
+            return None if i is None else i + 1
+        li = loc_index(re.sub(r"^(BEFORE )?(ENTERING|EXITING) ", "", left))
+        if li is None:
+            return None
+        w = first_trainer(li + 1 if left.startswith("EXITING") else li)
+        return None if w is None else w + 1 if cond.startswith("FIRST") else w
+
+    def add(name: str, w: int | None, src: str) -> None:
+        q = re.search(r"\[x(\d+)\]", name)
+        iid = to_id_str(re.sub(r"\s*\[.*\]", "", name))
+        if iid in HELD and w is not None and (iid not in held or w < held[iid]["before_trainer"]):
+            held[iid] = {"name": re.sub(r"\s*\[.*\]", "", name).strip(), "before_trainer": w, "from": src,
+                         "copies": min(int(q.group(1)), 6) if q else 1, **HELD[iid]}
+    fill = [(re.search(r'fgColor rgb="([0-9A-F]+)"', f) or [None, None])[1] for f in re.findall(r"<fill>(.*?)</fill>", st, re.S)]
+    xf_fill = [int(m) for m in re.findall(r'<xf [^>]*fillId="(\d+)"', re.search(r"<cellXfs[^>]*>(.*?)</cellXfs>", st, re.S).group(1))]
+    x = z.read("xl/" + rels[sheets["Care Packages"]].replace("/xl/", "").lstrip("/")).decode()
+    stage = None
+    for row in re.findall(r"<row[^>]*>(.*?)</row>", x, re.S):
+        cells = []
+        for attrs, body in re.findall(r"<c ([^>]*?)>(.*?)</c>", re.sub(r"<c [^>]*/>", "", row), re.S):
+            tt, sidx, v = re.search(r'\bt="([^"]+)"', attrs), re.search(r'\bs="(\d+)"', attrs), re.search(r"<v>(.*?)</v>", body, re.S)
+            val = (ss[int(v.group(1))] if tt and tt.group(1) == "s" else v.group(1)) if v else ""
+            if val.strip():
+                cells.append((val.strip(), fill[xf_fill[int(sidx.group(1))]] if sidx else None))
+        if len(cells) == 1 and "[x" not in cells[0][0] and cells[0][0].isupper():  # a stage header
+            w = stage_when(cells[0][0])
+            stage = (cells[0][0], w)
+            prev = max(prev, w or 0)
+        elif stage and stage[1] is not None:
+            for name, fc in cells:
+                if fc not in NOT_HARDCORE:
+                    add(name, stage[1], f"care package: {stage[0].title()}")
+    for area in items["overworld"]:
+        for it in area["items"]:
+            if "EV" not in it["location"]:
+                add(it["name"], when(f"{area['area']}, {it['location']}"), f"{area['area']}: {it['location'][:60]}")
+    (RR / "items.json").write_text(json.dumps(dict(sorted(held.items(), key=lambda kv: kv[1]["before_trainer"])), indent=0))
+    stages = sorted({(v["before_trainer"], v["from"]) for v in held.values() if v["from"].startswith("care")})
+    print(f"data/rr/items.json: {len(held)} held items; care-package stages at trainers {[t for t, _ in stages]}")
     n_early = {b: sum(1 for v in tms.values() if v["before_trainer"] <= i) for i, b in
                [(6, "Brock"), (15, "Misty"), (26, "Surge"), (34, "Erika")]}
     print(f"data/rr/order.json: {len(entries)} trainers, gates {gates}, {len(gifts)} gifts/trades; tms.json: {len(tms)} TM/tutor moves, in hand by {n_early}")
@@ -297,7 +369,6 @@ def main() -> None:
     (RR / "evolutions.json").write_text(json.dumps(data["evos"]))
     (RR / "species.json").write_text(json.dumps(data["species"]))
     (RR / "moves.json").write_text(json.dumps(data["moves"]))
-    (RR / "items.json").write_text("{}")
     (RR / "trainers.json").write_text(json.dumps({"trainers": []}))
     (RR / "encounters.json").write_text(json.dumps({"starter": [], "routes": []}))
     print(f"data/rr: {len(data['species'])} species, {len(data['moves'])} moves; {len(missing)} ids unknown to the mod: {missing[:30]}")

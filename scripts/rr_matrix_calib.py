@@ -98,7 +98,7 @@ def duels(ctx, mon, packed: str, n: int) -> dict:
 def calibrate(args, name: str) -> list[dict]:
     """Every (candidate, enemy mon) cell at boss `name`: the paper pair and its duels."""
     pargs = SimpleNamespace(n_solo=args.seeds, n_team=args.seeds, n_search=args.seeds, search="9,8", seed=args.seed,
-                            death_weight=0.5, legal=args.legal, arena=args.arena, blind_field=False, matchup=False, out=None)
+                            death_weight=0.5, legal=args.legal, arena=args.arena, blind_field=False, matchup=False, items=False, out=None)
     ctx = tp.setup(pargs, name, announce=False)
     cands = ctx.pool + [s for s in rp.STARTERS if s not in ctx.pool]
     mons = {s: m for s in cands if (m := tp.mon_of(ctx, s)) is not None}

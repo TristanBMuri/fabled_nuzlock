@@ -2543,3 +2543,47 @@ same in 70% of fights (the risk queries' fast battles move with any engine chang
 a correctness change: nothing moves beyond the noise floor, and the mechanism that does move
 (the stall budget) moves the right way. Every table before this one has three PP Ups on both
 sides.
+
+## 2026-10-14 — Player held items from the care packages (C1) (`results/rr_items_boxes.*`)
+
+**The data.** `build_rr.progression` now also writes `data/rr/items.json` (the BDSP format
+`gauntlet.assign_items` reads): the care-package tab of the official item sheet, stage by stage
+in play order, mapped to the trainer index the stage is in hand at — "ENTERING ROUTE 2" is the
+first trainer that place is open at (Brendan, 1), "EXITING PEWTER CITY" the next place (Lass
+Sally, 7), "… AFTER DEFEATING GRUNT" the first grunt from the previous stage on (the grunts
+repeat; stages never go back), "DEFEATING LT. SURGE" his index plus one — with the red (not in
+hardcore) and blue (not in MGM) fills dropped and ×10 read as six holders; plus the overworld's
+single held items by the existing `when()` (Eviolite from Whitney at 25, Expert Belt from Chuck
+at 51, Leftovers at 53, Choice Band at 85; nothing EV-gated: hardcore has no EVs). 27 items;
+stages at trainers 1, 5, 8, 17, 20, 33, 91. Priced the way the BDSP items are (`build_rr.HELD`):
+type boosters ×1.2, Oran / Sitrus / Berry Juice / Shell Bell / Leftovers / Expert Belt / Life Orb
+flat, Eviolite ×1.5 for a mon that still evolves (`item_value`'s new `nfe` flag), Choice items a
+locked ×1.5. Not priced: the resist berries (the matrix knows them, the item model does not),
+Choice Scarf, Light Ball, Black Sludge.
+
+**The probe.** `rr_team_probe.team_mons`: the final six are copies of the cached mons holding
+the items in hand at the boss, one each, greedy by `item_value` (deterministic in the team);
+the chooser, stage A / B and the duels stay item-blind. `--no-items` is the old regime. Items
+print in the sets and sit in the events (`sets[].item`).
+
+**Paired on the 30 boxes (`rr_pp_boxes`, the same 60 sixes):**
+
+| | Brock boxes: win / ≥50% / deaths per mon / deathless | Misty boxes |
+|---|---|---|
+| no items (`rr_pp_boxes`) | 74% / 87% / 0.57 / 8% | 41% / 40% / 0.78 / 3% |
+| items in hand (`rr_items_boxes`) — **the baseline from here** | 83% / 90% / 0.46 / 13% | 53% / 57% / 0.70 / 4% |
+
+Paired: Brock win **+8.3 ± 3.7**, deaths **−0.106 ± 0.029**, deathless +5.0 ± 2.5; Misty win
+**+12.2 ± 4.2**, deaths **−0.084 ± 0.019**. The largest single lever since the cover chooser,
+and the first one that moves deaths at both bosses. What is held: at Brock Silver Powder (46 of
+180 slots), Mystic Water, Black Glasses, Sharp Beak, Twisted Spoon — the Route 2 package is type
+boosters, so every mon with a STAB of a boosted type hits ×1.2 and the paper's 2-hit cells become
+real; at Misty Sitrus (30: every box has one holder without a boosted STAB), Silk Scarf (28),
+Mystic Water, Silver Powder. Kills by enemy: Brock's all fall (Cacnea 145 → 97, Lileep 128 →
+102, Lunatone 161 → 136); at Misty Toxicroak 160 → 122 and Mantine 197 → 158 while Ludicolo
+rises 204 → 226 (the fights last into it). Items are the default from here; every RR table
+before this one has the player without items.
+
+Next on the item side: the resist berries by the matrix (a Wacan on the Mantine answer is the
+kind of pick `item_value` cannot make), and the duels / chooser with items, since a candidate's
+cell changes with its item. Then D1 (Brock under sand) and D3, the box milestone.

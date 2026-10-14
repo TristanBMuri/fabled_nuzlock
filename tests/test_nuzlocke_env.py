@@ -296,3 +296,11 @@ def test_snapshot_round_trip(env):
         assert other.risk(tuple(range(len(other.roster))), n=1)[0] in (0.0, 1.0)
     finally:
         other.runner.bridge.close()
+
+
+def test_eviolite_only_for_a_mon_that_still_evolves():
+    from gauntlet import item_value, load_game
+    md = load_game()["moves"]
+    ev = {"flat": 1.5, "nfe": True}
+    assert item_value(Mon("bidoof", 20, ["tackle"]), ev, md, set()) == 1.5
+    assert item_value(Mon("bibarel", 20, ["tackle"]), ev, md, set()) == 1.0

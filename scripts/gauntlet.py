@@ -240,7 +240,10 @@ def encounter_moves(species: str, level: int, rule: str = "best4",
 def item_value(m: Mon, item: dict, md: dict, types: set[str]) -> float:
     """What holding `item` is worth to m: the multiplier on its attacks of the
     boosted type (1.2 STAB / 1.1 off-type) or category (Choice locks: x0.85), or
-    the item's flat value (Leftovers 1.25). 1.0 = nothing."""
+    the item's flat value (Leftovers 1.25); an `nfe` item (Eviolite) only for a mon that
+    still evolves. 1.0 = nothing."""
+    if item.get("nfe") and not load_game()["evolutions"].get(m.species):
+        return 1.0
     if "flat" in item:
         return item["flat"]
     attacks = [md[x] for x in m.moves if x in md and md[x]["category"] != "Status"]

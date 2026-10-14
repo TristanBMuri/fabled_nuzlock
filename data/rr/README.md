@@ -45,9 +45,11 @@ Grinding Mode: that single fact changes several assumptions the probes made.
   base-Speed mon), Expert Belt/Focus Sash from Chuck, Choice items from the
   late Johto leaders; care packages give berries, type boosters and the like
   per stage (Sitrus from Route 3, Leftovers and Expert Belt ×10 after Brendan
-  in Fuchsia, Life Orb ×10 after Blaine). The probes' "Eviolite on every NFE,
-  Life Orb on the rest" is wrong before the late game; items=False is the
-  honest early-game setting.
+  in Fuchsia, Life Orb ×10 after Blaine). `items.json` (build_rr.progression, 2026-10-14) holds
+  the held items the item model can price with the trainer index they are in hand at: the
+  care-package stages (red / blue fills left out) and the overworld's single rewards; the
+  probes hand one to each of the final six (gauntlet.assign_items). Resist berries are not
+  priced yet (the matrix knows them, the item model does not).
 - Trade evolutions use the Link Cable item (2100 in Celadon 4F); evolution
   stones are all buyable there.
 

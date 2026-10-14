@@ -1,1 +1,212 @@
-{}
+{
+"hardstone": {
+"name": "Hard Stone",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Rock",
+"mult": 1.2
+},
+"mysticwater": {
+"name": "Mystic Water",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Water",
+"mult": 1.2
+},
+"nevermeltice": {
+"name": "Never-Melt Ice",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Ice",
+"mult": 1.2
+},
+"oranberry": {
+"name": "Oran Berry",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"flat": 1.05
+},
+"pixieplate": {
+"name": "Pixie Plate",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Fairy",
+"mult": 1.2
+},
+"poisonbarb": {
+"name": "Poison Barb",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Poison",
+"mult": 1.2
+},
+"sharpbeak": {
+"name": "Sharp Beak",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Flying",
+"mult": 1.2
+},
+"silverpowder": {
+"name": "Silver Powder",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Bug",
+"mult": 1.2
+},
+"softsand": {
+"name": "Soft Sand",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Ground",
+"mult": 1.2
+},
+"spelltag": {
+"name": "Spell Tag",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Ghost",
+"mult": 1.2
+},
+"twistedspoon": {
+"name": "Twisted Spoon",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Psychic",
+"mult": 1.2
+},
+"magnet": {
+"name": "Magnet",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"type": "Electric",
+"mult": 1.2
+},
+"shellbell": {
+"name": "Shell Bell",
+"before_trainer": 1,
+"from": "care package: Entering Route 2",
+"copies": 6,
+"flat": 1.08
+},
+"miracleseed": {
+"name": "Miracle Seed",
+"before_trainer": 5,
+"from": "care package: Exiting Viridian Forest",
+"copies": 6,
+"type": "Grass",
+"mult": 1.2
+},
+"dragonfang": {
+"name": "Dragon Fang",
+"before_trainer": 5,
+"from": "care package: Exiting Viridian Forest",
+"copies": 6,
+"type": "Dragon",
+"mult": 1.2
+},
+"blackglasses": {
+"name": "Black Glasses",
+"before_trainer": 5,
+"from": "care package: Exiting Viridian Forest",
+"copies": 6,
+"type": "Dark",
+"mult": 1.2
+},
+"blackbelt": {
+"name": "Black Belt",
+"before_trainer": 5,
+"from": "care package: Exiting Viridian Forest",
+"copies": 6,
+"type": "Fighting",
+"mult": 1.2
+},
+"berryjuice": {
+"name": "Berry Juice",
+"before_trainer": 8,
+"from": "care package: Route 3 After Lass Sally",
+"copies": 6,
+"flat": 1.15
+},
+"sitrusberry": {
+"name": "Sitrus Berry",
+"before_trainer": 8,
+"from": "care package: Route 3 After Lass Sally",
+"copies": 6,
+"flat": 1.15
+},
+"silkscarf": {
+"name": "Silk Scarf",
+"before_trainer": 17,
+"from": "care package: Nugget Bridge After Defeating Grunt",
+"copies": 6,
+"type": "Normal",
+"mult": 1.2
+},
+"charcoal": {
+"name": "Charcoal",
+"before_trainer": 20,
+"from": "care package: Cerulean City After Defeating Grunt",
+"copies": 6,
+"type": "Fire",
+"mult": 1.2
+},
+"eviolite": {
+"name": "Eviolite",
+"before_trainer": 25,
+"from": "Route 11: From Whitney after defeating her.",
+"copies": 1,
+"flat": 1.5,
+"nfe": true
+},
+"metalcoat": {
+"name": "Metal Coat",
+"before_trainer": 33,
+"from": "care package: Entering Celadon City Gym",
+"copies": 6,
+"type": "Steel",
+"mult": 1.2
+},
+"expertbelt": {
+"name": "Expert Belt",
+"before_trainer": 51,
+"from": "Saffron City: From Chuck after defeating him in the Dojo.",
+"copies": 1,
+"flat": 1.1
+},
+"leftovers": {
+"name": "Leftovers",
+"before_trainer": 53,
+"from": "Route 16: Use Itemfinder Key Item on the exact spot Snorlax was on.",
+"copies": 1,
+"flat": 1.25
+},
+"choiceband": {
+"name": "Choice Band",
+"before_trainer": 85,
+"from": "Cinnabar Island: From Jasmine after defeating her in Pok\u00e9mon Lab.",
+"copies": 1,
+"category": "Physical",
+"mult": 1.5,
+"lock": true
+},
+"lifeorb": {
+"name": "Life Orb",
+"before_trainer": 91,
+"from": "care package: Defeating Blaine",
+"copies": 6,
+"flat": 1.2
+}
+}

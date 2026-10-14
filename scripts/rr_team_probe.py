@@ -10,8 +10,9 @@ SHORT best are combined: a greedy build plus random six-subsets, each team
 scored by the calc bot's progress (n battles); (C) the TOP teams are played
 with calc + search and the best team is reported with its search-play win
 rate and deaths per mon. Hardcore = Minimal Grinding Mode: nobody has EVs
-(player 0, enemy 0 from the dump), no items (Eviolite / Life Orb are single
-late copies). `--legal` removes the 82 moves hardcore bans for the player
+(player 0, enemy 0 from the dump); the final six hold the items the care packages and the
+overworld have handed out by that boss (data/rr/items.json, one per mon; 2026-10-14, C1:
+Brock 74 -> 83%, Misty 41 -> 53% on the same sixes; `--no-items` for the old regime). `--legal` removes the 82 moves hardcore bans for the player
 (data/rr/hardcore_rules.json) from every moveset in stages A-C; without it the
 player has every move (the 2026-10-10 afternoon run also gave the enemy
 252/252 EVs and the player items / trained EVs — see NOTEBOOK.md). Full enemy
@@ -35,6 +36,7 @@ per boss). 2026-10-12: 165 -> 22 min (boxes), 151 -> 25 min (pool) on 20 workers
 import argparse
 import collections
 import contextlib
+import copy
 import json
 import multiprocessing as mp
 import os
@@ -50,7 +52,7 @@ from poke_env.data import to_id_str  # noqa: E402
 import rr_probe as rp  # noqa: E402
 from rr_postmortem import attribution  # noqa: E402  (sets gauntlet.GAME = "rr", injects the mod data)
 import gauntlet  # noqa: E402
-from gauntlet import STATS, Mon, encounter_moves, evolve, pack_team  # noqa: E402
+from gauntlet import STATS, Mon, assign_items, encounter_moves, evolve, pack_team  # noqa: E402
 
 SHORT, TOP = 24, 6
 GREEDY_N, SUBSETS = 4, 150
@@ -111,7 +113,16 @@ def build_mon(species: str, cap: int, known: dict, progress: int, boss_types: se
 
 
 def show(m: Mon) -> str:
-    return f"{m.species}({m.nature}/{m.ability})"
+    return f"{m.species}({m.nature}/{m.ability}{'/' + m.item if m.item else ''})"
+
+
+def team_mons(ctx, team) -> list[Mon]:
+    """The six as played: copies of the cached mons, holding the items in hand by this boss under
+    --items (gauntlet.assign_items: one per mon, greedy by item_value, deterministic in the team)."""
+    mons = [copy.copy(mon_of(ctx, s)) for s in team]
+    if ctx.args.items:
+        assign_items(mons, ctx.progress)
+    return mons
 
 
 def play(bridge, brain, enemy, party: list[Mon], enemy_packed: str, n: int, search=None, arena=None, seeds=None):
@@ -291,7 +302,7 @@ def worker_ctx(args, name: str):
 def battle_job(args, name: str, team: tuple, i: int) -> tuple:
     """Searched battle i of `team` against boss `name` (a pool job)."""
     ctx = worker_ctx(args, name)
-    return one_battle(ctx.bridge, ctx.calc, ctx.enemy, [mon_of(ctx, s) for s in team], ctx.enemy_packed, i,
+    return one_battle(ctx.bridge, ctx.calc, ctx.enemy, team_mons(ctx, team), ctx.enemy_packed, i,
                       search=ctx.searcher, arena=ctx.arena, seeds=ctx.seeds)
 
 
@@ -337,11 +348,11 @@ def say_threats(ctx, threats: list[dict], tag: str = "") -> None:
 
 
 def sets_of(ctx, team) -> list[dict]:
-    return [{"species": m.species, "nature": m.nature, "ability": m.ability, "moves": m.moves} for m in (mon_of(ctx, s) for s in team)]
+    return [{"species": m.species, "nature": m.nature, "ability": m.ability, "item": m.item, "moves": m.moves} for m in team_mons(ctx, team)]
 
 
 def matrix(ctx, team) -> dict:
-    return cells(ctx.bridge, {s: mon_of(ctx, s) for s in team}, ctx.enemy_packed, ctx.arena)
+    return cells(ctx.bridge, dict(zip(team, team_mons(ctx, team))), ctx.enemy_packed, ctx.arena)
 
 
 # The planned-pool probe: the best six in everything catchable. Three fan-outs over all the
@@ -406,7 +417,7 @@ def pool_row(args, ctx, pre: dict, played: dict, threats: list[dict]) -> dict:
     w, _, t, d = results[0]
     print(f"{name:<10} legal={args.legal!s:<5} best team under search: win {w:5.0%} deaths/mon {d:.2f} deathless {clean[t]:.0%} "
           f"{list(t)}  (others: {', '.join(f'{w_:.0%}' for w_, _, _, _ in results[1:])})  ({time.time() - ctx.t0:.0f}s)", flush=True)
-    print(f"{name:<10} sets: " + ", ".join(f"{show(mon_of(ctx, s))} {mon_of(ctx, s).moves}" for s in t), flush=True)
+    print(f"{name:<10} sets: " + ", ".join(f"{show(m)} {m.moves}" for m in team_mons(ctx, t)), flush=True)
     say_threats(ctx, threats)
     emit(args, "threats", boss=name, team=list(t), threats=threats)
     repaired = None
@@ -422,7 +433,7 @@ def pool_row(args, ctx, pre: dict, played: dict, threats: list[dict]) -> dict:
         repaired = {"team": list(rteam), "win": rw, "deaths_per_mon": rd, "deathless": rc, "counters_offered": extra, "counters_taken": taken}
         emit(args, "repaired", boss=name, **repaired, sets=sets_of(ctx, rteam))
         print(f"{name:<10} repaired: counters offered {extra}, taken {taken}: win {rw:5.0%} deaths/mon {rd:.2f} deathless {rc:.0%} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - ctx.t0:.0f}s)", flush=True)
-    row = {"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser, "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena,
+    row = {"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser, "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena, "items": args.items,
            "unmodelled": ctx.unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d, "deathless": clean[t], "n": args.n_search,
            "all": [(list(t_), w_, d_, clean[t_]) for w_, _, t_, d_ in results], "threats": threats, "repaired": repaired,
            "starter": pre["starter"], "sets": sets_of(ctx, t), "enemy": ctx.enemy_species, "pool": len(pool), "progress": ctx.progress, "shortlist": short}
@@ -504,7 +515,7 @@ def boxes_start(args, name: str) -> dict | None:
     emit(args, "stage_a", boss=name, scored=len(solo), top=[(sp, round(pr, 3)) for pr, sp in solo[:SHORT]])
     ctx.bridge.close()
     return {"boss": name, "mode": "boxes", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser,
-            "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena, "n": args.n_search,
+            "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena, "n": args.n_search, "items": args.items,
             "enemy": ctx.enemy_species, "pool": len(ctx.pool), "progress": ctx.progress}
 
 
@@ -552,8 +563,10 @@ def main() -> None:
                     help="six by calc-bot progress (greedy), by matchup cover on the paper matrix (cover), or by cover with every cell judged by n-duel one-on-ones (duel)")
     ap.add_argument("--matchup", action="store_true", help="the calc bot (and so the rollouts) switches on the matchup matrix")
     ap.add_argument("--death-weight", type=float, default=0.5, help="search value: win +-1 minus this x the fainted fraction (6 = one death costs a win)")
+    ap.add_argument("--no-items", action="store_true", help="no held items (default: the final six hold the items in hand by the boss — care packages + overworld, data/rr/items.json; one per mon, gauntlet.assign_items; C1, 2026-10-14)")
     ap.add_argument("--out")
     args = ap.parse_args()
+    args.items = not args.no_items
     names = [b.strip() for b in args.bosses.split(",")]
     t0 = time.time()
     if args.out:
@@ -571,7 +584,7 @@ def main() -> None:
     emit(args, "end", minutes=round((time.time() - t0) / 60, 1))
     mode = "boxes" if args.boxes else "pool"
     print(f"\nRadical Red best-six probe ({mode}) | legal moves only: {args.legal} | arena effects: {args.arena} | field-aware calc bot: {not args.blind_field} | chooser {args.chooser} | matchup play {args.matchup} | death weight {args.death_weight} | seeded | "
-          f"search {args.search} x n={args.n_search} | no EVs, no items | enemy = RR AI, full info | {(time.time() - t0) / 60:.0f} min")
+          f"search {args.search} x n={args.n_search} | no EVs, {'items in hand' if args.items else 'no items'} | enemy = RR AI, full info | {(time.time() - t0) / 60:.0f} min")
     if args.boxes:
         print(f"  {'boss':<10} {'cap':>3} {'mean win':>8} {'>=50%':>6} {'d/mon':>5} {'clean':>5}  most missed counter (vs)")
         for r in sorted(rows, key=lambda r: r["cap"]):
