@@ -76,10 +76,15 @@ tiers have no term for a liability. The paper chooser stays the default; the fla
 landed at half. Resist berries are in the formula (`calc_bot.RESIST_BERRY`) and the matrix
 spends them like the balloon (`matchup.hits_to_ko`); Misty's race precision 71 → 78%, our first
 hit within a roll 87 → 90%. The enemy's heal berries as HP were tried and dropped (false nones
-58 → 105: the tiers' cap on our hits calls a 3/6 cell "none"). **The RR box baseline is now
-`results/rr_berry_boxes.*`** (paper chooser, the new formula); every table before it has the
-Wacan error in Misty's Electric cells. Next (TODO.md): C1 player items; the tiers' hit cap
-(a 3/6 cell is an answer) when the matrix comes up again.
+58 → 105: the tiers' cap on our hits calls a 3/6 cell "none"). Every table before 2026-10-13 has
+the Wacan error in Misty's Electric cells.
+**No PP Ups (2026-10-14, the user's catch):** Showdown gave every move three PP Ups on both sides;
+`sim_bridge.js` now resets every slot to the base PP before the first request (`basePP`, the
+carry applied on top). Paired: within the noise floor everywhere, the stallers kill less (NOTEBOOK.md
+last entry). **Baselines from here: `results/rr_pp_boxes.*` (RR boxes, paper chooser) and
+`results/bdsp_pp.*` (BDSP, Gen 4 AI: 404.60 / 391.60 / 4.45 / 65%)**; every earlier table has
+the PP Ups. Next (TODO.md): C1 player items; the tiers' hit cap (a 3/6 cell is an answer) when
+the matrix comes up again.
 
 Still open: the BDSP swap scoring was the only big lever left and it is a behaviour change
 (above, declined); within an episode nothing exact is large (the memo is in; the engine is the

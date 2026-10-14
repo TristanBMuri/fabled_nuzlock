@@ -1,0 +1,111 @@
+BROCK: trainer #6, cap 16, 132 candidates x 6 enemies, 20 seeds, arena {'ai_permanent': True, 'weather': 'sandstorm'}
+BROCK: no paper row for ['deerlingautumn', 'deerlingsummer']
+MISTY: trainer #18, cap 28, 219 candidates x 6 enemies, 20 seeds, arena {'ai_permanent': True, 'weather': 'raindance'}
+
+BROCK: 780 cells
+  tier  cells duel win  HP left win>=90% win<=10%  (HP left: mean over won duels)
+  safe    156      95%      69%      89%       3%
+  race    128      74%      42%      48%       4%
+  none    496      18%      40%       6%      68%
+  false safes (safe, duel < 50%): 5
+    chingling vs Hippopotas: duel 0%, paper 1/9 faster healer
+    chingling vs Archen: duel 0%, paper 2/4 faster
+    chingling vs Varoom: duel 0%, paper 1/99 faster
+    bellsprout vs Hippopotas: duel 5%, paper 2/3 faster healer
+    tarountula vs Cacnea: duel 5%, paper 2/5 slower
+  false nones (none, duel >= 90%): 32
+    bramblin vs Lunatone: duel 100%, paper 3/2 slower
+    burmy vs Lileep: duel 100%, paper 3/3 faster healer
+    burmysandy vs Lileep: duel 100%, paper 3/3 faster healer
+    burmytrash vs Lileep: duel 100%, paper 3/3 faster healer
+    caterpie vs Lileep: duel 100%, paper 3/2 faster healer
+    grimeralola vs Cacnea: duel 100%, paper 3/3 slower
+    lillipup vs Lileep: duel 100%, paper 3/4 faster healer
+    meowthgalar vs Lileep: duel 100%, paper 3/6 faster healer
+    nymble vs Lileep: duel 100%, paper 3/1 faster healer
+    oddish vs Hippopotas: duel 100%, paper 3/5 faster healer
+    paras vs Lileep: duel 100%, paper 2/2 slower healer
+    phantump vs Varoom: duel 100%, paper 4/8 faster
+  formula vs engine, ours first hit (mean over seeds): 763 cells, median engine/paper 1.00, within +-20%: 95%, engine < 0.8x: 3%, > 1.2x: 2%
+    move synchronoise            n=6    engine/paper median 0.00
+  formula vs engine, theirs first hit (mean over seeds): 638 cells, median engine/paper 0.98, within +-20%: 91%, engine < 0.8x: 8%, > 1.2x: 0%
+    move bulletseed              n=15   engine/paper median 0.80
+
+MISTY: 1314 cells
+  tier  cells duel win  HP left win>=90% win<=10%  (HP left: mean over won duels)
+  safe     43      94%      79%      91%       5%
+  race    117      76%      52%      61%       9%
+  none   1154       8%      37%       2%      86%
+  false safes (safe, duel < 50%): 2
+    chingling vs Clodsire: duel 0%, paper 2/4 faster healer
+    munna vs Clodsire: duel 0%, paper 2/3 faster healer
+  false nones (none, duel >= 90%): 26
+    bramblin vs Mantine: duel 100%, paper 6/1 slower healer
+    grubbin vs Politoed: duel 100%, paper 2/2 slower
+    kricketot vs Politoed: duel 100%, paper 3/2 faster
+    mienfoo vs Clodsire: duel 100%, paper 4/3 faster healer
+    natu vs Politoed: duel 100%, paper 3/2 faster
+    nymble vs Politoed: duel 100%, paper 3/2 faster
+    pachirisu vs Politoed: duel 100%, paper 3/2 faster
+    petilil vs Politoed: duel 100%, paper 3/3 slower
+    rattataalola vs Politoed: duel 100%, paper 3/2 faster
+    seviper vs Toxicroak: duel 100%, paper 4/4 faster
+    slakoth vs Politoed: duel 100%, paper 3/2 faster
+    yamper vs Clodsire: duel 100%, paper 3/2 faster healer
+  formula vs engine, ours first hit (mean over seeds): 1071 cells, median engine/paper 0.99, within +-20%: 86%, engine < 0.8x: 4%, > 1.2x: 11%
+    move dig                     n=79   engine/paper median 1.99
+    ability Rivalry              n=10   engine/paper median 1.23
+    move synchronoise            n=10   engine/paper median 0.00
+    ability Inner Focus          n=7    engine/paper median 1.97
+    move dragonclaw              n=6    engine/paper median 1.23
+    ability Forewarn             n=6    engine/paper median 0.00
+    ability Sand Rush            n=4    engine/paper median 1.51
+    ability Anger Shell          n=4    engine/paper median 1.55
+    ability Purifying Salt       n=4    engine/paper median 1.49
+    ability Steam Engine         n=4    engine/paper median 1.49
+    ability Striker              n=4    engine/paper median 1.68
+    move crushclaw               n=3    engine/paper median 1.28
+  formula vs engine, theirs first hit (mean over seeds): 1276 cells, median engine/paper 1.00, within +-20%: 71%, engine < 0.8x: 18%, > 1.2x: 10%
+    move drainpunch              n=104  engine/paper median 1.27
+
+ALL: 2094 cells
+  tier  cells duel win  HP left win>=90% win<=10%  (HP left: mean over won duels)
+  safe    199      95%      71%      89%       4%
+  race    245      75%      47%      54%       7%
+  none   1650      11%      38%       4%      80%
+  false safes (safe, duel < 50%): 7
+    chingling vs Hippopotas: duel 0%, paper 1/9 faster healer
+    chingling vs Archen: duel 0%, paper 2/4 faster
+    chingling vs Varoom: duel 0%, paper 1/99 faster
+    chingling vs Clodsire: duel 0%, paper 2/4 faster healer
+    munna vs Clodsire: duel 0%, paper 2/3 faster healer
+    bellsprout vs Hippopotas: duel 5%, paper 2/3 faster healer
+    tarountula vs Cacnea: duel 5%, paper 2/5 slower
+  false nones (none, duel >= 90%): 58
+    bramblin vs Lunatone: duel 100%, paper 3/2 slower
+    burmy vs Lileep: duel 100%, paper 3/3 faster healer
+    burmysandy vs Lileep: duel 100%, paper 3/3 faster healer
+    burmytrash vs Lileep: duel 100%, paper 3/3 faster healer
+    caterpie vs Lileep: duel 100%, paper 3/2 faster healer
+    grimeralola vs Cacnea: duel 100%, paper 3/3 slower
+    lillipup vs Lileep: duel 100%, paper 3/4 faster healer
+    meowthgalar vs Lileep: duel 100%, paper 3/6 faster healer
+    nymble vs Lileep: duel 100%, paper 3/1 faster healer
+    oddish vs Hippopotas: duel 100%, paper 3/5 faster healer
+    paras vs Lileep: duel 100%, paper 2/2 slower healer
+    phantump vs Varoom: duel 100%, paper 4/8 faster
+  formula vs engine, ours first hit (mean over seeds): 1834 cells, median engine/paper 1.00, within +-20%: 90%, engine < 0.8x: 3%, > 1.2x: 7%
+    move dig                     n=79   engine/paper median 1.99
+    move synchronoise            n=16   engine/paper median 0.00
+    ability Striker              n=10   engine/paper median 1.29
+    move dragonclaw              n=6    engine/paper median 1.23
+    ability Forewarn             n=6    engine/paper median 0.00
+    ability Anger Shell          n=4    engine/paper median 1.55
+    ability Purifying Salt       n=4    engine/paper median 1.49
+    ability Steam Engine         n=4    engine/paper median 1.49
+    move crushclaw               n=3    engine/paper median 1.28
+  formula vs engine, theirs first hit (mean over seeds): 1914 cells, median engine/paper 0.99, within +-20%: 78%, engine < 0.8x: 15%, > 1.2x: 7%
+    move drainpunch              n=104  engine/paper median 1.27
+    move bulletseed              n=15   engine/paper median 0.80
+
+matrix calibration | legal True | arena True | 20 seeds | calc bot vs RR AI, full info | 3.4 min

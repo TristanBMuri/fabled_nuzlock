@@ -101,29 +101,45 @@ function teamState(side) {
   });
 }
 
+// No PP Ups (2026-10-14): Showdown starts every move at pp * 8/5 (three PP Ups); the games'
+// trainers and a hardcore player have the base PP. Reset both sides just before the battle
+// starts (the first request then carries the real maxpp), then re-apply a carry.
+function basePP(battle) {
+  for (const side of battle.sides) for (const p of side.pokemon) {
+    for (const slot of new Set([...p.baseMoveSlots, ...p.moveSlots])) {
+      const mv = battle.dex.moves.get(slot.id);
+      if (mv.exists && mv.pp) slot.pp = slot.maxpp = mv.pp;
+    }
+  }
+}
+
+function applyCarry(battle, carry) {
+  // carry: per p1 mon in team order {hp, status, pp} from a previous battle (a fight that
+  // starts without a heal); edited before the battle starts
+  const side = battle.sides[0];
+  carry.forEach((c, i) => {
+    const p = side.pokemon.find(q => q.set === side.team[i]) || side.pokemon[i];
+    if (!c || !p) return;
+    if (c.hp != null) { p.hp = Math.max(0, Math.min(p.maxhp, c.hp)); if (p.hp === 0) p.fainted = true; }
+    if (c.status && !p.setStatus(c.status, null, null, true)) {  // before start: set directly
+      p.status = c.status;
+      p.statusState = { id: c.status, target: p, startTime: 3, time: 3 };
+    }
+    if (c.pp) c.pp.forEach((pp, j) => { if (p.moveSlots[j]) p.moveSlots[j].pp = Math.min(pp, p.moveSlots[j].maxpp); });
+  });
+}
+
 function handle(msg) {
   const entry = msg.id !== undefined ? battles.get(msg.id) : undefined;
   if (msg.op !== 'new' && !entry) throw new Error(`no battle ${msg.id}`);
   switch (msg.op) {
     case 'new': {
       const e = { battle: null, out: { p1: [], p2: [] } };
-      // carry: per p1 mon in team order {hp, status, pp} from a previous battle
-      // (a fight that starts without a heal). The battle starts only once both
-      // players are set, so p1's state is edited before p2 is added.
+      // The battle starts once both players are set; start() is wrapped so the PP reset and
+      // the carry edit the pokemon after they exist and before the first request goes out.
       e.battle = new Battle({ formatid: msg.format, seed: msg.seed, send: sender(e), p1: prepPlayer(msg.format, msg.p1) });
-      if (msg.carry) {
-        const side = e.battle.sides[0];
-        msg.carry.forEach((c, i) => {
-          const p = side.pokemon.find(q => q.set === side.team[i]) || side.pokemon[i];
-          if (!c || !p) return;
-          if (c.hp != null) { p.hp = Math.max(0, Math.min(p.maxhp, c.hp)); if (p.hp === 0) p.fainted = true; }
-          if (c.status && !p.setStatus(c.status, null, null, true)) {  // before start: set directly
-            p.status = c.status;
-            p.statusState = { id: c.status, target: p, startTime: 3, time: 3 };
-          }
-          if (c.pp) c.pp.forEach((pp, j) => { if (p.moveSlots[j]) p.moveSlots[j].pp = pp; });
-        });
-      }
+      const start = e.battle.start.bind(e.battle);
+      e.battle.start = () => { basePP(e.battle); if (msg.carry) applyCarry(e.battle, msg.carry); start(); };
       e.battle.setPlayer('p2', prepPlayer(msg.format, msg.p2));
       e.arena = msg.arena || null;
       battles.set(msg.id, e);

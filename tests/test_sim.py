@@ -130,3 +130,17 @@ def test_arena_weather_is_permanent(bridge):
     assert Weather.SANDSTORM in sb.mirrors["p1"].weather
     f = sb.fork(seed=[1, 2, 3, 4])  # a fork keeps the arena
     assert f.arena == sb.arena and Weather.SANDSTORM in f.mirrors["p2"].weather
+
+
+def test_moves_start_at_base_pp_and_carry_applies(bridge):
+    """No PP Ups (2026-10-14): the engine's default is pp * 8/5 on every move; the games' trainers
+    and a hardcore player have the base PP. A carry still sets the PP it brings."""
+    us = "Shinx||||tackle,spark,hydropump|Serious|85,85,85,85,85,85|M|31,31,31,31,31,31||20|"
+    them = "Bidoof||||tackle,roost|Serious|85,85,85,85,85,85|M|31,31,31,31,31,31||20|"
+    sb = SimBattle(bridge, FMT, us, them)
+    st = sb.state()
+    assert st["p1"][0]["pp"] == [35, 20, 5] and st["p2"][0]["pp"] == [35, 10]  # not 56 / 32 / 8 and 56 / 16 (Roost is 10 PP in gen 8, 5 from gen 9)
+    sb.close()
+    sb = SimBattle(bridge, FMT, us, them, carry=[{"hp": 30, "status": None, "pp": [35, 7, 2]}])
+    assert sb.state()["p1"][0]["pp"] == [35, 7, 2] and sb.state()["p1"][0]["hp"] == 30
+    sb.close()

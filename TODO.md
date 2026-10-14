@@ -186,8 +186,9 @@ adopted** (NOTEBOOK.md): `--chooser duel` (every cover cell judged by the one-on
 Brock (+5–7 wins) and loses at Misty (deaths +0.07 per mon: Carnivine wins its one duel and is
 dead weight against three enemies); the paper chooser stays. Found on the way: Mantine's Wacan
 Berry — resist berries are in the formula and the matrix, heal berries tried and dropped (the
-tiers' cap on our hits, not the berry, is the open matrix question). New RR box baseline:
-`results/rr_berry_boxes.*`. Next: C1 items.
+tiers' cap on our hits, not the berry, is the open matrix question). **No PP Ups 2026-10-14** (the user's catch:
+Showdown's three PP Ups on every move, both sides; reset in the bridge; paired within noise,
+stallers kill less). Baselines: `results/rr_pp_boxes.*`, `results/bdsp_pp.*`. Next: C1 items.
 
 
 A2.1 + A2.3 (AI sensitivity, read-through) → B1 (matrix calibration) → B2/B3

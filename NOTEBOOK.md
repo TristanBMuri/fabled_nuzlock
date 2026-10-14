@@ -2497,3 +2497,49 @@ change, as it must be (no berry at Brock).
 
 Operational: pair box tables by index on the `.jsonl` rows (`boxes[i]`, the fan-out keeps job
 order); the events file is in worker-finish order and carries the index as `i`.
+
+## 2026-10-14 — No PP Ups (`results/rr_matrix_calib_pp.*`, `results/rr_pp_boxes.*`, `results/bdsp_pp.*`)
+
+**The question** (the user's): are all moves PP-maxed? They were. Showdown builds every move slot
+at `pp × 8/5` — three PP Ups — unless the move forbids them (`sim/pokemon.ts`), in both forks, for
+both sides, and nothing of ours overrode it. The games' trainers and a hardcore player have the
+base PP: Recover / Roost / Slack Off / Sucker Punch 5 (the sim gave 8), Toxic / Protect / Hurricane
+/ Drain Punch 10 (16). Within one fight that is the enemy's stall budget — Lileep's and
+Clodsire's Recover, Mantine's Roost, Hippopotas' Slack Off, the Toxic users — and our own
+five-PP moves. Across fights nothing carries any more (BDSP's League is `locked` with a full
+heal), so the error was confined to the fight.
+
+**The fix** (`ai_util/sim_bridge.js`): the battle's `start()` is wrapped so that, once both
+sides' pokemon exist and before the first request goes out, every move slot is set to the
+dex's base PP (`basePP`), then a carry is applied on top (`applyCarry`, capped at the new max).
+No engine patch, no flag: the old results files are the paired baseline. Roost is 10 PP in gen 8
+and 5 from gen 9, so BDSP and Radical Red get their own generation's numbers. `tests/test_sim.py`
+checks the state's PP and a carry. poke-env's `Move.max_pp` still reads × 8/5 from its own dex;
+nothing of ours reads it.
+
+**Paired, same seeds and boxes.** The one-on-ones do not notice (2–4 turns, nobody runs dry):
+the calibration is unchanged to the cell except one Hippopotas duel; the five Misty cells that
+changed *paper* tier are the `hits_to_ko` rounding fix from the day before (a hit of exactly 1/3
+was a fourth hit), since the previous calibration predates it. The 6v6 fights do:
+
+| | Brock boxes: win / ≥50% / deaths per mon / deathless | Misty boxes |
+|---|---|---|
+| PP Ups (`rr_berry_boxes`) | 70% / 87% / 0.57 / 7% | 44% / 43% / 0.75 / 3% |
+| base PP (`rr_pp_boxes`) — **the baseline from here** | 74% / 87% / 0.57 / 8% | 41% / 40% / 0.78 / 3% |
+
+The same 60 sixes (the chooser reads nothing of PP); paired: Brock win +4.4 ± 3.7, Misty −2.8 ±
+3.8, Misty deaths +0.03 ± 0.02. Kills by enemy over the 180 battles: the stallers fall —
+Hippopotas 35 → 22, Lileep 146 → 128, Clodsire 79 → 61 — and Misty's attackers rise (Mantine
+175 → 197, Starmie 157 → 185), which reads as the fights running longer into the attackers once
+the stall is spent, within ~2 SE of a count.
+
+| BDSP, Gen 4 AI, 20 episodes | cleared | no-death | deaths | runs cleared | route deaths | Cynthia deaths / losses |
+|---|---|---|---|---|---|---|
+| PP Ups (`bdsp_formula`) | 404.60 | 389.30 | 4.10 | 60% | 8 | 65 / 8 |
+| base PP (`bdsp_pp`) — **the baseline from here** | 404.60 | 391.60 | 4.45 | 65% | 5 | 62 / 6 |
+
+Paired: cleared +0.00 ± 0.21, no-death +2.3 ± 9.9, deaths +0.35 ± 0.74; the party fielded is the
+same in 70% of fights (the risk queries' fast battles move with any engine change). Accepted as
+a correctness change: nothing moves beyond the noise floor, and the mechanism that does move
+(the stall budget) moves the right way. Every table before this one has three PP Ups on both
+sides.
