@@ -578,6 +578,14 @@ table (2026-09-16, pending) is E3c's measurement.
 - [ ] Belief over enemy sets (prior from species × level, collapses on
       reveal); cross-attempt memory, reset per gauntlet.
 - [ ] Value-of-information behaviour: does it scout?
+- [ ] Idea (only if we go ML again; added 2026-11-04): learn to *predict the
+      unknowns from opponent play* — held item, ability, unrevealed moves,
+      and what the enemy does next (switch vs stay, which move) — from the
+      observed behaviour so far (switch timing, move choice, lead, what it
+      does into our type). Fits as a learned likelihood on top of the
+      explicit belief above, trained on enemy-AI logs; trainer-specific
+      facts still go in explicit memory, not weights. Calibrate against the
+      explicit belief first (see "Explicit before learned").
 
 ### 5. Later
 - [ ] Move events / builds (stage 1–2 above; see 2¾ → E7, reusable TMs)
