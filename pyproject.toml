@@ -7,6 +7,7 @@ dependencies = [
     "poke-env>=0.15.0",
     "gymnasium<1.2.3",
     "numpy",
+    "poke-engine>=0.0.48",
 ]
 
 [dependency-groups]

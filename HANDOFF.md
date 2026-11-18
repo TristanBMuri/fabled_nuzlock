@@ -1,5 +1,10 @@
 # HANDOFF — state of the project as of 2026-10-12
 
+**2026-11-18: RL learning track started in `rl/`** (user's choice; `rl/README.md`). It is off the
+planner's path: nothing imports it. It runs on poke-engine (the Rust sim, 13 us/turn vs ~1.7 ms
+for our Showdown rollout turn). Lesson 1 (tabular Q-learning) is done; lesson 2 (search teacher
+to a small net) is next. The README also covers the Aug–Nov 2026 Showdown bot wave.
+
 ## Next task (2026-10-12): make the whole pipeline faster — progress
 
 The goal and the two rules stand (profile first; every speed-up shown to change nothing on
