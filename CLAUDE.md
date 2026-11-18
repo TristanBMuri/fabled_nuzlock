@@ -30,7 +30,7 @@ The prior attempt lives at `~/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_
 
 ```bash
 uv sync                                            # deps; the Showdown clone: README → Setup
-uv run pytest -q                                   # 45 tests, ~2 s (node + built Showdown)
+uv run pytest -q                                   # 46 tests, ~2 s (node + built Showdown)
 # the benchmark table (~35 min, 20 workers x ~1 GB; check free -g first)
 uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 20
 # League levers: paired replay from the saved openers (~30 min)
@@ -39,6 +39,7 @@ uv run python scripts/league_test.py --snapshots results/league_snapshots --repl
 uv run python rl/lesson1_qlearning.py              # ~10 s
 uv run python rl/engine_diff.py --positions 1000   # poke-engine vs Showdown, ~3 min (97% agree)
 uv sync --reinstall-package poke-engine            # after editing the fork in poke-engine/ (rl/README.md)
+uv run python rl/route.py --harvest data/teams/gauntlet_harvest/battles_best4.jsonl --trainers 60  # ~4 min
 # the run dashboard (UI_TODO.md): probes with --out write <out>.events.jsonl
 uv run python ui/build.py --serve                  # http://localhost:8765
 ```

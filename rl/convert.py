@@ -81,6 +81,10 @@ def _side(d: dict, foe: dict, issues: list) -> Side:
     for v, left in active["volatiles"].items():
         if v in IGNORED_VOLATILES:
             continue
+        if v == "partiallytrapped" and left == 1:  # Showdown: expires at this turn's residual, before
+            continue                              # its damage; poke-engine's trap has no end
+        if v == "confusion" and left == 1:  # Showdown: snaps out before this turn's move
+            continue
         if known("volatile", v):
             vols.add(v)
             if v in ELAPSED:

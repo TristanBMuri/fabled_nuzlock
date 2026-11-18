@@ -1,3 +1,85 @@
+diff --git a/src/choices.rs b/src/choices.rs
+index 65075c0..9569a03 100644
+--- a/src/choices.rs
++++ b/src/choices.rs
+@@ -20461,6 +20461,77 @@ impl Choices {
+             _ => false,
+         }
+     }
++    // Showdown `accuracy: true` or `ignoreEvasion` (generated from its Gen 8 dex): these
++    // never miss because of the target's evasion
++    pub fn ignores_evasion(&self) -> bool {
++        matches!(
++            self,
++            Choices::ACIDARMOR | Choices::ACUPRESSURE | Choices::AERIALACE |
++            Choices::AFTERYOU | Choices::AGILITY | Choices::ALLYSWITCH | Choices::AMNESIA |
++            Choices::AQUARING | Choices::AROMATHERAPY | Choices::AROMATICMIST |
++            Choices::ASSIST | Choices::AURASPHERE | Choices::AURORAVEIL |
++            Choices::AUTOTOMIZE | Choices::BANEFULBUNKER | Choices::BARRIER |
++            Choices::BATONPASS | Choices::BELLYDRUM | Choices::BESTOW | Choices::BIDE |
++            Choices::BLOCK | Choices::BULKUP | Choices::BURNINGBULWARK | Choices::CALMMIND |
++            Choices::CAMOUFLAGE | Choices::CELEBRATE | Choices::CHARGE |
++            Choices::CHILLYRECEPTION | Choices::CHIPAWAY | Choices::CLEARSMOG |
++            Choices::COACHING | Choices::COIL | Choices::CONFIDE | Choices::CONVERSION |
++            Choices::CONVERSION2 | Choices::COPYCAT | Choices::COSMICPOWER |
++            Choices::COTTONGUARD | Choices::CRAFTYSHIELD | Choices::CURSE |
++            Choices::DARKESTLARIAT | Choices::DECORATE | Choices::DEFENDORDER |
++            Choices::DEFENSECURL | Choices::DEFOG | Choices::DESTINYBOND | Choices::DETECT |
++            Choices::DISARMINGVOICE | Choices::DOUBLETEAM | Choices::DRAGONCHEER |
++            Choices::DRAGONDANCE | Choices::ELECTRICTERRAIN | Choices::ELECTRIFY |
++            Choices::ENDURE | Choices::FAIRYLOCK | Choices::FALSESURRENDER |
++            Choices::FEINTATTACK | Choices::FILLETAWAY | Choices::FLORALHEALING |
++            Choices::FLOWERSHIELD | Choices::FLOWERTRICK | Choices::FOCUSENERGY |
++            Choices::FOLLOWME | Choices::FORESIGHT | Choices::GEARUP | Choices::GEOMANCY |
++            Choices::GRASSYTERRAIN | Choices::GRAVITY | Choices::GROWTH | Choices::GRUDGE |
++            Choices::GUARDSPLIT | Choices::GUARDSWAP | Choices::HAIL | Choices::HAPPYHOUR |
++            Choices::HARDEN | Choices::HAZE | Choices::HEALBELL | Choices::HEALINGWISH |
++            Choices::HEALORDER | Choices::HEALPULSE | Choices::HEARTSWAP |
++            Choices::HELPINGHAND | Choices::HOLDHANDS | Choices::HONECLAWS | Choices::HOWL |
++            Choices::HYPERSPACEFURY | Choices::HYPERSPACEHOLE | Choices::IMPRISON |
++            Choices::INGRAIN | Choices::INSTRUCT | Choices::IONDELUGE | Choices::IRONDEFENSE
++            | Choices::JUNGLEHEALING | Choices::KINGSSHIELD | Choices::KOWTOWCLEAVE |
++            Choices::LASERFOCUS | Choices::LIFEDEW | Choices::LIGHTSCREEN | Choices::LOCKON
++            | Choices::LUCKYCHANT | Choices::LUNARBLESSING | Choices::LUNARDANCE |
++            Choices::MAGICALLEAF | Choices::MAGICCOAT | Choices::MAGICROOM |
++            Choices::MAGNETBOMB | Choices::MAGNETICFLUX | Choices::MAGNETRISE |
++            Choices::MATBLOCK | Choices::MEANLOOK | Choices::MEDITATE | Choices::MEFIRST |
++            Choices::METRONOME | Choices::MILKDRINK | Choices::MIMIC | Choices::MINDREADER |
++            Choices::MINIMIZE | Choices::MIRACLEEYE | Choices::MIRRORMOVE | Choices::MIST |
++            Choices::MISTYTERRAIN | Choices::MOONLIGHT | Choices::MORNINGSUN |
++            Choices::MUDSPORT | Choices::NASTYPLOT | Choices::NATUREPOWER |
++            Choices::NORETREAT | Choices::ODORSLEUTH | Choices::PAINSPLIT |
++            Choices::PERISHSONG | Choices::PIKAPAPOW | Choices::PLAYNICE |
++            Choices::POWERSHIFT | Choices::POWERSPLIT | Choices::POWERSWAP |
++            Choices::POWERTRICK | Choices::PROTECT | Choices::PSYCHICTERRAIN |
++            Choices::PSYCHUP | Choices::PURIFY | Choices::QUICKGUARD | Choices::QUIVERDANCE
++            | Choices::RAGEPOWDER | Choices::RAINDANCE | Choices::RECOVER | Choices::RECYCLE
++            | Choices::REFLECT | Choices::REFLECTTYPE | Choices::REFRESH | Choices::REST |
++            Choices::REVIVALBLESSING | Choices::ROAR | Choices::ROCKPOLISH |
++            Choices::ROLEPLAY | Choices::ROOST | Choices::ROTOTILLER | Choices::SACREDSWORD
++            | Choices::SAFEGUARD | Choices::SANDSTORM | Choices::SHADOWPUNCH |
++            Choices::SHARPEN | Choices::SHEDTAIL | Choices::SHELLSMASH | Choices::SHELTER |
++            Choices::SHIFTGEAR | Choices::SHOCKWAVE | Choices::SHOREUP | Choices::SILKTRAP |
++            Choices::SKETCH | Choices::SKILLSWAP | Choices::SLACKOFF | Choices::SLEEPTALK |
++            Choices::SMARTSTRIKE | Choices::SNATCH | Choices::SNOWSCAPE |
++            Choices::SOFTBOILED | Choices::SPEEDSWAP | Choices::SPICYEXTRACT |
++            Choices::SPIDERWEB | Choices::SPIKES | Choices::SPIKYSHIELD | Choices::SPLASH |
++            Choices::SPOTLIGHT | Choices::STEALTHROCK | Choices::STICKYWEB |
++            Choices::STOCKPILE | Choices::STRUGGLE | Choices::STUFFCHEEKS |
++            Choices::SUBSTITUTE | Choices::SUNNYDAY | Choices::SWALLOW | Choices::SWIFT |
++            Choices::SWORDSDANCE | Choices::SYNTHESIS | Choices::TACHYONCUTTER |
++            Choices::TAILGLOW | Choices::TAILWIND | Choices::TAKEHEART |
++            Choices::TEARFULLOOK | Choices::TEATIME | Choices::TELEKINESIS |
++            Choices::TELEPORT | Choices::TIDYUP | Choices::TOPSYTURVY | Choices::TOXICSPIKES
++            | Choices::TRANSFORM | Choices::TRICKROOM | Choices::TRUMPCARD |
++            Choices::VEEVEEVOLLEY | Choices::VICTORYDANCE | Choices::VITALTHROW |
++            Choices::WATERSPORT | Choices::WHIRLWIND | Choices::WIDEGUARD | Choices::WISH |
++            Choices::WITHDRAW | Choices::WONDERROOM | Choices::WORKUP | Choices::YAWN
++        )
++    }
+     pub fn increased_crit_ratio(&self) -> bool {
+         match self {
+             Choices::AEROBLAST
 diff --git a/src/genx/abilities.rs b/src/genx/abilities.rs
 index 293ee3e..0fc77fc 100644
 --- a/src/genx/abilities.rs
@@ -94,7 +176,7 @@ index 293ee3e..0fc77fc 100644
                      effect: Effect::Status(PokemonStatus::SLEEP),
                  });
 diff --git a/src/genx/choice_effects.rs b/src/genx/choice_effects.rs
-index 714b126..4e361ea 100644
+index 714b126..fd72392 100644
 --- a/src/genx/choice_effects.rs
 +++ b/src/genx/choice_effects.rs
 @@ -181,8 +181,9 @@ pub fn modify_choice(
@@ -129,7 +211,26 @@ index 714b126..4e361ea 100644
              if state.terrain.terrain_type != Terrain::NONE {
                  instructions
                      .instruction_list
-@@ -1428,7 +1443,15 @@ pub fn choice_special_effect(
+@@ -1299,6 +1314,18 @@ pub fn choice_special_effect(
+ ) {
+     let (attacking_side, defending_side) = state.get_both_sides(attacking_side_ref);
+     match choice.move_id {
++        // StatBoosts has no evasion field, so the evasion boosters raise it here
++        Choices::DOUBLETEAM | Choices::MINIMIZE => {
++            let amount = if choice.move_id == Choices::MINIMIZE { 2 } else { 1 };
++            apply_boost_instruction(
++                attacking_side,
++                &PokemonBoostableStat::Evasion,
++                &amount,
++                attacking_side_ref,
++                attacking_side_ref,
++                instructions,
++            );
++        }
+         Choices::BELLYDRUM => {
+             let boost_amount = 6 - attacking_side.attack_boost;
+             let attacker = attacking_side.get_active();
+@@ -1428,7 +1455,15 @@ pub fn choice_special_effect(
              let attacking_side = state.get_side(attacking_side_ref);
              let active_index = attacking_side.active_index;
              let active_pkmn = attacking_side.get_active();
@@ -146,54 +247,166 @@ index 714b126..4e361ea 100644
                  let heal_amount = active_pkmn.maxhp - active_pkmn.hp;
                  instructions
                      .instruction_list
+diff --git a/src/genx/damage_calc.rs b/src/genx/damage_calc.rs
+index 8270d91..c6f2205 100644
+--- a/src/genx/damage_calc.rs
++++ b/src/genx/damage_calc.rs
+@@ -557,7 +557,7 @@ fn common_pkmn_damage_calc(
+     weather: &Weather,
+     terrain: &Terrain,
+     choice: &Choice,
+-) -> (f32, f32) {
++) -> (f32, f32, f32) {
+     let mut damage: f32;
+     let mut crit_damage: f32;
+     let mut common_damage = 2.0 * attacker.level as f32;
+@@ -598,10 +598,7 @@ fn common_pkmn_damage_calc(
+     damage_modifier *= volatile_status_modifier(&choice, attacking_side, defending_side);
+     damage_modifier *= terrain_modifier(terrain, attacker, defender, &choice);
+ 
+-    damage = damage * damage_modifier;
+-    crit_damage = crit_damage * damage_modifier;
+-
+-    (damage, crit_damage)
++    (damage, crit_damage, damage_modifier)
+ }
+ 
+ // This is a basic damage calculation function that assumes special effects/modifiers
+@@ -609,16 +606,17 @@ fn common_pkmn_damage_calc(
+ //
+ // i.e. if an ability would multiply a move's base-power by 1.3x, that should already
+ // be reflected in the `Choice`
+-pub fn calculate_damage(
++// The damage formula in parts: (base, modifier, crit base, crit modifier). Base is the
++// integer the random roll applies to; everything after the roll is in the modifier.
++fn damage_parts(
+     state: &State,
+     attacking_side: &SideReference,
+     choice: &Choice,
+-    _damage_rolls: DamageRolls,
+-) -> Option<(i16, i16)> {
++) -> Option<(f32, f32, f32, f32)> {
+     if choice.category == MoveCategory::Status || choice.category == MoveCategory::Switch {
+         return None;
+     } else if choice.base_power == 0.0 {
+-        return Some((0, 0));
++        return Some((0.0, 0.0, 0.0, 0.0));
+     }
+     let (attacking_side, defending_side) = state.get_both_sides_immutable(attacking_side);
+     let attacker = attacking_side.get_active_immutable();
+@@ -640,7 +638,7 @@ pub fn calculate_damage(
+             effective_weather,
+         );
+ 
+-    let (mut damage, mut crit_damage) = common_pkmn_damage_calc(
++    let (damage, crit_damage, modifier) = common_pkmn_damage_calc(
+         attacking_side,
+         attacker,
+         attacking_stat,
+@@ -653,24 +651,37 @@ pub fn calculate_damage(
+         &state.terrain.terrain_type,
+         choice,
+     );
++    let mut screen = 1.0;
+     if attacker.ability != Abilities::INFILTRATOR {
+         if defending_side.side_conditions.aurora_veil > 0 {
+-            damage *= 0.5
++            screen = 0.5
+         } else if defending_side.side_conditions.reflect > 0
+             && choice.category == MoveCategory::Physical
+         {
+-            damage *= 0.5
++            screen = 0.5
+         } else if defending_side.side_conditions.light_screen > 0
+             && choice.category == MoveCategory::Special
+         {
+-            damage *= 0.5
++            screen = 0.5
+         }
+     }
+ 
+-    crit_damage *= CRIT_MULTIPLIER;
++    let mut crit_multiplier = CRIT_MULTIPLIER;
+     if attacker.ability == Abilities::SNIPER {
+-        crit_damage *= 1.5;
++        crit_multiplier *= 1.5;
+     }
++    Some((damage, modifier * screen, crit_damage, modifier * crit_multiplier))
++}
++
++pub fn calculate_damage(
++    state: &State,
++    attacking_side: &SideReference,
++    choice: &Choice,
++    _damage_rolls: DamageRolls,
++) -> Option<(i16, i16)> {
++    let (base, modifier, crit_base, crit_modifier) = damage_parts(state, attacking_side, choice)?;
++    let mut damage = base * modifier;
++    let mut crit_damage = crit_base * crit_modifier;
+ 
+     match _damage_rolls {
+         DamageRolls::Average => {
+@@ -687,7 +698,28 @@ pub fn calculate_damage(
+         }
+     }
+ 
+-    Some((damage as i16, crit_damage as i16))
++    // Showdown: a hit that is not an immunity does at least 1
++    let at_least_one = |d: f32| if modifier > 0.0 { (d as i16).max(1) } else { d as i16 };
++    Some((at_least_one(damage), at_least_one(crit_damage)))
++}
++
++// The 16 damage rolls in Showdown's order: the random factor applies to the integer base and
++// is floored before STAB, type and the other modifiers. At low levels this differs a lot from
++// scaling the maximum (Lv 14 Tackle into 23 HP: 1 KO roll of 16, not 5).
++pub fn showdown_damage_rolls(
++    state: &State,
++    attacking_side: &SideReference,
++    choice: &Choice,
++) -> Option<([i16; 16], [i16; 16])> {
++    let (base, modifier, crit_base, crit_modifier) = damage_parts(state, attacking_side, choice)?;
++    let roll = |b: f32, m: f32, r: usize| {
++        let d = ((b * (85 + r) as f32 / 100.0).floor() * m).floor() as i16;
++        if m > 0.0 { d.max(1) } else { d }
++    };
++    Some((
++        std::array::from_fn(|r| roll(base, modifier, r)),
++        std::array::from_fn(|r| roll(crit_base, crit_modifier, r)),
++    ))
+ }
+ 
+ pub fn calculate_futuresight_damage(
+@@ -698,7 +730,7 @@ pub fn calculate_futuresight_damage(
+     let attacking_stat = attacking_side.pokemon[attacking_side_pokemon_index].special_attack;
+     let defending_stat = defending_side.get_active_immutable().special_defense;
+     let attacker = attacking_side.get_active_immutable();
+-    let (mut damage, _) = common_pkmn_damage_calc(
++    let (base, _, modifier) = common_pkmn_damage_calc(
+         attacking_side,
+         attacker,
+         attacking_stat,
+@@ -711,6 +743,7 @@ pub fn calculate_futuresight_damage(
+         &Terrain::NONE,
+         MOVES.get(&Choices::FUTURESIGHT).unwrap(),
+     );
++    let mut damage = base * modifier;
+     if attacker.ability != Abilities::INFILTRATOR {
+         if defending_side.side_conditions.light_screen > 0 {
+             damage *= 0.5
 diff --git a/src/genx/generate_instructions.rs b/src/genx/generate_instructions.rs
-index 2a8d2cd..b834147 100644
+index 2a8d2cd..129d079 100644
 --- a/src/genx/generate_instructions.rs
 +++ b/src/genx/generate_instructions.rs
-@@ -241,6 +241,42 @@ fn generate_instructions_from_switch(
-     new_pokemon_index: PokemonIndex,
-     switching_side_ref: SideReference,
-     incoming_instructions: &mut StateInstructions,
-+) {
-+    switch_in_without_effects(state, new_pokemon_index, switching_side_ref, incoming_instructions);
-+    ability_on_switch_in(state, &switching_side_ref, incoming_instructions);
-+    item_on_switch_in(state, &switching_side_ref, incoming_instructions);
-+}
-+
-+// Both sides switching (Showdown, Gen 5+): both mons come in, then their switch-in
-+// abilities and items run in speed order, so the slower one's weather / Intimidate wins
-+// or lands on the new foe.
-+fn generate_instructions_from_double_switch(
-+    state: &mut State,
-+    side_one_index: PokemonIndex,
-+    side_two_index: PokemonIndex,
-+    incoming_instructions: &mut StateInstructions,
-+) {
-+    switch_in_without_effects(state, side_one_index, SideReference::SideOne, incoming_instructions);
-+    switch_in_without_effects(state, side_two_index, SideReference::SideTwo, incoming_instructions);
-+    let s1 = get_effective_speed(state, &SideReference::SideOne);
-+    let s2 = get_effective_speed(state, &SideReference::SideTwo);
-+    let side_one_first = if state.trick_room.active { s1 < s2 } else { s1 > s2 };
-+    let order = if side_one_first {
-+        [SideReference::SideOne, SideReference::SideTwo]
-+    } else {
-+        [SideReference::SideTwo, SideReference::SideOne]
-+    };
-+    for side_ref in order {
-+        ability_on_switch_in(state, &side_ref, incoming_instructions);
-+        item_on_switch_in(state, &side_ref, incoming_instructions);
-+    }
-+}
-+
-+fn switch_in_without_effects(
-+    state: &mut State,
-+    new_pokemon_index: PokemonIndex,
-+    switching_side_ref: SideReference,
-+    incoming_instructions: &mut StateInstructions,
- ) {
-     let should_last_used_move = state.use_last_used_move;
+@@ -26,7 +26,7 @@ use crate::instruction::{DecrementFutureSightInstruction, FormeChangeInstruction
+ use crate::instruction::{DecrementPPInstruction, SetLastUsedMoveInstruction};
  
-@@ -473,7 +509,7 @@ fn generate_instructions_from_switch(
+ use super::damage_calc::calculate_futuresight_damage;
+-use super::damage_calc::{calculate_damage, type_effectiveness_modifier, DamageRolls};
++use super::damage_calc::{calculate_damage, showdown_damage_rolls, type_effectiveness_modifier, DamageRolls};
+ use super::items::{
+     item_before_move, item_end_of_turn, item_modify_attack_against, item_modify_attack_being_used,
+     item_on_switch_in, Items,
+@@ -473,7 +473,7 @@ fn generate_instructions_from_switch(
                  side,
                  &PokemonBoostableStat::Speed,
                  &-1,
@@ -202,17 +415,37 @@ index 2a8d2cd..b834147 100644
                  &switching_side_ref,
                  incoming_instructions,
              );
-@@ -566,9 +602,6 @@ fn generate_instructions_from_switch(
-             }
-         }
-     }
--
--    ability_on_switch_in(state, &switching_side_ref, incoming_instructions);
--    item_on_switch_in(state, &switching_side_ref, incoming_instructions);
+@@ -571,6 +571,29 @@ fn generate_instructions_from_switch(
+     item_on_switch_in(state, &switching_side_ref, incoming_instructions);
  }
  
++// Both sides switching (Showdown): switches go in the order of the outgoing mons' speed
++// (reversed in Trick Room), and each runs its switch-in abilities / items before the other
++// side switches (runSwitch sorts ahead of the pending switch), so the first one's Intimidate
++// hits the mon that is about to leave.
++fn generate_instructions_from_double_switch(
++    state: &mut State,
++    side_one_index: PokemonIndex,
++    side_two_index: PokemonIndex,
++    incoming_instructions: &mut StateInstructions,
++) {
++    let s1 = get_effective_speed(state, &SideReference::SideOne);
++    let s2 = get_effective_speed(state, &SideReference::SideTwo);
++    let side_one_first = if state.trick_room.active { s1 < s2 } else { s1 > s2 };
++    let order = if side_one_first {
++        [(SideReference::SideOne, side_one_index), (SideReference::SideTwo, side_two_index)]
++    } else {
++        [(SideReference::SideTwo, side_two_index), (SideReference::SideOne, side_one_index)]
++    };
++    for (side_ref, index) in order {
++        generate_instructions_from_switch(state, index, side_ref, incoming_instructions);
++    }
++}
++
  fn generate_instructions_from_increment_side_condition(
-@@ -642,12 +675,21 @@ fn generate_instructions_from_side_conditions(
+     state: &mut State,
+     side_condition: &SideCondition,
+@@ -642,12 +665,21 @@ fn generate_instructions_from_side_conditions(
          | PokemonSideCondition::Reflect
          | PokemonSideCondition::Safeguard
          | PokemonSideCondition::Mist => {
@@ -235,7 +468,7 @@ index 2a8d2cd..b834147 100644
              );
          }
          PokemonSideCondition::Tailwind => {
-@@ -907,7 +949,41 @@ fn get_instructions_from_status_effects(
+@@ -907,7 +939,41 @@ fn get_instructions_from_status_effects(
              new_status: status.status,
          })
      };
@@ -277,7 +510,7 @@ index 2a8d2cd..b834147 100644
  }
  
  pub fn get_boost_amount(side: &Side, boost: &PokemonBoostableStat, amount: i8) -> i8 {
-@@ -925,6 +1001,36 @@ pub fn get_boost_amount(side: &Side, boost: &PokemonBoostableStat, amount: i8) -
+@@ -925,6 +991,36 @@ pub fn get_boost_amount(side: &Side, boost: &PokemonBoostableStat, amount: i8) -
      0
  }
  
@@ -314,7 +547,68 @@ index 2a8d2cd..b834147 100644
  pub fn apply_boost_instruction(
      target_side: &mut Side,
      stat: &PokemonBoostableStat,
-@@ -2411,7 +2517,8 @@ pub fn generate_instructions_from_move(
+@@ -1035,6 +1131,13 @@ fn get_instructions_from_boosts(
+     }
+ }
+ 
++// (average damage of the rolls that do not KO, number of rolls that do)
++fn kill_rolls(rolls: &[i16; 16], health: i16) -> (i16, i16) {
++    let survive: Vec<i16> = rolls.iter().copied().filter(|&d| d < health).collect();
++    let average = survive.iter().map(|&d| d as i32).sum::<i32>() / survive.len().max(1) as i32;
++    (average as i16, (16 - survive.len()) as i16)
++}
++
+ fn compare_health_with_damage_multiples(max_damage: i16, health: i16) -> (i16, i16) {
+     let max_damage_f32 = max_damage as f32;
+     let health_f32 = health as f32;
+@@ -1223,11 +1326,19 @@ fn check_move_hit_or_miss(
+ 
+     Otherwise, update the incoming instructions' percent_hit to reflect the chance of the move hitting
+     */
++    // Showdown (Gen 5+): one stage, the attacker's accuracy minus the target's evasion
++    let evasion = state
++        .get_side_immutable(&attacking_side_ref.get_other_side())
++        .evasion_boost;
+     let attacking_side = state.get_side(attacking_side_ref);
+     let attacking_pokemon = attacking_side.get_active_immutable();
++    let stage = if choice.move_id.ignores_evasion() {
++        attacking_side.accuracy_boost
++    } else {
++        (attacking_side.accuracy_boost - evasion).clamp(-6, 6)
++    };
+ 
+-    let mut percent_hit =
+-        ((choice.accuracy / 100.0) * boosted_accuracy(attacking_side.accuracy_boost)).min(1.0);
++    let mut percent_hit = ((choice.accuracy / 100.0) * boosted_accuracy(stage)).min(1.0);
+     if Some((0, 0)) == damage {
+         percent_hit = 0.0;
+     }
+@@ -1547,7 +1658,11 @@ fn generate_instructions_from_damage(
+ 
+         let attacking_pokemon = state.get_side(attacking_side_ref).get_active();
+         if let Some(drain_fraction) = choice.drain {
+-            let drain_amount = (damage_dealt as f32 * drain_fraction) as i16;
++            // Showdown: Gen 5+ rounds; Gen 4 floors with a minimum of 1
++            #[cfg(not(feature = "gen4"))]
++            let drain_amount = (damage_dealt as f32 * drain_fraction).round() as i16;
++            #[cfg(feature = "gen4")]
++            let drain_amount = ((damage_dealt as f32 * drain_fraction) as i16).max(1);
+             let heal_amount =
+                 cmp::min(drain_amount, attacking_pokemon.maxhp - attacking_pokemon.hp);
+             if heal_amount != 0 {
+@@ -2360,6 +2475,11 @@ pub fn generate_instructions_from_move(
+     } else {
+         calculate_damage(state, &attacking_side, &choice, DamageRolls::Max)
+     };
++    let rolls = if fixed_damage.is_none() {
++        showdown_damage_rolls(state, &attacking_side, &choice)
++    } else {
++        None
++    };
+     check_move_hit_or_miss(
+         state,
+         &choice,
+@@ -2411,36 +2531,32 @@ pub fn generate_instructions_from_move(
          }
      }
  
@@ -324,10 +618,25 @@ index 2a8d2cd..b834147 100644
      let defender_active = defender_side.get_active();
      let mut does_damage = false;
      let (mut branch_damage, mut regular_damage) = (0, 0);
-@@ -2429,17 +2536,7 @@ pub fn generate_instructions_from_move(
-             let (average_non_kill_damage, num_kill_rolls) =
-                 compare_health_with_damage_multiples(max_damage_dealt, defender_active.hp);
- 
+     let mut branch_instructions: Option<StateInstructions> = None;
+     if let Some((max_damage_dealt, max_crit_damage)) = damage {
+         does_damage = true;
+-        let avg_damage_dealt = (max_damage_dealt as f32 * 0.925) as i16;
+-        let min_damage_dealt = (max_damage_dealt as f32 * 0.85) as i16;
++        // the mean of Showdown's 16 rolls where we have them (fixed damage: none)
++        let mean = |r: &[i16; 16]| (r.iter().map(|&d| d as f32).sum::<f32>() / 16.0).round() as i16;
++        let avg_damage_dealt = rolls.map_or((max_damage_dealt as f32 * 0.925) as i16, |(r, _)| mean(&r));
++        let avg_crit_damage = rolls.map_or((max_crit_damage as f32 * 0.925) as i16, |(_, c)| mean(&c));
++        let min_damage_dealt = rolls.map_or((max_damage_dealt as f32 * 0.85) as i16, |(r, _)| r[0]);
+         if fixed_damage.is_some() {
+             regular_damage = max_damage_dealt;
+         } else if branch_on_damage
+             && max_damage_dealt >= defender_active.hp
+             && min_damage_dealt < defender_active.hp
+         {
+-            let (average_non_kill_damage, num_kill_rolls) =
+-                compare_health_with_damage_multiples(max_damage_dealt, defender_active.hp);
+-
 -            let crit_rate = if defender_active.ability == Abilities::BATTLEARMOR
 -                || defender_active.ability == Abilities::SHELLARMOR
 -            {
@@ -338,12 +647,17 @@ index 2a8d2cd..b834147 100644
 -                1.0 / 8.0
 -            } else {
 -                BASE_CRIT_CHANCE
--            };
-+            let crit_rate = crit_rate;
++            let (average_non_kill_damage, num_kill_rolls) = match rolls {
++                Some((r, _)) => kill_rolls(&r, defender_active.hp),
++                None => compare_health_with_damage_multiples(max_damage_dealt, defender_active.hp),
+             };
  
++            let crit_rate = crit_rate;
++
              // the chance of a branch is the chance of the roll killing + the chance of a crit
              let branch_chance = ((1.0 - crit_rate) * (num_kill_rolls as f32 / 16.0)) + crit_rate;
-@@ -2452,17 +2549,7 @@ pub fn generate_instructions_from_move(
+ 
+@@ -2452,28 +2568,18 @@ pub fn generate_instructions_from_move(
              incoming_instructions.update_percentage(1.0 - branch_chance);
              regular_damage = average_non_kill_damage;
          } else if branch_on_damage && max_damage_dealt < defender_active.hp {
@@ -362,7 +676,21 @@ index 2a8d2cd..b834147 100644
              let mut branch_ins = incoming_instructions.clone();
              branch_ins.update_percentage(crit_rate);
              branch_instructions = Some(branch_ins);
-@@ -4201,15 +4288,16 @@ pub fn generate_instructions_from_move_pair(
+-            branch_damage = (max_crit_damage as f32 * 0.925) as i16;
++            branch_damage = avg_crit_damage;
+             incoming_instructions.update_percentage(1.0 - crit_rate);
+-            regular_damage = (max_damage_dealt as f32 * 0.925) as i16;
++            regular_damage = avg_damage_dealt;
+         } else if choice.move_id.guaranteed_crit()
+             && defender_active.ability != Abilities::BATTLEARMOR
+             && defender_active.ability != Abilities::SHELLARMOR
+         {
+-            regular_damage = (max_crit_damage as f32 * 0.925) as i16;
++            regular_damage = avg_crit_damage;
+         } else {
+             regular_damage = avg_damage_dealt;
+         }
+@@ -4201,15 +4307,16 @@ pub fn generate_instructions_from_move_pair(
      }
  
      // run switches
@@ -382,7 +710,25 @@ index 2a8d2cd..b834147 100644
          generate_instructions_from_switch(
              state,
              *switch_id,
-@@ -6384,7 +6472,11 @@ mod tests {
+@@ -4995,7 +5102,7 @@ mod tests {
+                 percentage: 63.0,
+                 instruction_list: vec![Instruction::Damage(DamageInstruction {
+                     side_ref: SideReference::SideTwo,
+-                    damage_amount: 188,
++                    damage_amount: 187,
+                 })],
+             },
+             StateInstructions {
+@@ -5003,7 +5110,7 @@ mod tests {
+                 instruction_list: vec![
+                     Instruction::Damage(DamageInstruction {
+                         side_ref: SideReference::SideTwo,
+-                        damage_amount: 188,
++                        damage_amount: 187,
+                     }),
+                     Instruction::ApplyVolatileStatus(ApplyVolatileStatusInstruction {
+                         side_ref: SideReference::SideTwo,
+@@ -6384,7 +6491,11 @@ mod tests {
  
          let expected_instructions = vec![StateInstructions {
              percentage: 100.0,
@@ -395,7 +741,7 @@ index 2a8d2cd..b834147 100644
          }];
  
          assert_eq!(instructions, expected_instructions)
-@@ -6411,7 +6503,13 @@ mod tests {
+@@ -6411,7 +6522,13 @@ mod tests {
  
          let expected_instructions = vec![StateInstructions {
              percentage: 100.0,
@@ -410,7 +756,7 @@ index 2a8d2cd..b834147 100644
                  new_terrain: Terrain::NONE,
                  new_terrain_turns_remaining: 0,
                  previous_terrain: Terrain::ELECTRICTERRAIN,
-@@ -6446,6 +6544,11 @@ mod tests {
+@@ -6446,6 +6563,11 @@ mod tests {
          let expected_instructions = vec![StateInstructions {
              percentage: 100.0,
              instruction_list: vec![
@@ -422,6 +768,42 @@ index 2a8d2cd..b834147 100644
                  Instruction::ChangeTerrain(ChangeTerrain {
                      new_terrain: Terrain::NONE,
                      new_terrain_turns_remaining: 0,
+@@ -6710,7 +6832,7 @@ mod tests {
+             instruction_list: vec![
+                 Instruction::Damage(DamageInstruction {
+                     side_ref: SideReference::SideTwo,
+-                    damage_amount: 61,
++                    damage_amount: 60,
+                 }),
+                 Instruction::ChangeSideCondition(ChangeSideConditionInstruction {
+                     side_ref: SideReference::SideOne,
+@@ -6806,7 +6928,7 @@ mod tests {
+             instruction_list: vec![
+                 Instruction::Damage(DamageInstruction {
+                     side_ref: SideReference::SideTwo,
+-                    damage_amount: 61,
++                    damage_amount: 60,
+                 }),
+                 Instruction::ChangeSideCondition(ChangeSideConditionInstruction {
+                     side_ref: SideReference::SideOne,
+@@ -6866,7 +6988,7 @@ mod tests {
+             instruction_list: vec![
+                 Instruction::Damage(DamageInstruction {
+                     side_ref: SideReference::SideTwo,
+-                    damage_amount: 61,
++                    damage_amount: 60,
+                 }),
+                 Instruction::Boost(BoostInstruction {
+                     side_ref: SideReference::SideOne,
+@@ -7278,7 +7400,7 @@ mod tests {
+             percentage: 100.0,
+             instruction_list: vec![Instruction::Damage(DamageInstruction {
+                 side_ref: SideReference::SideTwo,
+-                damage_amount: 72,
++                damage_amount: 71,
+             })],
+         };
+ 
 diff --git a/src/genx/items.rs b/src/genx/items.rs
 index 785833d..600dbdd 100644
 --- a/src/genx/items.rs
@@ -547,10 +929,218 @@ index 237b1e1..c3a6b5c 100644
      }
  }
 diff --git a/tests/test_battle_mechanics.rs b/tests/test_battle_mechanics.rs
-index 8cf8f58..fa585fc 100644
+index 8cf8f58..1661408 100644
 --- a/tests/test_battle_mechanics.rs
 +++ b/tests/test_battle_mechanics.rs
-@@ -22594,14 +22594,14 @@ fn test_effectspore() {
+@@ -573,7 +573,8 @@ fn test_branch_when_a_roll_can_kill_on_the_low_side() {
+ #[test]
+ fn test_min_damage_killing_does_not_branch() {
+     let mut state = State::default();
+-    state.side_two.get_active().hp = 44;
++    // the lowest Showdown roll is 43 (floor(35 * 0.85) * 1.5 STAB)
++    state.side_two.get_active().hp = 43;
+ 
+     let move_one = Choices::TACKLE;
+     let move_two = Choices::SPLASH;
+@@ -597,7 +598,7 @@ fn test_min_damage_killing_does_not_branch() {
+         percentage: 100.00,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 44,
++            damage_amount: 43,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -773,7 +774,7 @@ fn test_move_pair_instruction_generation_where_first_move_branches() {
+                 Instruction::Damage(DamageInstruction {
+                     side_ref: SideReference::SideOne,
+                     // playrough lowered attack means this does less dmg than other branches
+-                    damage_amount: 33,
++                    damage_amount: 32,
+                 }),
+             ],
+         },
+@@ -2192,7 +2193,7 @@ fn test_color_change_does_not_activate_if_type_is_already_the_same() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideOne,
+-            damage_amount: 7,
++            damage_amount: 8,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -2345,7 +2346,7 @@ fn test_moldbreaker_ignores_wellbakedbody() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 15,
++            damage_amount: 16,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -5036,7 +5037,7 @@ fn test_normalgem_boosting_tackle() {
+             // 48 damage normally. 1.3x for gem
+             Instruction::Damage(DamageInstruction {
+                 side_ref: SideReference::SideTwo,
+-                damage_amount: 61,
++                damage_amount: 62,
+             }),
+         ],
+     }];
+@@ -5065,7 +5066,7 @@ fn test_chopleberry_damage_reduction() {
+             }),
+             Instruction::Damage(DamageInstruction {
+                 side_ref: SideReference::SideTwo,
+-                damage_amount: 33, // 64 damage normally
++                damage_amount: 32, // 64 damage normally
+             }),
+             Instruction::Boost(BoostInstruction {
+                 side_ref: SideReference::SideOne,
+@@ -5362,7 +5363,7 @@ fn test_liechi_berry_activate_after_taking_damage_when_slower() {
+             }),
+             Instruction::Damage(DamageInstruction {
+                 side_ref: SideReference::SideTwo,
+-                damage_amount: 72, // boosted damage
++                damage_amount: 71, // boosted damage
+             }),
+         ],
+     }];
+@@ -5961,7 +5962,7 @@ fn test_hydrosteam() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 93,
++            damage_amount: 94,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -6184,7 +6185,7 @@ fn test_terablast_becomes_physical() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 141, // boosted from 95 because attack increased
++            damage_amount: 140, // boosted from 95 because attack increased
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -8807,7 +8808,7 @@ fn test_poltergeist() {
+             percentage: 90.0,
+             instruction_list: vec![Instruction::Damage(DamageInstruction {
+                 side_ref: SideReference::SideTwo,
+-                damage_amount: 86,
++                damage_amount: 87,
+             })],
+         },
+     ];
+@@ -8994,7 +8995,7 @@ fn test_ice_def_in_snow() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideOne,
+-            damage_amount: 33, // 48 normally
++            damage_amount: 32, // 48 normally
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -9239,7 +9240,7 @@ fn test_rock_spdef_in_sand_versus_secretsword_doesnt_change_damageroll() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideOne,
+-            damage_amount: 135,
++            damage_amount: 134,
+         })],
+     }];
+     assert_eq!(first_instructions, second_instructions);
+@@ -9469,7 +9470,7 @@ fn test_bodypress() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 375, // 127 with defense of 100 and no boosts
++            damage_amount: 374, // 127 with defense of 100 and no boosts
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -14018,7 +14019,7 @@ fn test_solarblade_in_sun() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 98,
++            damage_amount: 99,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -15252,7 +15253,7 @@ fn test_lowkick_basepower_lowest_damage() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 33,
++            damage_amount: 32,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -16365,7 +16366,7 @@ fn test_lifeorb_boost_and_recoil() {
+         instruction_list: vec![
+             Instruction::Damage(DamageInstruction {
+                 side_ref: SideReference::SideTwo,
+-                damage_amount: 61,
++                damage_amount: 62,
+             }),
+             Instruction::Heal(HealInstruction {
+                 side_ref: SideReference::SideOne,
+@@ -16392,7 +16393,7 @@ fn test_no_lifeorb_recoil_with_magicguard() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 61,
++            damage_amount: 62,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -17312,7 +17313,7 @@ fn test_marvelscale() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 33,
++            damage_amount: 32,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -17417,7 +17418,7 @@ fn test_vessel_of_ruin() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 24,
++            damage_amount: 25,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -20698,7 +20699,7 @@ fn test_technician() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 72,
++            damage_amount: 71,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -21422,7 +21423,7 @@ fn test_pixilate() {
+         percentage: 100.0,
+         instruction_list: vec![Instruction::Damage(DamageInstruction {
+             side_ref: SideReference::SideTwo,
+-            damage_amount: 58,
++            damage_amount: 57,
+         })],
+     }];
+     assert_eq!(expected_instructions, vec_of_instructions);
+@@ -21593,7 +21594,7 @@ fn test_mortalspin_poison_and_remove_hazards() {
+         instruction_list: vec![
+             Instruction::Damage(DamageInstruction {
+                 side_ref: SideReference::SideTwo,
+-                damage_amount: 24,
++                damage_amount: 25,
+             }),
+             Instruction::ChangeSideCondition(ChangeSideConditionInstruction {
+                 side_ref: SideReference::SideOne,
+@@ -22594,14 +22595,14 @@ fn test_effectspore() {
  
      let expected_instructions = vec![
          StateInstructions {
@@ -567,7 +1157,7 @@ index 8cf8f58..fa585fc 100644
              instruction_list: vec![
                  Instruction::Damage(DamageInstruction {
                      side_ref: SideReference::SideTwo,
-@@ -22616,7 +22616,7 @@ fn test_effectspore() {
+@@ -22616,7 +22617,7 @@ fn test_effectspore() {
              ],
          },
          StateInstructions {
@@ -576,7 +1166,7 @@ index 8cf8f58..fa585fc 100644
              instruction_list: vec![
                  Instruction::Damage(DamageInstruction {
                      side_ref: SideReference::SideTwo,
-@@ -22631,7 +22631,7 @@ fn test_effectspore() {
+@@ -22631,7 +22632,7 @@ fn test_effectspore() {
              ],
          },
          StateInstructions {

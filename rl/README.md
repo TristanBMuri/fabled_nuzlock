@@ -51,18 +51,53 @@ hit more often in that sample: Light Clay, Scope Lens, Leek, pinch berries.)
 
 Fixed in the patch (each was a cluster in the diff): Defog's evasion drop; Sheer Force + Life
 Orb recoil; Sticky Web vs Defiant / Competitive; Effect Spore odds and powder immunity;
-Soul-Heart; Synchronize; Speed Boost on the switch-in turn; ability order when both sides
-switch (weather, Intimidate); Fishious Rend / Bolt Beak vs a switch-in; Rest at full HP; crit
-stages (Scope Lens, Razor Claw, Super Luck, Focus Energy, Leek); Light Clay and the pinch
-berries. Fixed in the converter: last move (Encore), Wish, Future Sight, Healing Wish, Slow
-Start, Rest's fixed sleep, "has not moved since switching in" (Fake Out).
+Soul-Heart; Synchronize; Speed Boost on the switch-in turn; both sides switching (in the
+outgoing mons' speed order, each switch-in complete: weather, Intimidate); Fishious Rend /
+Bolt Beak vs a switch-in; Rest at full HP; crit stages (Scope Lens, Razor Claw, Super Luck,
+Focus Energy, Leek); Light Clay and the pinch berries. Found by the BDSP gauntlet (low
+levels, where rounding decides KOs): damage rolls in Showdown's order (the random factor on
+the integer base, then STAB / type: a Lv 14 Tackle into 23 HP KOs on 1 roll of 16, not 5)
+and their true mean; a non-immune hit does at least 1; drain rounds; Double Team / Minimize
+raise evasion and accuracy counts the target's evasion (never-miss moves listed from
+Showdown's dex). Fixed in the converter: last move (Encore), Wish, Future Sight, Healing
+Wish, Slow Start, Rest's fixed sleep, "has not moved since switching in" (Fake Out), Bind
+and confusion on their last turn.
 
-Still open: Ditto (no Imposter / Transform), Struggle (poke-engine refuses it), Doom Desire,
-two-turn moves mid-charge, and a tail of single cases. Soul-Heart only counts its own KOs.
+Still open: Rollout / Ice Ball (no lock-in or doubling), Rivalry (poke-engine has no
+genders), Ditto (no Imposter / Transform), Struggle (poke-engine refuses it), Doom Desire,
+Rage, two-turn moves mid-charge, and a tail of single cases. Soul-Heart only counts its own
+KOs. The first two are the gauntlet's big ones (see the router).
 
 Approximations by design: Showdown fixes how long sleep, confusion and Outrage last when they
 start; poke-engine rolls a chance each turn. The converter maps the fixed-length ones
-(Taunt, Encore, Yawn, Slow Start, Rest) and the field timers.
+(Taunt, Encore, Yawn, Slow Start, Rest) and the field timers. poke-engine keeps one damage
+value per outcome, so its mean HP is good to ~0.5 HP per hit; `engine_diff` flags an HP gap
+only from 5% of max HP and 1.5 HP.
+
+## Router — `route.py`
+
+Run a turn on poke-engine only where it agrees with Showdown; everything else stays on
+Showdown. Two levels:
+
+- `route(bridge, p1_team, p2_team, cache)` once per matchup, cached in `logs/route.jsonl`
+  (the router's own log): every name known to poke-engine, then a probe of 50 random
+  positions of this matchup, each replayed 200 times on Showdown (~4 s). Any disagreement
+  sends the whole matchup to Showdown (`--tolerate` relaxes it).
+- `turn_gaps(dump)` every turn, microseconds: a known gap (`GAPS`) on either active mon sends
+  that turn to Showdown. A gap on the bench does not matter until it is in. The converter's
+  `issues` do the same for a state it cannot carry.
+
+    uv run python rl/route.py --harvest data/teams/gauntlet_harvest/battles_best4.jsonl --trainers 60
+
+First 60 BDSP trainers (one harvested matchup each, `gen8customgamenogimmicks`):
+**46/60 matchups pass**, and 45% of their probe turns run on poke-engine; the rest have
+Rollout (645 positions) or Rivalry (462) on the field: early-game Bidoof and Shinx. The 14
+failures are single cases (Rage, Disable, Rock Throw vs Protect, …).
+
+Nothing in the planner calls the router yet: its search runs Showdown forks with `calc_bot`
+rollouts, which read poke-env mirrors, not poke-engine states. The router is for code that
+already runs on poke-engine (the lessons below); bringing it to the planner means a second
+search backend.
 
 What this means: fine for learning and for search as a first pass; a planner decision that
 matters is still confirmed on Showdown. The format here is vanilla gen8 random battles; our

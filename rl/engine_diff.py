@@ -11,7 +11,8 @@ A position is flagged when the engines disagree beyond sampling noise:
   missing  Showdown outcomes poke-engine gives zero probability   (>= MISS)
   extra    poke-engine outcomes Showdown never produced           (>= MISS)
   tv       total variation distance between the outcome tables    (>= TV)
-  hp       mean HP of either active mon differs                   (>= HP, of max HP)
+  hp       mean HP of either active mon differs                   (>= HP of max HP, and >= 1.5 HP:
+           poke-engine keeps one damage value per outcome, so ~0.5 HP per hit is its resolution)
            (not checked when the turn can end the battle: Showdown then skips end-of-turn
            effects, poke-engine does not; the outcome table still counts the KO)
 """
@@ -72,15 +73,18 @@ def compare(bridge, bid, dump, c1, c2, samples):
         "diffs": sorted(([round(eng.get(k, 0), 3), round(sd.get(k, 0), 3), k] for k in keys),
                         key=lambda r: -abs(r[0] - r[1]))[:4],
     }
+    # 1.5 HP is the floor: at low levels 5% of max HP is a single hit point
+    hp_bad = any(abs(rec["dhp"][j]) >= max(HP, 1.5 / dump[s]["pokemon"][0]["maxhp"]) for j, s in enumerate(("p1", "p2")))
     rec["flags"] = [f for f, bad in [("missing", rec["missing"] >= MISS), ("extra", rec["extra"] >= MISS),
-                                      ("tv", rec["tv"] >= TV), ("hp", not ended and max(map(abs, rec["dhp"])) >= HP)] if bad]
+                                      ("tv", rec["tv"] >= TV), ("hp", not ended and hp_bad)] if bad]
     if rec["flags"]:
         rec["dump"] = dump  # random teams cannot be regenerated; keep the position to debug it
     return rec
 
 
-def positions(bridge, fmt, n, rng):
-    """Yield (battle id, dump, p1 choice, p2 choice) along random-move battles."""
+def positions(bridge, fmt, n, rng, teams=(None, None)):
+    """Yield (battle id, dump, p1 choice, p2 choice) along random-move battles.
+    teams: packed teams to replay one matchup; None = the format's random teams."""
     count, game = 0, 0
     while count < n:
         bid = f"g{game}"
@@ -88,7 +92,8 @@ def positions(bridge, fmt, n, rng):
         seed = lambda: [rng.randrange(1 << 16) for _ in range(4)]  # noqa: E731
         # a seed per player fixes the random teams too, so --seed fixes the whole position set
         bridge.call(op="new", id=bid, format=fmt, seed=seed(),
-                    p1={"name": "p1", "team": None, "seed": seed()}, p2={"name": "p2", "team": None, "seed": seed()})
+                    p1={"name": "p1", "team": teams[0], "seed": seed()},
+                    p2={"name": "p2", "team": teams[1], "seed": seed()})
         for _ in range(200):
             d = bridge.call(op="dump", id=bid)
             if d["ended"]:

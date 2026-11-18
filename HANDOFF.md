@@ -10,6 +10,9 @@ built as Gen 8 by `uv sync`. Agreement on 1000 seeded gen8 random-battle positio
 81% (0.0.48 wheel) → 97% (fork); the open gaps are in `rl/README.md`. The bridge gained a
 `dump` op (full state + legal choices) for it. The fork lives only on this disk and in the
 patch; it is not pushed anywhere.
+`rl/route.py` routes per matchup (probe vs Showdown, cached in logs/route.jsonl) and per turn
+(known gaps on the active mons): 46/60 BDSP trainers pass, 45% of turns on poke-engine;
+Rollout and Rivalry hold back most of the rest. Nothing in the planner calls it yet.
 
 ## Next task (2026-10-12): make the whole pipeline faster — progress
 

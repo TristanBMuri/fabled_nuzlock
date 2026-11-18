@@ -135,7 +135,8 @@ function dumpSide(side) {
       toxic: p.status === 'tox' ? p.statusState.stage : 0,
       moves: p.moveSlots.map(m => [m.id, m.pp]),
       slot: side.team.indexOf(p.set), boosts: i === 0 ? p.boosts : null,
-      volatiles: i === 0 ? Object.fromEntries(Object.entries(p.volatiles).map(([k, v]) => [k, v.duration || 0])) : {},
+      // turns left: duration, or time for confusion (counted down before each move)
+      volatiles: i === 0 ? Object.fromEntries(Object.entries(p.volatiles).map(([k, v]) => [k, v.duration || v.time || 0])) : {},
       lastMove: i === 0 && p.lastMove ? p.lastMove.id : null,  // Encore / Disable read it
       moveActions: p.activeMoveActions,  // 0 = not moved since switching in (Fake Out, Speed Boost)
       abilityCounter: p.abilityState.counter || 0,  // Slow Start: turns left
