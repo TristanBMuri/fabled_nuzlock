@@ -9,6 +9,7 @@
 //     seed = 4 ints (Gen5 PRNG) fixes the fork's RNG; reseed=true rolls a fresh one
 //   {"op":"forcelose","id":"b0","side":"p1"}                         -> flush
 //   {"op":"state","id":"b0"}   -> hp/fainted per mon in original team order
+//   {"op":"dump","id":"b0"}    -> full state in switch order + legal choices (rl/convert.py)
 //   {"op":"close","id":"b0"}
 //
 // flush = {"p1":[lines],"p2":[lines],"ended":bool,"winner":"p1"|"p2"|"","turn":n}
@@ -101,6 +102,36 @@ function teamState(side) {
   });
 }
 
+function dumpSide(side) {
+  // everything rl/convert.py needs, in switch order (index 0 = the active mon), plus the
+  // legal choices of the pending request: [showdown choice, move id or species id]
+  const req = side.activeRequest;
+  const choices = [];
+  if (req && !req.wait) {
+    const act = req.active && req.active[0];
+    if (act && !req.forceSwitch) {
+      act.moves.forEach((m, i) => { if (!m.disabled && m.pp !== 0) choices.push([`move ${i + 1}`, m.id]); });
+    }
+    if (req.forceSwitch || (act && !act.trapped && !act.maybeTrapped)) {
+      side.pokemon.forEach((p, i) => { if (i > 0 && !p.fainted) choices.push([`switch ${i + 1}`, p.species.id]); });
+    }
+  }
+  const cond = {};
+  for (const [id, st] of Object.entries(side.sideConditions)) cond[id] = st.layers || st.duration || 1;
+  return {
+    forced: !!(req && req.forceSwitch), choices, conditions: cond,
+    pokemon: side.pokemon.map((p, i) => ({
+      species: p.species.id, types: p.getTypes(), level: p.level, weightkg: p.getWeight() / 10, hp: p.hp, maxhp: p.maxhp,
+      stats: p.storedStats, ability: p.ability, item: p.item, status: p.status,
+      sleep: p.status === 'slp' ? { time: p.statusState.time, start: p.statusState.startTime } : null,
+      toxic: p.status === 'tox' ? p.statusState.stage : 0,
+      moves: p.moveSlots.map(m => [m.id, m.pp]),
+      slot: side.team.indexOf(p.set), boosts: i === 0 ? p.boosts : null,
+      volatiles: i === 0 ? Object.fromEntries(Object.entries(p.volatiles).map(([k, v]) => [k, v.duration || 0])) : {},
+    })),
+  };
+}
+
 // No PP Ups (2026-10-14): Showdown starts every move at pp * 8/5 (three PP Ups); the games'
 // trainers and a hardcore player have the base PP. Reset both sides just before the battle
 // starts (the first request then carries the real maxpp), then re-apply a carry.
@@ -166,6 +197,16 @@ function handle(msg) {
         turn: entry.battle.turn, ended: entry.battle.ended, winner: winnerId(entry.battle),
         p1: teamState(entry.battle.sides[0]), p2: teamState(entry.battle.sides[1]),
       };
+    case 'dump': {
+      const b = entry.battle;
+      return {
+        turn: b.turn, ended: b.ended, winner: winnerId(b),
+        weather: b.field.weather, terrain: b.field.terrain,  // turns left; 0 = no end (primal weather)
+        weatherTurns: b.field.weatherState.duration || 0, terrainTurns: b.field.terrainState.duration || 0,
+        pseudo: Object.fromEntries(Object.entries(b.field.pseudoWeather).map(([k, v]) => [k, v.duration || 0])),
+        p1: dumpSide(b.sides[0]), p2: dumpSide(b.sides[1]),
+      };
+    }
     case 'close':
       entry.battle.destroy();
       battles.delete(msg.id);

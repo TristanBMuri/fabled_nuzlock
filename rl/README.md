@@ -7,7 +7,7 @@ One file per lesson; each runs end to end in minutes.
 ## Why a Rust engine
 
 The bots that changed the competitive scene in 2025–26 lean on a fast simulator
-([deep-research notes, 2026-11-18](#what-the-field-did-2025-26)). We use
+([research notes below](#the-2026-bot-wave-augnov-2026)). We use
 [poke-engine](https://github.com/pmariglia/poke-engine) (`pip install poke-engine`, Rust,
 the engine under Foul Play). Measured on this machine:
 
@@ -20,12 +20,44 @@ the engine under Foul Play). Measured on this machine:
 ~130x more turns per second. Attempt #3's PPO stalled at 6M Showdown steps; here 6M turns are
 ~80 s of engine time per core. Whether *that* fixes from-scratch RL is lesson 2's question.
 
-**Caveats.** poke-engine is its own model of the game: singles only, and by its author's
-account less complete than Showdown. **The pip wheel is a Gen 4 build** (Shadow Ball does half
-damage to Steel). A Gen 8 wheel builds from the sdist in 7 s with
-`maturin build --release --no-default-features --features poke-engine/gen8` (cargo is in the
-box), at the same speed. It is not our `gen8customgamenogimmicks`, nor
-the RR / BDSP mods. Train on it, but any claim about the planner is checked on Showdown.
+**Gen 8, not the pip default.** The PyPI wheel is a Gen 4 build (Shadow Ball does half damage
+to Steel). `pyproject.toml` makes `uv sync` build poke-engine from the sdist with the `gen8`
+feature (needs cargo, which is in the box; ~10 s), at the same speed.
+
+## Can we trust it? — `engine_diff.py` + `convert.py`
+
+`convert.py` turns a Showdown battle (the bridge's `dump` op) into a poke-engine State and
+lists what it cannot carry over (poke-engine silently maps unknown names to NONE, so every
+name is checked). `engine_diff.py` plays the same turn on both: poke-engine's exact outcome
+table against 200 Showdown replays with fresh RNG, positions from random-move gen8 random
+battles.
+
+    uv run python rl/engine_diff.py --positions 1000     # ~3 min, logs/engine_diff.jsonl
+
+First run, 2026-11-18, 1000 positions (`--show N` prints the worst cases):
+
+| | positions |
+|---|---|
+| fully agree | **813 (81%)** |
+| not convertible (Light Clay, Scope Lens unknown) | 77 (8%) |
+| poke-engine refuses Struggle | 5 |
+| disagree beyond sampling noise | 105 (11% of the 918 compared) |
+
+Engine gaps found so far, each seen in several positions:
+- **Sheer Force + Life Orb**: poke-engine takes the 10% recoil Showdown waives (Tauros, Landorus).
+- **Defog** does not lower the target's evasion (11 of 13 Defog positions).
+- **Competitive / Defiant** do not trigger from Sticky Web (Meowstic-F).
+- **Soul-Heart** is missing (Magearna's Fleur Cannon: -2 where Showdown has -1).
+- **Effect Spore**: ~70% sleep on contact where Showdown has 30% split over sleep / poison / paralysis.
+- Not yet explained: Toxic positions often ~1/16 HP apart; Rest, Aegislash, Greedent, Fake Out.
+
+Approximations by design: Showdown fixes how long sleep, confusion and Outrage last when they
+start; poke-engine rolls a chance each turn. The converter maps the fixed-length ones
+(Taunt, Encore, Yawn, Slow Start) and the field timers.
+
+What this means: fine for learning and for search as a first pass; a planner decision that
+matters is still confirmed on Showdown. The format here is vanilla gen8 random battles; our
+custom format and the RR / BDSP mods are not covered.
 
 ## The ladder
 
@@ -33,9 +65,9 @@ the RR / BDSP mods. Train on it, but any claim about the planner is checked on S
 
 Garchomp vs a random-move Rotom-Wash. The agent has to learn, from +1 / -1 alone, that
 Earthquake does nothing (Levitate), Will-O-Wisp halves its attack, and that Swords Dance pays.
-First run (seed 0, 30k episodes): Q picks Swords Dance at the start (+0.90 vs Dragon Claw
-+0.81), the same move as poke-engine's expectiminimax; win rate 95.9% vs 94.8% for always
-Dragon Claw and 64% for random.
+Run on the Gen 8 build (seed 0, 30k episodes): Q values Swords Dance highest at the start
+(+0.97 vs Dragon Claw +0.86), the same move as poke-engine's expectiminimax; win rate 97.4%,
+vs 98.0% for always Dragon Claw and 74% for random. (On the Gen 4 wheel it was 95.9 / 94.8 / 64.)
 
 Exercises, each a one-line change:
 - `--episodes 2000`: what does an unconverged table look like? (Lesson from attempt #3:
@@ -43,6 +75,9 @@ Exercises, each a one-line change:
 - `--gamma 0.9`: the win is ~5 turns away; does discounting change the policy?
 - Make `opponent()` always use Will-O-Wisp. Does Swords Dance stay the right opening?
 - Drop the burn flag from `key()`. The table can no longer tell burned from not: what breaks?
+- Q prefers Swords Dance yet loses to always Dragon Claw by 0.6 points. Is that noise
+  (rerun with other seeds), the coarse `key()`, or is Swords Dance worse against a
+  *random* opponent than against the worst-case one expectiminimax assumes?
 - Replace Q-learning's `max` target with the action actually taken next (SARSA). Compare.
 
 ### 2. Search teacher → small network, 3v3 — `lesson2_distill.py` (next)

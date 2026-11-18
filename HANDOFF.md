@@ -4,6 +4,9 @@
 planner's path: nothing imports it. It runs on poke-engine (the Rust sim, 13 us/turn vs ~1.7 ms
 for our Showdown rollout turn). Lesson 1 (tabular Q-learning) is done; lesson 2 (search teacher
 to a small net) is next. The README also covers the Aug–Nov 2026 Showdown bot wave.
+`rl/engine_diff.py` measures poke-engine (built as Gen 8 by `uv sync`) against Showdown turn by turn:
+81% of 1000 gen8 random-battle positions agree; the gaps are listed in `rl/README.md`. The bridge
+gained a `dump` op (full state + legal choices) for it.
 
 ## Next task (2026-10-12): make the whole pipeline faster — progress
 

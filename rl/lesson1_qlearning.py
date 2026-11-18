@@ -15,8 +15,14 @@ import argparse
 import random
 from collections import defaultdict
 
-from poke_engine import (Move, Pokemon, Side, State, generate_instructions,
-                         iterative_deepening_expectiminimax)
+from poke_engine import (
+    Move,
+    Pokemon,
+    Side,
+    State,
+    generate_instructions,
+    iterative_deepening_expectiminimax,
+)
 
 US = ["earthquake", "dragonclaw", "swordsdance", "stoneedge"]
 THEM = ["hydropump", "willowisp", "thunderbolt", "protect"]
