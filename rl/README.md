@@ -20,8 +20,11 @@ the engine under Foul Play). Measured on this machine:
 ~130x more turns per second. Attempt #3's PPO stalled at 6M Showdown steps; here 6M turns are
 ~80 s of engine time per core. Whether *that* fixes from-scratch RL is lesson 2's question.
 
-**Caveats.** poke-engine is its own model of the game: Gen 9 build, singles only, and by its
-author's account less complete than Showdown. It is not our `gen8customgamenogimmicks`, nor
+**Caveats.** poke-engine is its own model of the game: singles only, and by its author's
+account less complete than Showdown. **The pip wheel is a Gen 4 build** (Shadow Ball does half
+damage to Steel). A Gen 8 wheel builds from the sdist in 7 s with
+`maturin build --release --no-default-features --features poke-engine/gen8` (cargo is in the
+box), at the same speed. It is not our `gen8customgamenogimmicks`, nor
 the RR / BDSP mods. Train on it, but any claim about the planner is checked on Showdown.
 
 ## The ladder
