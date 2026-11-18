@@ -18,6 +18,9 @@ pythonpath = ["."]
 testpaths = ["tests"]
 
 [tool.uv]
-# poke-engine's PyPI wheel is a Gen 4 build; build Gen 8 from the sdist (needs cargo, ~10 s)
-no-binary-package = ["poke-engine"]
+# poke-engine: our fork (poke-engine/, gitignored, branch nuzlock; README -> Setup), built
+# as Gen 8 (the PyPI wheel is Gen 4). Needs cargo; a rebuild after an edit is ~30 s.
 config-settings = { build-args = "--no-default-features --features poke-engine/gen8" }
+
+[tool.uv.sources]
+poke-engine = { path = "poke-engine/poke-engine-py" }

@@ -28,6 +28,9 @@ uv sync                                                   # python deps
 git clone https://github.com/smogon/pokemon-showdown.git  # the simulator (gitignored, vendored)
 cd pokemon-showdown && git checkout 84d7ceb && npm install && node build && cd ..
 ./scripts/setup_custom_formats.sh                        # the gen8customgamenogimmicks format
+git clone https://github.com/pmariglia/poke-engine.git    # Rust battle engine for rl/ (gitignored)
+cd poke-engine && git checkout -b nuzlock f7b147f && git apply ../rl/poke-engine.patch && cd ..
+uv sync                                                   # builds it as Gen 8 (needs cargo)
 uv run pytest -q                                          # 22 tests, ~2 s (node + built Showdown)
 ```
 

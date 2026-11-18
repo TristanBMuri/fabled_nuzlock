@@ -118,16 +118,27 @@ function dumpSide(side) {
   }
   const cond = {};
   for (const [id, st] of Object.entries(side.sideConditions)) cond[id] = st.layers || st.duration || 1;
+  // slot conditions of the active slot: wish {duration, hp}; futuremove {duration, move, source
+  // = the user's index in its own side's switch order}
+  const slot = Object.fromEntries(Object.entries(side.slotConditions[0] || {}).map(([id, st]) => [id, {
+    duration: st.duration || 0, hp: st.hp || 0, move: st.move || '',
+    source: st.source ? st.source.side.pokemon.indexOf(st.source) : -1,
+  }]));
   return {
-    forced: !!(req && req.forceSwitch), choices, conditions: cond,
+    forced: !!(req && req.forceSwitch), choices, conditions: cond, slot,
     pokemon: side.pokemon.map((p, i) => ({
       species: p.species.id, types: p.getTypes(), level: p.level, weightkg: p.getWeight() / 10, hp: p.hp, maxhp: p.maxhp,
       stats: p.storedStats, ability: p.ability, item: p.item, status: p.status,
-      sleep: p.status === 'slp' ? { time: p.statusState.time, start: p.statusState.startTime } : null,
+      // rest: Rest sets its own fixed 3-turn timer, with the sleeper as the source
+      sleep: p.status === 'slp' ? { time: p.statusState.time, start: p.statusState.startTime,
+        rest: p.statusState.source === p && p.statusState.startTime === 3 } : null,
       toxic: p.status === 'tox' ? p.statusState.stage : 0,
       moves: p.moveSlots.map(m => [m.id, m.pp]),
       slot: side.team.indexOf(p.set), boosts: i === 0 ? p.boosts : null,
       volatiles: i === 0 ? Object.fromEntries(Object.entries(p.volatiles).map(([k, v]) => [k, v.duration || 0])) : {},
+      lastMove: i === 0 && p.lastMove ? p.lastMove.id : null,  // Encore / Disable read it
+      moveActions: p.activeMoveActions,  // 0 = not moved since switching in (Fake Out, Speed Boost)
+      abilityCounter: p.abilityState.counter || 0,  // Slow Start: turns left
     })),
   };
 }

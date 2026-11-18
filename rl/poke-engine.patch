@@ -1,0 +1,587 @@
+diff --git a/src/genx/abilities.rs b/src/genx/abilities.rs
+index 293ee3e..0fc77fc 100644
+--- a/src/genx/abilities.rs
++++ b/src/genx/abilities.rs
+@@ -364,6 +364,15 @@ define_enum_with_from_str! {
+ }
+ 
+ // whether the attacker's ability or move ignores the target's ability, e.g. mold breaker or sunsteel strike
++pub fn sheer_force_applies(choice: &Choice) -> bool {
++    let volatile_boosted = choice.volatile_status.as_ref().is_some_and(|v| {
++        v.volatile_status != PokemonVolatileStatus::PARTIALLYTRAPPED
++            && v.volatile_status != PokemonVolatileStatus::LOCKEDMOVE
++            && v.volatile_status != PokemonVolatileStatus::SMACKDOWN
++    });
++    choice.secondaries.is_some() || volatile_boosted
++}
++
+ pub fn ignores_target_ability(
+     attacking_pkmn: &Pokemon,
+     choice: &Choice,
+@@ -783,7 +792,8 @@ pub fn ability_after_damage_hit(
+                 );
+             }
+         }
+-        Abilities::GRIMNEIGH | Abilities::ASONESPECTRIER => {
++        // Soul-Heart fires on any faint; only the KO by its own attack is modelled here
++        Abilities::GRIMNEIGH | Abilities::ASONESPECTRIER | Abilities::SOULHEART => {
+             if damage_dealt > 0 && defending_side.get_active_immutable().hp == 0 {
+                 apply_boost_instruction(
+                     attacking_side,
+@@ -1316,8 +1326,14 @@ pub fn ability_end_of_turn(
+                 instructions.instruction_list.push(ins);
+             }
+         }
++        // Showdown: not on the turn it switched in (activeTurns == 0)
+         Abilities::SPEEDBOOST => {
+-            if attacking_side.speed_boost < 6 {
++            if attacking_side.speed_boost < 6
++                && !matches!(
++                    attacking_side.last_used_move,
++                    crate::state::LastUsedMove::Switch(_)
++                )
++            {
+                 let ins = Instruction::Boost(BoostInstruction {
+                     side_ref: side_ref.clone(),
+                     stat: PokemonBoostableStat::Speed,
+@@ -2231,17 +2247,7 @@ pub fn ability_modify_attack_being_used(
+             }
+         }
+         Abilities::SHEERFORCE => {
+-            let mut sheer_force_volatile_boosted = false;
+-            if let Some(attacker_volatile_status) = &attacker_choice.volatile_status {
+-                if attacker_volatile_status.volatile_status
+-                    != PokemonVolatileStatus::PARTIALLYTRAPPED
+-                    && attacker_volatile_status.volatile_status != PokemonVolatileStatus::LOCKEDMOVE
+-                    && attacker_volatile_status.volatile_status != PokemonVolatileStatus::SMACKDOWN
+-                {
+-                    sheer_force_volatile_boosted = true;
+-                }
+-            }
+-            if attacker_choice.secondaries.is_some() || sheer_force_volatile_boosted {
++            if sheer_force_applies(attacker_choice) {
+                 attacker_choice.base_power *= 1.3;
+                 attacker_choice.secondaries = None;
+                 attacker_choice.volatile_status = None
+@@ -2522,20 +2528,26 @@ pub fn ability_modify_attack_against(
+                 attacker_choice.base_power /= 1.5;
+             }
+         }
++        // Showdown rolls once: 11% sleep, 10% paralysis, 9% poison. The engine rolls each in
++        // turn and a later one cannot land after an earlier one, hence the conditional chances.
++        // Powder: Grass types and Overcoat are immune.
+         Abilities::EFFECTSPORE => {
+-            if attacker_choice.flags.contact {
++            if attacker_choice.flags.contact
++                && !attacking_pkmn.has_type(&PokemonType::GRASS)
++                && attacking_pkmn.ability != Abilities::OVERCOAT
++            {
+                 attacker_choice.add_or_create_secondaries(Secondary {
+                     chance: 9.0,
+                     target: MoveTarget::User,
+                     effect: Effect::Status(PokemonStatus::POISON),
+                 });
+                 attacker_choice.add_or_create_secondaries(Secondary {
+-                    chance: 10.0,
++                    chance: 1000.0 / 91.0,
+                     target: MoveTarget::User,
+                     effect: Effect::Status(PokemonStatus::PARALYZE),
+                 });
+                 attacker_choice.add_or_create_secondaries(Secondary {
+-                    chance: 11.0,
++                    chance: 1100.0 / 81.0,
+                     target: MoveTarget::User,
+                     effect: Effect::Status(PokemonStatus::SLEEP),
+                 });
+diff --git a/src/genx/choice_effects.rs b/src/genx/choice_effects.rs
+index 714b126..4e361ea 100644
+--- a/src/genx/choice_effects.rs
++++ b/src/genx/choice_effects.rs
+@@ -181,8 +181,9 @@ pub fn modify_choice(
+                 _ => {}
+             }
+         }
++        // Showdown: also doubled against a target that switched in this turn
+         Choices::BOLTBEAK | Choices::FISHIOUSREND => {
+-            if attacker_choice.first_move {
++            if attacker_choice.first_move || defender_choice.category == MoveCategory::Switch {
+                 attacker_choice.base_power *= 2.0;
+             }
+         }
+@@ -1119,6 +1120,20 @@ pub fn choice_hazard_clear(
+         Choices::DEFOG
+             if defending_side.get_active_immutable().ability != Abilities::GOODASGOLD =>
+         {
++            // Showdown: -1 evasion on the target unless it is behind a Substitute
++            if !defending_side
++                .volatile_statuses
++                .contains(&PokemonVolatileStatus::SUBSTITUTE)
++            {
++                apply_boost_instruction(
++                    defending_side,
++                    &PokemonBoostableStat::Evasion,
++                    &-1,
++                    attacking_side_ref,
++                    &attacking_side_ref.get_other_side(),
++                    instructions,
++                );
++            }
+             if state.terrain.terrain_type != Terrain::NONE {
+                 instructions
+                     .instruction_list
+@@ -1428,7 +1443,15 @@ pub fn choice_special_effect(
+             let attacking_side = state.get_side(attacking_side_ref);
+             let active_index = attacking_side.active_index;
+             let active_pkmn = attacking_side.get_active();
+-            if active_pkmn.status != PokemonStatus::SLEEP && !electric_terrain_active {
++            // Showdown: fails at full HP and for Insomnia / Vital Spirit / Comatose
++            if active_pkmn.status != PokemonStatus::SLEEP
++                && !electric_terrain_active
++                && active_pkmn.hp < active_pkmn.maxhp
++                && !matches!(
++                    active_pkmn.ability,
++                    Abilities::INSOMNIA | Abilities::VITALSPIRIT | Abilities::COMATOSE
++                )
++            {
+                 let heal_amount = active_pkmn.maxhp - active_pkmn.hp;
+                 instructions
+                     .instruction_list
+diff --git a/src/genx/generate_instructions.rs b/src/genx/generate_instructions.rs
+index 2a8d2cd..b834147 100644
+--- a/src/genx/generate_instructions.rs
++++ b/src/genx/generate_instructions.rs
+@@ -241,6 +241,42 @@ fn generate_instructions_from_switch(
+     new_pokemon_index: PokemonIndex,
+     switching_side_ref: SideReference,
+     incoming_instructions: &mut StateInstructions,
++) {
++    switch_in_without_effects(state, new_pokemon_index, switching_side_ref, incoming_instructions);
++    ability_on_switch_in(state, &switching_side_ref, incoming_instructions);
++    item_on_switch_in(state, &switching_side_ref, incoming_instructions);
++}
++
++// Both sides switching (Showdown, Gen 5+): both mons come in, then their switch-in
++// abilities and items run in speed order, so the slower one's weather / Intimidate wins
++// or lands on the new foe.
++fn generate_instructions_from_double_switch(
++    state: &mut State,
++    side_one_index: PokemonIndex,
++    side_two_index: PokemonIndex,
++    incoming_instructions: &mut StateInstructions,
++) {
++    switch_in_without_effects(state, side_one_index, SideReference::SideOne, incoming_instructions);
++    switch_in_without_effects(state, side_two_index, SideReference::SideTwo, incoming_instructions);
++    let s1 = get_effective_speed(state, &SideReference::SideOne);
++    let s2 = get_effective_speed(state, &SideReference::SideTwo);
++    let side_one_first = if state.trick_room.active { s1 < s2 } else { s1 > s2 };
++    let order = if side_one_first {
++        [SideReference::SideOne, SideReference::SideTwo]
++    } else {
++        [SideReference::SideTwo, SideReference::SideOne]
++    };
++    for side_ref in order {
++        ability_on_switch_in(state, &side_ref, incoming_instructions);
++        item_on_switch_in(state, &side_ref, incoming_instructions);
++    }
++}
++
++fn switch_in_without_effects(
++    state: &mut State,
++    new_pokemon_index: PokemonIndex,
++    switching_side_ref: SideReference,
++    incoming_instructions: &mut StateInstructions,
+ ) {
+     let should_last_used_move = state.use_last_used_move;
+ 
+@@ -473,7 +509,7 @@ fn generate_instructions_from_switch(
+                 side,
+                 &PokemonBoostableStat::Speed,
+                 &-1,
+-                &switching_side_ref,
++                &switching_side_ref.get_other_side(),
+                 &switching_side_ref,
+                 incoming_instructions,
+             );
+@@ -566,9 +602,6 @@ fn generate_instructions_from_switch(
+             }
+         }
+     }
+-
+-    ability_on_switch_in(state, &switching_side_ref, incoming_instructions);
+-    item_on_switch_in(state, &switching_side_ref, incoming_instructions);
+ }
+ 
+ fn generate_instructions_from_increment_side_condition(
+@@ -642,12 +675,21 @@ fn generate_instructions_from_side_conditions(
+         | PokemonSideCondition::Reflect
+         | PokemonSideCondition::Safeguard
+         | PokemonSideCondition::Mist => {
++            let light_clay = state
++                .get_side_immutable(attacking_side_reference)
++                .get_active_immutable()
++                .item
++                == Items::LIGHTCLAY;
++            let screen = !matches!(
++                side_condition.condition,
++                PokemonSideCondition::Safeguard | PokemonSideCondition::Mist
++            );
+             generate_instructions_from_duration_side_conditions(
+                 state,
+                 side_condition,
+                 attacking_side_reference,
+                 incoming_instructions,
+-                SIDE_CONDITION_DURATION,
++                if light_clay && screen { 8 } else { SIDE_CONDITION_DURATION },
+             );
+         }
+         PokemonSideCondition::Tailwind => {
+@@ -907,7 +949,41 @@ fn get_instructions_from_status_effects(
+             new_status: status.status,
+         })
+     };
++    let synchronize = matches!(instruction, Instruction::ChangeStatus(_))
++        && target_pkmn.ability == Abilities::SYNCHRONIZE
++        && target_side_ref != *attacking_side_reference
++        && matches!(
++            status.status,
++            PokemonStatus::BURN
++                | PokemonStatus::PARALYZE
++                | PokemonStatus::POISON
++                | PokemonStatus::TOXIC
++        );
+     incoming_instructions.instruction_list.push(instruction);
++
++    // Synchronize: a foe that burns / paralyzes / poisons it gets the same status back
++    if synchronize
++        && state.get_side_immutable(attacking_side_reference).get_active_immutable().status
++            == PokemonStatus::NONE
++        && !immune_to_status(
++            state,
++            &MoveTarget::Opponent,
++            attacking_side_reference,
++            &status.status,
++        )
++    {
++        let attacking_side = state.get_side(attacking_side_reference);
++        let index = attacking_side.active_index;
++        attacking_side.get_active().status = status.status;
++        incoming_instructions
++            .instruction_list
++            .push(Instruction::ChangeStatus(ChangeStatusInstruction {
++                side_ref: *attacking_side_reference,
++                pokemon_index: index,
++                old_status: PokemonStatus::NONE,
++                new_status: status.status,
++            }));
++    }
+ }
+ 
+ pub fn get_boost_amount(side: &Side, boost: &PokemonBoostableStat, amount: i8) -> i8 {
+@@ -925,6 +1001,36 @@ pub fn get_boost_amount(side: &Side, boost: &PokemonBoostableStat, amount: i8) -
+     0
+ }
+ 
++// Crit chance from the crit stage (Showdown's critRatio): high-crit move, Scope Lens /
++// Razor Claw, Super Luck +1 each; Focus Energy, Leek (Farfetch'd line) +2.
++fn crit_rate(attacker_side: &Side, defender: &crate::state::Pokemon, choice: &Choice) -> f32 {
++    if defender.ability == Abilities::BATTLEARMOR || defender.ability == Abilities::SHELLARMOR {
++        return 0.0;
++    }
++    if choice.move_id.guaranteed_crit() {
++        return 1.0;
++    }
++    let attacker = attacker_side.get_active_immutable();
++    let stage = choice.move_id.increased_crit_ratio() as usize
++        + matches!(attacker.item, Items::SCOPELENS | Items::RAZORCLAW) as usize
++        + (attacker.ability == Abilities::SUPERLUCK) as usize
++        + 2 * attacker_side
++            .volatile_statuses
++            .contains(&PokemonVolatileStatus::FOCUSENERGY) as usize
++        + 2 * (attacker.item == Items::LEEK
++            && matches!(
++                attacker.id,
++                crate::pokemon::PokemonName::FARFETCHD
++                    | crate::pokemon::PokemonName::FARFETCHDGALAR
++                    | crate::pokemon::PokemonName::SIRFETCHD
++            )) as usize;
++    #[cfg(any(feature = "gen4", feature = "gen5"))]
++    let table = [BASE_CRIT_CHANCE, 1.0 / 8.0, 1.0 / 4.0, 1.0 / 3.0, 1.0 / 2.0];
++    #[cfg(not(any(feature = "gen4", feature = "gen5")))]
++    let table = [BASE_CRIT_CHANCE, 1.0 / 8.0, 1.0 / 2.0, 1.0];
++    table[stage.min(table.len() - 1)]
++}
++
+ pub fn apply_boost_instruction(
+     target_side: &mut Side,
+     stat: &PokemonBoostableStat,
+@@ -2411,7 +2517,8 @@ pub fn generate_instructions_from_move(
+         }
+     }
+ 
+-    let (_attacker_side, defender_side) = state.get_both_sides(&attacking_side);
++    let (attacker_side, defender_side) = state.get_both_sides(&attacking_side);
++    let crit_rate = crit_rate(attacker_side, defender_side.get_active_immutable(), choice);
+     let defender_active = defender_side.get_active();
+     let mut does_damage = false;
+     let (mut branch_damage, mut regular_damage) = (0, 0);
+@@ -2429,17 +2536,7 @@ pub fn generate_instructions_from_move(
+             let (average_non_kill_damage, num_kill_rolls) =
+                 compare_health_with_damage_multiples(max_damage_dealt, defender_active.hp);
+ 
+-            let crit_rate = if defender_active.ability == Abilities::BATTLEARMOR
+-                || defender_active.ability == Abilities::SHELLARMOR
+-            {
+-                0.0
+-            } else if choice.move_id.guaranteed_crit() {
+-                1.0
+-            } else if choice.move_id.increased_crit_ratio() {
+-                1.0 / 8.0
+-            } else {
+-                BASE_CRIT_CHANCE
+-            };
++            let crit_rate = crit_rate;
+ 
+             // the chance of a branch is the chance of the roll killing + the chance of a crit
+             let branch_chance = ((1.0 - crit_rate) * (num_kill_rolls as f32 / 16.0)) + crit_rate;
+@@ -2452,17 +2549,7 @@ pub fn generate_instructions_from_move(
+             incoming_instructions.update_percentage(1.0 - branch_chance);
+             regular_damage = average_non_kill_damage;
+         } else if branch_on_damage && max_damage_dealt < defender_active.hp {
+-            let crit_rate = if defender_active.ability == Abilities::BATTLEARMOR
+-                || defender_active.ability == Abilities::SHELLARMOR
+-            {
+-                0.0
+-            } else if choice.move_id.guaranteed_crit() {
+-                1.0
+-            } else if choice.move_id.increased_crit_ratio() {
+-                1.0 / 8.0
+-            } else {
+-                BASE_CRIT_CHANCE
+-            };
++            let crit_rate = crit_rate;
+             let mut branch_ins = incoming_instructions.clone();
+             branch_ins.update_percentage(crit_rate);
+             branch_instructions = Some(branch_ins);
+@@ -4201,15 +4288,16 @@ pub fn generate_instructions_from_move_pair(
+     }
+ 
+     // run switches
+-    if let MoveChoice::Switch(switch_id) = side_one_move {
++    if let (MoveChoice::Switch(one), MoveChoice::Switch(two)) = (side_one_move, side_two_move) {
++        generate_instructions_from_double_switch(state, *one, *two, &mut incoming_instructions);
++    } else if let MoveChoice::Switch(switch_id) = side_one_move {
+         generate_instructions_from_switch(
+             state,
+             *switch_id,
+             SideReference::SideOne,
+             &mut incoming_instructions,
+         );
+-    }
+-    if let MoveChoice::Switch(switch_id) = side_two_move {
++    } else if let MoveChoice::Switch(switch_id) = side_two_move {
+         generate_instructions_from_switch(
+             state,
+             *switch_id,
+@@ -6384,7 +6472,11 @@ mod tests {
+ 
+         let expected_instructions = vec![StateInstructions {
+             percentage: 100.0,
+-            instruction_list: vec![],
++            instruction_list: vec![Instruction::Boost(BoostInstruction {
++                side_ref: SideReference::SideTwo,
++                stat: PokemonBoostableStat::Evasion,
++                amount: -1,
++            })],
+         }];
+ 
+         assert_eq!(instructions, expected_instructions)
+@@ -6411,7 +6503,13 @@ mod tests {
+ 
+         let expected_instructions = vec![StateInstructions {
+             percentage: 100.0,
+-            instruction_list: vec![Instruction::ChangeTerrain(ChangeTerrain {
++            instruction_list: vec![
++            Instruction::Boost(BoostInstruction {
++                side_ref: SideReference::SideTwo,
++                stat: PokemonBoostableStat::Evasion,
++                amount: -1,
++            }),
++            Instruction::ChangeTerrain(ChangeTerrain {
+                 new_terrain: Terrain::NONE,
+                 new_terrain_turns_remaining: 0,
+                 previous_terrain: Terrain::ELECTRICTERRAIN,
+@@ -6446,6 +6544,11 @@ mod tests {
+         let expected_instructions = vec![StateInstructions {
+             percentage: 100.0,
+             instruction_list: vec![
++                Instruction::Boost(BoostInstruction {
++                side_ref: SideReference::SideTwo,
++                stat: PokemonBoostableStat::Evasion,
++                amount: -1,
++            }),
+                 Instruction::ChangeTerrain(ChangeTerrain {
+                     new_terrain: Terrain::NONE,
+                     new_terrain_turns_remaining: 0,
+diff --git a/src/genx/items.rs b/src/genx/items.rs
+index 785833d..600dbdd 100644
+--- a/src/genx/items.rs
++++ b/src/genx/items.rs
+@@ -1,5 +1,5 @@
+ #![allow(unused_variables)]
+-use super::abilities::Abilities;
++use super::abilities::{sheer_force_applies, Abilities};
+ use super::damage_calc::type_effectiveness_modifier;
+ use super::generate_instructions::{apply_boost_instruction, immune_to_status};
+ use super::state::Terrain;
+@@ -20,7 +20,7 @@ use std::cmp;
+ use super::state::PokemonVolatileStatus;
+ 
+ define_enum_with_from_str! {
+-    #[repr(u8)]
++    #[repr(u16)]
+     #[derive(Debug, PartialEq, Clone, Copy)]
+     Items {
+         NONE,
+@@ -279,6 +279,15 @@ define_enum_with_from_str! {
+         TATSUGIRINITE,
+         ZERAORITE,
+         ZYGARDITE,
++        LIGHTCLAY,
++        SCOPELENS,
++        RAZORCLAW,
++        LEEK,
++        FIGYBERRY,
++        WIKIBERRY,
++        MAGOBERRY,
++        AGUAVBERRY,
++        IAPAPABERRY,
+     },
+     default = UNKNOWNITEM
+ }
+@@ -388,6 +397,29 @@ fn lum_berry(
+     active_pkmn.item = Items::NONE;
+ }
+ 
++fn pinch_berry(side_ref: &SideReference, attacking_side: &mut Side, instructions: &mut StateInstructions) {
++    let active_pkmn = attacking_side.get_active();
++    let heal_amount = cmp::min(active_pkmn.maxhp / 3, active_pkmn.maxhp - active_pkmn.hp);
++    instructions.instruction_list.push(Instruction::Heal(HealInstruction {
++        side_ref: *side_ref,
++        heal_amount,
++    }));
++    active_pkmn.hp += heal_amount;
++    instructions.instruction_list.push(Instruction::ChangeItem(ChangeItemInstruction {
++        side_ref: *side_ref,
++        current_item: active_pkmn.item,
++        new_item: Items::NONE,
++    }));
++    active_pkmn.item = Items::NONE;
++}
++
++fn is_pinch_berry(item: Items) -> bool {
++    matches!(
++        item,
++        Items::FIGYBERRY | Items::WIKIBERRY | Items::MAGOBERRY | Items::AGUAVBERRY | Items::IAPAPABERRY
++    )
++}
++
+ fn sitrus_berry(
+     side_ref: &SideReference,
+     attacking_side: &mut Side,
+@@ -760,6 +792,13 @@ pub fn item_before_move(
+         Items::SITRUSBERRY if active_pkmn.hp <= active_pkmn.maxhp / 4 => {
+             sitrus_berry(side_ref, attacking_side, instructions)
+         }
++        item if is_pinch_berry(item)
++            && (active_pkmn.hp <= active_pkmn.maxhp / 4
++                || (active_pkmn.ability == Abilities::GLUTTONY
++                    && active_pkmn.hp <= active_pkmn.maxhp / 2)) =>
++        {
++            pinch_berry(side_ref, attacking_side, instructions)
++        }
+         Items::ASPEARBERRY if active_pkmn.status == PokemonStatus::FREEZE => {
+             status_cure_berry(Items::ASPEARBERRY, side_ref, attacking_side, instructions)
+         }
+@@ -915,6 +954,13 @@ pub fn item_end_of_turn(
+         Items::SITRUSBERRY if active_pkmn.hp <= active_pkmn.maxhp / 2 => {
+             sitrus_berry(side_ref, attacking_side, instructions)
+         }
++        item if is_pinch_berry(item)
++            && (active_pkmn.hp <= active_pkmn.maxhp / 4
++                || (active_pkmn.ability == Abilities::GLUTTONY
++                    && active_pkmn.hp <= active_pkmn.maxhp / 2)) =>
++        {
++            pinch_berry(side_ref, attacking_side, instructions)
++        }
+         Items::ASPEARBERRY if active_pkmn.status == PokemonStatus::FREEZE => {
+             status_cure_berry(Items::ASPEARBERRY, side_ref, attacking_side, instructions)
+         }
+@@ -1208,8 +1254,14 @@ pub fn item_modify_attack_being_used(
+                     });
+                 }
+ 
++                // Sheer Force has already removed the secondaries; judge the move as written
+                 #[cfg(not(feature = "gen4"))]
+-                if attacking_side.get_active_immutable().ability != Abilities::MAGICGUARD {
++                if attacking_side.get_active_immutable().ability != Abilities::MAGICGUARD
++                    && !(attacking_side.get_active_immutable().ability == Abilities::SHEERFORCE
++                        && crate::choices::MOVES
++                            .get(&attacking_choice.move_id)
++                            .is_some_and(sheer_force_applies))
++                {
+                     attacking_choice.add_or_create_secondaries(Secondary {
+                         chance: 100.0,
+                         effect: Effect::Heal(-0.1),
+diff --git a/src/instruction.rs b/src/instruction.rs
+index 237b1e1..c3a6b5c 100644
+--- a/src/instruction.rs
++++ b/src/instruction.rs
+@@ -598,7 +598,8 @@ mod test {
+     // Make sure that the size of the Instruction enum doesn't change
+     #[test]
+     fn test_instruction_size() {
+-        assert_eq!(size_of::<Instruction>(), 6);
++        // 6 upstream; 8 since Items is u16 (more than 256 items)
++        assert_eq!(size_of::<Instruction>(), 8);
+         assert_eq!(align_of::<Instruction>(), 2);
+     }
+ }
+diff --git a/tests/test_battle_mechanics.rs b/tests/test_battle_mechanics.rs
+index 8cf8f58..fa585fc 100644
+--- a/tests/test_battle_mechanics.rs
++++ b/tests/test_battle_mechanics.rs
+@@ -22594,14 +22594,14 @@ fn test_effectspore() {
+ 
+     let expected_instructions = vec![
+         StateInstructions {
+-            percentage: 72.891,
++            percentage: 70.0,
+             instruction_list: vec![Instruction::Damage(DamageInstruction {
+                 side_ref: SideReference::SideTwo,
+                 damage_amount: 48,
+             })],
+         },
+         StateInstructions {
+-            percentage: 9.009,
++            percentage: 10.999999,
+             instruction_list: vec![
+                 Instruction::Damage(DamageInstruction {
+                     side_ref: SideReference::SideTwo,
+@@ -22616,7 +22616,7 @@ fn test_effectspore() {
+             ],
+         },
+         StateInstructions {
+-            percentage: 9.1,
++            percentage: 10.0,
+             instruction_list: vec![
+                 Instruction::Damage(DamageInstruction {
+                     side_ref: SideReference::SideTwo,
+@@ -22631,7 +22631,7 @@ fn test_effectspore() {
+             ],
+         },
+         StateInstructions {
+-            percentage: 8.999999,
++            percentage: 9.0,
+             instruction_list: vec![
+                 Instruction::Damage(DamageInstruction {
+                     side_ref: SideReference::SideTwo,

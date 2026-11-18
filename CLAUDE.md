@@ -37,7 +37,8 @@ uv run python -u scripts/plan_gauntlet.py --episodes 20 --seed 300 --slice 405 -
 uv run python scripts/league_test.py --snapshots results/league_snapshots --replays 4 --slice 405 --policy calc --search 9,8 --search-all --deep 9,16 --workers 20 --out logs/league_x.jsonl --vs results/league_base.jsonl
 # RL learning track (rl/README.md, off the planner's path; poke-engine = Rust sim)
 uv run python rl/lesson1_qlearning.py              # ~10 s
-uv run python rl/engine_diff.py --positions 1000   # poke-engine vs Showdown, ~3 min
+uv run python rl/engine_diff.py --positions 1000   # poke-engine vs Showdown, ~3 min (97% agree)
+uv sync --reinstall-package poke-engine            # after editing the fork in poke-engine/ (rl/README.md)
 # the run dashboard (UI_TODO.md): probes with --out write <out>.events.jsonl
 uv run python ui/build.py --serve                  # http://localhost:8765
 ```

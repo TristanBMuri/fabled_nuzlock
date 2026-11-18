@@ -18,3 +18,6 @@ pokemon-showdown-rr/
 
 # dashboard data, rebuilt by ui/build.py
 ui/data.json
+
+# poke-engine: our fork of pmariglia/poke-engine (branch nuzlock), not our code
+poke-engine/

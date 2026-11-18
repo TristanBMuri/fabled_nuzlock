@@ -40,7 +40,7 @@ IGNORED_VOLATILES = {"choicelock", "stall"}
 # confusion and lockedmove get a random length in Showdown and a per-turn chance in
 # poke-engine, so they stay approximations
 ELAPSED = {"taunt": lambda left: 3 - left, "encore": lambda left: 3 - left,
-           "yawn": lambda left: 2 - left, "slowstart": lambda left: left + 1}
+           "yawn": lambda left: 2 - left}
 
 
 def _tokens(state: State) -> set[str]:
@@ -64,15 +64,17 @@ def _mon(p: dict, issues: list) -> Pokemon:
             issues.append(f"{kind}:{name}")
     types = [t.lower() for t in p["types"]][:2] + ["typeless"]
     st = p["stats"]
-    slept = p["sleep"]["start"] - p["sleep"]["time"] if p["sleep"] else 0
+    sl = p["sleep"] or {}
+    rest = sl.get("time", 0) if sl.get("rest") else 0  # both engines count Rest sleep down from 3
+    slept = 0 if rest or not sl else sl["start"] - sl["time"]
     return Pokemon(id=p["species"], level=p["level"], types=tuple(types[:2]), base_types=tuple(types[:2]),
                    hp=p["hp"], maxhp=p["maxhp"], ability=p["ability"], base_ability=p["ability"],
                    item=p["item"] or "none", attack=st["atk"], defense=st["def"], special_attack=st["spa"],
                    special_defense=st["spd"], speed=st["spe"], status=STATUS[p["status"]],
-                   sleep_turns=max(0, slept), weight_kg=p["weightkg"], moves=[Move(id=m, pp=pp) for m, pp in p["moves"]])
+                   sleep_turns=max(0, slept), rest_turns=rest, weight_kg=p["weightkg"], moves=[Move(id=m, pp=pp) for m, pp in p["moves"]])
 
 
-def _side(d: dict, issues: list) -> Side:
+def _side(d: dict, foe: dict, issues: list) -> Side:
     mons = [_mon(p, issues) for p in d["pokemon"]]
     active = d["pokemon"][0]
     vols, durations = set(), {}
@@ -85,6 +87,19 @@ def _side(d: dict, issues: list) -> Side:
                 durations[v] = ELAPSED[v](left)
         else:
             issues.append(f"volatile:{v}")
+    if active["ability"] == "slowstart" and active["abilityCounter"] > 0:  # Showdown keeps it in abilityState
+        vols.add("slowstart")
+        durations["slowstart"] = active["abilityCounter"]  # both count turns left
+    # Wish heals this slot; a future move sits on the target's slot in Showdown, on the user's
+    # side in poke-engine. Both count the same turns.
+    extra = {}
+    if "wish" in d["slot"]:
+        extra["wish"] = (1, int(d["slot"]["wish"]["hp"]))  # Showdown: always resolves this turn
+    fm = foe["slot"].get("futuremove")
+    if fm and fm["move"] == "futuresight":
+        extra["future_sight"] = (fm["duration"], str(fm["source"]))
+    issues += [f"slot:{k}" for k in d["slot"] if k not in ("wish", "healingwish")
+               and not (k == "futuremove" and d["slot"][k]["move"] == "futuresight")]
     cond = {}
     for k, n in d["conditions"].items():
         if k in SIDE_CONDITIONS:
@@ -92,9 +107,16 @@ def _side(d: dict, issues: list) -> Side:
         else:
             issues.append(f"side:{k}")
     cond["toxic_count"] = active["toxic"]
+    if "healingwish" in d["slot"]:  # Gen 8: waits in the slot for a mon that needs it
+        cond["healing_wish"] = 1
+    names = [m for m, _ in active["moves"]]
+    # poke-engine marks "switched in, has not moved yet" with a switch as the last move
+    last = ("switch:0" if active["moveActions"] == 0 else
+            f"move:{names.index(active['lastMove'])}" if active["lastMove"] in names else "move:none")
     return Side(pokemon=mons + [Pokemon.create_fainted() for _ in range(6 - len(mons))],
                 volatile_statuses=vols, side_conditions=SideConditions(**cond),
-                volatile_status_durations=VolatileStatusDurations(**durations),
+                volatile_status_durations=VolatileStatusDurations(**durations), last_used_move=last,
+                **extra,
                 **{BOOSTS[k]: v for k, v in active["boosts"].items()})
 
 
@@ -107,7 +129,7 @@ def to_engine(dump: dict) -> tuple[State, list[str]]:
     pseudo = set(dump["pseudo"]) - {"sleepclausemod"}  # a clause, not a field effect
     issues += [f"field:{p}" for p in pseudo - {"trickroom"}]
     turns = lambda n: n if n > 0 else -1  # poke-engine: 0 turns left = never ends, -1 too
-    state = State(side_one=_side(dump["p1"], issues), side_two=_side(dump["p2"], issues),
+    state = State(side_one=_side(dump["p1"], dump["p2"], issues), side_two=_side(dump["p2"], dump["p1"], issues),
                   weather=WEATHER.get(dump["weather"], "none"), weather_turns_remaining=turns(dump["weatherTurns"]),
                   terrain=TERRAIN.get(dump["terrain"], "none"), terrain_turns_remaining=turns(dump["terrainTurns"]),
                   trick_room="trickroom" in pseudo, trick_room_turns_remaining=dump["pseudo"].get("trickroom", 0))

@@ -12,6 +12,8 @@ A position is flagged when the engines disagree beyond sampling noise:
   extra    poke-engine outcomes Showdown never produced           (>= MISS)
   tv       total variation distance between the outcome tables    (>= TV)
   hp       mean HP of either active mon differs                   (>= HP, of max HP)
+           (not checked when the turn can end the battle: Showdown then skips end-of-turn
+           effects, poke-engine does not; the outcome table still counts the KO)
 """
 
 import argparse
@@ -33,8 +35,9 @@ MISS, TV, HP = 0.10, 0.20, 0.05
 
 def compare(bridge, bid, dump, c1, c2, samples):
     state, issues = to_engine(dump)
-    rec = {"turn": dump["turn"], "p1": dump["p1"]["pokemon"][0]["species"], "p2": dump["p2"]["pokemon"][0]["species"],
-           "c1": c1[1], "c2": c2[1], "issues": issues}
+    a1, a2 = dump["p1"]["pokemon"][0], dump["p2"]["pokemon"][0]
+    rec = {"turn": dump["turn"], "p1": a1["species"], "p2": a2["species"], "c1": c1[1], "c2": c2[1],
+           "x1": [a1["ability"], a1["item"]], "x2": [a2["ability"], a2["item"]], "issues": issues}
     if issues:
         return rec
     try:
@@ -48,12 +51,14 @@ def compare(bridge, bid, dump, c1, c2, samples):
         w = b.percentage / 100
         eng[key] += w
         eng_hp = [eng_hp[i] + w * hp[i] for i in range(2)]
-    sd, sd_hp = Counter(), [0.0, 0.0]
+    sd, sd_hp, ended = Counter(), [0.0, 0.0], False
     for i in range(samples):
         fid = f"{bid}f{i}"
         bridge.call(op="fork", id=bid, new=fid, reseed=True)
         bridge.call(op="choose", id=fid, p1=c1[0], p2=c2[0])
-        key, hp = outcome_showdown(bridge.call(op="dump", id=fid))
+        after = bridge.call(op="dump", id=fid)
+        ended |= after["ended"]
+        key, hp = outcome_showdown(after)
         bridge.call(op="close", id=fid)
         sd[key] += 1 / samples
         sd_hp = [sd_hp[j] + hp[j] / samples for j in range(2)]
@@ -68,7 +73,9 @@ def compare(bridge, bid, dump, c1, c2, samples):
                         key=lambda r: -abs(r[0] - r[1]))[:4],
     }
     rec["flags"] = [f for f, bad in [("missing", rec["missing"] >= MISS), ("extra", rec["extra"] >= MISS),
-                                      ("tv", rec["tv"] >= TV), ("hp", max(map(abs, rec["dhp"])) >= HP)] if bad]
+                                      ("tv", rec["tv"] >= TV), ("hp", not ended and max(map(abs, rec["dhp"])) >= HP)] if bad]
+    if rec["flags"]:
+        rec["dump"] = dump  # random teams cannot be regenerated; keep the position to debug it
     return rec
 
 
@@ -78,9 +85,10 @@ def positions(bridge, fmt, n, rng):
     while count < n:
         bid = f"g{game}"
         game += 1
-        seed = [rng.randrange(1 << 16) for _ in range(4)]
-        bridge.call(op="new", id=bid, format=fmt, seed=seed,
-                    p1={"name": "p1", "team": None}, p2={"name": "p2", "team": None})
+        seed = lambda: [rng.randrange(1 << 16) for _ in range(4)]  # noqa: E731
+        # a seed per player fixes the random teams too, so --seed fixes the whole position set
+        bridge.call(op="new", id=bid, format=fmt, seed=seed(),
+                    p1={"name": "p1", "team": None, "seed": seed()}, p2={"name": "p2", "team": None, "seed": seed()})
         for _ in range(200):
             d = bridge.call(op="dump", id=bid)
             if d["ended"]:
@@ -138,7 +146,8 @@ def main():
             print(f"      {m:18s} {k}/{base[m]}")
     worst = sorted(flagged, key=lambda r: -(r["missing"] + r["extra"] + r["tv"]))[:args.show]
     for r in worst:
-        print(f"\nturn {r['turn']}: {r['p1']} {r['c1']}  vs  {r['p2']} {r['c2']}  flags={r['flags']} dhp={r['dhp']}")
+        print(f"\nturn {r['turn']}: {r['p1']} {r['x1']} {r['c1']}  vs  {r['p2']} {r['x2']} {r['c2']}  "
+              f"flags={r['flags']} dhp={r['dhp']}")
         for pe, ps, k in r["diffs"]:
             print(f"   engine {pe:.2f}  showdown {ps:.2f}  {k}")
 

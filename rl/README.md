@@ -20,9 +20,12 @@ the engine under Foul Play). Measured on this machine:
 ~130x more turns per second. Attempt #3's PPO stalled at 6M Showdown steps; here 6M turns are
 ~80 s of engine time per core. Whether *that* fixes from-scratch RL is lesson 2's question.
 
-**Gen 8, not the pip default.** The PyPI wheel is a Gen 4 build (Shadow Ball does half damage
-to Steel). `pyproject.toml` makes `uv sync` build poke-engine from the sdist with the `gen8`
-feature (needs cargo, which is in the box; ~10 s), at the same speed.
+**Our fork, built as Gen 8.** The PyPI wheel is a Gen 4 build (Shadow Ball does half damage
+to Steel) and 0.0.48 lags upstream. `poke-engine/` (gitignored) is upstream `main` (f7b147f)
+plus `rl/poke-engine.patch`, the conformance fixes below; `pyproject.toml` builds it with the
+`gen8` feature (needs cargo, in the box). After editing the Rust: `uv sync
+--reinstall-package poke-engine` (~30 s), and refresh the patch with `git diff f7b147f >
+../rl/poke-engine.patch` inside `poke-engine/`. Same speed: 11-12 µs per turn.
 
 ## Can we trust it? — `engine_diff.py` + `convert.py`
 
@@ -34,26 +37,32 @@ battles.
 
     uv run python rl/engine_diff.py --positions 1000     # ~3 min, logs/engine_diff.jsonl
 
-First run, 2026-11-18, 1000 positions (`--show N` prints the worst cases):
+`--seed` fixes the whole position set (the random teams too), so runs compare fix by fix.
+Flagged positions keep their full dump in the log, to replay on poke-engine.
 
-| | positions |
-|---|---|
-| fully agree | **813 (81%)** |
-| not convertible (Light Clay, Scope Lens unknown) | 77 (8%) |
-| poke-engine refuses Struggle | 5 |
-| disagree beyond sampling noise | 105 (11% of the 918 compared) |
+| 1000 positions | 0.0.48 wheel | upstream main | + our patch |
+|---|---|---|---|
+| fully agree | 81% | 69-71% | **97%** |
+| not convertible | 8% | 25-27% | 0% |
+| disagree (of the compared) | 11% | 6% | **3%** |
 
-Engine gaps found so far, each seen in several positions:
-- **Sheer Force + Life Orb**: poke-engine takes the 10% recoil Showdown waives (Tauros, Landorus).
-- **Defog** does not lower the target's evasion (11 of 13 Defog positions).
-- **Competitive / Defiant** do not trigger from Sticky Web (Meowstic-F).
-- **Soul-Heart** is missing (Magearna's Fleur Cannon: -2 where Showdown has -1).
-- **Effect Spore**: ~70% sleep on contact where Showdown has 30% split over sleep / poison / paralysis.
-- Not yet explained: Toxic positions often ~1/16 HP apart; Rest, Aegislash, Greedent, Fake Out.
+(The first two columns had unseeded teams; upstream main's "not convertible" is the same gaps
+hit more often in that sample: Light Clay, Scope Lens, Leek, pinch berries.)
+
+Fixed in the patch (each was a cluster in the diff): Defog's evasion drop; Sheer Force + Life
+Orb recoil; Sticky Web vs Defiant / Competitive; Effect Spore odds and powder immunity;
+Soul-Heart; Synchronize; Speed Boost on the switch-in turn; ability order when both sides
+switch (weather, Intimidate); Fishious Rend / Bolt Beak vs a switch-in; Rest at full HP; crit
+stages (Scope Lens, Razor Claw, Super Luck, Focus Energy, Leek); Light Clay and the pinch
+berries. Fixed in the converter: last move (Encore), Wish, Future Sight, Healing Wish, Slow
+Start, Rest's fixed sleep, "has not moved since switching in" (Fake Out).
+
+Still open: Ditto (no Imposter / Transform), Struggle (poke-engine refuses it), Doom Desire,
+two-turn moves mid-charge, and a tail of single cases. Soul-Heart only counts its own KOs.
 
 Approximations by design: Showdown fixes how long sleep, confusion and Outrage last when they
 start; poke-engine rolls a chance each turn. The converter maps the fixed-length ones
-(Taunt, Encore, Yawn, Slow Start) and the field timers.
+(Taunt, Encore, Yawn, Slow Start, Rest) and the field timers.
 
 What this means: fine for learning and for search as a first pass; a planner decision that
 matters is still confirmed on Showdown. The format here is vanilla gen8 random battles; our
