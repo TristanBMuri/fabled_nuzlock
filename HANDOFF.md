@@ -1,5 +1,12 @@
 # HANDOFF — state of the project as of 2026-10-12
 
+**2026-11-23 (later): RR on the Rust engine** (NOTEBOOK.md last entry, rl/README.md → "Radical Red on
+poke-engine"). `rr_team_probe.py --engine 20000` runs the player's search on poke-engine's `rr` build
+(97% agreement with the RR Showdown sim on boss positions), Showdown as the fallback: the same
+quality as the Showdown search at ~1/10 the compute. First six-gym box table: Erika 22%, Koga /
+Blaine 0% (a planner / box wall, confirmed on Showdown). Open: doubles (Sabrina, Lorelei, ~20
+fights), Rivalry (no genders), the Erika+ wall (encounter routing, TODO.md G0).
+
 **2026-11-23: back on Radical Red** (NOTEBOOK.md last entry). `--legal` is now the player's full
 hardcore legality (`rr_probe.hardcore`: bans, Toxic / Leech Seed list, ability swaps); RR box
 baseline `results/rr_sheet_boxes.*` (Brock 73% / Misty 53%): boss sets from the official sheet

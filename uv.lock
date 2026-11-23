@@ -659,6 +659,7 @@ dependencies = [
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "numpy", version = "2.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "poke-engine" },
+    { name = "poke-engine-rr" },
     { name = "poke-env" },
     { name = "torch" },
 ]
@@ -674,6 +675,7 @@ requires-dist = [
     { name = "gymnasium", specifier = "<1.2.3" },
     { name = "numpy" },
     { name = "poke-engine", directory = "poke-engine/poke-engine-py" },
+    { name = "poke-engine-rr", directory = "poke-engine/poke-engine-py-rr" },
     { name = "poke-env", specifier = ">=0.15.0" },
     { name = "torch", specifier = ">=2.15.0" },
 ]
@@ -939,6 +941,11 @@ wheels = [
 name = "poke-engine"
 version = "0.0.48"
 source = { directory = "poke-engine/poke-engine-py" }
+
+[[package]]
+name = "poke-engine-rr"
+version = "0.0.48"
+source = { directory = "poke-engine/poke-engine-py-rr" }
 
 [[package]]
 name = "poke-env"

@@ -8,6 +8,7 @@ dependencies = [
     "gymnasium<1.2.3",
     "numpy",
     "poke-engine>=0.0.48",
+    "poke-engine-rr",
     "torch>=2.15.0",
 ]
 
@@ -19,9 +20,10 @@ pythonpath = ["."]
 testpaths = ["tests"]
 
 [tool.uv]
-# poke-engine: our fork (poke-engine/, gitignored, branch nuzlock; README -> Setup), built
-# as Gen 8 (the PyPI wheel is Gen 4). Needs cargo; a rebuild after an edit is ~30 s.
-config-settings = { build-args = "--no-default-features --features poke-engine/gen8" }
+# poke-engine: our fork (poke-engine/, gitignored, branch nuzlock; README -> Setup). Two builds
+# of it: poke_engine = Gen 8 (the PyPI wheel is Gen 4), poke_engine_rr = Radical Red (feature
+# `rr`); each package's Cargo.toml picks its features. Needs cargo; a rebuild is ~30 s.
 
 [tool.uv.sources]
 poke-engine = { path = "poke-engine/poke-engine-py" }
+poke-engine-rr = { path = "poke-engine/poke-engine-py-rr" }

@@ -208,8 +208,16 @@ def setup(args, name: str, announce: bool = True):
     return SimpleNamespace(name=name, args=args, known=known, cap=cap, pool=pool, progress=progress, arena=arena,
                            unmodelled=unmodelled, enemy_packed=enemy_packed, enemy_species=enemy_species,
                            boss_types=boss_types, bridge=SimBridge(showdown=str(rp.FORK)), enemy=enemy, calc=calc,
-                           searcher=Searcher(enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed, death_weight=args.death_weight),
+                           searcher=searcher(args, Searcher(enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed, death_weight=args.death_weight)),
                            seeds=seeds, rng=random.Random(f"{name}-team-{args.seed}"), team_score={}, mons={}, t0=time.time())
+
+
+def searcher(args, showdown):
+    """--engine: the Rust engine's search with the Showdown search as its fallback."""
+    if not getattr(args, "engine", 0):
+        return showdown
+    from rl.engine_search import EngineSearcher
+    return EngineSearcher(showdown, iterations=args.engine, opponent=getattr(args, "engine_opp", "minimax"))
 
 
 def mon_of(ctx, sp: str) -> Mon | None:
@@ -494,6 +502,8 @@ def box_job(args, name: str, i: int) -> dict | None:
         w, d, pr, attr, cl = searched(ctx, team)
         threats = threats_of(ctx, attr, ctx.pool, exclude=set(species))
         out = {"box": box, "team": list(team), "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl, "threats": threats}
+        if hasattr(ctx.searcher, "stats"):  # --engine: decisions on the engine / on Showdown, and why (cumulative per worker)
+            out["engine"] = dict(ctx.searcher.stats)
         emit(args, "box", boss=name, i=i, of=args.boxes, **out, deaths_by=dict(attr[0]), matrix=matrix(ctx, team))
         print(f"{name:<10} box {i + 1:>2}/{args.boxes}: {len(box)} mons, team {list(team)} -> win {w:5.0%} deaths/mon {d:.2f} deathless {cl:.0%}; "
               + "; ".join(f"{th['enemy']} killed {th['deaths']}, missing " + (", ".join(f"{sp} ({wh})" for sp, _, _, wh in th["counters"][:1]) or "no counter in the pool") for th in threats)
@@ -569,6 +579,10 @@ def main() -> None:
     ap.add_argument("--matchup", action="store_true", help="the calc bot (and so the rollouts) switches on the matchup matrix")
     ap.add_argument("--death-weight", type=float, default=0.5, help="search value: win +-1 minus this x the fainted fraction (6 = one death costs a win)")
     ap.add_argument("--no-items", action="store_true", help="no held items (default: the final six hold the items in hand by the boss — care packages + overworld, data/rr/items.json; one per mon, gauntlet.assign_items; C1, 2026-10-14)")
+    ap.add_argument("--engine", type=int, default=0, help="stage C's search runs poke-engine MCTS with this many iterations where the position converts "
+                    "(rl/engine_search.py), the Showdown search (--search) everywhere else; 0 = Showdown only")
+    ap.add_argument("--engine-opp", choices=("minimax", "ai"), default="minimax",
+                    help="--engine's model of the boss: both sides search, or the RR AI in Rust")
     ap.add_argument("--out")
     args = ap.parse_args()
     args.items = not args.no_items

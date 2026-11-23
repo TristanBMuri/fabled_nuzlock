@@ -92,7 +92,10 @@ def effectiveness(move, dfn) -> float:
     under full info; the game's AI never clicks Scald into Dry Skin, so neither may the model of it)."""
     if move.type == PokemonType.GROUND and dfn.item == "airballoon":
         return 0.0
-    mult = dfn.damage_multiplier(move)
+    try:
+        mult = dfn.damage_multiplier(move)
+    except KeyError:  # a typeless ("???") move or defender type: poke-env's chart has no row; Showdown = neutral
+        mult = 1.0
     ab = (dfn.ability or "").replace(" ", "").lower()
     if ab in ABILITY_IMMUNE_TYPE and move.type is not None and move.type.name.capitalize() == ABILITY_IMMUNE_TYPE[ab]:
         return 0.0

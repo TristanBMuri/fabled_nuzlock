@@ -7,7 +7,7 @@ Two levels:
                             turn_gaps lets through is replayed --samples times on Showdown
                             (engine_diff.compare). More than --tolerate disagreements -> Showdown
   turn_gaps(dump)  every turn, microseconds: a known gap (GAPS) on either active mon, or
-                   something the converter cannot carry (a two-turn move mid-charge), sends
+                   something the converter cannot carry (Booster Energy Protosynthesis), sends
                    that turn to Showdown. A gap on the bench does not matter until it is in.
 
 Every matchup decision is one line of logs/route.jsonl (its own log, nothing else writes
@@ -36,8 +36,7 @@ LOG = Path("logs/route.jsonl")
 # what poke-engine still gets wrong (rl/README.md -> Can we trust it?)
 GAPS = {"ability:imposter": "no Transform", "move:transform": "no Transform",
         "move:doomdesire": "no Doom Desire", "ability:soulheart": "Soul-Heart counts only its own KOs",
-        "ability:rivalry": "no genders", "move:rollout": "no lock-in / doubling",
-        "move:iceball": "no lock-in / doubling"}
+        "ability:rivalry": "no genders"}
 
 
 def _features(mon: dict) -> set[str]:

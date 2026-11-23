@@ -107,6 +107,7 @@ function dumpSide(side) {
   // legal choices of the pending request: [showdown choice, move id or species id]
   const req = side.activeRequest;
   const choices = [];
+  const canMega = !!(req && !req.wait && req.active && req.active[0] && req.active[0].canMegaEvo);
   if (req && !req.wait) {
     const act = req.active && req.active[0];
     if (act && !req.forceSwitch) {
@@ -117,7 +118,8 @@ function dumpSide(side) {
     }
   }
   const cond = {};
-  for (const [id, st] of Object.entries(side.sideConditions)) cond[id] = st.layers || st.duration || 1;
+  // an arena-pinned condition has duration 0 (applyArena): never runs out, so a long count
+  for (const [id, st] of Object.entries(side.sideConditions)) cond[id] = st.layers || (st.duration === 0 ? 99 : st.duration) || 1;
   // slot conditions of the active slot: wish {duration, hp}; futuremove {duration, move, source
   // = the user's index in its own side's switch order}
   const slot = Object.fromEntries(Object.entries(side.slotConditions[0] || {}).map(([id, st]) => [id, {
@@ -125,10 +127,10 @@ function dumpSide(side) {
     source: st.source ? st.source.side.pokemon.indexOf(st.source) : -1,
   }]));
   return {
-    forced: !!(req && req.forceSwitch), choices, conditions: cond, slot,
+    forced: !!(req && req.forceSwitch), choices, conditions: cond, slot, canMega,
     pokemon: side.pokemon.map((p, i) => ({
       species: p.species.id, types: p.getTypes(), level: p.level, weightkg: p.getWeight() / 10, hp: p.hp, maxhp: p.maxhp,
-      stats: p.storedStats, ability: p.ability, item: p.item, status: p.status,
+      stats: p.storedStats, ability: p.ability, item: p.item, status: p.status, hpType: p.hpType || '',
       // rest: Rest sets its own fixed 3-turn timer, with the sleeper as the source
       sleep: p.status === 'slp' ? { time: p.statusState.time, start: p.statusState.startTime,
         rest: p.statusState.source === p && p.statusState.startTime === 3 } : null,
@@ -140,6 +142,10 @@ function dumpSide(side) {
       lastMove: i === 0 && p.lastMove ? p.lastMove.id : null,  // Encore / Disable read it
       moveActions: p.activeMoveActions,  // 0 = not moved since switching in (Fake Out, Speed Boost)
       abilityCounter: p.abilityState.counter || 0,  // Slow Start: turns left
+      // Rollout / Ice Ball: hits done; Protosynthesis / Quark Drive: the boosted stat
+      volatileData: i === 0 ? Object.fromEntries(Object.entries(p.volatiles)
+        .filter(([, v]) => v.hitCount !== undefined || v.bestStat)
+        .map(([k, v]) => [k, { hitCount: v.hitCount || 0, bestStat: v.bestStat || '', fromBooster: !!v.fromBooster }])) : {},
     })),
   };
 }

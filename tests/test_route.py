@@ -8,9 +8,9 @@ def _mon(ability, moves):
 
 
 def test_turn_gaps_look_at_the_active_mons_only():
-    shinx, bidoof = _mon("rivalry", ["tackle"]), _mon("simple", ["rollout", "tackle"])
+    shinx, bidoof = _mon("rivalry", ["tackle"]), _mon("simple", ["doomdesire", "tackle"])
     starly = _mon("keeneye", ["quickattack"])
     dump = lambda p1: {"p1": {"pokemon": p1}, "p2": {"pokemon": [starly]}}  # noqa: E731
-    assert turn_gaps(dump([starly, bidoof])) == []                 # Rollout on the bench
-    assert turn_gaps(dump([bidoof, starly])) == ["move:rollout"]   # Rollout in
+    assert turn_gaps(dump([starly, bidoof])) == []                    # Doom Desire on the bench
+    assert turn_gaps(dump([bidoof, starly])) == ["move:doomdesire"]  # Doom Desire in
     assert turn_gaps(dump([shinx])) == ["ability:rivalry"]

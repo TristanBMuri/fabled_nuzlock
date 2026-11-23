@@ -103,7 +103,74 @@ What this means: fine for learning and for search as a first pass; a planner dec
 matters is still confirmed on Showdown. The format here is vanilla gen8 random battles; our
 custom format and the RR / BDSP mods are not covered.
 
-## Radical Red on poke-engine: a workload guess (2026-11-21, not measured)
+## Radical Red on poke-engine (started 2026-11-23)
+
+The battle always runs on Showdown (the RR fork); the *search* behind each player decision runs
+on poke-engine where it is trusted, and on the Showdown rollout search everywhere else.
+
+- **Build.** Cargo feature `rr` = gen9 + the gen9rr mod. A second Python package,
+  `poke_engine_rr` (`poke-engine/poke-engine-py-rr`, same bindings source), sits next to the
+  Gen 8 `poke_engine`; `uv sync --reinstall-package poke-engine-rr` after a Rust edit.
+- **Data.** `rl/rr_engine_data.py` diffs the mod against the gen9 it inherits (both in the fork)
+  and writes `poke-engine/src/rr_data.rs`: the plain data of the 149 existing moves the mod
+  changed. It also prints the worklist of what is code, not data (`--json
+  logs/rr_engine_gaps.json`): 27 new moves, 28 new abilities, 30 changed abilities, 20 changed
+  moves, 8 changed items, 5 changed conditions (freeze, hail, ...), 76 new species.
+- **Mechanics** (Rust, `#[cfg(feature = "rr")]`, tests in `poke-engine/tests/test_rr_*.rs`), built
+  2026-11-23 by delegated agents on worktree branches of the fork, merged into `nuzlock`:
+  `rr-moves` (Gemini Neon: the 27 new moves, the changed moves / conditions / items, 76 new
+  species, Oran Berry, Berry Juice; freeze is RR's frostbite, hail is snow-like), `rr-abilities`
+  (Gemini Neon: all 28 new and 30 changed abilities), `rr-mega` (Opus: mega evolution from the
+  mod's 66 stone megas; a stone holder megas on its first move, as the RR AI does; Gen 9 turn
+  order on the mega turn), `rr-conformance` (Gemini Neon: the diff's tail; Speed Boost, Anger
+  Shell after a multi-hit, Harsh Sun / Heavy Rain cases, permanent terrain, the terrain seeds,
+  Sand Veil / Snow Cloak, Chloroblast, Covet, `switch:<slot>` choices for two mons of one species),
+  `rr-gaps` (Opus: Rollout / Ice Ball lock-in and doubling, for every gen, gen8 suite green;
+  Mega Rayquaza; the converter carries two-turn moves mid-charge and Protosynthesis / Quark
+  Drive via the dump's `volatileData`). Left: Rivalry (no genders in poke-engine), a Booster
+  Energy boost under sun / Electric Terrain (issue `volatile:<v>-booster`). Under `rr`, 38
+  vanilla tests in test_battle_mechanics.rs and 9 lib tests fail on purpose (mechanics RR
+  changes); the gen8 build passes everything.
+- **Converter.** `convert.use_rr()`: typed Hidden Power (Showdown keeps the type in `hpType`)
+  becomes poke-engine's 60 BP id; Z crystals (the RR AI never Z-moves) become no item; mega
+  stones stay, a mega forme sets `mega_evolved`; `mega:pending` is left only for Mega Rayquaza.
+  Arena-pinned side conditions (Koga's Tailwind) dump as 99 turns; `snow`; `recharge` = `none`.
+- **Conformance.** `uv run python rl/engine_diff.py --rr --positions 400 --samples 100`:
+  positions from every hardcore boss in trainer order (sampled player party vs the sheet set,
+  arena on), 4 per boss. 2026-11-23: before the mechanics 45% not convertible and 89% of the
+  rest agreeing; after the three merges 2% / 92%; after `rr-conformance` **2% not convertible,
+  97% agree** (the rest are single cases: Metronome, HP means); after `rr-gaps` **0% not
+  convertible, 97% agree**.
+- **Search.** `rl/engine_search.py` `EngineSearcher(fallback, iterations, death=60)`: poke-engine
+  MCTS (both sides search, full information) when the position converts and no known gap is on
+  either active mon, else the fallback (`ai_util.evaluate.Searcher`). In the probe:
+  `rr_team_probe.py ... --engine 20000` (box rows get `engine`: decisions on the engine / on
+  Showdown and why). Under `rr` the evaluation charges `POKE_ENGINE_DEATH` points per fainted mon
+  of ours and a won battle is scored by the evaluation (a win with deaths < a clean win).
+  Misty, the same 10 boxes as `results/rr_sheet_boxes`: Showdown search 52% wins / 0.69 deaths
+  per mon (172-487 s a box); engine, death 0: 48% / 0.77 (100k iterations: 43% / 0.76, so not
+  depth); with the won-terminal change, death 0: 53% / 0.73, **death 60: 52% / 0.66 at 10-58 s a
+  box**; death 200: nearly every box lost (too afraid to trade). On the merged engine, both bosses
+  (`results/rr_engine_merged_boxes10.*`, 96-100% of searched decisions on the engine): **Brock 75% /
+  0.44 / 17% deathless** (Showdown search 72% / 0.53 / 12%), **Misty 53% / 0.65** (52% / 0.69).
+  10 boxes x 6 battles: a lead, not a result. **The 30-box table** (`results/rr_engine_boxes30.*`, the
+  same boxes and teams as `results/rr_sheet_boxes`): Brock 70% / 0.49 / 16% deathless, Misty 51% /
+  0.68 / 4%; paired per box vs the Showdown search: wins -2.8 +- 10.3 / -2.2 +- 9.4 points, deaths
+  per mon -0.04 +- 0.09 / -0.04 +- 0.05 (95%). **A tie, in 3 min on 4 workers** (the baseline: 29
+  min on 10).
+- **The RR AI in Rust** (`rr-ai`, Gemini Neon: `src/genx/rr_ai.rs`, bindings `rr_ai_choice`,
+  `monte_carlo_tree_search_vs_ai`): the same choice as `ai_util/rr_ai.py` on 90.3% of 600 boss
+  decisions (moves 92%, forced switches 90%, voluntary switches 78%; `rl/rr_ai_diff.py`,
+  `results/rr_ai_diff.log`; the Python AI breaks ties at random). **Searching against it is worse**
+  (`--engine-opp ai`, `results/rr_engine_ai_boxes30.*`, paired vs the minimax engine search: Brock
+  wins -13 +- 10 points, Misty -33 +- 12; no turn-limit losses, long passive battles of 70-90
+  turns): the search exploits the model's errors. Not adopted; `minimax` stays the default.
+- **All six gyms, 30 boxes, engine search** (`results/rr_engine_gyms30.*`, 10 workers): Brock 66% /
+  0.52 d/mon, Misty 47% / 0.68, Lt. Surge 44% / 0.76, Erika 22% / 0.88, **Koga and Blaine 0% /
+  1.00**. The Showdown search also loses all 10 Koga boxes (`results/rr_showdown_koga10.*`): a wall
+  for the sampled boxes and the planner (Tapu Lele, Hoopa-U, Chi-Yu at 68), not the engine.
+
+### The workload guess (2026-11-21, not measured)
 
 What it would take to run RR search on the Rust engine. A guess, calibrated on the Gen 8
 conformance sprint (one day, 2026-11-18: a 1177-line patch plus `convert.py` / `engine_diff.py`,

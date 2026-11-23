@@ -2643,3 +2643,33 @@ Storm Drain, Brendan #1's Treecko Unburden, Brendan #23 at 28 (was 30); Misty / 
 unchanged. 30 boxes, 10 workers (`results/rr_sheet_boxes.*`): **Brock 81 → 73% / 0.47 → 0.53 d/mon /
 14 → 10% deathless**, Misty 53% / 0.72 / 4% (identical: same data, same seeds). Most missed at Brock
 is now Ledyba vs Cacnea. **RR baseline from here: `results/rr_sheet_boxes.*`.**
+
+## 2026-11-23 — Radical Red on the Rust engine (poke-engine `rr` build)
+
+The user's call: put the whole RR setting on the Rust engine, Showdown as the fallback, built by
+delegated agents (Gemini Neon for the bulk, Opus alongside). The battle stays on Showdown; the
+player's search runs on poke-engine wherever the position converts. Details and every number:
+`rl/README.md` → "Radical Red on poke-engine".
+
+- **Build**: cargo feature `rr` (gen9 + the gen9rr mod), Python package `poke_engine_rr` next to
+  the Gen 8 `poke_engine`. Data: `rl/rr_engine_data.py` writes the 149 changed moves' data into
+  `poke-engine/src/rr_data.rs` and lists what is code. Code, on worktree branches merged into the
+  fork's `nuzlock`: rr-moves (moves / items / species / conditions; RR freeze = frostbite, hail is
+  snow-like), rr-abilities (28 new + 30 changed), rr-mega (66 stone megas, auto on first move),
+  rr-conformance, rr-gaps (Rollout / Ice Ball for every gen, two-turn charge, Protosynthesis, Mega
+  Rayquaza), rr-ai (the RR AI in Rust).
+- **Conformance** (`rl/engine_diff.py --rr`, 400 positions over every hardcore boss): not
+  convertible 45% → 0%, agreement on the rest 83% → **97%** (`results/engine_diff_rr.log`).
+- **Search** (`rl/engine_search.py`, `rr_team_probe.py --engine 20000`): MCTS with a Nuzlocke death
+  weight (60 points per fainted mon of ours; 200 lost nearly every box). 30 boxes Brock / Misty,
+  paired against `results/rr_sheet_boxes`: wins −2.8 ± 10.3 / −2.2 ± 9.4 points, deaths per mon
+  −0.04 / −0.04: **a tie, in 3 min on 4 workers (baseline 29 min on 10)**
+  (`results/rr_engine_boxes30.*`). 96–100% of searched decisions run on the engine.
+- **The RR AI in Rust**: 90.3% the same choice as `ai_util/rr_ai.py` (`results/rr_ai_diff.log`);
+  searching against it (`--engine-opp ai`) loses badly (Misty −33 points; long passive battles, no
+  turn-limit losses: the search exploits the model's errors). Not adopted.
+- **All six gyms, 30 boxes** (`results/rr_engine_gyms30.*`): Brock 66%, Misty 47%, Lt. Surge 44%,
+  Erika 22%, Koga 0%, Blaine 0%. The Showdown search also loses all 10 Koga boxes
+  (`results/rr_showdown_koga10.*`): a wall for the sampled boxes and the planner, not the engine.
+- Fixed on the way: Hidden Power was typeless in every conversion (Showdown keeps the type in
+  `hpType`); the calc bot crashed on a typeless ("???") move at Koga.

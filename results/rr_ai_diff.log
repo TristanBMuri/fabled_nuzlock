@@ -1,0 +1,33 @@
+RR AI diff: 600 non-trivial p2 decisions across 54 boss battles (seed=0)
+  trivial (1 legal option) skipped: 28
+  OVERALL agreement:                542/600 (90.3%)
+  Move decisions (py chose move):   434/473 (91.8%)
+  Voluntary switches (py switch):   39/50 (78.0%)
+  Forced switches (post-KO/pivot):  69/77 (89.6%)
+  All switch-involved decisions:    108/133 (81.2%)
+
+Top disagreement patterns (58 total):
+     8  py_switch_vs_rust_move
+     8  forced_switch:different_mon
+     6  py_move_vs_rust_switch
+     3  voluntary_switch:different_mon
+     2  move:rocktomb_vs_bulletpunch
+     2  move:flash_vs_hiddenpowerbug60
+     2  move:hiddenpowerghost60_vs_aircutter
+     2  move:foulplay_vs_protect
+     1  move:covet_vs_poweruppunch
+     1  move:sludge_vs_belch
+     1  move:roost_vs_protect
+     1  move:zippyzap_vs_extremespeed
+
+Sample disagreements (first 10):
+  [NORMAL boss#0 t=3] p2=snubbull(0.13,intimidate,muscleband) vs p1=watchog(1.0,analytic,) w=- tr=- | py=covet vs rust=['poweruppunch']
+  [NORMAL boss#1 t=2] p2=meditite(1.0,purepower,muscleband) vs p1=leavanny(0.88,chlorophyll,) w=- tr=- | py=rocktomb vs rust=['bulletpunch']
+  [NORMAL boss#1 t=3] p2=meditite(0.08,purepower,muscleband) vs p1=leavanny(0.64,chlorophyll,) w=- tr=- | py=rocktomb vs rust=['bulletpunch']
+  [NORMAL boss#3 t=2] p2=charcadet(0.76,flamebody,) vs p1=ninjask(0.94,speedboost,) w=- tr=- | py=switch gulpin vs rust=['firespin']
+  [NORMAL boss#3 t=3] p2=gulpin(0.74,gluttony,iapapaberry) vs p1=ninjask(0.89,speedboost,) w=- tr=- | py=sludge vs rust=['belch']
+  [NORMAL boss#4 t=6] p2=dustox(0.12,shielddust,blacksludge) vs p1=kricketune(0.28,technician,) w=- tr=- | py=roost vs rust=['protect']
+  [NORMAL boss#4 t=9] p2=volbeat(1.0,prankster,lumberry) vs p1=raticatealola(1.0,gluttony,) w=- tr=- | py=flash vs rust=['hiddenpowerbug60']
+  [NORMAL boss#4 t=10] p2=volbeat(0.31,prankster,) vs p1=raticatealola(0.79,gluttony,) w=- tr=- | py=flash vs rust=['hiddenpowerbug60']
+  [NORMAL boss#6 t=5] p2=cacnea(0.18,sandrush,eviolite) vs p1=meowthgalar(1.0,toughclaws,) w=sandstorm tr=- | py=switch varoom vs rust=['poweruppunch']
+  [FORCED boss#6 t=9] p2=varoom(0.0,filter,) vs p1=sandygast(0.78,watercompaction,) w=sandstorm tr=- | py=switch lileep vs rust=['switch cacnea']
