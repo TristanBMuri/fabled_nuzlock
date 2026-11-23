@@ -120,12 +120,14 @@ def pack_trainer(t: dict, cap: int | None) -> str:
     return "]".join(parts)
 
 
-def boss_team(name: str | int) -> tuple[str, int, list[str]]:
+def boss_team(name: str | int, sheet: bool = True) -> tuple[str, int, list[str]]:
     """Packed team, max level and species for a trainer-order entry (by name = first entry
     with that name, or by index) from the dump: the twelve big bosses by dump id, every
     other entry by matching the tracker block's species against dump trainers of that
     class name (the rival's variant = the one the tracker shows); relative levels resolve
-    against the entry's cap."""
+    against the entry's cap. sheet=True (default since 2026-11-23): every mon the official sheet
+    lists takes the sheet's level, item, ability, nature and moves (the dump reads abilities from
+    slot 0 where the sheet has the hidden one: Brock's Varoom Overcoat vs Filter)."""
     dump = json.load(open(RR / "trainers_hardcore.json"))
     order = json.load(open(RR / "order.json"))["entries"]
     t_idx = name if isinstance(name, int) else next(i for i, e in enumerate(order) if e["name"] == name)
@@ -142,6 +144,19 @@ def boss_team(name: str | int) -> tuple[str, int, list[str]]:
             raise KeyError(f"no dump trainer for #{t_idx} {entry['name']}")
         tr = max(cands, key=lambda x: (len(want & {to_id_str(m["species"]) for m in x["mons"]}), x["relative"]))
     cap = entry["cap"] if tr["relative"] else max(entry["cap"], tr["cap"] or 0)
+    block = block_of(entry) if sheet else None
+    if block:  # the official sheet is the truth (user, 2026-11-23); the dump keeps IVs, gender, unlisted mons
+        by_sp = {tracker_id(p["species"], "species").removesuffix("mega"): p for p in block["pokemon"]}
+        mons = []
+        for d in tr["mons"]:
+            p = by_sp.get(to_id_str(d["species"]).removesuffix("mega"))
+            if p:
+                d = {**d, "level": tracker_level(p["level"], entry["cap"]), "item": tracker_id(p["item"], "items"),
+                     "ability": tracker_id(p["ability"], "abilities"), "nature": p["nature"],
+                     "moves": [m for m in (tracker_id(x, "moves") for x in p["moves"]) if m]}
+            mons.append(d)
+        tr = {**tr, "mons": mons}
+        cap = max([entry["cap"]] + [d["level"] for d in mons if d["level"] is not None])
     return pack_trainer(tr, entry["cap"]), cap, [m["species"] for m in tr["mons"]]
 
 

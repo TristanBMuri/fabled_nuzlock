@@ -2,8 +2,9 @@
 
 **2026-11-23: back on Radical Red** (NOTEBOOK.md last entry). `--legal` is now the player's full
 hardcore legality (`rr_probe.hardcore`: bans, Toxic / Leech Seed list, ability swaps); RR box
-baseline `results/rr_enemypp_boxes.*` (Brock 81% / Misty 53%; bosses' PP maxed again, per the
-official sheet; bridge resets only the player in gen9rr). `--normal` plays normal
+baseline `results/rr_sheet_boxes.*` (Brock 73% / Misty 53%): boss sets from the official sheet
+(`rp.boss_team(sheet=True)`, the user's call: the sheet is the truth; Varoom = Filter), the
+bosses' PP maxed (bridge resets only the player in gen9rr). `--normal` plays normal
 mode's bosses as the easier comparison (100% / 100%; TODO.md E1, the settings ladder). ROM
 checklist `data/rr/FIDELITY.md` + `scripts/rr_data_diff.py` (A1 / A3, waiting on the user's
 emulator rows). D1's premise is gone (field-aware now better); next = D2 / the boost-aware

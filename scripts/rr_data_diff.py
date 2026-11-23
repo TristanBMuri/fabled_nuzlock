@@ -32,7 +32,7 @@ def main() -> None:
     for t, e in enumerate(order[:args.upto + 1]):
         block = rp.block_of(e)
         try:
-            packed, cap, _ = rp.boss_team(t)
+            packed, cap, _ = rp.boss_team(t, sheet=False)
         except KeyError:
             packed = None
         tag = f"#{t:<3} {e['name']:<20} cap {e['cap']}{' (optional)' if e['optional'] else ''}"

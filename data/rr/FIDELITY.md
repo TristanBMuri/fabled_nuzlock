@@ -45,8 +45,10 @@ gen9rr format only the player is reset now (`ai_util/sim_bridge.js basePP`).
 
 The pattern: where they disagree, the dump usually has ability slot 0 and the sheet the
 hidden ability. The dump's own header warns that its max-level guess is "still wrong a lot
-for bosses; check the official doc". **If the ROM sides with the sheet on Varoom and Treecko,
-switch the sim to the sheet's abilities wholesale** and rerun the box tables.
+for bosses; check the official doc". **Settled 2026-11-23 (the user): the official sheet is the truth.** `rp.boss_team` now takes
+every listed mon's level, item, ability, nature and moves from the sheet (`sheet=True`); the dump
+keeps IVs, gender and the mons / trainers the sheet does not list. The "sim" column above is
+the old behaviour; `rr_data_diff.py` still compares the raw dump.
 
 Also open: #14 Lass Relli has no team in either source; #21 / #22 (doubles) list only one of
 the two trainers in the dump.

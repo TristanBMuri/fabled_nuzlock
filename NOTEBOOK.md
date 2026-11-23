@@ -2634,3 +2634,12 @@ Misty 53% / 0.72 / 4% — inside the noise of `rr_legal_boxes`. **RR baseline fr
 Drive folder has boss sheets only (both modes); the only per-trainer source is Rudo2204's dumps
 (hardcore / normal / easy now in data/rr/). The dump has Varoom Overcoat in both modes, the sheets
 Filter: a dump-wide ability reading question for the ROM.
+
+**The official sheet as the truth for boss sets (same day, the user's call).** `rp.boss_team(sheet=True)`:
+each mon the official hardcore sheet lists takes its level, item, ability, nature and moves; the
+dump keeps IVs, gender and unlisted mons (the user's HTML export of the default-mode sheet matched
+our copy: Varoom = Filter). Changes in the fights we run: Brock's Varoom Filter (was Overcoat), Lileep
+Storm Drain, Brendan #1's Treecko Unburden, Brendan #23 at 28 (was 30); Misty / Surge / Erika
+unchanged. 30 boxes, 10 workers (`results/rr_sheet_boxes.*`): **Brock 81 → 73% / 0.47 → 0.53 d/mon /
+14 → 10% deathless**, Misty 53% / 0.72 / 4% (identical: same data, same seeds). Most missed at Brock
+is now Ledyba vs Cacnea. **RR baseline from here: `results/rr_sheet_boxes.*`.**
