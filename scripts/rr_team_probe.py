@@ -53,7 +53,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from poke_env.data import to_id_str  # noqa: E402
 import rr_probe as rp  # noqa: E402
 from rr_postmortem import attribution  # noqa: E402  (sets gauntlet.GAME = "rr", injects the mod data)
-from gauntlet import STATS, Mon, assign_items, encounter_moves, evolve, pack_team  # noqa: E402
+from gauntlet import STATS, Mon, assign_items, encounter_moves, evolve, mega_stone, pack_team  # noqa: E402
 
 SHORT, TOP = 24, 6
 GREEDY_N, SUBSETS = 4, 150
@@ -101,13 +101,14 @@ def progress(st: dict) -> float:
 def build_mon(species: str, cap: int, known: dict, progress: int, boss_types: set = frozenset(), arena: dict = {}) -> Mon | None:
     """Evolved by level at the cap (no stones), best4 moves over the TMs and tutors in hand
     by trainer `progress` (data/rr/tms.json, minus gauntlet.BANNED_MOVES), the nature and
-    ability the planner picks for this boss (rr_probe.choose_nature / choose_ability), no
-    item, no EVs (Minimal Grinding Mode)."""
+    ability the planner picks for this boss (rr_probe.choose_nature / choose_ability), its mega
+    stone if one is in hand (so stages A / B see the mega; team_mons re-assigns items), no EVs
+    (Minimal Grinding Mode)."""
     ev = evolve(species, cap, None, caught_level=5, trainer_idx=None)
     moves = encounter_moves(ev, cap, "best4", progress=progress)
     if not moves or ev not in known:
         return None
-    m = Mon(ev, cap, moves, ability=rp.choose_ability(ev, known, boss_types, arena), item=None, caught_level=5,
+    m = Mon(ev, cap, moves, ability=rp.choose_ability(ev, known, boss_types, arena), item=mega_stone(ev, progress), caught_level=5,
             nature=rp.choose_nature(ev, moves, known))
     m.evs = dict.fromkeys(STATS, 0)
     return m

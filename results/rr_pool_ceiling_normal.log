@@ -1,0 +1,46 @@
+KOGA: trainer #80, cap 68, pool 460 species; arena {'ai_permanent': True}; not modelled: []
+BLAINE: trainer #90, cap 76, pool 548 species; arena {'ai_permanent': True, 'weather': 'sunnyday'}; not modelled: []
+BLAINE: starter oshawott; boss attacks with ['Bug', 'Dark', 'Dragon', 'Fighting', 'Fire', 'Flying', 'Grass', 'Normal', 'Psychic']
+KOGA: starter litten; boss attacks with ['Bug', 'Dark', 'Electric', 'Fairy', 'Fighting', 'Ice', 'Normal', 'Poison', 'Water']
+BLAINE FAILED: RuntimeError: Error: invalid team: "heavydboots" is an invalid item.
+    at prepPlayer (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:37:23)
+    at handle (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:195:32)
+    at Interface.<anonymous> (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:245:13)
+    at Interface.emit (node:events:524:28)
+    at Interface.emit (node:domain:489:12)
+    at [_onLine] [as _onLine] (node:internal/readline/interface:415:12)
+    at [_normalWrite] [as _normalWrite] (node:internal/readline/interface:609:22)
+    at Socket.ondata (node:internal/readline/interface:242:23)
+    at Socket.emit (node:events:524:28)
+    at Socket.emit (node:domain:489:12)
+l/ai_util/sim.py", line 88, in call
+    raise RuntimeError(reply["error"])
+RuntimeError: Error: invalid team: "heavydboots" is an invalid item.
+    at prepPlayer (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:37:23)
+    at handle (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:195:32)
+    at Interface.<anonymous> (/home/tristan/CodingProjects/nuzlock_rl/ai_util/sim_bridge.js:245:13)
+    at Interface.emit (node:events:524:28)
+    at Interface.emit (node:domain:489:12)
+    at [_onLine] [as _onLine] (node:internal/readline/interface:415:12)
+    at [_normalWrite] [as _normalWrite] (node:internal/readline/interface:609:22)
+    at Socket.ondata (node:internal/readline/interface:242:23)
+    at Socket.emit (node:events:524:28)
+    at Socket.emit (node:domain:489:12)
+
+KOGA: A solo scores for 461 species in 4s; top: golett 0.32, slowpokegalar 0.30, slowbrogalar 0.30, togedemaru 0.23, arctozolt 0.23, omastar 0.22, cryogonal 0.20, wishiwashi 0.18
+KOGA: B 279 teams scored in 21s; greedy ('golett', 'morpeko', 'omastar', 'rolycoly', 'skrelp', 'wishiwashi') (0.90); best fast ('golett', 'morpeko', 'omastar', 'rolycoly', 'skrelp', 'wishiwashi') (0.90)
+KOGA: cover team ('annihilape', 'chansey', 'frillish', 'golett', 'palossand', 'tinkatink')
+KOGA: C cover  ['annihilape', 'chansey', 'frillish', 'golett', 'palossand', 'tinkatink']: win 8% deaths/mon 0.96 deathless 0%
+KOGA: C fast   ['golett', 'morpeko', 'omastar', 'rolycoly', 'skrelp', 'wishiwashi']: win 8% deaths/mon 0.99 deathless 0%
+KOGA: C top    ['golett', 'morpeko', 'omastar', 'rolycoly', 'skrelp', 'togedemaru']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C top    ['golett', 'mantine', 'rolycoly', 'shinx', 'slowbrogalar', 'teddiursa']: win 8% deaths/mon 0.94 deathless 0%
+KOGA: C top    ['golett', 'kabutops', 'mantine', 'rolycoly', 'slowbrogalar', 'teddiursa']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C top    ['golett', 'morpeko', 'omastar', 'rolycoly', 'skrelp', 'slowpokegalar']: win 0% deaths/mon 1.00 deathless 0%
+KOGA       legal=True  best team under search: win    8% deaths/mon 0.94 deathless 0% ['golett', 'mantine', 'rolycoly', 'shinx', 'slowbrogalar', 'teddiursa']  (others: 8%, 8%, 0%, 0%, 0%)  (30s)
+KOGA       sets: golurk(Adamant/Iron Fist/spelltag) ['headlongrush', 'shadowpunch', 'hammerarm', 'rest'], mantine(Modest/Water Absorb/sharpbeak) ['hydropump', 'airslash', 'icebeam', 'roost'], coalossal(Jolly/Steam Engine/hardstone) ['burnup', 'stoneedge', 'earthquake', 'rest'], luxray(Adamant/Intimidate/magnet) ['volttackle', 'crunch', 'playrough', 'rest'], slowbrogalar(Modest/Quick Draw/twistedspoon) ['futuresight', 'shellsidearm', 'icebeam', 'slackoff'], ursaluna(Adamant/Guts/leftovers) ['headlongrush', 'thrash', 'closecombat', 'rest']
+KOGA       threat Drapion (37 of our deaths): counters none
+KOGA       threat Accelgor (15 of our deaths): counters none
+
+Radical Red best-six probe (pool) | normal bosses | hardcore legality: True | arena effects: True | field-aware calc bot: True | chooser cover | matchup play True | death weight 6.0 | seeded | search 9,8 x n=12 | no EVs, items in hand | enemy = RR AI, full info | 1 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  KOGA        68    8%       0.94    0%  golett, mantine, rolycoly, shinx, slowbrogalar, teddiursa  | -

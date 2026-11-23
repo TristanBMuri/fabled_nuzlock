@@ -198,7 +198,12 @@ function handle(msg) {
       return flush(e);
     }
     case 'choose':
-      for (const s of ['p1', 'p2']) if (msg[s] != null) entry.battle.choose(s, msg[s]);
+      for (const s of ['p1', 'p2']) {
+        if (msg[s] == null) continue;
+        // a stone holder megas on its first move, both sides (the RR AI's rule, and poke-engine's rr build)
+        const act = entry.battle[s].activeRequest && entry.battle[s].activeRequest.active && entry.battle[s].activeRequest.active[0];
+        entry.battle.choose(s, act && act.canMegaEvo && /^move [^ ]+$/.test(msg[s]) ? msg[s] + ' mega' : msg[s]);
+      }
       return flush(entry);
     case 'fork': {
       // stringify: toJSON shares array refs (log) with the live battle

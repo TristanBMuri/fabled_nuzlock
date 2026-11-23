@@ -162,7 +162,12 @@ HELD = {**{to_id_str(n): {"type": t, "mult": 1.2} for n, t in (
     ("Metal Coat", "Steel"), ("Pixie Plate", "Fairy"))},
     "oranberry": {"flat": 1.05}, "sitrusberry": {"flat": 1.15}, "berryjuice": {"flat": 1.15}, "shellbell": {"flat": 1.08},
     "leftovers": {"flat": 1.25}, "expertbelt": {"flat": 1.1}, "lifeorb": {"flat": 1.2}, "eviolite": {"flat": 1.5, "nfe": True},
-    "choiceband": {"category": "Physical", "mult": 1.5, "lock": True}, "choicespecs": {"category": "Special", "mult": 1.5, "lock": True}}
+    "choiceband": {"category": "Physical", "mult": 1.5, "lock": True}, "choicespecs": {"category": "Special", "mult": 1.5, "lock": True},
+    "choicescarf": {"flat": 1.1}}
+# the mod's mega stones (66): held by the species they evolve, after the Mega Ring (2026-11-23)
+if (RR / "mod_data.json").exists():
+    HELD.update({k: {"mega": to_id_str(v["megaEvolves"])} for k, v in json.load(open(RR / "mod_data.json"))["items"].items()
+                 if v.get("megaStone") and v.get("megaEvolves")})
 
 
 MOVES_KNOWN = set(json.load(open(RR / "moves.json"))) if (RR / "moves.json").exists() else set()
@@ -314,6 +319,11 @@ def progression() -> None:
         return None if w is None else w + 1 if cond.startswith("FIRST") else w
 
     def add(name: str, w: int | None, src: str) -> None:
+        parts = [n.strip() for n in re.split(r"[/\n]", name) if n.strip()]  # "Charizardite X/Y", two stones in one cell
+        if len(parts) > 1:
+            for n in parts:
+                add(parts[0][:-1] + n if len(n) == 1 else n, w, src)
+            return
         q = re.search(r"\[x(\d+)\]", name)
         iid = to_id_str(re.sub(r"\s*\[.*\]", "", name))
         if iid in HELD and w is not None and (iid not in held or w < held[iid]["before_trainer"]):
@@ -342,6 +352,13 @@ def progression() -> None:
         for it in area["items"]:
             if "EV" not in it["location"]:
                 add(it["name"], when(f"{area['area']}, {it['location']}"), f"{area['area']}: {it['location'][:60]}")
+    ring = next((when(f"{a['area']}, {it['location']}") for a in items["overworld"] for it in a["items"]
+                 if it["name"].strip() == "Mega Ring"), None)
+    for k in [k for k, v in held.items() if "mega" in v]:  # a stone is no use before the ring
+        if ring is None:
+            del held[k]
+        else:
+            held[k]["before_trainer"] = max(held[k]["before_trainer"], ring)
     (RR / "items.json").write_text(json.dumps(dict(sorted(held.items(), key=lambda kv: kv[1]["before_trainer"])), indent=0))
     stages = sorted({(v["before_trainer"], v["from"]) for v in held.values() if v["from"].startswith("care")})
     print(f"data/rr/items.json: {len(held)} held items; care-package stages at trainers {[t for t, _ in stages]}")

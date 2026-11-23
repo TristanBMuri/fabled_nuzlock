@@ -2673,3 +2673,44 @@ player's search runs on poke-engine wherever the position converts. Details and 
   (`results/rr_showdown_koga10.*`): a wall for the sampled boxes and the planner, not the engine.
 - Fixed on the way: Hidden Power was typeless in every conversion (Showdown keeps the type in
   `hpType`); the calc bot crashed on a typeless ("???") move at Koga.
+
+## 2026-11-23 — RL plan, Phase 0: is Koga / Blaine a team-choice wall? (`results/rr_*ceiling*`)
+
+`rl/RR_PLAN.md` (the RL plan for RR, reviewed by Fable and Opus) gates everything on one question:
+does *any* six from the whole pool beat Koga / Blaine? Pool mode, the gyms30 settings (`--legal
+--arena --matchup --chooser cover --death-weight 6 --engine 20000`), `--n-search 12`, 10 workers,
+~3 min a boss. Best of ~6 candidate sixes on the same seeds, so optimistic.
+
+| setting | Erika | Koga | Blaine |
+|---|---|---|---|
+| hardcore, today's builder (`rr_pool_ceiling`) | 92% / 0.19 d/mon | **8%** / 0.93 | **0%** / 1.00 |
+| normal-mode bosses (`rr_pool_ceiling_normal`) | | 8% / 0.94 | crashed (`heavydboots`: bad item id in `normal_boss`) |
+| Rest out of best4 (`rr_ceiling_norest`) | | 8% (same teams) | 0% |
+| + 85 EVs in every stat (`rr_ceiling_norest_ev85*`) | | **42%** / 0.63, 25% deathless | **58%** / 0.76 |
+| stone / item evolutions in hand, 0 EVs (`rr_ceiling_stones`) | | 0% | 0% |
+
+- **Gate failed:** with legal builds no pool six wins at Koga or Blaine. A better chooser or a value
+  net cannot fix that; the RL plan stops at Phase 0 (as written).
+- **EVs flip it** (≈ +14 stat points per stat at 68): the fights are decided on stat margins. EVs
+  are illegal in hardcore (Minimal Grinding, `data/rr/hardcore_rules.json`), so this is a
+  diagnostic, not a fix. The legal levers that move margins are the ones the builder lacks: mega
+  stones, Choice Specs / Scarf, Life Orb before trainer 91, Focus Sash, Assault Vest
+  (`data/rr/items.json` has 27 items, none of these) and set quality (best4 = 3 attacks + the
+  first status move; Rest on 148/180 Koga mons in gyms30, never Sleep Talk; no setup moves unless
+  learned by level).
+- **Megas and the Choice Scarf (the user's catch: the items sheet has them).** `build_rr.py` kept only
+  the items `item_value` could price; it now keeps the mod's mega stones (no stone before the Mega
+  Ring, trainer 44; `X/Y` and two-stone cells split) and the Scarf: `items.json` 27 → 79 items,
+  ~20 stones in hand by Koga, ~40 by Blaine, Scarf at 83. A stone counts 3.0 for its own species
+  (`gauntlet.item_value`), `build_mon` hands it out up front so stages A / B see the mega
+  (`gauntlet.mega_stone`), and the bridge megas any stone holder on its first move, both sides
+  (`sim_bridge.js` `choose`; the RR AI already did, poke-engine's rr build models it). Tables
+  before Sabrina are untouched (no stone before 44). **Ceiling with megas
+  (`rr_ceiling_mega`): Koga 8%, Blaine 0%**; the chooser now fields Coalossal-Mega and
+  Kangaskhan-Mega, and nothing changes.
+- So far the ceiling means "the best of what stages A / B propose" (calc-bot solo scores, then
+  greedy): at Blaine (Desolate Land, Ho-Oh, Charizard-Mega X) they propose Cherubi, Deerling,
+  Seedot. A searched chooser over a wider candidate set (RR_PLAN.md Phase 1) is now the
+  diagnostic, not the payoff.
+- Experiments run through `scripts/rr_builder_probe.py` (env switches on top of the probe). Ditto
+  and Smeargle are skipped there: poke-env's mirror asserts on Transform / Sketch.

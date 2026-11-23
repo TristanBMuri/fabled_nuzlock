@@ -1,0 +1,19 @@
+BLAINE: trainer #90, cap 76, pool 548 species; arena {'ai_permanent': True, 'weather': 'desolateland'}; not modelled: []
+BLAINE: starter oshawott; boss attacks with ['Dark', 'Dragon', 'Electric', 'Fighting', 'Fire', 'Flying', 'Grass', 'Ground', 'Ice', 'Normal', 'Poison', 'Water']
+BLAINE: A solo scores for 547 species in 7s; top: eiscue 0.37, wattrel 0.29, cherubi 0.29, deerlingwinter 0.29, deerlingsummer 0.29, deerlingautumn 0.29, deerling 0.29, mienfoo 0.28
+BLAINE: B 278 teams scored in 24s; greedy ('eiscue', 'jumpluff', 'litleo', 'mienfoo', 'pyroar', 'screamtail') (0.85); best fast ('bulbasaur', 'cherubi', 'deerlingautumn', 'deerlingwinter', 'hoppip', 'screamtail') (1.08)
+BLAINE: cover team ('chansey', 'lunatone', 'ponytagalar', 'rapidashgalar', 'screamtail', 'slakoth')
+BLAINE: C cover  ['chansey', 'lunatone', 'ponytagalar', 'rapidashgalar', 'screamtail', 'slakoth']: win 25% deaths/mon 0.86 deathless 0%
+BLAINE: C greedy ['eiscue', 'jumpluff', 'litleo', 'mienfoo', 'pyroar', 'screamtail']: win 58% deaths/mon 0.76 deathless 0%
+BLAINE: C fast   ['bulbasaur', 'cherubi', 'deerlingautumn', 'deerlingwinter', 'hoppip', 'screamtail']: win 33% deaths/mon 0.89 deathless 0%
+BLAINE: C top    ['bulbasaur', 'cryogonal', 'deerling', 'deerlingautumn', 'mienfoo', 'simisage']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C top    ['cherubi', 'deerlingsummer', 'eiscue', 'jumpluff', 'mienfoo', 'screamtail']: win 25% deaths/mon 0.92 deathless 0%
+BLAINE: C top    ['cherubi', 'eiscue', 'exeggutoralola', 'hoppip', 'tropius', 'wattrel']: win 17% deaths/mon 0.97 deathless 0%
+BLAINE     legal=True  best team under search: win   58% deaths/mon 0.76 deathless 0% ['eiscue', 'jumpluff', 'litleo', 'mienfoo', 'pyroar', 'screamtail']  (others: 33%, 25%, 25%, 17%, 0%)  (48s)
+BLAINE     sets: eiscue(Adamant/Ice Face/nevermeltice) ['icespinner', 'liquidation', 'zenheadbutt', 'toxic'], jumpluff(Adamant/Chlorophyll/sharpbeak) ['solarblade', 'fly', 'doubleedge', 'synthesis'], pyroar(Modest/Rivalry/silkscarf) ['overheat', 'hypervoice', 'darkpulse', 'willowisp'], mienshao(Adamant/Inner Focus/choiceband) ['highjumpkick', 'blazekick', 'icespinner', 'reflect'], pyroar(Modest/Rivalry/silkscarf) ['overheat', 'hypervoice', 'darkpulse', 'willowisp'], screamtail(Modest/Protosynthesis/leftovers) ['psychic', 'dazzlinggleam', 'thunderbolt', 'sing']
+BLAINE     threat Ho-Oh (22 of our deaths): counters minior [wins the duel 100%, 28% HP left; ROCK TUNNEL 1F / grass_day 5%], zebstrika [wins the duel 100%, 26% HP left; ROUTE 17 / grass_day 10%], blitzle [wins the duel 100%, 26% HP left; ROUTE 10 / grass_day 10%]
+BLAINE     threat Walking Wake (13 of our deaths): counters fidough [wins the duel 100%, 100% HP left; ROUTE 21A / grass_day 8%], rapidashgalar [wins the duel 100%, 97% HP left; MANSION 3F / grass_night 10%], ponytagalar [wins the duel 100%, 97% HP left; ROUTE 2 / grass_night 10%]
+
+Radical Red best-six probe (pool) | hardcore bosses | hardcore legality: True | arena effects: True | field-aware calc bot: True | chooser cover | matchup play True | death weight 6.0 | seeded | search 9,8 x n=12 | no EVs, items in hand | enemy = RR AI, full info | 1 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  BLAINE      76   58%       0.76    0%  eiscue, jumpluff, litleo, mienfoo, pyroar, screamtail  | {'weather': 'desolateland'}

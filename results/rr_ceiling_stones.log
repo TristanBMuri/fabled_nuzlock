@@ -1,0 +1,35 @@
+KOGA: trainer #80, cap 68, pool 460 species; arena {'ai_permanent': True, 'p2': ['tailwind']}; not modelled: []
+BLAINE: trainer #90, cap 76, pool 548 species; arena {'ai_permanent': True, 'weather': 'desolateland'}; not modelled: []
+BLAINE: starter oshawott; boss attacks with ['Dark', 'Dragon', 'Electric', 'Fighting', 'Fire', 'Flying', 'Grass', 'Ground', 'Ice', 'Normal', 'Poison', 'Water']
+KOGA: starter litten; boss attacks with ['Dark', 'Electric', 'Fairy', 'Fighting', 'Fire', 'Ground', 'Ice', 'Normal', 'Poison', 'Psychic', 'Rock']
+KOGA: A solo scores for 460 species in 5s; top: charcadet 0.27, rolycoly 0.26, carkol 0.26, numel 0.22, rookidee 0.19, slowpokegalar 0.18, slowbrogalar 0.18, yamaskgalar 0.17
+BLAINE: A solo scores for 547 species in 6s; top: bellsprout 0.30, cherubi 0.28, tropius 0.26, sunkern 0.24, cryogonal 0.24, exeggutoralola 0.23, seedot 0.23, oddish 0.23
+BLAINE: B 279 teams scored in 21s; greedy ('cacnea', 'cherubi', 'cryogonal', 'deerlingwinter', 'petilil', 'tropius') (0.86); best fast ('bellsprout', 'cherubi', 'cryogonal', 'hydrapple', 'munchlax', 'seedot') (0.87)
+BLAINE: cover team ('carkol', 'elgyem', 'ponytagalar', 'rapidashgalar', 'screamtail', 'slakoth')
+KOGA: B 279 teams scored in 22s; greedy ('charcadet', 'qwilfishhisui', 'rolycoly', 'rookidee', 'runerigus', 'yamaskgalar') (0.80); best fast ('charcadet', 'qwilfishhisui', 'rolycoly', 'rookidee', 'runerigus', 'yamaskgalar') (0.80)
+KOGA: cover team ('dondozo', 'slakoth', 'teddiursa', 'tinkatink', 'wailmer', 'wailord')
+KOGA: C cover  ['dondozo', 'slakoth', 'teddiursa', 'tinkatink', 'wailmer', 'wailord']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C fast   ['charcadet', 'qwilfishhisui', 'rolycoly', 'rookidee', 'runerigus', 'yamaskgalar']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C top    ['charcadet', 'pineco', 'qwilfishhisui', 'rolycoly', 'rookidee', 'yamaskgalar']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C top    ['charcadet', 'forretress', 'qwilfishhisui', 'rolycoly', 'rookidee', 'yamaskgalar']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C top    ['charcadet', 'qwilfishhisui', 'rolycoly', 'rookidee', 'slowpokegalar', 'yamaskgalar']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C top    ['charcadet', 'qwilfishhisui', 'rolycoly', 'rookidee', 'slowbrogalar', 'yamaskgalar']: win 0% deaths/mon 1.00 deathless 0%
+KOGA       legal=True  best team under search: win    0% deaths/mon 1.00 deathless 0% ['dondozo', 'slakoth', 'teddiursa', 'tinkatink', 'wailmer', 'wailord']  (others: 0%, 0%, 0%, 0%, 0%)  (47s)
+KOGA       sets: dondozo(Adamant/Unaware/mysticwater) ['wavecrash', 'doubleedge', 'earthquake', 'rest'], slaking(Adamant/Truant/silkscarf) ['doubleedge', 'earthquake', 'hammerarm', 'slackoff'], ursaluna(Adamant/Guts/softsand) ['headlongrush', 'thrash', 'closecombat', 'rest'], tinkaton(Adamant/Mold Breaker/pixieplate) ['gigatonhammer', 'playrough', 'foulplay', 'rest'], wailord(Modest/Water Veil/mysticwater) ['waterspout', 'icebeam', 'hypervoice', 'rest'], wailord(Modest/Water Veil/leftovers) ['waterspout', 'icebeam', 'hypervoice', 'rest']
+KOGA       threat Chi-Yu (45 of our deaths): counters litten [wins the duel 100%, 69% HP left; starter], ponytagalar [wins the duel 100%, 59% HP left; ROUTE 2 / grass_night 10%], ponyta [wins the duel 100%, 58% HP left; ROUTE 2 / grass_day 10%]
+KOGA       threat Hoopa-Unbound (10 of our deaths): counters wimpod [wins the duel 100%, 100% HP left; VERMILLION CITY / good_rod 20%], tarountula [wins the duel 100%, 100% HP left; FOREST EXPANSION / grass_night 20%], nymble [wins the duel 100%, 100% HP left; FOREST EXPANSION / grass_day 1%]
+BLAINE: C cover  ['carkol', 'elgyem', 'ponytagalar', 'rapidashgalar', 'screamtail', 'slakoth']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C greedy ['cacnea', 'cherubi', 'cryogonal', 'deerlingwinter', 'petilil', 'tropius']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C fast   ['bellsprout', 'cherubi', 'cryogonal', 'hydrapple', 'munchlax', 'seedot']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C top    ['cacnea', 'cherubi', 'deerlingwinter', 'oddish', 'petilil', 'tropius']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C top    ['cacnea', 'cherubi', 'deerlingwinter', 'petilil', 'shroomish', 'tropius']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C top    ['cacnea', 'cherubi', 'deerlingwinter', 'petilil', 'sunkern', 'tropius']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE     legal=True  best team under search: win    0% deaths/mon 1.00 deathless 0% ['carkol', 'elgyem', 'ponytagalar', 'rapidashgalar', 'screamtail', 'slakoth']  (others: 0%, 0%, 0%, 0%, 0%)  (47s)
+BLAINE     sets: coalossal(Jolly/Flash Fire/hardstone) ['burnup', 'stoneedge', 'earthquake', 'rest'], beheeyem(Modest/Telepathy/twistedspoon) ['futuresight', 'thunderbolt', 'energyball', 'recover'], rapidashgalar(Adamant/Flash Fire/pixieplate) ['flareblitz', 'playrough', 'megahorn', 'rest'], rapidashgalar(Adamant/Flash Fire/pixieplate) ['flareblitz', 'playrough', 'megahorn', 'rest'], screamtail(Modest/Protosynthesis/leftovers) ['psychic', 'dazzlinggleam', 'thunderbolt', 'rest'], slaking(Adamant/Truant/choiceband) ['doubleedge', 'earthquake', 'hammerarm', 'slackoff']
+BLAINE     threat Ho-Oh (27 of our deaths): counters rockruff [wins the duel 100%, 3% HP left; ROUTE 22 / grass_day 4%]
+BLAINE     threat Venusaur (25 of our deaths): counters karrablast [wins the duel 100%, 74% HP left; ROUTE 25 / grass_day 10%], escavalier [wins the duel 100%, 74% HP left; ROUTE 16 / grass_day 1%], varoom [wins the duel 100%, 63% HP left; MT MOON B2F / grass_day 20%]
+
+Radical Red best-six probe (pool) | hardcore bosses | hardcore legality: True | arena effects: True | field-aware calc bot: True | chooser cover | matchup play True | death weight 6.0 | seeded | search 9,8 x n=12 | no EVs, items in hand | enemy = RR AI, full info | 1 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  KOGA        68    0%       1.00    0%  dondozo, slakoth, teddiursa, tinkatink, wailmer, wailord  | {'p2': ['tailwind']}
+  BLAINE      76    0%       1.00    0%  carkol, elgyem, ponytagalar, rapidashgalar, screamtail, slakoth  | {'weather': 'desolateland'}

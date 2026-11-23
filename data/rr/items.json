@@ -179,6 +179,90 @@
 "type": "Steel",
 "mult": 1.2
 },
+"mewtwonitey": {
+"name": "Mewtwonite Y",
+"before_trainer": 44,
+"from": "Route 4 (East): From Giovanni after defeating him in Cerulean Cave.",
+"copies": 1,
+"mega": "mewtwo"
+},
+"coalossite": {
+"name": "Coalossite",
+"before_trainer": 44,
+"from": "Rock Tunnel: B1F, in room with northeast crossroads. (Rock Smash HM neede",
+"copies": 1,
+"mega": "coalossal"
+},
+"gengarite": {
+"name": "Gengarite",
+"before_trainer": 44,
+"from": "Lavender Town: From Morty in Fuji's house after showing a Pok\u00e9mon with max ",
+"copies": 1,
+"mega": "gengar"
+},
+"centiskite": {
+"name": "Centiskite",
+"before_trainer": 44,
+"from": "Route 8: From an Ace Trainer, after defeating him. (Requires Mega Rin",
+"copies": 1,
+"mega": "centiskorch"
+},
+"lucarionite": {
+"name": "Lucarionite",
+"before_trainer": 44,
+"from": "Celadon City: From Lucario owner at Pok\u00e9mon Center with Lucario follower (",
+"copies": 1,
+"mega": "lucario"
+},
+"alakazite": {
+"name": "Alakazite",
+"before_trainer": 44,
+"from": "Celadon City: Department Store's rooftop, from a little girl sitting behin",
+"copies": 1,
+"mega": "alakazam"
+},
+"sablenite": {
+"name": "Sablenite",
+"before_trainer": 44,
+"from": "Pok\u00e9mon Tower: 3F, north east area.",
+"copies": 1,
+"mega": "sableye"
+},
+"alcremite": {
+"name": "Alcremite",
+"before_trainer": 44,
+"from": "Saffron City: From a woman in the western house, after getting her ingredi",
+"copies": 1,
+"mega": "alcremie"
+},
+"swampertite": {
+"name": "Swampertite",
+"before_trainer": 44,
+"from": "Saffron City: From the Dumbass Mudkip Kid in the north-western house after",
+"copies": 1,
+"mega": "swampert"
+},
+"garbodorite": {
+"name": "Garbodorite",
+"before_trainer": 44,
+"from": "Silph Co.: 4F, in the room on the far left side. (Keycard required)",
+"copies": 1,
+"mega": "garbodor"
+},
+"audinite": {
+"name": "Audinite",
+"before_trainer": 44,
+"from": "Silph Co.: 6F, bottom item in the bottom left room. (Keycard required)",
+"copies": 1,
+"mega": "audino"
+},
+"kangaskhanite": {
+"name": "Kangaskhanite",
+"before_trainer": 44,
+"from": "Silph Co.: 7F, in the bottom left area of the floor, near a Scientist.",
+"copies": 1,
+"mega": "kangaskhan"
+},
 "expertbelt": {
 "name": "Expert Belt",
 "before_trainer": 51,
@@ -192,6 +276,230 @@
 "from": "Route 16: Use Itemfinder Key Item on the exact spot Snorlax was on.",
 "copies": 1,
 "flat": 1.25
+},
+"venusaurite": {
+"name": "Venusaurite",
+"before_trainer": 53,
+"from": "Route 16: Upstairs in northern gate on Route 16, from Scientist upon s",
+"copies": 1,
+"mega": "venusaur"
+},
+"charizarditex": {
+"name": "Charizardite X",
+"before_trainer": 53,
+"from": "Route 16: Upstairs in northern gate on Route 16, from Scientist upon s",
+"copies": 1,
+"mega": "charizard"
+},
+"charizarditey": {
+"name": "Charizardite Y",
+"before_trainer": 53,
+"from": "Route 16: Upstairs in northern gate on Route 16, from Scientist upon s",
+"copies": 1,
+"mega": "charizard"
+},
+"blastoisinite": {
+"name": "Blastoisinite",
+"before_trainer": 53,
+"from": "Route 16: Upstairs in northern gate on Route 16, from Scientist upon s",
+"copies": 1,
+"mega": "blastoise"
+},
+"absolite": {
+"name": "Absolite",
+"before_trainer": 53,
+"from": "Route 17: At bottom of Route, middle, beside signpost between ponds.",
+"copies": 1,
+"mega": "absol"
+},
+"altarianite": {
+"name": "Altarianite",
+"before_trainer": 53,
+"from": "Route 18: Below the gate, in the bottom left corner of the grass patch",
+"copies": 1,
+"mega": "altaria"
+},
+"sharpedonite": {
+"name": "Sharpedonite",
+"before_trainer": 53,
+"from": "Route 12 (Lower Area): In the fisherman's house, if you show him a Sharpedo followe",
+"copies": 1,
+"mega": "sharpedo"
+},
+"sandacondite": {
+"name": "Sandacondite",
+"before_trainer": 63,
+"from": "Route 15: From a Female Ace Trainer after defeating her in the western",
+"copies": 1,
+"mega": "sandaconda"
+},
+"orbeetlite": {
+"name": "Orbeetlite",
+"before_trainer": 75,
+"from": "Route 2: Above Diglett's Cave. (Rock Smash HM required)",
+"copies": 1,
+"mega": "orbeetle"
+},
+"butterfrite": {
+"name": "Butterfrite",
+"before_trainer": 75,
+"from": "Viridian Forest: Follow the small path at the end of the forest. (Rock Smash ",
+"copies": 1,
+"mega": "butterfree"
+},
+"scizorite": {
+"name": "Scizorite",
+"before_trainer": 81,
+"from": "Route 22: In the middle of the Route in between the pond and a ledge. ",
+"copies": 1,
+"mega": "scizor"
+},
+"tyranitarite": {
+"name": "Tyranitarite",
+"before_trainer": 81,
+"from": "Route 24: On a small islet to the left of the Nugget Bridge. (Surf HM ",
+"copies": 1,
+"mega": "tyranitar"
+},
+"copperajite": {
+"name": "Copperajite",
+"before_trainer": 81,
+"from": "Vermilion City: On islet below the Gym. (Surf HM required)",
+"copies": 1,
+"mega": "copperajah"
+},
+"slowbronite": {
+"name": "Slowbronite",
+"before_trainer": 81,
+"from": "Route 12 (Lower Area): On a small islet to the south west from the Snorlax. (Surf H",
+"copies": 1,
+"mega": "slowbro"
+},
+"heracronite": {
+"name": "Heracronite",
+"before_trainer": 81,
+"from": "Safari Zone: East Area, left of the Rest House in the north eastern part ",
+"copies": 1,
+"mega": "heracross"
+},
+"pidgeotite": {
+"name": "Pidgeotite",
+"before_trainer": 81,
+"from": "Safari Zone: North Area, in the north-central part of the area, just abov",
+"copies": 1,
+"mega": "pidgeot"
+},
+"lopunnite": {
+"name": "Lopunnite",
+"before_trainer": 81,
+"from": "Safari Zone: West Area, southwest part, in grass below heightened platfor",
+"copies": 1,
+"mega": "lopunny"
+},
+"drednawite": {
+"name": "Drednawite",
+"before_trainer": 81,
+"from": "Route 19: On a small islet on the south part of the Route. (Surf HM re",
+"copies": 1,
+"mega": "drednaw"
+},
+"laprasite": {
+"name": "Laprasite",
+"before_trainer": 81,
+"from": "Seafoam Islands: B1F, in the north western part of the floor.",
+"copies": 1,
+"mega": "lapras"
+},
+"abomasite": {
+"name": "Abomasite",
+"before_trainer": 81,
+"from": "Seafoam Islands: B2F, in the south western part of the floor.",
+"copies": 1,
+"mega": "abomasnow"
+},
+"medichamite": {
+"name": "Medichamite",
+"before_trainer": 81,
+"from": "Route 20 (West): On small islet in middle of Route, below stationary female S",
+"copies": 1,
+"mega": "medicham"
+},
+"latiosite": {
+"name": "Latiosite",
+"before_trainer": 81,
+"from": "Cinnabar Island: In Pok\u00e9mon Lab's rightmost room, from Scientist at left tabl",
+"copies": 1,
+"mega": "latios"
+},
+"latiasite": {
+"name": "Latiasite",
+"before_trainer": 81,
+"from": "Cinnabar Island: In Pok\u00e9mon Lab's rightmost room, from Scientist at left tabl",
+"copies": 1,
+"mega": "latias"
+},
+"blazikenite": {
+"name": "Blazikenite",
+"before_trainer": 81,
+"from": "Cinnabar Island: From May after you defeat her in front of the Pok\u00e9mon Mansio",
+"copies": 1,
+"mega": "blaziken"
+},
+"gardevoirite": {
+"name": "Gardevoirite",
+"before_trainer": 81,
+"from": "Pok\u00e9mon Mansion: 1F, in the south east part of the floor with lots of palm tr",
+"copies": 1,
+"mega": "gardevoir"
+},
+"cameruptite": {
+"name": "Cameruptite",
+"before_trainer": 81,
+"from": "Pok\u00e9mon Mansion: 1F, in the south east part of the floor with lots of palm tr",
+"copies": 1,
+"mega": "camerupt"
+},
+"banettite": {
+"name": "Banettite",
+"before_trainer": 81,
+"from": "Pok\u00e9mon Mansion: B1F, in the south west part of the floor.",
+"copies": 1,
+"mega": "banette"
+},
+"machampite": {
+"name": "Machampite",
+"before_trainer": 81,
+"from": "Power Plant: From Dumbass trainer after defeating him in the central room",
+"copies": 1,
+"mega": "machamp"
+},
+"ampharosite": {
+"name": "Ampharosite",
+"before_trainer": 81,
+"from": "Power Plant: In the north east corner.",
+"copies": 1,
+"mega": "ampharos"
+},
+"glalitite": {
+"name": "Glalitite",
+"before_trainer": 83,
+"from": "Route 20 (East): From Pryce after defeating him in front of Seafom Islands.",
+"copies": 1,
+"mega": "glalie"
+},
+"choicescarf": {
+"name": "Choice Scarf",
+"before_trainer": 83,
+"from": "Route 20 (East): From Pryce after defeating him in front of Seafom Islands.",
+"copies": 1,
+"flat": 1.1
+},
+"aggronite": {
+"name": "Aggronite",
+"before_trainer": 85,
+"from": "Cinnabar Island: From Jasmine after defeating her in Pok\u00e9mon Lab.",
+"copies": 1,
+"mega": "aggron"
 },
 "choiceband": {
 "name": "Choice Band",
@@ -208,5 +516,61 @@
 "from": "care package: Defeating Blaine",
 "copies": 6,
 "flat": 1.2
+},
+"snorlaxite": {
+"name": "Snorlaxite",
+"before_trainer": 91,
+"from": "Route 23: In the north east corner of the Volcano badge check gate.",
+"copies": 1,
+"mega": "snorlax"
+},
+"metagrossite": {
+"name": "Metagrossite",
+"before_trainer": 91,
+"from": "Victory Road: 2F, in the north east part of the floor, near a Juggler.",
+"copies": 1,
+"mega": "metagross"
+},
+"houndoominite": {
+"name": "Houndoominite",
+"before_trainer": 94,
+"from": "Cerulean Cave: 1F, from Archer after defeating him in battle.",
+"copies": 1,
+"mega": "houndoom"
+},
+"mawilite": {
+"name": "Mawilite",
+"before_trainer": 95,
+"from": "Cerulean Cave: 1F, from Ariana after defeating her in battle.",
+"copies": 1,
+"mega": "mawile"
+},
+"diancite": {
+"name": "Diancite",
+"before_trainer": 98,
+"from": "Cerulean Cave: 2F, northeast area, reached by climbing northeast ladder on ",
+"copies": 1,
+"mega": "diancie"
+},
+"garchompite": {
+"name": "Garchompite",
+"before_trainer": 98,
+"from": "Cerulean Cave: B1F, in the north east area of the floor.",
+"copies": 1,
+"mega": "garchomp"
+},
+"sceptilite": {
+"name": "Sceptilite",
+"before_trainer": 102,
+"from": "Route 23: From Brendan after defeating him in front of Victory Road's ",
+"copies": 1,
+"mega": "sceptile"
+},
+"salamencite": {
+"name": "Salamencite",
+"before_trainer": 114,
+"from": "Route 4 (East): From Lance after defeating Giovanni in Cerulean Cave.",
+"copies": 1,
+"mega": "salamence"
 }
 }

@@ -1,0 +1,33 @@
+KOGA: trainer #80, cap 68, pool 460 species; arena {'ai_permanent': True, 'p2': ['tailwind']}; not modelled: []
+BLAINE: trainer #90, cap 76, pool 548 species; arena {'ai_permanent': True, 'weather': 'desolateland'}; not modelled: []
+KOGA: starter litten; boss attacks with ['Dark', 'Electric', 'Fairy', 'Fighting', 'Fire', 'Ground', 'Ice', 'Normal', 'Poison', 'Psychic', 'Rock']
+BLAINE: starter oshawott; boss attacks with ['Dark', 'Dragon', 'Electric', 'Fighting', 'Fire', 'Flying', 'Grass', 'Ground', 'Ice', 'Normal', 'Poison', 'Water']
+KOGA: A solo scores for 460 species in 5s; top: hippopotas 0.28, rolycoly 0.25, carkol 0.25, numel 0.23, drilbur 0.22, rookidee 0.21, parasect 0.21, paras 0.21
+BLAINE FAILED: AssertionError: Error with move earthpower. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'sketch': sketch (Move object)}, ability: owntempo
+me/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move earthpower. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'sketch': sketch (Move object)}, ability: owntempo
+
+KOGA: B 279 teams scored in 23s; greedy ('hippopotas', 'mukalola', 'parasect', 'rolycoly', 'slakoth', 'tinkatink') (1.61); best fast ('hippopotas', 'mukalola', 'parasect', 'rolycoly', 'slakoth', 'tinkatink') (1.61)
+KOGA: cover team ('dondozo', 'golett', 'hippopotas', 'slakoth', 'teddiursa', 'wailmer')
+KOGA: C cover  ['dondozo', 'golett', 'hippopotas', 'slakoth', 'teddiursa', 'wailmer']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C fast   ['hippopotas', 'mukalola', 'parasect', 'rolycoly', 'slakoth', 'tinkatink']: win 42% deaths/mon 0.71 deathless 8%
+KOGA: C top    ['hippopotas', 'mukalola', 'paras', 'rolycoly', 'slakoth', 'tinkatink']: win 33% deaths/mon 0.69 deathless 17%
+KOGA: C top    ['hippopotas', 'mukalola', 'rolycoly', 'slakoth', 'tinkatink', 'varoom']: win 33% deaths/mon 0.72 deathless 8%
+KOGA: C top    ['hippopotas', 'mukalola', 'numel', 'rolycoly', 'slakoth', 'tinkatink']: win 42% deaths/mon 0.64 deathless 17%
+KOGA: C top    ['hippopotas', 'mukalola', 'rolycoly', 'shuppet', 'slakoth', 'tinkatink']: win 42% deaths/mon 0.63 deathless 25%
+KOGA       legal=True  best team under search: win   42% deaths/mon 0.63 deathless 25% ['hippopotas', 'mukalola', 'rolycoly', 'shuppet', 'slakoth', 'tinkatink']  (others: 42%, 42%, 33%, 33%, 0%)  (41s)
+KOGA       sets: hippowdon(Adamant/Sand Force/softsand) ['earthquake', 'doubleedge', 'ironhead', 'dig'], mukalola(Adamant/Poison Touch/poisonbarb) ['gunkshot', 'crunch', 'bodyslam', 'poisonjab'], coalossal(Jolly/Flash Fire/hardstone) ['burnup', 'stoneedge', 'earthquake', 'willowisp'], banette(Adamant/Insomnia/spelltag) ['poltergeist', 'doubleedge', 'foulplay', 'thunderwave'], slaking(Adamant/Truant/silkscarf) ['doubleedge', 'earthquake', 'hammerarm', 'slackoff'], tinkaton(Adamant/Mold Breaker/leftovers) ['gigatonhammer', 'playrough', 'foulplay', 'thunderwave']
+KOGA       threat Toxtricity (18 of our deaths): counters rolycoly [wins the duel 100%, 81% HP left; MT MOON B1F / grass_day 10%], carkol [wins the duel 100%, 81% HP left; ROCK TUNNEL 1F / grass_day 10%], stunfiskgalar [wins the duel 100%, 80% HP left; DIGLETT CAVE B1F / grass_night 10%]
+KOGA       threat Nidoking (9 of our deaths): counters corsolagalar [wins the duel 100%, 61% HP left; ROUTE 10 / good_rod 20%], cetitan [wins the duel 100%, 53% HP left; ROUTE 12 / grass_day 10%], lapras [wins the duel 100%, 49% HP left; gift: SILPH CO. 7F — Defeat your rival and talk to the guy behind him]
+
+Radical Red best-six probe (pool) | hardcore bosses | hardcore legality: True | arena effects: True | field-aware calc bot: True | chooser cover | matchup play True | death weight 6.0 | seeded | search 9,8 x n=12 | no EVs, items in hand | enemy = RR AI, full info | 1 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  KOGA        68   42%       0.63   25%  hippopotas, mukalola, rolycoly, shuppet, slakoth, tinkatink  | {'p2': ['tailwind']}

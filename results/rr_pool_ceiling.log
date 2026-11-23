@@ -1,0 +1,51 @@
+ERIKA: trainer #34, cap 44, pool 344 species; arena {'ai_permanent': True, 'terrain': 'grassyterrain'}; not modelled: []
+KOGA: trainer #80, cap 68, pool 460 species; arena {'ai_permanent': True, 'p2': ['tailwind']}; not modelled: []
+BLAINE: trainer #90, cap 76, pool 548 species; arena {'ai_permanent': True, 'weather': 'desolateland'}; not modelled: []
+ERIKA: starter froakie; boss attacks with ['Bug', 'Dark', 'Dragon', 'Electric', 'Fighting', 'Fire', 'Flying', 'Grass', 'Ground', 'Normal', 'Poison', 'Psychic', 'Rock', 'Steel']
+BLAINE: starter oshawott; boss attacks with ['Dark', 'Dragon', 'Electric', 'Fighting', 'Fire', 'Flying', 'Grass', 'Ground', 'Ice', 'Normal', 'Poison', 'Water']
+KOGA: starter litten; boss attacks with ['Dark', 'Electric', 'Fairy', 'Fighting', 'Fire', 'Ground', 'Ice', 'Normal', 'Poison', 'Psychic', 'Rock']
+ERIKA: A solo scores for 345 species in 4s; top: slowpokegalar 0.38, stufful 0.28, starly 0.26, noibat 0.25, bergmite 0.24, spinarak 0.23, drampa 0.23, eiscue 0.22
+KOGA: A solo scores for 461 species in 5s; top: rolycoly 0.26, carkol 0.26, numel 0.22, rookidee 0.19, slowpokegalar 0.18, slowbrogalar 0.18, yamaskgalar 0.17, varoom 0.17
+BLAINE: A solo scores for 549 species in 7s; top: cherubi 0.28, tropius 0.26, cryogonal 0.24, seedot 0.24, exeggutoralola 0.23, shroomish 0.23, cetitan 0.22, bulbasaur 0.22
+KOGA: B 279 teams scored in 22s; greedy ('darumaka', 'dewpider', 'forretress', 'numel', 'pineco', 'rookidee') (0.65); best fast ('carkol', 'darumaka', 'dewpider', 'ferrothorn', 'qwilfishhisui', 'slowpokegalar') (0.82)
+KOGA: cover team ('dondozo', 'slakoth', 'teddiursa', 'tinkatink', 'wailmer', 'wailord')
+BLAINE: B 279 teams scored in 23s; greedy ('cherubi', 'deerlingautumn', 'deerlingsummer', 'deerlingwinter', 'munchlax', 'seedot') (0.93); best fast ('cherubi', 'deerlingautumn', 'deerlingsummer', 'deerlingwinter', 'munchlax', 'seedot') (0.93)
+BLAINE: cover team ('carkol', 'elgyem', 'ponytagalar', 'rapidashgalar', 'screamtail', 'slakoth')
+ERIKA: B 279 teams scored in 31s; greedy ('ponyta', 'ponytagalar', 'riolu', 'slowpokegalar', 'starly', 'torkoal') (1.48); best fast ('durant', 'pawniard', 'ponyta', 'slowpokegalar', 'starly', 'volbeat') (1.71)
+ERIKA: cover team ('darumaka', 'fletchling', 'gulpin', 'noibat', 'rookidee', 'slowpokegalar')
+ERIKA: C cover  ['darumaka', 'fletchling', 'gulpin', 'noibat', 'rookidee', 'slowpokegalar']: win 92% deaths/mon 0.19 deathless 42%
+ERIKA: C greedy ['ponyta', 'ponytagalar', 'riolu', 'slowpokegalar', 'starly', 'torkoal']: win 50% deaths/mon 0.76 deathless 0%
+ERIKA: C fast   ['durant', 'pawniard', 'ponyta', 'slowpokegalar', 'starly', 'volbeat']: win 75% deaths/mon 0.49 deathless 0%
+ERIKA: C top    ['drampa', 'durant', 'fletchling', 'ponyta', 'slowpokegalar', 'stufful']: win 50% deaths/mon 0.67 deathless 0%
+ERIKA: C top    ['ponyta', 'ponytagalar', 'slowpokegalar', 'starly', 'torkoal', 'volbeat']: win 25% deaths/mon 0.90 deathless 0%
+ERIKA: C top    ['ponyta', 'ponytagalar', 'shroomish', 'slowpokegalar', 'starly', 'torkoal']: win 25% deaths/mon 0.88 deathless 0%
+ERIKA      legal=True  best team under search: win   92% deaths/mon 0.19 deathless 42% ['darumaka', 'fletchling', 'gulpin', 'noibat', 'rookidee', 'slowpokegalar']  (others: 75%, 50%, 50%, 25%, 25%)  (66s)
+ERIKA      sets: darmanitan(Adamant/Sheer Force/charcoal) ['flareblitz', 'thrash', 'hammerarm', 'rest'], talonflame(Adamant/Flame Body/sharpbeak) ['flareblitz', 'bravebird', 'uturn', 'roost'], swalot(Modest/Liquid Ooze/poisonbarb) ['belch', 'icebeam', 'shadowball', 'rest'], noivern(Modest/Frisk/sharpbeak) ['aeroblast', 'boomburst', 'dragonpulse', 'roost'], corviknight(Adamant/Pressure/sharpbeak) ['bravebird', 'ironhead', 'uturn', 'roost'], slowbrogalar(Modest/Quick Draw/twistedspoon) ['shellsidearm', 'psychic', 'icebeam', 'slackoff']
+ERIKA      threat Ogerpon-Cornerstone (4 of our deaths): counters eiscue [wins the duel 100%, 100% HP left; trade: give Carbink at ROUTE 5 UNDERGROUND PATH], spinarak [wins the duel 100%, 80% HP left; VIRIDIAN FOREST / grass_night 20%], sizzlipede [wins the duel 100%, 79% HP left; ROUTE 6 / grass_day 10%]
+ERIKA      threat Hawlucha (4 of our deaths): counters spritzee [wins the duel 100%, 100% HP left; ROUTE 5 / grass_night 10%], eiscue [wins the duel 100%, 100% HP left; trade: give Carbink at ROUTE 5 UNDERGROUND PATH], slowpokegalar [wins the duel 100%, 88% HP left; ROUTE 6 / good_rod 60%]
+KOGA: C cover  ['dondozo', 'slakoth', 'teddiursa', 'tinkatink', 'wailmer', 'wailord']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C greedy ['darumaka', 'dewpider', 'forretress', 'numel', 'pineco', 'rookidee']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C fast   ['carkol', 'darumaka', 'dewpider', 'ferrothorn', 'qwilfishhisui', 'slowpokegalar']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C top    ['bronzor', 'carkol', 'forretress', 'golett', 'numel', 'qwilfishhisui']: win 8% deaths/mon 0.93 deathless 0%
+KOGA: C top    ['ferroseed', 'ferrothorn', 'forretress', 'houndstone', 'rolycoly', 'yamaskgalar']: win 0% deaths/mon 1.00 deathless 0%
+KOGA: C top    ['bronzor', 'darumaka', 'dewpider', 'numel', 'pineco', 'rookidee']: win 0% deaths/mon 1.00 deathless 0%
+KOGA       legal=True  best team under search: win    8% deaths/mon 0.93 deathless 0% ['bronzor', 'carkol', 'forretress', 'golett', 'numel', 'qwilfishhisui']  (others: 0%, 0%, 0%, 0%, 0%)  (66s)
+KOGA       sets: bronzong(Jolly/Levitate/twistedspoon) ['spinout', 'futuresight', 'earthquake', 'rest'], coalossal(Jolly/Flash Fire/hardstone) ['burnup', 'stoneedge', 'earthquake', 'rest'], forretress(Adamant/Sturdy/silverpowder) ['spinout', 'doubleedge', 'lunge', 'rest'], golurk(Adamant/Iron Fist/spelltag) ['headlongrush', 'shadowpunch', 'hammerarm', 'rest'], camerupt(Timid/Magma Armor/softsand) ['eruption', 'earthquake', 'steameruption', 'slackoff'], overqwil(Adamant/Intimidate/leftovers) ['gunkshot', 'foulplay', 'aquatail', 'rest']
+KOGA       threat Hoopa-Unbound (33 of our deaths): counters wimpod [wins the duel 100%, 100% HP left; VERMILLION CITY / good_rod 20%], tarountula [wins the duel 100%, 100% HP left; FOREST EXPANSION / grass_night 20%], nymble [wins the duel 100%, 100% HP left; FOREST EXPANSION / grass_day 1%]
+KOGA       threat Nidoking (16 of our deaths): counters slakoth [wins the duel 100%, 46% HP left; FOREST EXPANSION / grass_day 5%], lapras [wins the duel 100%, 40% HP left; gift: SILPH CO. 7F — Defeat your rival and talk to the guy behind him], cubchoo [wins the duel 100%, 39% HP left; VIRIDIAN CITY / grass_day 10%]
+BLAINE: C cover  ['carkol', 'elgyem', 'ponytagalar', 'rapidashgalar', 'screamtail', 'slakoth']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C fast   ['cherubi', 'deerlingautumn', 'deerlingsummer', 'deerlingwinter', 'munchlax', 'seedot']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C top    ['cherubi', 'deerling', 'deerlingsummer', 'deerlingwinter', 'munchlax', 'seedot']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C top    ['bulbasaur', 'cherubi', 'cryogonal', 'deerlingwinter', 'druddigon', 'shroomish']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C top    ['cryogonal', 'deerling', 'deerlingautumn', 'deerlingwinter', 'gossifleur', 'trapinch']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE: C top    ['cherubi', 'deerlingsummer', 'deerlingwinter', 'morelull', 'munchlax', 'seedot']: win 0% deaths/mon 1.00 deathless 0%
+BLAINE     legal=True  best team under search: win    0% deaths/mon 1.00 deathless 0% ['cryogonal', 'deerling', 'deerlingautumn', 'deerlingwinter', 'gossifleur', 'trapinch']  (others: 0%, 0%, 0%, 0%, 0%)  (66s)
+BLAINE     sets: cryogonal(Modest/Levitate/nevermeltice) ['freezyfrost', 'flashcannon', 'hiddenpower', 'recover'], sawsbuck(Adamant/Chlorophyll/silkscarf) ['doubleedge', 'seedbomb', 'megahorn', 'rest'], sawsbuck(Adamant/Chlorophyll/silkscarf) ['doubleedge', 'seedbomb', 'megahorn', 'rest'], sawsbuck(Adamant/Chlorophyll/silkscarf) ['doubleedge', 'seedbomb', 'megahorn', 'rest'], eldegoss(Modest/Cotton Down/leftovers) ['leafstorm', 'hypervoice', 'synthesis', 'energyball'], flygon(Jolly/Levitate/choiceband) ['headlongrush', 'dragonpulse', 'superpower', 'roost']
+BLAINE     threat Ho-Oh (35 of our deaths): counters rockruff [wins the duel 100%, 3% HP left; ROUTE 22 / grass_day 4%]
+BLAINE     threat Great Tusk (11 of our deaths): counters tropius [wins the duel 100%, 100% HP left; ROUTE 9 / grass_day 8%], smoochum [wins the duel 100%, 100% HP left; MT MOON B2F / grass_day 9%], simisage [wins the duel 100%, 100% HP left; ROUTE 13 / grass_day 10%]
+
+Radical Red best-six probe (pool) | hardcore bosses | hardcore legality: True | arena effects: True | field-aware calc bot: True | chooser cover | matchup play True | death weight 6.0 | seeded | search 9,8 x n=12 | no EVs, items in hand | enemy = RR AI, full info | 1 min
+  boss       cap   win deaths/mon clean  best team  | arena
+  ERIKA       44   92%       0.19   42%  darumaka, fletchling, gulpin, noibat, rookidee, slowpokegalar  | {'terrain': 'grassyterrain'}
+  KOGA        68    8%       0.93    0%  bronzor, carkol, forretress, golett, numel, qwilfishhisui  | {'p2': ['tailwind']}
+  BLAINE      76    0%       1.00    0%  cryogonal, deerling, deerlingautumn, deerlingwinter, gossifleur, trapinch  | {'weather': 'desolateland'}

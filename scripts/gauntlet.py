@@ -243,7 +243,9 @@ def item_value(m: Mon, item: dict, md: dict, types: set[str]) -> float:
     """What holding `item` is worth to m: the multiplier on its attacks of the
     boosted type (1.2 STAB / 1.1 off-type) or category (Choice locks: x0.85), or
     the item's flat value (Leftovers 1.25); an `nfe` item (Eviolite) only for a mon that
-    still evolves. 1.0 = nothing."""
+    still evolves; a mega stone only for its own species (3.0: always first). 1.0 = nothing."""
+    if "mega" in item:
+        return 3.0 if to_id_str(m.species) == item["mega"] else 1.0
     if item.get("nfe") and not load_game()["evolutions"].get(m.species):
         return 1.0
     if "flat" in item:
@@ -255,6 +257,14 @@ def item_value(m: Mon, item: dict, md: dict, types: set[str]) -> float:
     if any(a["category"] == item["category"] for a in attacks[:1]):  # the strongest attack's category
         return item["mult"] * (0.85 if item.get("lock") else 1.0)
     return 1.0
+
+
+def mega_stone(species: str, progress: int | None) -> str | None:
+    """The mega stone of `species` in hand at trainer `progress` (items.json), if any."""
+    if progress is None:
+        return None
+    sid = to_id_str(species)
+    return next((k for k, v in load_game()["items"].items() if v.get("mega") == sid and v["before_trainer"] <= progress), None)
 
 
 def assign_items(mons: list[Mon], progress: int | None) -> None:
