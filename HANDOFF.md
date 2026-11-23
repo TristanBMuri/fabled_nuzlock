@@ -1,5 +1,14 @@
 # HANDOFF — state of the project as of 2026-10-12
 
+**2026-11-23: back on Radical Red** (NOTEBOOK.md last entry). `--legal` is now the player's full
+hardcore legality (`rr_probe.hardcore`: bans, Toxic / Leech Seed list, ability swaps); RR box
+baseline `results/rr_enemypp_boxes.*` (Brock 81% / Misty 53%; bosses' PP maxed again, per the
+official sheet; bridge resets only the player in gen9rr). `--normal` plays normal
+mode's bosses as the easier comparison (100% / 100%; TODO.md E1, the settings ladder). ROM
+checklist `data/rr/FIDELITY.md` + `scripts/rr_data_diff.py` (A1 / A3, waiting on the user's
+emulator rows). D1's premise is gone (field-aware now better); next = D2 / the boost-aware
+threat at Brock, D3, then encounter routing (TODO.md G0, later).
+
 **2026-11-18: RL learning track started in `rl/`** (user's choice; `rl/README.md`). It is off the
 planner's path: nothing imports it. It runs on poke-engine (the Rust sim, 13 us/turn vs ~1.7 ms
 for our Showdown rollout turn). Lesson 1 (tabular Q-learning) is done; lesson 2 (2026-11-22: PPO

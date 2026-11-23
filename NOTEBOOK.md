@@ -2587,3 +2587,50 @@ before this one has the player without items.
 Next on the item side: the resist berries by the matrix (a Wacan on the Mantine answer is the
 kind of pick `item_value` cannot make), and the duels / chooser with items, since a candidate's
 cell changes with its item. Then D1 (Brock under sand) and D3, the box milestone.
+
+## 2026-11-23 — Hardcore legality, normal mode, the ROM checklist, D1 revisited (`results/rr_{legal,normal}_boxes.*`, `results/rr_data_diff.log`, `results/rr_d1_brock_*.log`)
+
+**Player legality.** `rr_probe.hardcore()` (under `--legal`) now applies all of the player's
+hardcore rules, not just the 82 banned moves: Toxic / Leech Seed only on the 91 listed species
+(`gauntlet.SPECIES_MOVES`) and the ability swaps (`player_ability`: Drizzle → Adaptability,
+Speed Boost → Infiltrator, Tyranitar → Intimidate, keeps for Spinda / Comfey / Espathra);
+`choose_ability` scores each slot as what the player gets. ~14 mons per boss pool change
+(Yanma, Hippowdon, Bisharp, ...), Toxic falls off a few sets. 30 boxes, same flags as
+`rr_items_boxes`: Brock 83 → 82% / 0.46 → 0.46 d/mon / 13 → 13% deathless, Misty 53 → 53% /
+0.70 → 0.69 / 4 → 5%. Inside the noise: the rules were right to add and cost nothing yet.
+**Baseline from here: `results/rr_legal_boxes.*`.**
+
+**Normal mode (the easier setting, kept for comparison).** The tracker export has a `default`
+(normal mode) boss list next to `hardcore`; `--normal` plays its sets and caps
+(`rr_probe.normal_boss`; tracker names resolved against the mod's tables by `tracker_id`:
+"Headlon. Rush", "Weakness Pol.", "HP Grass", "Ursaluna-BM"). Normal Brock is 4 mons at L12–14,
+no sand; normal Misty 4 mons, no rain. Same pools, items and chooser, no legality:
+
+| setting | Brock win / d/mon / deathless | Misty win / d/mon / deathless |
+|---|---|---|
+| normal mode | 100% / 0.05 / 77% | 100% / 0.09 / 68% |
+| hardcore, full legality | 82% / 0.46 / 13% | 53% / 0.69 / 5% |
+
+The hardcore bosses, not the player's rules, are the whole gap.
+
+**A3 automatic half.** `scripts/rr_data_diff.py`: dump vs sheet for trainer order #0–#34, 98 / 149
+shared mons identical; abilities 29 (dump slot 0 vs sheet hidden, e.g. Brock's Varoom Overcoat vs
+Filter), levels 24 (dump +2 on Brendan #23 and the optional leaders), items 5, natures 3, moves 4.
+Misty / Surge / Erika agree fully. `data/rr/FIDELITY.md` is the ROM checklist (sim value per row,
+an empty ROM column).
+
+**D1 revisited.** Same team, 12 fights, current code (`rr_deaths.py BROCK 12 --matchup
+--death-weight 6`, ± `--blind-field`): field-aware 12/12, 24 deaths; blind 10/12, 34 deaths. The
+2026-10-11 reversal (field 37 vs blind 20) is gone (CFRU AI, formula, items since). The deaths are
+attrition: 22 / 24 at < 50% HP, 22 / 24 while already in; Cacnea (Power-Up Punch) 10, Lunatone 8.
+That is D2 (death weight, rollout value) and the boost-aware threat, not field awareness.
+
+**Enemy PP maxed (same day).** The official hardcore sheet: "All of the opposing Pokémon's moves
+in this sheet are PP maxed" — the 2026-10-14 no-PP-Ups reset had taken them from the bosses too.
+In a gen9rr format the bridge now resets only p1 (`sim_bridge.js basePP`; checked: our Rock Tomb
+15, Brock's 24). 30 boxes on 10 workers (`results/rr_enemypp_boxes.*`): Brock 81% / 0.47 / 14%,
+Misty 53% / 0.72 / 4% — inside the noise of `rr_legal_boxes`. **RR baseline from here:
+`results/rr_enemypp_boxes.*`.** Sources checked the same day (data/rr/FIDELITY.md): the official
+Drive folder has boss sheets only (both modes); the only per-trainer source is Rudo2204's dumps
+(hardcore / normal / easy now in data/rr/). The dump has Varoom Overcoat in both modes, the sheets
+Filter: a dump-wide ability reading question for the ROM.

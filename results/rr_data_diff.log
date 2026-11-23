@@ -1,0 +1,104 @@
+#0   RIVAL                cap 16 (optional): agree
+#1   BRENDAN              cap 16: 
+    treecko        ability  dump overgrow  sheet unburden
+#2   LASS ANNE            cap 16: agree
+#3   ACE NELLE            cap 16 (optional): agree
+#4   CATCHER SAMMY        cap 16: agree
+#5   FALKNER              cap 16: 
+    farfetchdgalar item     dump leekstick  sheet leek
+    farfetchdgalar ability  dump steadfast  sheet scrappy
+#6   BROCK                cap 16: 
+    lileep         ability  dump suctioncups  sheet stormdrain
+    varoom         ability  dump overcoat  sheet filter
+#7   LASS SALLY           cap 23: 
+    pikachuflying  ability  dump static  sheet lightningrod
+#8   SUPER NERD MIGUEL    cap 23: 
+    sableye        ability  dump frisk  sheet prankster
+    skiddo         ability  dump sapsipper  sheet grasspelt
+    swoobat        ability  dump unaware  sheet simple
+    thwackey       ability  dump overgrow  sheet grassysurge
+#9   ARCHER               cap 23: agree
+#10  RIVAL                cap 28: 
+    simisear       ability  dump gluttony  sheet sagepower
+#11  CATCHER CALE         cap 28: agree
+#12  LASS ALI             cap 28: 
+    brionne        ability  dump torrent  sheet liquidvoice
+    brionne        nature   dump modest  sheet bashful
+#13  YOUNGSTER TIMMY      cap 28: agree
+#14  LASS RELLI           cap 28: no tracker block 
+#15  CAMPER ETHAN         cap 28: 
+    mabosstiff     nature   dump bashful  sheet adamant
+#16  GRUNT                cap 28: agree
+#17  BUGSY                cap 28 (optional): 
+    araquanid      level    dump 23  sheet 28
+    araquanid      moves    dump ['liquidation', 'xscissor']  sheet ['bugbite', 'waterfall']
+    kleavor        level    dump 24  sheet 28
+    lokix          level    dump 23  sheet 28
+    lokix          item     dump buggem  sheet silverpowder
+    scizor         level    dump 24  sheet 28
+    scizor         item     dump scizorite  sheet assaultvest
+    scizor         moves    dump ['dualwingbeat']  sheet ['aerialace']
+    scyther        level    dump 23  sheet 28
+    scyther        item     dump eviolite  sheet muscleband
+    scyther        moves    dump ['bugbite', 'dualwingbeat']  sheet ['aerialace', 'uturn']
+    vikavolt       level    dump 23  sheet 28
+    vikavolt       moves    dump ['bugbuzz', 'energyball', 'thunder']  sheet ['hiddenpowergrass', 'roost', 'signalbeam']
+#18  MISTY                cap 28: agree
+#19  GRUNT                cap 28: 
+    veluza         ability  dump moldbreaker  sheet sharpness
+#20  CAMPER JEFF          cap 28: agree
+#21  ANN & BROOKS         cap 28: 
+    species: dump only -, sheet only ['decidueye', 'simisage', 'wigglytuff']
+    samurott       ability  dump shellarmor  sheet battlearmor
+    simisear       ability  dump gluttony  sheet sagepower
+#22  EDMOND & TREVOR      cap 28: 
+    species: dump only -, sheet only ['cramorant', 'masquerain', 'nidoqueen']
+    cradily        ability  dump suctioncups  sheet stormdrain
+#23  BRENDAN              cap 28: 
+    crawdaunt      level    dump 30  sheet 28
+    gardevoir      level    dump 30  sheet 28
+    hariyama       level    dump 30  sheet 28
+    plusle         level    dump 30  sheet 28
+    sceptile       level    dump 30  sheet 28
+    slaking        level    dump 30  sheet 28
+#24  WHITNEY              cap 28 (optional): 
+    altaria        level    dump 30  sheet 28
+    altaria        ability  dump naturalcure  sheet pixilate
+    farigiraf      level    dump 30  sheet 28
+    luvdisc        level    dump 30  sheet 28
+    luvdisc        ability  dump swiftswim  sheet soulheart
+    pyroar         level    dump 30  sheet 28
+    swellow        level    dump 30  sheet 28
+    togekiss       level    dump 30  sheet 28
+#25  GENTLEMAN TUCKER     cap 36: 
+    farfetchd      item     dump leekstick  sheet leek
+    pikachusurfing ability  dump static  sheet lightningrod
+    swanna         ability  dump frisk  sheet noguard
+#26  LT. SURGE            cap 36: 
+    ampharos       ability  dump plus  sheet moldbreaker
+#27  PICNICKER ALICIA     cap 36: 
+    flareon        ability  dump flashfire  sheet toxicboost
+#28  PICNICKER CAITLIN    cap 36: 
+    sneaselhisui   nature   dump jolly  sheet bashful
+    spinda         ability  dump owntempo  sheet contrary
+#29  PICNICKER DANA       cap 36: agree
+#30  MANIAC HERMAN        cap 36: 
+    ninetales      ability  dump flashfire  sheet drought
+    sylveon        ability  dump cutecharm  sheet pixilate
+#31  MORTY                cap 36 (optional): 
+    ceruledge      level    dump 44  sheet 36
+    dusknoir       level    dump 44  sheet 36
+    dusknoir       ability  dump pressure  sheet hustle
+    gengar         level    dump 44  sheet 36
+    gengar         ability  dump levitate  sheet shadowtag
+    krookodile     level    dump 44  sheet 36
+    mismagius      level    dump 44  sheet 36
+    weavile        level    dump 44  sheet 36
+    weavile        ability  dump pressure  sheet infiltrator
+#32  SUPER NERD AIDAN     cap 36: agree
+#33  ACE MARY             cap 36: 
+    weavile        ability  dump pressure  sheet infiltrator
+#34  ERIKA                cap 44: 
+    sceptile       ability  dump overgrow  sheet technician
+
+98/149 shared mons identical; fields that differ: {'ability': 29, 'item': 5, 'nature': 3, 'level': 24, 'moves': 4}

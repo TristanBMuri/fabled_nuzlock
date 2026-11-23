@@ -26,9 +26,7 @@ def main() -> None:
     import numpy as np
     import rr_probe as rp
     import rr_team_probe as tp
-    import gauntlet
     from gauntlet import pack_team
-    from poke_env.data import to_id_str
     from ai_util.calc_bot import calc_brain
     from ai_util.evaluate import Searcher
     from ai_util.rr_ai import RadicalRedAI
@@ -44,7 +42,7 @@ def main() -> None:
     ap.add_argument("--death-weight", type=float, default=0.5)
     ap.add_argument("--json", action="store_true", help="also write logs/trace_<boss>_<battle>.json")
     args = ap.parse_args()
-    gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(ROOT / "data/rr/hardcore_rules.json"))["banned_moves"]}
+    rp.hardcore()
     if args.preserve or args.matchup:
         import ai_util.calc_bot as cb
         cb.PRESERVE, cb.MATCHUP = args.preserve, args.matchup

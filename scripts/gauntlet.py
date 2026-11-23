@@ -96,6 +96,7 @@ _STAT_NAMES = dict(zip(STATS, ("HP", "Atk", "Def", "SpA", "SpD", "Spe")))
 # would be filled with 252 per stat by the validator (README: the EV bug).
 PLAYER_EVS = {k: 85 for k in STATS}
 BANNED_MOVES: set[str] = set()  # moves the player may not use (Radical Red hardcore: data/rr/hardcore_rules.json)
+SPECIES_MOVES: dict[str, set[str]] = {}  # move -> the only species that may use it (hardcore: Toxic, Leech Seed)
 PLAYER_IVS = {k: 31 for k in STATS}
 
 
@@ -208,11 +209,12 @@ def encounter_moves(species: str, level: int, rule: str = "best4",
             (self-KO, recharge, conditional) never get a slot."""
     game = load_game()
     ls = game["learnsets"].get(species, {})
-    pool = list(dict.fromkeys(m for m, lvl in ls.get("levelup", []) if lvl <= level and m not in BANNED_MOVES))
+    legal = lambda m: m not in BANNED_MOVES and species in SPECIES_MOVES.get(m, (species,))
+    pool = list(dict.fromkeys(m for m, lvl in ls.get("levelup", []) if lvl <= level and legal(m)))
     if rule == "last4" or not pool:
         return pool[-4:]
     if progress is not None:  # TMs in hand, after the level-up moves (later = preferred on ties)
-        pool += [m for m in ls.get("tm", []) if m not in pool and m not in BANNED_MOVES
+        pool += [m for m in ls.get("tm", []) if m not in pool and legal(m)
                  and m in game["tms"] and game["tms"][m]["before_trainer"] <= progress]
     md, sp = game["moves"], game["species"].get(species, {})
     stab, bs = set(sp.get("types", [])), sp.get("baseStats", {"atk": 1, "spa": 1})

@@ -38,9 +38,7 @@ def attribution(history: list[str]) -> tuple[collections.Counter, collections.Co
 
 def main() -> None:
     import rr_probe as rp
-    import gauntlet
     from gauntlet import STATS, Mon, encounter_moves, evolve, pack_team
-    from poke_env.data import to_id_str
     from ai_util.calc_bot import calc_brain
     from ai_util.evaluate import Searcher
     from ai_util.rr_ai import RadicalRedAI
@@ -48,7 +46,7 @@ def main() -> None:
 
     boss, n = sys.argv[1], int(sys.argv[2])
     source = sys.argv[3] if len(sys.argv) > 3 else "results/rr_team_probe_real.jsonl"
-    gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(ROOT / "data/rr/hardcore_rules.json"))["banned_moves"]}
+    rp.hardcore()
     rows = {r["boss"]: r for r in map(json.loads, open(ROOT / source))}
     r = rows[boss]
     by, known = rp.pools()

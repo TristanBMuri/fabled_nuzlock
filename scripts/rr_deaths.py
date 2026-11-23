@@ -66,9 +66,7 @@ def deaths_in(history: list[str]) -> list[dict]:
 
 def main() -> None:
     import rr_probe as rp
-    import gauntlet
     from gauntlet import STATS, Mon, encounter_moves, evolve, pack_team
-    from poke_env.data import to_id_str
     from ai_util.calc_bot import calc_brain
     from ai_util.evaluate import Searcher
     from ai_util.rr_ai import RadicalRedAI
@@ -87,7 +85,7 @@ def main() -> None:
     ap.add_argument("--json", action="store_true", help="also write logs/deaths_<boss>_<variant>.json")
     args = ap.parse_args()
     boss, n, source = args.boss, args.n, args.source
-    gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(ROOT / "data/rr/hardcore_rules.json"))["banned_moves"]}
+    rp.hardcore()
     r = {x["boss"]: x for x in map(json.loads, open(ROOT / source))}[boss]
     by, known = rp.pools()
     block, cap, pool, t = by[boss]

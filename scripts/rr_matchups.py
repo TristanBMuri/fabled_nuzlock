@@ -24,7 +24,6 @@ sys.path.insert(0, str(ROOT / "scripts"))
 def main() -> None:
     import rr_probe as rp
     import rr_team_probe as tp
-    import gauntlet
     from poke_env.data import to_id_str
     from ai_util.matchup import safe
     from ai_util.sim import SimBridge
@@ -35,7 +34,7 @@ def main() -> None:
     ap.add_argument("--pool", action="store_true", help="every catchable species, summarised per enemy mon")
     ap.add_argument("--json", action="store_true", help="also write logs/matrix_<boss>_<team|pool>.json")
     args = ap.parse_args()
-    gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(ROOT / "data/rr/hardcore_rules.json"))["banned_moves"]}
+    rp.hardcore()
     by, known = rp.pools()
     block, cap, pool, t = by[args.boss]
     arena, _ = rp.arena(block.get("battleEffect", ""))

@@ -56,6 +56,13 @@ mismatch we fix in `config/custom-formats.ts` or the fork. 2 hd + ROM time.
    the seed noise, the AI's exact shape matters and (2) is urgent; if not,
    the result is robust to the port. 1 hd (machine time).
 
+**A1 / A3 started 2026-11-23:** `data/rr/FIDELITY.md` is the checklist with the sim's value
+per row and an empty ROM column; `scripts/rr_data_diff.py` (`results/rr_data_diff.log`) did
+A3's automatic half: 98 / 149 boss mons to Erika identical between dump and sheet, the rest
+mostly abilities (dump slot 0 vs sheet hidden: Brock's Varoom Overcoat vs Filter) and levels
+(the dump's +2 on Brendan #23). Brock / Misty / Surge / Erika agree except Brock's two
+abilities. Waiting on the ROM rows.
+
 **A3. Data vs game.** The dump (`trainers_hardcore.json`) is one person's
 export; the tracker's sets are another. Diff them for the first 20 bosses
 (species, level, item, moves) and spot-check five against the ROM. Already
@@ -138,6 +145,13 @@ calibration (B1), the AI replay (A2) and the fidelity table (A1) all write
 JSON next to their logs so the page can show them. Steps 1–2 of UI_TODO:
 1–2 hd; the rest after.
 
+**E1. The settings ladder (2026-11-23).** Keep the easier settings runnable and report them
+side by side, so a hardcore number always comes with how much the rules cost:
+`--normal` (normal mode's boss sets and caps, `rr_probe.normal_boss`), `--legal` (the
+player's hardcore legality: banned moves, Toxic / Leech Seed list, ability swaps —
+`rr_probe.hardcore`), `--arena`, `--no-items`, and pool vs `--boxes`. First rows:
+`results/rr_normal_boxes.*` vs `results/rr_legal_boxes.*` (NOTEBOOK.md 2026-11-23).
+
 ## F. Doubles
 
 #8, #11–13 before Misty, ~20 mandatory fights overall incl. Sabrina and
@@ -147,6 +161,14 @@ the port's doubles targeting from CFRU, search over joint actions only if
 needed. 3–4 hd. After D3, before anything past Erika.
 
 ## G. Routing and the run layer
+
+**G0. Encounter routing for hardcore (later; added 2026-11-23 at the user's request).** In
+hardcore the box is the first encounter per location (dupes re-rolled), so the run's only
+lever on its box is *which locations to visit in which order* before each boss (optional
+areas, rods and Surf as they unlock, gifts). Routing answers "where do I go next for the
+counter the next boss needs". It does not replace the easier settings: every routing table
+reports next to them (planned pool = any species you want, boxes = drawn, routed boxes =
+drawn with the route chosen), on hardcore and normal mode (the settings ladder, E1).
 
 The 30-point gap between a drawn box and the planned pool is routing. First
 pass needs no new machinery: for each box, the "most missed counter" column

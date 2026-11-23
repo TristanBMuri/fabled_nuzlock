@@ -145,10 +145,13 @@ function dumpSide(side) {
 }
 
 // No PP Ups (2026-10-14): Showdown starts every move at pp * 8/5 (three PP Ups); the games'
-// trainers and a hardcore player have the base PP. Reset both sides just before the battle
-// starts (the first request then carries the real maxpp), then re-apply a carry.
+// trainers and a hardcore player have the base PP. Reset just before the battle starts (the
+// first request then carries the real maxpp), then re-apply a carry. Radical Red's bosses are
+// the exception (2026-11-23, the official hardcore sheet: "All of the opposing Pokemon's moves
+// in this sheet are PP maxed"): in a gen9rr format only the player (p1) is reset.
 function basePP(battle) {
-  for (const side of battle.sides) for (const p of side.pokemon) {
+  const sides = battle.format.id.startsWith('gen9rr') ? [battle.sides[0]] : battle.sides;
+  for (const side of sides) for (const p of side.pokemon) {
     for (const slot of new Set([...p.baseMoveSlots, ...p.moveSlots])) {
       const mv = battle.dex.moves.get(slot.id);
       if (mv.exists && mv.pp) slot.pp = slot.maxpp = mv.pp;

@@ -145,6 +145,60 @@ def boss_team(name: str | int) -> tuple[str, int, list[str]]:
     return pack_trainer(tr, entry["cap"]), cap, [m["species"] for m in tr["mons"]]
 
 
+_MOD: dict = {}
+TYPES = {"bug", "dark", "dragon", "electric", "fairy", "fighting", "fire", "flying", "ghost", "grass", "ground", "ice",
+         "poison", "psychic", "rock", "steel", "water"}
+FORM_ALIASES = {"bm": "bloodmoon", "i": "", "c": "complete", "p": "primal", "t": "therian", "a": "alola", "g": "galar", "h": "hisui"}
+
+
+def tracker_id(name: str, kind: str) -> str:
+    """A tracker-export name -> the fork's id (kind: moves / items / abilities / species). The export
+    abbreviates long names ("Headlon. Rush", "Weakness Pol.", "HP Ground", "Ursaluna-BM"): each of
+    its words must start the full name's word. Unresolved names come back as their plain id."""
+    if not _MOD:
+        _MOD.update(json.load(open(RR / "mod_data.json")))
+    x, table = to_id_str(name or ""), _MOD[kind]
+    if x in ("", "none", "noitem") or x in table:
+        return "" if x in ("none", "noitem") else x
+    if kind == "moves" and x.startswith("hp") and x[2:] in TYPES:  # Showdown's alias, as the dump's names
+        return "hiddenpower" + x[2:]
+    words = [w for w in re.split(r"[ \-.]+", name.strip().lower()) if w]
+    if kind == "species" and len(words) == 2 and words[1] in FORM_ALIASES:
+        x = to_id_str(words[0] + FORM_ALIASES[words[1]])
+        return x if x in table else to_id_str(words[0])
+    for k, e in table.items():
+        full = [w for w in re.split(r"[ \-]+", e["name"].lower()) if w]
+        if len(full) == len(words) and all(f.startswith(w) for w, f in zip(words, full)):
+            return k
+    return dump_id(name)
+
+
+def tracker_level(lv: str, cap: int) -> int:
+    """A tracker level: "13", or relative to the cap ("Highest Lv -2", "Highest Lv", "Player Max Level")."""
+    m = re.search(r"-\s*(\d+)$", lv)
+    return int(lv) if lv.isdigit() else cap - (int(m.group(1)) if m else 0)
+
+
+def normal_boss(name: str) -> tuple[dict, str, int, list[str]]:
+    """Normal mode (the easier setting): the boss's first tracker block under `default` and its cap in
+    the normal trainer order -> (block, packed team, cap, species). Levels "Highest Lv - n" resolve
+    against the cap; the sets' own EVs (mostly none early), IVs 31."""
+    d = json.load(open(RR / "tracker_bosses.json"))["default"]
+    cap = next(int(e["levelCap"].rstrip("+").split("/")[0]) for e in d["trainerOrder"] if e["name"] == name)
+    block = next(x for c in d["categories"] if c["name"] not in ("Kanto Rematch", "Postgame")
+                 for x in c["bosses"] if x["title"].split("·")[-1].strip().upper() == name)
+    parts, species = [], []
+    for p in block["pokemon"]:
+        lv = tracker_level(p["level"], cap)
+        ev = {k.lower(): int(v) for k, v in p.get("evs", {}).items()}
+        sp = tracker_id(p["species"], "species")
+        species.append(sp)
+        parts.append("|".join([sp, "", tracker_id(p["item"], "items"), tracker_id(p["ability"], "abilities"),
+                               ",".join(tracker_id(m, "moves") for m in p["moves"]), p["nature"],
+                               ",".join(str(ev.get(k, 0)) for k in STATS), "", ",".join(["31"] * 6), "", str(lv), ""]))
+    return block, "]".join(parts), cap, species
+
+
 def block_of(entry: dict) -> dict | None:
     """The tracker block for a trainer-order entry: its name's first block in a first-fight
     category (not rematches / post-game), preferring one whose title names the location."""
@@ -208,11 +262,42 @@ def choose_nature(species: str, moves: list[str], known: dict) -> str:
     return NATURE[("atk", "spa")] if "Physical" in cats or not cats else NATURE[("spa", "atk")]
 
 
+ABILITY_SWAPS: dict = {}  # hardcore only (hardcore()): ability id -> what the player's mon gets instead
+SPECIES_SWAPS: dict = {}  # species id -> its own replacement (Tyranitar: Intimidate, not Sand Force)
+KEEPS: dict = {}  # species id -> the ability it keeps despite the swap (Spinda: Contrary)
+
+
+def hardcore() -> None:
+    """The player's hardcore legality from data/rr/hardcore_rules.json: the 82 banned moves, Toxic /
+    Leech Seed only on the 91 listed species (gauntlet.SPECIES_MOVES), and the ability swaps
+    (Drizzle -> Adaptability, Speed Boost -> Infiltrator, ...; player_ability). Without it the
+    player plays the easier rules: every move and ability the mod has."""
+    r = json.load(open(RR / "hardcore_rules.json"))
+    gauntlet.BANNED_MOVES = {to_id_str(m) for m in r["banned_moves"]}
+    allowed = {to_id_str(s) for s in r["toxic_leech_seed_allowed_species"]}
+    gauntlet.SPECIES_MOVES = {"toxic": allowed, "leechseed": allowed}
+    ABILITY_SWAPS.update({to_id_str(a): b for a, b in r["ability_changes"].items()})
+    for name, ab in r["species_ability_changes"].items():  # "Mega Tyranitar" -> tyranitarmega
+        SPECIES_SWAPS[to_id_str(name[5:]) + "mega" if name.startswith("Mega ") else to_id_str(name)] = ab
+    for line in r["keeps"]:  # "Spinda Keeps Contrary"
+        sp, ab = line.split(" Keeps ")
+        KEEPS[to_id_str(sp)] = to_id_str(ab)
+
+
+def player_ability(species: str, ability: str) -> str:
+    """The ability the player's mon has under the hardcore swaps (unchanged when hardcore() is off)."""
+    a = to_id_str(ability)
+    if a not in ABILITY_SWAPS or KEEPS.get(species) == a:
+        return ability
+    return SPECIES_SWAPS.get(species, ABILITY_SWAPS[a])
+
+
 def choose_ability(species: str, known: dict, boss_types: set, arena: dict) -> str | None:
     """Capsules (and the patch) make every slot available: an immunity to a type the boss
-    attacks with, a speed ability for the gym's weather / terrain, Intimidate; else slot 0."""
+    attacks with, a speed ability for the gym's weather / terrain, Intimidate; else slot 0.
+    Each slot is scored as what the player actually gets (player_ability: the hardcore swaps)."""
     from ai_util.calc_bot import ABILITY_IMMUNE_TYPE, SPEED_ABILITY
-    slots = known.get(species, {}).get("abilities", {})
+    slots = {k: player_ability(species, v) for k, v in known.get(species, {}).get("abilities", {}).items()}
     if not slots:
         return None
     weather = {"raindance": "swiftswim", "sunnyday": "chlorophyll", "sandstorm": "sandrush", "snow": "slushrush",

@@ -12,14 +12,16 @@ with calc + search and the best team is reported with its search-play win
 rate and deaths per mon. Hardcore = Minimal Grinding Mode: nobody has EVs
 (player 0, enemy 0 from the dump); the final six hold the items the care packages and the
 overworld have handed out by that boss (data/rr/items.json, one per mon; 2026-10-14, C1:
-Brock 74 -> 83%, Misty 41 -> 53% on the same sixes; `--no-items` for the old regime). `--legal` removes the 82 moves hardcore bans for the player
-(data/rr/hardcore_rules.json) from every moveset in stages A-C; without it the
+Brock 74 -> 83%, Misty 41 -> 53% on the same sixes; `--no-items` for the old regime). `--legal` applies the player's
+hardcore legality (data/rr/hardcore_rules.json, rr_probe.hardcore: the 82 banned moves, Toxic /
+Leech Seed only on the listed species, the ability swaps) in stages A-C; without it the
 player has every move (the 2026-10-10 afternoon run also gave the enemy
 252/252 EVs and the player items / trained EVs — see NOTEBOOK.md). Full enemy
 information; enemy = the RR AI port. `--arena` puts the gym's permanent field effect
 (tracker battleEffect: weather / terrain / Tailwind / Trick Room) into the sim and
 makes p2's own weather and terrain permanent (hardcore). Not modelled: doubles,
-the custom arena rules, natures, the player's ability swaps.
+the custom arena rules. `--normal` swaps in normal mode's boss sets and caps (the easier
+game; run it without --legal to compare the settings).
 
 `--boxes N` is the milestone form: N boxes per boss drawn by rarity (one encounter per
 open location, a random starter, the gifts), the chooser (stage A ranking + greedy build)
@@ -51,7 +53,6 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from poke_env.data import to_id_str  # noqa: E402
 import rr_probe as rp  # noqa: E402
 from rr_postmortem import attribution  # noqa: E402  (sets gauntlet.GAME = "rr", injects the mod data)
-import gauntlet  # noqa: E402
 from gauntlet import STATS, Mon, assign_items, encounter_moves, evolve, pack_team  # noqa: E402
 
 SHORT, TOP = 24, 6
@@ -180,19 +181,22 @@ def setup(args, name: str, announce: bool = True):
     if name not in by:
         raise KeyError(f"{name}: no team data (not a tracker boss block nor a dump id)")
     block, cap, pool, progress = by[name]
+    if args.normal:  # the easier game: normal mode's boss set and cap; the pool, items and TMs stay the hardcore run's
+        block, enemy_packed, cap, enemy_species = rp.normal_boss(name)
     arena, unmodelled = rp.arena(block.get("battleEffect", "")) if args.arena else ({}, [block.get("battleEffect", "")])
     if announce:
         print(f"{name}: trainer #{progress}, cap {cap}, pool {len(pool)} species; arena {arena}; not modelled: {unmodelled}", flush=True)
     if args.legal:
-        gauntlet.BANNED_MOVES = {to_id_str(m) for m in json.load(open(rp.RR / "hardcore_rules.json"))["banned_moves"]}
+        rp.hardcore()
     if args.blind_field or args.matchup:
         import ai_util.calc_bot as cb
         cb.FIELD_AWARE = not args.blind_field
         cb.MATCHUP = args.matchup
     srng = random.Random(f"{name}-seeds-{args.seed}")
     seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(max(args.n_solo, args.n_team, args.n_search))]
-    enemy_packed, dump_cap, enemy_species = rp.boss_team(int(name[1:]) if name.startswith("#") else name)
-    cap = max(cap, dump_cap)
+    if not args.normal:
+        enemy_packed, dump_cap, enemy_species = rp.boss_team(int(name[1:]) if name.startswith("#") else name)
+        cap = max(cap, dump_cap)
     md = rp.load_game("rr")["moves"]
     boss_types = {md[mv]["type"] for mon in enemy_packed.split("]") for mv in mon.split("|")[4].split(",") if mv in md}
     enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
@@ -433,7 +437,7 @@ def pool_row(args, ctx, pre: dict, played: dict, threats: list[dict]) -> dict:
         repaired = {"team": list(rteam), "win": rw, "deaths_per_mon": rd, "deathless": rc, "counters_offered": extra, "counters_taken": taken}
         emit(args, "repaired", boss=name, **repaired, sets=sets_of(ctx, rteam))
         print(f"{name:<10} repaired: counters offered {extra}, taken {taken}: win {rw:5.0%} deaths/mon {rd:.2f} deathless {rc:.0%} {list(rteam)}  (best was {w:.0%} / {d:.2f})  ({time.time() - ctx.t0:.0f}s)", flush=True)
-    row = {"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser, "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena, "items": args.items,
+    row = {"boss": name, "mode": "pool", "cap": ctx.cap, "legal": args.legal, "normal": args.normal, "field_aware": not args.blind_field, "chooser": args.chooser, "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena, "items": args.items,
            "unmodelled": ctx.unmodelled, "best_team": list(t), "win": w, "deaths_per_mon": d, "deathless": clean[t], "n": args.n_search,
            "all": [(list(t_), w_, d_, clean[t_]) for w_, _, t_, d_ in results], "threats": threats, "repaired": repaired,
            "starter": pre["starter"], "sets": sets_of(ctx, t), "enemy": ctx.enemy_species, "pool": len(pool), "progress": ctx.progress, "shortlist": short}
@@ -514,7 +518,7 @@ def boxes_start(args, name: str) -> dict | None:
     print(f"{name}: A solo scores for {len(solo)} species (pool + starters) in {time.time() - ctx.t0:.0f}s", flush=True)
     emit(args, "stage_a", boss=name, scored=len(solo), top=[(sp, round(pr, 3)) for pr, sp in solo[:SHORT]])
     ctx.bridge.close()
-    return {"boss": name, "mode": "boxes", "cap": ctx.cap, "legal": args.legal, "field_aware": not args.blind_field, "chooser": args.chooser,
+    return {"boss": name, "mode": "boxes", "cap": ctx.cap, "legal": args.legal, "normal": args.normal, "field_aware": not args.blind_field, "chooser": args.chooser,
             "matchup": args.matchup, "death_weight": args.death_weight, "arena": ctx.arena, "n": args.n_search, "items": args.items,
             "enemy": ctx.enemy_species, "pool": len(ctx.pool), "progress": ctx.progress}
 
@@ -554,7 +558,8 @@ def main() -> None:
     ap.add_argument("--search", default="9,8")
     ap.add_argument("--seed", type=int, default=0)
     ap.add_argument("--workers", type=int, default=6)
-    ap.add_argument("--legal", action="store_true", help="drop the moves hardcore bans for the player")
+    ap.add_argument("--legal", action="store_true", help="the player's hardcore legality: banned moves, the Toxic / Leech Seed list, ability swaps (rr_probe.hardcore)")
+    ap.add_argument("--normal", action="store_true", help="normal mode's boss sets and caps (tracker 'default', rr_probe.normal_boss): the easier setting, for comparison")
     ap.add_argument("--arena", action="store_true", help="the gym's permanent field effect (tracker battleEffect) in the sim")
     ap.add_argument("--blind-field", action="store_true", help="the calc bot ignores weather / terrain (the pre-2026-10-11 bot)")
     ap.add_argument("--repair", action="store_true", help="offer the counters to the greedy build and play the result too")
@@ -583,13 +588,14 @@ def main() -> None:
         Path(args.out).write_text("".join(json.dumps(r) + "\n" for r in rows))
     emit(args, "end", minutes=round((time.time() - t0) / 60, 1))
     mode = "boxes" if args.boxes else "pool"
-    print(f"\nRadical Red best-six probe ({mode}) | legal moves only: {args.legal} | arena effects: {args.arena} | field-aware calc bot: {not args.blind_field} | chooser {args.chooser} | matchup play {args.matchup} | death weight {args.death_weight} | seeded | "
+    print(f"\nRadical Red best-six probe ({mode}) | {'normal' if args.normal else 'hardcore'} bosses | hardcore legality: {args.legal} | arena effects: {args.arena} | field-aware calc bot: {not args.blind_field} | chooser {args.chooser} | matchup play {args.matchup} | death weight {args.death_weight} | seeded | "
           f"search {args.search} x n={args.n_search} | no EVs, {'items in hand' if args.items else 'no items'} | enemy = RR AI, full info | {(time.time() - t0) / 60:.0f} min")
     if args.boxes:
         print(f"  {'boss':<10} {'cap':>3} {'mean win':>8} {'>=50%':>6} {'d/mon':>5} {'clean':>5}  most missed counter (vs)")
         for r in sorted(rows, key=lambda r: r["cap"]):
-            top = r["missing"][0] if r["missing"] else ((None, None, None), 0)
-            print(f"  {r['boss']:<10} {r['cap']:>3} {r['mean_win']:8.0%} {r['p_clear']:6.0%} {r['mean_deaths']:5.2f} {r['mean_deathless']:5.0%}  {top[0][1]} vs {top[0][0]} ({top[0][2]}) x{top[1]}")
+            (en, sp, wh), v = r["missing"][0] if r["missing"] else ((None, None, None), 0)
+            print(f"  {r['boss']:<10} {r['cap']:>3} {r['mean_win']:8.0%} {r['p_clear']:6.0%} {r['mean_deaths']:5.2f} {r['mean_deathless']:5.0%}  "
+                  + (f"{sp} vs {en} ({wh}) x{v}" if v else "-"))
     else:
         print(f"  {'boss':<10} {'cap':>3} {'win':>5} {'deaths/mon':>10} {'clean':>5}  best team  | arena")
         for r in sorted(rows, key=lambda r: r["cap"]):
