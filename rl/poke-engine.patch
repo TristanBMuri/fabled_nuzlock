@@ -1,3 +1,47 @@
+diff --git a/poke-engine-py/python/poke_engine/poke_engine.pyi b/poke-engine-py/python/poke_engine/poke_engine.pyi
+index 96306e4..4794da1 100644
+--- a/poke-engine-py/python/poke_engine/poke_engine.pyi
++++ b/poke-engine-py/python/poke_engine/poke_engine.pyi
+@@ -478,3 +478,9 @@ def calculate_damage(
+     :return: List of damage values
+     """
+     ...
++
++def get_all_options(py_state: State) -> Tuple[List[str], List[str]]:
++    """
++    The legal choices of both sides (moves, "switch <name>", "none"), as generate_instructions takes them.
++    """
++    ...
+diff --git a/poke-engine-py/src/lib.rs b/poke-engine-py/src/lib.rs
+index 032da2e..172970b 100644
+--- a/poke-engine-py/src/lib.rs
++++ b/poke-engine-py/src/lib.rs
+@@ -1041,6 +1041,17 @@ impl PyInstruction {
+     }
+ }
+ 
++#[pyfunction]
++fn get_all_options(py_state: PyState) -> (Vec<String>, Vec<String>) {
++    // the legal choices of both sides, as generate_instructions takes them (rl/lesson2)
++    let state: State = py_state.into();
++    let (s1, s2) = state.root_get_all_options();
++    (
++        s1.iter().map(|m| movechoice_to_string(&state.side_one, m)).collect(),
++        s2.iter().map(|m| movechoice_to_string(&state.side_two, m)).collect(),
++    )
++}
++
+ #[pyfunction]
+ fn generate_instructions(
+     py_state: PyState,
+@@ -1130,6 +1141,7 @@ fn py_poke_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
+     m.add_function(wrap_pyfunction!(generate_instructions, m)?)?;
+     m.add_function(wrap_pyfunction!(id, m)?)?;
+     m.add_function(wrap_pyfunction!(mcts, m)?)?;
++    m.add_function(wrap_pyfunction!(get_all_options, m)?)?;
+     m.add_class::<PyState>()?;
+     m.add_class::<PySide>()?;
+     m.add_class::<PySideConditions>()?;
 diff --git a/src/choices.rs b/src/choices.rs
 index 65075c0..9569a03 100644
 --- a/src/choices.rs

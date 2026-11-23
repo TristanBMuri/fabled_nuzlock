@@ -8,6 +8,7 @@ dependencies = [
     "gymnasium<1.2.3",
     "numpy",
     "poke-engine>=0.0.48",
+    "torch>=2.15.0",
 ]
 
 [dependency-groups]

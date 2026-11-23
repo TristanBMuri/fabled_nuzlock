@@ -103,6 +103,41 @@ What this means: fine for learning and for search as a first pass; a planner dec
 matters is still confirmed on Showdown. The format here is vanilla gen8 random battles; our
 custom format and the RR / BDSP mods are not covered.
 
+## Radical Red on poke-engine: a workload guess (2026-11-21, not measured)
+
+What it would take to run RR search on the Rust engine. A guess, calibrated on the Gen 8
+conformance sprint (one day, 2026-11-18: a 1177-line patch plus `convert.py` / `engine_diff.py`,
+81% → 97%) and on the size of `pokemon-showdown-rr/data/mods/gen9rr`:
+
+| | entries | with handlers (custom code) |
+|---|---|---|
+| species (`pokedex.ts`) | 905 | 0 (stats and types only) |
+| moves | 488 | ~70 |
+| abilities | 60 | ~118 |
+| items | 220 | ~40 |
+| conditions / `scripts.ts` | 99 + 625 lines | megas, `runMove` overrides |
+
+poke-engine: 63k lines of Rust, a `gen9` feature exists, **no mega evolution as a choice**.
+
+| Step | Work | Guess |
+|---|---|---|
+| 1. Data | script the mod's TS → Rust tables (stats, types, move power / accuracy / type, new names) | 1–2 days |
+| 2. Mechanics | ~200 move / ability / item effects in Rust with tests, many reuse existing ones; arena rules (permanent weather) easy; megas: pre-evolved boss = cheap, a real choice type = not | 1½–3 weeks |
+| 3. Conformance | `convert.py` + `engine_diff.py` on RR dumps, iterate to ~95% on boss positions | 3–5 days |
+| 4. Enemy AI | the planner's enemy is scripted: `ai_util/rr_ai.py` (668 lines, CFRU) and the `calc_bot` parts it uses in Rust; a Python callback per node eats the 130x | 3–5 days |
+| 5. Planner | the second search backend (above) and paired runs against the current tables | 3–5 days |
+
+**Total 2½–4½ weeks** to planner-usable; steps 1–3 alone (a trustworthy engine) 2–3½ weeks.
+The ~200 handlers decide where in the range it lands.
+
+**Cheaper first step:** the RR work only reaches Brock and Misty. Cover only the early
+bosses' species / moves / abilities and let `route.py` fall back to Showdown for the rest:
+~4–7 days. Firm it up first (~1 h): count what `convert.py` cannot carry over on Brock / Misty
+dumps.
+
+**Caveat:** the RR sim itself is unverified against the ROM (TODO.md A1 / A2); a Rust copy
+inherits its errors. Do it after, or alongside, that check.
+
 ## The ladder
 
 ### 1. Tabular Q-learning, one matchup — `lesson1_qlearning.py` (done, ~10 s)
@@ -110,8 +145,14 @@ custom format and the RR / BDSP mods are not covered.
 Garchomp vs a random-move Rotom-Wash. The agent has to learn, from +1 / -1 alone, that
 Earthquake does nothing (Levitate), Will-O-Wisp halves its attack, and that Swords Dance pays.
 Run on the Gen 8 build (seed 0, 30k episodes): Q values Swords Dance highest at the start
-(+0.97 vs Dragon Claw +0.86), the same move as poke-engine's expectiminimax; win rate 97.4%,
+(+0.98 vs Dragon Claw +0.88), the same move as poke-engine's expectiminimax; win rate **98.6%**,
 vs 98.0% for always Dragon Claw and 74% for random. (On the Gen 4 wheel it was 95.9 / 94.8 / 64.)
+
+**Bug fixed 2026-11-22:** the burn flag in `key()` compared against `"brn"`, but the engine
+reports `"BURN"`, so it never fired: every number before this date (97.4%, Q +0.97 / +0.86)
+came from a table that could not tell burned from not. With the flag working, Q-learning
+beats always Dragon Claw instead of trailing it. That was the "drop the burn flag" exercise
+run by accident. `--episodes 2000` gives 94% (the unconverged table).
 
 Exercises, each a one-line change:
 - `--episodes 2000`: what does an unconverged table look like? (Lesson from attempt #3:
@@ -119,23 +160,140 @@ Exercises, each a one-line change:
 - `--gamma 0.9`: the win is ~5 turns away; does discounting change the policy?
 - Make `opponent()` always use Will-O-Wisp. Does Swords Dance stay the right opening?
 - Drop the burn flag from `key()`. The table can no longer tell burned from not: what breaks?
-- Q prefers Swords Dance yet loses to always Dragon Claw by 0.6 points. Is that noise
-  (rerun with other seeds), the coarse `key()`, or is Swords Dance worse against a
-  *random* opponent than against the worst-case one expectiminimax assumes?
+- Rerun with other seeds: is 98.6 vs 98.0 a real gap, or noise? (Hint: 2000 battles at
+  98% have a standard error of ~0.3 points.)
 - Replace Q-learning's `max` target with the action actually taken next (SARSA). Compare.
 
-### 2. Search teacher → small network, 3v3 — `lesson2_distill.py` (next)
+### 2. PPO from scratch on 3v3, with a cockpit — `lesson2_ppo.py` + `cockpit.py` (2026-11-22)
 
-Random 3v3 sets from a small pool on poke-engine. poke-engine's own MCTS plays both sides at
-a shallow setting and labels every turn (the move it picked, who won); a small MLP (~1M
-parameters, the size Numbrion says was enough for #1) learns to imitate the move and predict
-the winner. Adds torch back. Then the network plays alone, and plays with a shallow search on
-top. This is the Numbrion recipe ("you need a teacher ... instead of PPO"), and it answers why
-attempt #3's PPO stalled. Exercise: run plain self-play PPO on the same env with the attempt #2
-values (grad_clip 5.0, entropy 0.05) and compare the curves. Evaluate on Showdown against the
-calc bot via `ai_util/sim`.
+3v3 with switching on poke-engine (Gen 8 sets, level 50, `POOL` in the file). A 156k-parameter
+MLP (two layers of 256) reads a 344-number observation (HP, status, types, stats, boosts,
+hazards, and per move its type, power, category, accuracy, effectiveness, STAB) and picks one
+of 7 actions (4 moves, 3 switch slots; illegal ones masked). PPO, reward +1 / -1 at the end.
+Everything goes to `logs/rl/<run>.jsonl`; the cockpit draws it live:
 
-### 3. AlphaZero-lite — `lesson3_az.py` (later)
+    uv run python rl/cockpit.py                                   # http://localhost:8766, leave it open
+    uv run python rl/lesson2_ppo.py --run first                   # vs the greedy script, ~3.5k decisions/s
+    uv run python rl/lesson2_ppo.py --run mix --opp greedy,mcts   # ~1k decisions/s (MCTS is 1.4 ms a move)
+    uv run python rl/lesson2_ppo.py --run pool --pool             # 3 random mons a side each battle
+
+The cockpit (one HTML page, polls every 3 s): eval win rate against random / greedy / MCTS,
+training win rate per opponent, HP left when winning, battle length; the turn-1 policy over
+time (lesson 1's "Q at the start"), the value at the opening, switch rate, action mix;
+entropy, KL, clip fraction, explained variance, both losses, gradient norm, throughput; and
+at every eval one whole battle turn by turn with the policy's probabilities and value.
+
+Opponents (`--opp`, comma-separated, split across the 64 envs): `random`; `greedy` (highest
+power × STAB × effectiveness, switches only when forced); `mcts` (poke-engine's MCTS, which
+sees both full teams: the strong reference); `self` (the current policy, sampled).
+`get_all_options` (the legal choices) is a binding we added to the fork.
+
+**First result (fixed teams, `--opp greedy`, 300k decisions, 1.7 min):** 100% vs greedy and
+97% vs random after 40k decisions, but **0–22% vs MCTS** (50 battles, noisy) the whole run.
+The greedy script itself wins ~30% vs MCTS. The policy learned to beat *that script* (always
+Stone Edge on turn 1, the right answer to a Volcarona that never switches), not to play. This
+is attempt #3's ceiling seen live: a fixed scripted opponent is a narrow teacher.
+
+**`--opp greedy,mcts` (MCTS 100 in training, 1M decisions, 18 min): 70–88% vs MCTS 1000.**
+Same net, same budget; only the opponent changed.
+
+#### Comparing runs: the levers and the cockpit
+
+Pick several runs in the cockpit (click the chips) and every chart overlays them, one color
+per run; a "What differs" table lists only the settings that differ, the inputs, and the
+mean of each run's last three evals. Eval win rates carry a 95% band (200 battles: ±7 points
+at 50%): overlapping bands mean the difference may be noise. The x axis switches between
+decisions and minutes (BC needs an MCTS call per decision, so it is 2–3x slower per decision;
+compare on minutes, and cap runs with `--minutes`). Every run is evaluated the same way:
+random, greedy, and MCTS at `--eval-mcts 1000` iterations, 200 battles each, fixed seeds.
+
+| lever | values |
+|---|---|
+| `--algo` | `ppo`; `a2c` (one gradient step per batch, value baseline); `reinforce` (same, no baseline, Monte Carlo return); `bc` (imitate MCTS `--mcts-iters` on the positions the net reaches itself = DAgger; the reward is not in the policy loss at all) |
+| `--obs` | input groups: `core` (HP, alive, active), `status`, `types`, `stats`, `boosts`, `field` (hazards, screens, sub, Leech Seed, weather), `moves` (our active's) = the default; extra: `foe_moves` (their active's set: hidden information in real play), `matchup` (hand-made: best effectiveness each way, who is faster), `species` (identity). `all`, a list, or `+x,-y` |
+| `--opp` | `random`, `greedy`, `mcts`, `self`, comma-separated |
+| others | `--pool`, `--holdout`, `--init`, `--shape`, `--ent`, `--lr`, `--epochs`, `--hidden`, `--gamma`, `--seed`, `--note` |
+
+**Starting runs from the cockpit.** "+ new run" (or "new run with these settings" on a run's
+page) opens a form prefilled from a run's config; starting it pauses whatever is training
+(SIGTSTP: the trainer logs `pause`, stops itself, and leaves the paused time out of `--minutes`
+and the minutes axis). A paused run keeps its memory and uses no CPU; "resume" pauses the
+others. A run started from the terminal pauses the training one too, and refuses a name
+that exists (logs and nets are never overwritten). "Branch from this net" starts from that run's last checkpoint (`--init`, same `--obs`
+and `--hidden`, fresh optimizer): e.g. `bc` for 10 min, then branch into `ppo` and see whether
+RL gets past imitation. The note field asks what you expect: write the prediction first.
+
+**Seeds and the queue.** The form's "seeds" field (`0,1,2`) makes one run per seed
+(`<run>_s0`, …); the first starts, the rest wait in the queue (shown in the header), which
+starts the next run whenever nothing is training; "add to queue" queues them all. The queue
+lives in the cockpit's memory: restarting the cockpit forgets it. In the compare view, runs
+that differ only in seed become one line (the mean) with a band from the lowest to the highest
+seed. That band is the noise floor: two settings differ only if their seed bands separate.
+The 95% bands on single runs cover the luck of the 200 eval battles, not training luck.
+
+**Held-out teams (`--pool`).** Our team is one of the 84 trios of POOL; `--holdout 0.2` (the
+default) keeps 17 of them out of training (fixed split, the same for every run; each mon still
+appears in other trios). Every eval runs twice: training teams (`mcts`, …) and held-out teams
+(`mcts held`, …). Held-out well below training = it memorized team combinations. Pool runs from
+before 2026-11-22 trained on all trios.
+
+**What MCTS would do.** The turn-by-turn battle shows next to the net's policy MCTS's visit
+shares for our side (`--eval-mcts` iterations) and highlights the turns where their favourite
+moves differ, with the net's value estimate next to the final result.
+
+At the end of a run the finished net is re-evaluated with one input group zeroed at a time
+(100 battles each vs greedy and MCTS): the cockpit's "What it looks at" shows the drop.
+
+**Comparison 1 (2026-11-22, fixed teams, `--opp greedy,mcts`, 12 min each, mean of the last
+3 evals vs MCTS 1000):**
+
+| run | vs MCTS | decisions | notes |
+|---|---|---|---|
+| ppo, default inputs (344) | 74% | 573k | |
+| ppo, `--obs all` (511) | 76% | 536k | |
+| ppo, `--obs core,moves` (124) | 71% | 615k | |
+| a2c | **2%** | 586k | one step per 4096 samples: too slow, beats greedy only |
+| bc (imitate MCTS 100) | 64% (peak 77%) | 276k | agrees with the teacher on 76% of moves |
+
+Information made no difference here, and the importance test says why: the default net
+loses ≤ 3 points when any one group is zeroed. One fixed matchup can be recognized from
+almost any input, so the information is redundant. The minimal net leans on `core` (−37
+points without it). Information can only matter with `--pool` (many matchups). BC got there
+on half the decisions; it uses `moves` (−57) and `core` (−49) heavily. The algorithm made
+the biggest difference: PPO's 4 epochs over minibatches vs a2c's single step.
+
+**Comparison 2 (`--pool`: 3 random mons a side from 9, 20 min each, mean of the last 3
+evals, also on random teams):**
+
+| inputs | vs MCTS | vs greedy | vs random | decisions |
+|---|---|---|---|---|
+| `all` (511) | 23% | 54% | 88% | 874k |
+| default (344) | 16% | 50% | 82% | 949k |
+| `core,moves` (124) | 19% | 45% | 81% | 1.02M |
+
+Random teams are far harder: 16–23% vs MCTS where fixed teams reached ~75%. With the
+matchup changing, the default net now uses its inputs (−17 points without `moves`, −11
+without `core`, −10 without `types`). More information ranks first against every opponent,
+but by 4–9 points, about one band width, so treat it as a lead, not a result: rerun with
+another `--seed`. These evals use the training distribution (no held-out team combos yet).
+
+Exercises:
+- Longer `--pool` runs: are the curves still rising at 20 min? Hold out some team combos.
+- `--algo bc --mcts-iters 1000`: a stronger teacher. Does the student follow it?
+- `--opp self`: self-play. Train win stays near 50%; eval vs MCTS is the real signal.
+- `--algo reinforce` vs `a2c`: what does the value baseline buy?
+- `--ent 0.05` (attempt #2's value) vs 0.02; `--grad-clip 0.5` to watch learning silently stop.
+- `--shape 1.0`: reward HP damage too. Faster? Does it change what it learns?
+- Two seeds of the same config: how far apart are they? That is the noise floor for every
+  other comparison.
+
+### 3. Search teacher → small network, then search on top (next)
+
+The Numbrion recipe. Its first half is now lesson 2's `--algo bc`. Next: a stronger
+teacher, the value head trained to predict the winner, and the network playing *with* a
+shallow search on top. Lesson 2's MCTS curve is the bar to clear.
+
+### 4. AlphaZero-lite — `lesson4_az.py` (later)
 
 Close the loop: pUCT search guided by the network's policy and value, played against itself,
 and the search's visit counts become the next network's targets. This is Jaxcalibur's
@@ -167,7 +325,7 @@ most no longer play on the ladder (some still take challenges).
   Champions VGC simulator with Showdown parity, built for training bots.
 
 The common thread: a small network plus search over a fast engine, trained by self-play or
-by imitating a search teacher. That is lessons 2 and 3.
+by imitating a search teacher. That is lessons 3 and 4.
 
 ## What the field did (2025 – Mar 2026)
 
@@ -193,5 +351,5 @@ figures are self-reported by the authors.
 - **pkmn/engine** ([repo](https://github.com/pkmn/engine), Zig): >1000x Showdown on its own
   Gen 1 benchmark, but only Gen 1–2.
 - **Datasets** ([PokéAgent track 1](https://pokeagent.github.io/track1.html)): metamon-parsed-replays
-  (3.5M+ first-person trajectories), pokechamp-replays (2M battles). The option if lesson 2
+  (3.5M+ first-person trajectories), pokechamp-replays (2M battles). The option if lesson 3
   stalls: offline RL from human play instead of self-play.

@@ -61,7 +61,7 @@ def key(state):
     me, foe = state.side_one, state.side_two
     bucket = lambda p: min(4, int(5 * p.hp / p.maxhp))  # HP in fifths
     return (bucket(me.pokemon[0]), bucket(foe.pokemon[0]), min(me.attack_boost, 6) // 2,
-            me.pokemon[0].status.lower() == "brn")
+            me.pokemon[0].status.lower() == "burn")  # the engine says "BURN"
 
 
 def opponent(rng):

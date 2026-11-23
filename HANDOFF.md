@@ -2,8 +2,11 @@
 
 **2026-11-18: RL learning track started in `rl/`** (user's choice; `rl/README.md`). It is off the
 planner's path: nothing imports it. It runs on poke-engine (the Rust sim, 13 us/turn vs ~1.7 ms
-for our Showdown rollout turn). Lesson 1 (tabular Q-learning) is done; lesson 2 (search teacher
-to a small net) is next. The README also covers the Aug–Nov 2026 Showdown bot wave.
+for our Showdown rollout turn). Lesson 1 (tabular Q-learning) is done; lesson 2 (2026-11-22: PPO
+from scratch on 3v3 with switching, `rl/lesson2_ppo.py`, watched live in `rl/cockpit.py` on
+:8766) beats the greedy script 100% but MCTS only 0–22%; with MCTS in training ~75%. The cockpit
+overlays runs; levers `--algo ppo|a2c|reinforce|bc`, `--obs` input groups, `--opp`
+(rl/README.md → "Comparing runs"). Lesson 3 (stronger teacher + search on top) is next. The README also covers the Aug–Nov 2026 Showdown bot wave.
 `rl/engine_diff.py` measures poke-engine against Showdown turn by turn. poke-engine is now our
 fork: `poke-engine/` (gitignored) = upstream main + `rl/poke-engine.patch` (README → Setup),
 built as Gen 8 by `uv sync`. Agreement on 1000 seeded gen8 random-battle positions went
@@ -13,6 +16,8 @@ patch; it is not pushed anywhere.
 `rl/route.py` routes per matchup (probe vs Showdown, cached in logs/route.jsonl) and per turn
 (known gaps on the active mons): 46/60 BDSP trainers pass, 45% of turns on poke-engine;
 Rollout and Rivalry hold back most of the rest. Nothing in the planner calls it yet.
+A workload guess for Radical Red on poke-engine (2½–4½ weeks; 4–7 days for the early bosses
+only) is in `rl/README.md` → "Radical Red on poke-engine" (2026-11-21, not measured).
 
 ## Next task (2026-10-12): make the whole pipeline faster — progress
 

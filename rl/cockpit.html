@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RL Cockpit</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f4f4f2; --surface: #fcfcfb; --border: #e2e1dc; --grid: #ecebe7;
+  --text: #0b0b0b; --text-2: #52514e; --muted: #8a8984;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100; --s5: #e87ba4; --s6: #008300; --s7: #6250d6; --s8: #e34948;
+  --good: #1baf7a; --bad: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #121211; --surface: #1a1a19; --border: #2e2e2c; --grid: #262624;
+    --text: #f0efec; --text-2: #c3c2b7; --muted: #8a8984;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500; --s5: #d55181; --s6: #0ca30c; --s7: #9085e9; --s8: #e66767;
+    --good: #199e70; --bad: #e66767;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 13px/1.4 system-ui, sans-serif; }
+header { padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--surface); position: sticky; top: 0; z-index: 2; }
+.bar1 { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+header h1 { font-size: 15px; margin: 0 8px 0 0; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 6px; overflow: hidden; }
+.seg button { font: inherit; border: 0; background: transparent; color: var(--text-2); padding: 3px 10px; cursor: pointer; }
+.seg button.on { background: var(--text); color: var(--surface); }
+#live { color: var(--muted); }
+#live.on::before { content: "● "; color: var(--good); }
+#runs { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; max-height: 92px; overflow-y: auto; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--border); border-radius: 14px; padding: 2px 10px 2px 8px; cursor: pointer; user-select: none; color: var(--text-2); background: var(--bg); }
+.chip.on { color: var(--text); border-color: var(--text-2); }
+.chip i { width: 10px; height: 10px; border-radius: 3px; background: var(--grid); }
+.chip small { color: var(--muted); }
+select { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 3px 6px; }
+main { padding: 16px; max-width: 1500px; margin: 0 auto; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-bottom: 16px; }
+.tile { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; }
+.tile .k { color: var(--text-2); font-size: 11px; }
+.tile .v { font-size: 20px; font-variant-numeric: tabular-nums; }
+.tile .v small { font-size: 12px; color: var(--muted); }
+h2 { font-size: 13px; color: var(--text-2); margin: 20px 0 8px; font-weight: 600; text-transform: uppercase; letter-spacing: .04em; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 10px; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; position: relative; min-width: 0; }
+.card h3 { font-size: 12px; margin: 0; font-weight: 600; }
+.card .hint { color: var(--muted); font-size: 11px; margin: 1px 0 4px; min-height: 15px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 10px; font-size: 11px; color: var(--text-2); margin-top: 4px; }
+.legend i, .sw { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 4px; vertical-align: -1px; }
+svg { display: block; width: 100%; height: 150px; overflow: visible; }
+svg text { fill: var(--muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; font-size: 11px; box-shadow: 0 2px 8px #0002; display: none; z-index: 3; white-space: nowrap; }
+.tip b { font-variant-numeric: tabular-nums; }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; }
+td, th { padding: 4px 6px; border-bottom: 1px solid var(--grid); text-align: left; vertical-align: top; }
+th { color: var(--text-2); font-weight: 600; font-size: 11px; }
+td.num, th.num { text-align: right; }
+.hp { width: 70px; height: 6px; background: var(--grid); border-radius: 3px; overflow: hidden; margin-top: 3px; }
+.hp > div { height: 100%; border-radius: 3px; }
+.pol { display: grid; grid-template-columns: 110px 1fr 38px; gap: 1px 6px; align-items: center; font-size: 11px; }
+.pol .bar { height: 8px; background: var(--s1); border-radius: 0 4px 4px 0; min-width: 1px; }
+.pol .pick { font-weight: 700; }
+.scroll { overflow-x: auto; }
+.res-win { color: var(--good); font-weight: 600; } .res-loss { color: var(--bad); font-weight: 600; }
+.mix { display: grid; grid-template-columns: 120px 1fr 44px; gap: 3px 8px; align-items: center; font-size: 11px; }
+.mix .bar { height: 10px; background: var(--s7); border-radius: 0 4px 4px 0; }
+.drop { display: inline-block; height: 8px; border-radius: 0 4px 4px 0; background: var(--bad); vertical-align: middle; margin-right: 4px; }
+.gain { background: var(--good); }
+pre { font-size: 11px; white-space: pre-wrap; color: var(--text-2); margin: 0; }
+.empty { color: var(--muted); padding: 40px; text-align: center; }
+.diffcell { font-weight: 600; }
+.btn { font: inherit; color: var(--text); background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 3px 10px; cursor: pointer; }
+.btn:hover { border-color: var(--text-2); }
+.btn.main { background: var(--text); color: var(--surface); border-color: var(--text); }
+.st-running { color: var(--good); } .st-paused { color: var(--s4); } .st-stopped { color: var(--bad); } .st-done { color: var(--muted); }
+.ctl { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+#form { max-width: 1500px; margin: 16px auto 0; padding: 0 16px; }
+#form .card { display: grid; gap: 10px; }
+.fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px 12px; }
+.fields label { display: grid; gap: 2px; font-size: 11px; color: var(--text-2); }
+.fields input[type=text], .fields input:not([type]), textarea { font: inherit; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 4px 6px; width: 100%; }
+.fields input:disabled { color: var(--muted); }
+textarea { min-height: 44px; resize: vertical; }
+.err { color: var(--bad); }
+#queue .chip { cursor: default; } #queue b { cursor: pointer; color: var(--muted); }
+.diff td { background: color-mix(in srgb, var(--s4) 10%, transparent); }
+</style>
+</head>
+<body>
+<header>
+  <div class="bar1">
+    <h1>RL cockpit</h1>
+    <span style="color:var(--text-2)">x axis</span>
+    <span class="seg" id="xmode"><button data-x="step" class="on">decisions</button><button data-x="min">minutes</button></span>
+    <button class="btn main" id="newrun">+ new run</button>
+    <span id="live"></span>
+    <span id="queue"></span>
+    <span style="color:var(--muted);font-size:11px">click runs to overlay them; one run = full detail</span>
+  </div>
+  <div id="runs"></div>
+</header>
+<div id="form"></div>
+<main id="main"><div class="empty">No runs in logs/rl yet. Start one: <code>uv run python rl/lesson2_ppo.py --run first</code></div></main>
+<div class="tip" id="tip"></div>
+<script>
+const $ = s => document.querySelector(s);
+const COLORS = ['--s1', '--s2', '--s3', '--s4', '--s5', '--s6', '--s7', '--s8'];
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const store = { get(k, d) { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } }, set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} } };
+let allRuns = [], selected = store.get('selected', []), xmode = store.get('xmode', 'step');
+const data = {};  // run name -> {offset, events}
+let battleStep = null, dirty = true;
+
+const pct = v => v == null ? '–' : (100 * v).toFixed(0) + '%';
+const num = (v, d = 3) => v == null ? '–' : Math.abs(v) >= 100 ? Math.round(v).toLocaleString() : String(+(+v).toPrecision(d));
+const kfmt = v => v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(0) + 'k' : String(Math.round(v));
+const xfmt = v => xmode === 'min' ? v.toFixed(v < 10 ? 1 : 0) + ' min' : kfmt(v);
+const runColor = name => css(COLORS[selected.indexOf(name) % COLORS.length]);
+
+// x of an event: decisions, or minutes since the run started
+// (e.a = active seconds: paused time left out; older logs only have wall time e.t)
+const mins = (e, start) => (e.a ?? (e.t - start.t)) / 60;
+const X = (e, start) => xmode === 'min' ? mins(e, start) : e.step;
+const oppLabel = (o, start) => o.replace(/^mcts/, start.mcts_label || 'mcts');
+const isHeld = o => o.endsWith(' held');
+const info = n => allRuns.find(r => r.name === n) || {};
+const post = async (path, body) => { const r = await (await fetch(path, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })).json(); if (r.error) alert(r.error); await poll(); return !r.error; };
+const series = (evs, start, f) => evs.map(e => [X(e, start), f(e)]).filter(p => p[1] != null && isFinite(p[1]));
+const smooth = (pts, k = 5) => pts.map((p, i) => { const w = pts.slice(Math.max(0, i - k + 1), i + 1); return [p[0], w.reduce((a, q) => a + q[1], 0) / w.length]; });
+// eval points with a 95% band: binomial standard error of a win rate over n battles
+const evalPts = (evals, start, opp) => evals.filter(e => e.vs[opp]).map(e => { const p = e.vs[opp].win, n = e.vs[opp].n || 200, h = 1.96 * Math.sqrt(p * (1 - p) / n); return [X(e, start), p, Math.max(0, p - h), Math.min(1, p + h)]; });
+
+// a line chart: series = [{name, pts: [[x, y, lo?, hi?]], col?}]; hover shows every series at the nearest x
+function chart(title, hint, list, opt = {}) {
+  const card = document.createElement('div');
+  card.className = 'card';
+  card.innerHTML = `<h3>${title}</h3><div class="hint">${hint || ''}</div>`;
+  list = list.map((s, i) => ({ ...s, col: s.col || css(COLORS[i % COLORS.length]) })).filter(s => s.pts.length);
+  if (!list.length) { card.innerHTML += '<div class="hint">no data</div>'; return card; }
+  const W = 320, H = 150, L = 38, R = 8, T = 6, B = 18;
+  const xs = list.flatMap(s => s.pts.map(p => p[0])), ys = list.flatMap(s => s.pts.flatMap(p => p.slice(1)));
+  let x0 = Math.min(...xs), x1 = Math.max(...xs); if (x1 === x0) x1 = x0 + 1;
+  let y0 = opt.ymin ?? Math.min(...ys), y1 = opt.ymax ?? Math.max(...ys);
+  if (y1 === y0) { y0 -= 1; y1 += 1; }
+  const SX = x => L + (x - x0) / (x1 - x0) * (W - L - R), SY = y => T + (1 - (y - y0) / (y1 - y0)) * (H - T - B);
+  const fy = opt.fmt || (v => num(v, 2));
+  let g = '';
+  for (let i = 0; i <= 3; i++) {
+    const v = y0 + (y1 - y0) * i / 3;
+    g += `<line x1="${L}" x2="${W - R}" y1="${SY(v)}" y2="${SY(v)}" stroke="${css('--grid')}"/><text x="${L - 4}" y="${SY(v) + 3}" text-anchor="end">${fy(v)}</text>`;
+  }
+  g += `<text x="${L}" y="${H - 4}">${xfmt(x0)}</text><text x="${W - R}" y="${H - 4}" text-anchor="end">${xfmt(x1)}${xmode === 'step' ? ' decisions' : ''}</text>`;
+  for (const s of list) if (s.pts[0].length === 4 && s.pts.length > 1) {
+    const up = s.pts.map(p => SX(p[0]).toFixed(1) + ' ' + SY(p[3]).toFixed(1)), dn = s.pts.slice().reverse().map(p => SX(p[0]).toFixed(1) + ' ' + SY(p[2]).toFixed(1));
+    g += `<path d="M${up.join('L')}L${dn.join('L')}Z" fill="${s.col}" opacity="0.13"/>`;
+  }
+  for (const s of list) {
+    const d = s.pts.map((p, i) => (i ? 'L' : 'M') + SX(p[0]).toFixed(1) + ' ' + SY(p[1]).toFixed(1)).join('');
+    g += `<path d="${d}" fill="none" stroke="${s.col}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;
+    if (s.pts.length < 40) g += s.pts.map(p => `<circle cx="${SX(p[0])}" cy="${SY(p[1])}" r="2.5" fill="${s.col}"/>`).join('');
+  }
+  g += `<line class="xh" y1="${T}" y2="${H - B}" stroke="${css('--muted')}" stroke-dasharray="3 3" visibility="hidden"/><rect x="${L}" y="0" width="${W - L - R}" height="${H}" fill="transparent"/>`;
+  card.insertAdjacentHTML('beforeend', `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${g}</svg>`);
+  if (list.length > 1) card.insertAdjacentHTML('beforeend', '<div class="legend">' + list.map(s => `<span><i style="background:${s.col}"></i>${s.name}</span>`).join('') + '</div>');
+  const svg = card.querySelector('svg'), xh = svg.querySelector('.xh'), tip = $('#tip');
+  svg.addEventListener('mousemove', ev => {
+    const r = svg.getBoundingClientRect(), x = x0 + ((ev.clientX - r.left) / r.width * W - L) / (W - L - R) * (x1 - x0);
+    const near = s => s.pts.reduce((a, p) => Math.abs(p[0] - x) < Math.abs(a[0] - x) ? p : a);
+    xh.setAttribute('x1', SX(x)); xh.setAttribute('x2', SX(x)); xh.setAttribute('visibility', 'visible');
+    tip.innerHTML = `<div style="color:var(--text-2)">${xfmt(x)}${xmode === 'step' ? ' decisions' : ''}</div>` +
+      list.map(s => { const p = near(s); return `<div><span class="sw" style="background:${s.col}"></span>${s.name} <b>${fy(p[1])}</b>${p.length === 4 ? ` <span style="color:var(--muted)">(${fy(p[2])}–${fy(p[3])})</span>` : ''} <span style="color:var(--muted)">@ ${xfmt(p[0])}</span></div>`; }).join('');
+    tip.style.display = 'block';
+    tip.style.left = Math.min(ev.pageX + 12, window.scrollX + innerWidth - tip.offsetWidth - 8) + 'px';
+    tip.style.top = ev.pageY + 12 + 'px';
+  });
+  svg.addEventListener('mouseleave', () => { xh.setAttribute('visibility', 'hidden'); tip.style.display = 'none'; });
+  return card;
+}
+
+function parse(name) {
+  const ev = data[name]?.events || [];
+  const start = ev.find(e => e.kind === 'start');
+  return { name, start, c: start?.config || {}, ups: ev.filter(e => e.kind === 'update'), evals: ev.filter(e => e.kind === 'eval'),
+           battles: ev.filter(e => e.kind === 'battle'), imp: ev.find(e => e.kind === 'importance'), end: ev.find(e => e.kind === 'end'), last: ev[ev.length - 1] };
+}
+const meanTrain = u => { const v = Object.values(u.train_win || {}); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; };
+const section = (m, title, cards, hint) => {
+  m.insertAdjacentHTML('beforeend', `<h2>${title}</h2>` + (hint ? `<div class="hint" style="color:var(--muted);font-size:11px;margin:-4px 0 8px">${hint}</div>` : ''));
+  const g = document.createElement('div'); g.className = 'grid'; cards.forEach(x => g.appendChild(x)); m.appendChild(g);
+};
+
+function render() {
+  dirty = false;
+  const runs = selected.map(parse).filter(r => r.start);
+  liveLabel(runs);
+  const m = document.createElement('div');
+  if (!runs.length) m.innerHTML = '<div class="empty">Pick a run above.</div>';
+  else if (runs.length === 1) renderOne(m, runs[0]);
+  else renderCompare(m, runs);
+  const y = scrollY; $('#main').replaceChildren(m); scrollTo(0, y);
+}
+
+// ---- several runs: one line per run, a table of what differs, importance side by side
+function renderCompare(m, runs) {
+  const opps = [...new Set(runs.flatMap(r => r.evals.flatMap(e => Object.keys(e.vs))))];
+  const keys = [...new Set(runs.flatMap(r => Object.keys(r.c)))].filter(k => !['run', 'note'].includes(k) && new Set(runs.map(r => JSON.stringify(r.c[k]))).size > 1);
+  const lastK = (r, o, k = 3) => { const e = r.evals.filter(x => x.vs[o]).slice(-k); return e.length ? e.reduce((a, x) => a + x.vs[o].win, 0) / e.length : null; };
+  const best = (r, o) => r.evals.filter(x => x.vs[o]).reduce((a, x) => Math.max(a, x.vs[o].win), -1);
+  let t = `<div class="card scroll"><h3>What differs</h3><div class="hint">only the settings that differ between the picked runs; eval = mean of the last 3 evals (each ±${pct(1.96 * Math.sqrt(.25 / (runs[0].c.eval_n || 200)))} at 50%)</div><table><tr><th>run</th><th>note</th>` +
+    keys.map(k => `<th>${k}</th>`).join('') + '<th class="num">inputs</th><th class="num">decisions</th><th class="num">minutes</th>' +
+    opps.map(o => `<th class="num">eval ${o}</th><th class="num">best ${o}</th>`).join('') + '</tr>';
+  for (const r of runs) {
+    const last = r.ups[r.ups.length - 1] || {};
+    t += `<tr><td><span class="sw" style="background:${runColor(r.name)}"></span>${r.name} <small class="st-${info(r.name).status}">${info(r.name).status || ''}</small></td><td>${r.c.note || ''}</td>` +
+      keys.map(k => `<td class="diffcell">${r.c[k] ?? '–'}</td>`).join('') +
+      `<td class="num">${r.start.n_obs}</td><td class="num">${kfmt(last.step || 0)}</td><td class="num">${mins(r.last, r.start).toFixed(1)}</td>` +
+      opps.map(o => `<td class="num">${pct(lastK(r, o))}</td><td class="num">${best(r, o) >= 0 ? pct(best(r, o)) : '–'}</td>`).join('') + '</tr>';
+  }
+  m.insertAdjacentHTML('beforeend', t + '</table></div>');
+
+  const per = (f, sm) => runs.map(r => ({ name: r.name, col: runColor(r.name), pts: sm ? smooth(f(r)) : f(r) }));
+  section(m, 'Is it winning?', [
+    ...opps.map(o => chart(`Eval win rate vs ${oppLabel(o, runs[0].start)}${isHeld(o) ? ' (teams never trained on)' : ''}`, 'argmax policy, fixed seeds; band = 95% interval' + (seedGroups(runs).some(g => g.length > 1) ? '; seed groups: line = mean, band = lowest–highest seed' : ''), grouped(runs, o), { ymin: 0, ymax: 1, fmt: pct })),
+    chart('Training win rate', 'sampled policy, mean over its training opponents, smoothed', per(r => series(r.ups, r.start, meanTrain), true), { ymin: 0, ymax: 1, fmt: pct }),
+  ], 'hover for exact values; overlapping bands = the difference may be noise');
+  const cards = [
+    chart('Entropy', '', per(r => series(r.ups, r.start, u => u.entropy)), { ymin: 0 }),
+    chart('Explained variance', '', per(r => series(r.ups, r.start, u => u.explained_var)), { ymax: 1 }),
+    chart('Approx. KL per update', '', per(r => series(r.ups, r.start, u => u.kl))),
+    chart('Value loss', '', per(r => series(r.ups, r.start, u => u.v_loss)), { ymin: 0 }),
+    chart('Switch rate', '', per(r => series(r.ups, r.start, u => u.actions?.switch || 0)), { ymin: 0, fmt: pct }),
+    chart('Battle length', 'turns', per(r => series(r.ups, r.start, u => u.ep_len), true), { ymin: 0 }),
+    chart('Throughput', 'decisions / s', per(r => series(r.ups, r.start, u => u.sps)), { ymin: 0 }),
+  ];
+  if (runs.some(r => r.ups.some(u => u.teacher_agree != null))) cards.unshift(chart('Agreement with the teacher', 'bc runs: the sampled move = MCTS\'s move', per(r => series(r.ups, r.start, u => u.teacher_agree)), { ymin: 0, ymax: 1, fmt: pct }));
+  section(m, 'How it learned', cards);
+  const withImp = runs.filter(r => r.imp);
+  if (withImp.length) {
+    const groups = [...new Set(withImp.flatMap(r => Object.keys(r.imp.groups)))], o = withImp[0].imp.base.mcts != null ? 'mcts' : 'greedy';
+    let h = `<div class="card scroll"><h3>Which inputs each run uses (vs ${o})</h3><div class="hint">win rate drop when one input group is zeroed in the finished net; blank = the run did not see that group</div><table><tr><th>input group</th>${withImp.map(r => `<th><span class="sw" style="background:${runColor(r.name)}"></span>${r.name}</th>`).join('')}</tr>`;
+    for (const g of groups) h += `<tr><td>${g}</td>${withImp.map(r => r.imp.groups[g] ? impCell(r.imp.base[o] - r.imp.groups[g][o]) : '<td></td>').join('')}</tr>`;
+    m.insertAdjacentHTML('beforeend', '<h2>What it looks at</h2>' + h + '</table></div>');
+  }
+}
+// runs that differ only in seed (or name / note) are one group: their mean, and the spread between seeds
+const seedGroups = runs => Object.values(runs.reduce((g, r) => {
+  const k = JSON.stringify(Object.entries(r.c).filter(([k]) => !['run', 'note', 'seed'].includes(k)).sort());
+  (g[k] = g[k] || []).push(r); return g; }, {}));
+function grouped(runs, o) {
+  return seedGroups(runs).map(rs => {
+    if (rs.length === 1) return { name: rs[0].name, col: runColor(rs[0].name), pts: evalPts(rs[0].evals, rs[0].start, o) };
+    const ps = rs.map(r => evalPts(r.evals, r.start, o)), n = Math.min(...ps.map(p => p.length)), pts = [];
+    for (let i = 0; i < n; i++) { const ys = ps.map(p => p[i][1]); pts.push([ps.reduce((a, p) => a + p[i][0], 0) / ps.length, ys.reduce((a, y) => a + y, 0) / ys.length, Math.min(...ys), Math.max(...ys)]); }
+    return { name: `${rs[0].name.replace(/_s[^_]*$/, '')} (${rs.length} seeds)`, col: runColor(rs[0].name), pts };
+  });
+}
+const impCell = d => `<td style="white-space:nowrap"><span class="drop ${d < 0 ? 'gain' : ''}" style="width:${Math.min(120, Math.abs(d) * 150)}px"></span>${d > 0 ? '−' : d < 0 ? '+' : ''}${pct(Math.abs(d))}</td>`;
+
+// ---- one run: everything
+function renderOne(m, r) {
+  const { start, c, ups, evals, battles, imp } = r, last = ups[ups.length - 1] || {}, lastEval = evals[evals.length - 1];
+  const tiles = [['algorithm', `${c.algo || 'ppo'} <small>vs ${c.opp}</small>`], ['decisions', `${kfmt(last.step || 0)} <small>/ ${kfmt(c.steps)}</small>`],
+    ['decisions / s', num(last.sps)], ['elapsed', mins(r.last, start).toFixed(1) + ' min'],
+    ['network', `${(start.params / 1000).toFixed(0)}k <small>params, ${start.n_obs} inputs</small>`]];
+  if (lastEval) for (const [k, v] of Object.entries(lastEval.vs)) tiles.push([`eval vs ${oppLabel(k, start)}`, pct(v.win)]);
+  if (last.teacher_agree != null) tiles.push(['agrees with teacher', pct(last.teacher_agree)]);
+  m.appendChild(controls(r));
+  m.insertAdjacentHTML('beforeend', '<div class="tiles">' + tiles.map(([k, v]) => `<div class="tile"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('') + '</div>');
+
+  const allOpps = lastEval ? Object.keys(lastEval.vs) : [], opps = allOpps.filter(o => !isHeld(o)), held = allOpps.filter(isHeld);
+  const trainOpps = [...new Set(ups.flatMap(u => Object.keys(u.train_win || {})))];
+  section(m, 'Is it winning?', [
+    chart(held.length ? 'Eval win rate, training teams' : 'Eval win rate (argmax policy)', `${c.eval_n} battles each, fixed seeds; band = 95% interval`, opps.map(o => ({ name: o, pts: evalPts(evals, start, o) })), { ymin: 0, ymax: 1, fmt: pct }),
+    ...(held.length ? [chart('Eval win rate, held-out teams', `our team is one of ${start.held?.length} trios it never had in training (same mons, new combinations); below the left chart = memorized`, held.map(o => ({ name: o, pts: evalPts(evals, start, o) })), { ymin: 0, ymax: 1, fmt: pct })] : []),
+    chart('Training win rate (sampled policy)', 'per training opponent, smoothed over 5 updates', trainOpps.map(o => ({ name: o, pts: smooth(series(ups, start, u => u.train_win?.[o])) })), { ymin: 0, ymax: 1, fmt: pct }),
+    chart('Team HP left when winning (eval)', 'how clean the wins are: 1 = no damage taken', opps.map(o => ({ name: o, pts: series(evals, start, e => e.vs[o]?.win ? e.vs[o].hp_left : null) })), { ymin: 0, ymax: 1, fmt: pct }),
+    chart('Battle length', 'turns per finished training battle', [{ name: 'turns', pts: series(ups, start, u => u.ep_len) }], { ymin: 0 }),
+  ]);
+  const openOpts = [...new Set(ups.flatMap(u => Object.keys(u.opening?.policy || {})))];
+  const doing = [
+    chart('Opening policy', 'probability of each choice on turn 1 of the fixed matchup (lesson 1\'s "Q at the start")', openOpts.map(o => ({ name: o, pts: series(ups, start, u => u.opening?.policy[o]) })), { ymin: 0, ymax: 1, fmt: pct }),
+    chart('Value at the opening', 'the net\'s own guess of its win chance (−1 lose … +1 win)', [{ name: 'value', pts: series(ups, start, u => u.opening?.value) }], { ymin: -1, ymax: 1 }),
+    chart('Switch rate', 'share of our decisions that are switches (forced ones included)', [{ name: 'switch', pts: series(ups, start, u => u.actions?.switch || 0) }], { ymin: 0, fmt: pct }),
+    mixCard(last.actions || {}),
+  ];
+  if (ups.some(u => u.teacher_agree != null)) doing.unshift(chart('Agreement with the teacher', 'share of decisions where the sampled move = MCTS\'s move', [{ name: 'agree', pts: series(ups, start, u => u.teacher_agree) }], { ymin: 0, ymax: 1, fmt: pct }));
+  section(m, 'What is it doing?', doing);
+  section(m, 'Is the learning healthy?', [
+    chart('Entropy', 'policy randomness; a collapse to ~0 early = stopped exploring', [{ name: 'entropy', pts: series(ups, start, u => u.entropy) }], { ymin: 0 }),
+    chart('Approx. KL per update', 'how far each update moves the policy; spikes > 0.05 = too big a step', [{ name: 'kl', pts: series(ups, start, u => u.kl) }]),
+    chart('Clip fraction', 'share of samples where PPO\'s clip kicked in (0 for a2c / reinforce / bc by design)', [{ name: 'clipfrac', pts: series(ups, start, u => u.clipfrac) }], { ymin: 0, fmt: pct }),
+    chart('Explained variance', 'how much of the return the value head predicts; ≤ 0 = it predicts nothing', [{ name: 'explained var', pts: series(ups, start, u => u.explained_var) }], { ymax: 1 }),
+    chart(c.algo === 'bc' ? 'Imitation loss (cross-entropy)' : 'Policy loss', '', [{ name: 'policy loss', pts: series(ups, start, u => u.pi_loss) }]),
+    chart('Value loss', '', [{ name: 'value loss', pts: series(ups, start, u => u.v_loss) }], { ymin: 0 }),
+    chart('Gradient norm (before clipping)', `clipped at ${c.grad_clip}; attempt #2's 0.5 silently stopped learning`, [{ name: 'grad norm', pts: series(ups, start, u => u.grad_norm) }], { ymin: 0 }),
+    chart('Mean value / advantage spread', 'value head mean over the batch, and the raw advantage std', [{ name: 'value mean', pts: series(ups, start, u => u.value_mean) }, { name: 'adv std', pts: series(ups, start, u => u.adv_std) }]),
+    chart('Throughput', 'decisions per second while collecting + learning', [{ name: 'decisions/s', pts: series(ups, start, u => u.sps) }], { ymin: 0 }),
+  ]);
+
+  m.insertAdjacentHTML('beforeend', '<h2>What it looks at</h2>');
+  const ic = document.createElement('div'); ic.className = 'card'; m.appendChild(ic);
+  const sizes = start.obs_sizes || {};
+  if (!imp) ic.innerHTML = `<div class="hint">inputs: ${Object.entries(sizes).map(([g, n]) => `${g} ${n}`).join(' · ') || start.n_obs}. At the end of the run each group is zeroed in turn and the net re-evaluated; the drop shows what it relies on.</div>`;
+  else {
+    const os = Object.keys(imp.base);
+    ic.innerHTML = `<div class="hint">win rate when one input group is zeroed (${imp.n} battles each; full net: ${os.map(o => `${o} ${pct(imp.base[o])}`).join(', ')})</div><div class="scroll"><table><tr><th>group</th><th class="num">inputs</th>${os.map(o => `<th>drop vs ${o}</th>`).join('')}</tr>` +
+      Object.entries(imp.groups).map(([g, w]) => `<tr><td>${g}</td><td class="num">${sizes[g] ?? ''}</td>${os.map(o => impCell(imp.base[o] - w[o])).join('')}</tr>`).join('') + '</table></div>';
+  }
+
+  m.insertAdjacentHTML('beforeend', '<h2>A battle, turn by turn</h2>');
+  const bc = document.createElement('div'); bc.className = 'card'; m.appendChild(bc);
+  if (!battles.length) bc.innerHTML = '<div class="hint">written at every eval</div>';
+  else {
+    if (battleStep == null || !battles.some(b => b.step === battleStep)) battleStep = battles[battles.length - 1].step;
+    const b = battles.find(x => x.step === battleStep);
+    bc.innerHTML = `<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:6px"><label>after <select id="bsel">${battles.map(x => `<option value="${x.step}" ${x.step === battleStep ? 'selected' : ''}>${x.step.toLocaleString()} decisions</option>`).join('')}</select></label>
+      <span>sampled policy vs ${b.vs}: <span class="${b.result > 0 ? 'res-win' : 'res-loss'}">${b.result > 0 ? 'won' : b.result < 0 ? 'lost' : 'draw'}</span> in ${b.turns.length} turns</span></div>` + battleTable(b);
+    bc.querySelector('#bsel').onchange = e => { battleStep = +e.target.value; render(); };
+  }
+  m.insertAdjacentHTML('beforeend', `<h2>Run</h2><div class="card"><pre>${(start.teams || []).join(' ')}\n\n${Object.entries(c).map(([k, v]) => `${k.padEnd(12)} ${v}`).join('\n')}</pre></div>`);
+}
+
+function liveLabel() {
+  const n = st => allRuns.filter(r => r.status === st).length, run = n('running'), pau = n('paused');
+  $('#live').textContent = run || pau ? [run && `${run} running`, pau && `${pau} paused`].filter(Boolean).join(', ') : 'nothing training';
+  $('#live').className = run ? 'on' : '';
+}
+
+// ---- steering: pause / resume / stop a run, and start new ones (one trains at a time; the others wait paused)
+function controls(r) {
+  const s = info(r.name).status, d = document.createElement('div'); d.className = 'ctl';
+  d.innerHTML = `<b class="st-${s}">${{ running: '● training', paused: '‖ paused', done: 'finished', stopped: 'stopped (no end event)' }[s] || ''}</b>` +
+    (s === 'running' ? '<button class="btn" data-a="pause">pause</button>' : '') +
+    (s === 'paused' ? '<button class="btn" data-a="resume">resume (pauses the others)</button>' : '') +
+    (s === 'running' || s === 'paused' ? '<button class="btn" data-a="stop">stop</button>' : '') +
+    '<button class="btn" data-a="clone">new run with these settings</button>' +
+    (info(r.name).pt ? '<button class="btn" data-a="branch">branch from this net</button>' : '') +
+    (r.c.init ? `<span style="color:var(--muted)">started from ${r.c.init}'s net</span>` : '') + '<pre class="err" style="flex-basis:100%"></pre>';
+  d.onclick = e => {
+    const a = e.target.dataset.a; if (!a) return;
+    if (a === 'clone' || a === 'branch') return showForm(r, a === 'branch');
+    if (a !== 'stop' || confirm(`stop ${r.name}? it cannot be resumed`)) post('/' + a, { run: r.name });
+  };
+  if (s === 'stopped' && !r.evals.length) fetch(`/out?run=${encodeURIComponent(r.name)}`).then(x => x.ok ? x.text() : '').then(t => { d.querySelector('.err').textContent = t; });
+  return d;
+}
+
+const MAIN = ['algo', 'obs', 'opp', 'pool', 'minutes', 'mcts_iters', 'seed'];
+const HINT = { algo: 'ppo · a2c · reinforce · bc', obs: 'default · all · a list · +foe_moves,+matchup,+species,-types', opp: 'random,greedy,mcts,self', minutes: '0 = until --steps', mcts_iters: 'training opponent / bc teacher', seed: 'change only this to see the noise between runs' };
+function showForm(r, branch) {
+  const c = { ...(r?.c || {}) }, stem = (r?.name || 'run').replace(/_\d+$/, '');
+  let i = 2; while (allRuns.some(x => x.name === `${stem}_${i}`)) i++;
+  delete c.run; delete c.note; c.init = branch ? r.name : (c.init || '');
+  const field = k => { const v = c[k];
+    return `<label>${k.replace(/_/g, '-')}${typeof v === 'boolean' ? ` <input type="checkbox" data-k="${k}" ${v ? 'checked' : ''}>` : `<input data-k="${k}" value="${v ?? ''}">`}<small style="color:var(--muted)">${HINT[k] || ''}</small></label>`; };
+  const rest = Object.keys(c).filter(k => !MAIN.includes(k) && k !== 'init');
+  $('#form').innerHTML = `<div class="card"><h3>New run${r ? ` <span style="color:var(--muted);font-weight:400">from ${r.name}'s settings</span>` : ''}</h3>
+    <div class="hint">"start now" pauses whatever is training (resume it later from its page); the queue starts its next run whenever nothing is training</div>
+    <div class="fields"><label>run name<input data-k="run" value="${stem}_${i}"></label>
+      <label>start from a net<select data-k="init"><option value="">fresh (random weights)</option>${allRuns.filter(x => x.pt).map(x => `<option ${x.name === c.init ? 'selected' : ''}>${x.name}</option>`).join('')}</select><small style="color:var(--muted)">continues its last checkpoint; same obs + hidden</small></label>
+      ${MAIN.filter(k => k in c).map(field).join('')}
+      <label>seeds<input data-k="seeds" placeholder="e.g. 0,1,2"><small style="color:var(--muted)">one run per seed (name_s0, …), run one after another: how far apart identical runs land</small></label></div>
+    <label class="fields" style="display:block"><span style="font-size:11px;color:var(--text-2)">note: what do you expect, and why?</span><textarea data-k="note" placeholder="e.g. lower entropy bonus → entropy collapses earlier, vs MCTS stalls below 70%"></textarea></label>
+    <details><summary style="cursor:pointer;color:var(--text-2)">all other knobs</summary><div class="fields" style="margin-top:8px">${rest.map(field).join('')}</div></details>
+    <div class="ctl"><button class="btn main" id="go">start now</button><button class="btn" id="later">add to queue</button><button class="btn" id="cancel">cancel</button><span class="err" id="ferr"></span></div></div>`;
+  const f = $('#form');
+  const lock = () => { const src = info(f.querySelector('[data-k=init]').value).config;  // a net's shape fixes obs + hidden
+    for (const k of ['obs', 'hidden']) { const x = f.querySelector(`[data-k=${k}]`); if (!x) continue; x.disabled = !!src; if (src) x.value = src[k]; } };
+  f.querySelector('[data-k=init]').onchange = lock; lock();
+  f.querySelector('#cancel').onclick = () => { f.innerHTML = ''; };
+  const go = async queue => {
+    const flags = Object.fromEntries([...f.querySelectorAll('[data-k]')].map(x => [x.dataset.k, x.type === 'checkbox' ? x.checked : x.value.trim()]));
+    if (!flags.note && !confirm('no note: you will not remember why you ran this. start anyway?')) return;
+    if (!await post('/start', { ...flags, queue })) return;
+    f.innerHTML = '';
+    if (!queue) { selected = [flags.seeds ? `${flags.run}_s${flags.seeds.split(',')[0].trim()}` : flags.run]; store.set('selected', selected); dirty = true; poll(); }
+  };
+  f.querySelector('#go').onclick = () => go(false);
+  f.querySelector('#later').onclick = () => go(true);
+  f.scrollIntoView({ behavior: 'smooth' });
+}
+$('#newrun').onclick = () => showForm(selected.length ? parse(selected[0]) : (allRuns[0] && parse(allRuns[0].name)), false);
+
+function mixCard(actions) {
+  const card = document.createElement('div'); card.className = 'card';
+  const rows = Object.entries(actions).sort((a, b) => b[1] - a[1]), mx = Math.max(...rows.map(r => r[1]), 0.01);
+  card.innerHTML = `<h3>Action mix, latest update</h3><div class="hint">share of our decisions per move (all three mons)</div><div class="mix">` +
+    rows.map(([k, v]) => `<span>${k}</span><div class="bar" style="width:${100 * v / mx}%"></div><span>${pct(v)}</span>`).join('') + '</div>';
+  return card;
+}
+
+function hpBar(v) { const col = v > .5 ? css('--good') : v > .2 ? css('--s4') : css('--bad'); return `<div class="hp"><div style="width:${100 * v}%;background:${col}"></div></div>`; }
+
+const favourite = d => d ? Object.entries(d).sort((a, b) => b[1] - a[1])[0][0] : null;
+function battleTable(b) {
+  const both = b.turns.filter(t => t.policy && t.search), same = both.filter(t => favourite(t.policy) === favourite(t.search)).length;
+  return (both.length ? `<div class="hint">the net's favourite = MCTS's favourite on ${same} of ${both.length} turns with a choice; highlighted rows disagree. Value: the net's guess of how this ends (+1 win, −1 loss); result: ${b.result > 0 ? '+1' : '−1'}</div>` : '') +
+    `<div class="scroll"><table><tr><th>turn</th><th>us</th><th>them</th><th>teams</th><th>our policy (bold = sampled)</th><th>MCTS in our place</th><th>value</th><th>they chose</th></tr>` +
+    b.turns.map(t => {
+      const srch = t.search ? '<div class="pol">' + Object.entries(t.search).sort((a, c) => c[1] - a[1]).slice(0, 3).map(([k, v]) => `<span>${k}</span><div class="bar" style="width:${100 * v}%;background:var(--s2)"></div><span>${pct(v)}</span>`).join('') + '</div>' : '';
+      const pol = t.policy ? '<div class="pol">' + Object.entries(t.policy).sort((a, c) => c[1] - a[1]).map(([k, v]) => `<span class="${k === t.ours ? 'pick' : ''}">${k}</span><div class="bar" style="width:${100 * v}%"></div><span>${pct(v)}</span>`).join('') + '</div>' : '<span style="color:var(--muted)">no choice</span>';
+      const boost = v => v ? ` <span style="color:var(--text-2)">${v > 0 ? '+' : ''}${v}</span>` : '';
+      return `<tr class="${t.search && favourite(t.policy) !== favourite(t.search) ? 'diff' : ''}"><td>${t.turn}</td><td>${t.us}${boost(t.us_boost)}<br>${pct(t.us_hp)}${hpBar(t.us_hp)}</td><td>${t.them}${boost(t.them_boost)}<br>${pct(t.them_hp)}${hpBar(t.them_hp)}</td>
+        <td>us ${pct(t.us_team)}<br>them ${pct(t.them_team)}</td><td style="min-width:240px">${pol}</td><td style="min-width:200px">${srch}</td><td>${t.value != null ? (+t.value).toFixed(2) : '–'}</td><td>${t.theirs}</td></tr>`;
+    }).join('') + '</table></div>';
+}
+
+function drawChips() {
+  $('#runs').innerHTML = allRuns.map(r => {
+    const on = selected.includes(r.name), age = (Date.now() / 1000 - r.mtime) / 60;
+    return `<span class="chip ${on ? 'on' : ''}" data-run="${r.name}"><i style="${on ? `background:${runColor(r.name)}` : ''}"></i>${r.name} <small class="st-${r.status}">${r.status === 'running' ? '● training' : r.status === 'paused' ? '‖ paused' : r.status === 'stopped' ? 'stopped' : ''}</small> <small>${age < 2 ? 'live' : age < 60 ? Math.round(age) + ' min ago' : age < 1440 ? Math.round(age / 60) + ' h ago' : Math.round(age / 1440) + ' d ago'}</small></span>`;
+  }).join('');
+}
+$('#runs').onclick = e => {
+  const chip = e.target.closest('.chip'); if (!chip) return;
+  const n = chip.dataset.run;
+  selected = selected.includes(n) ? selected.filter(x => x !== n) : [...selected, n];
+  store.set('selected', selected); battleStep = null; dirty = true; drawChips(); poll();
+};
+$('#queue').onclick = e => { const n = e.target.dataset.unq; if (n) post('/unqueue', { run: n }); };
+$('#xmode').onclick = e => {
+  const b = e.target.closest('button'); if (!b) return;
+  xmode = b.dataset.x; store.set('xmode', xmode); dirty = true;
+  document.querySelectorAll('#xmode button').forEach(x => x.classList.toggle('on', x === b)); render();
+};
+document.querySelectorAll('#xmode button').forEach(x => x.classList.toggle('on', x.dataset.x === xmode));
+
+async function poll() {
+  try {
+    const prev = JSON.stringify(allRuns.map(r => r.status));
+    allRuns = await (await fetch('/runs')).json();
+    if (JSON.stringify(allRuns.map(r => r.status)) !== prev) dirty = true;
+    selected = selected.filter(n => allRuns.some(r => r.name === n));
+    if (!selected.length && allRuns.length) selected = [allRuns[0].name];
+    drawChips();
+    const q = await (await fetch('/queue')).json();
+    $('#queue').innerHTML = q.length ? 'queue: ' + q.map(x => `<span class="chip" title="${x.note.replace(/"/g, '&quot;')}">${x.run} <b data-unq="${x.run}" title="remove">×</b></span>`).join(' ') : '';
+    for (const n of selected) {
+      const d = data[n] || (data[n] = { offset: 0, events: [] });
+      if (d.offset > allRuns.find(r => r.name === n).size) d.offset = 0;  // the run was restarted under the same name
+      const txt = await (await fetch(`/log?run=${encodeURIComponent(n)}&from=${d.offset}`)).text();
+      if (d.offset === 0) d.events = [];
+      d.offset += new TextEncoder().encode(txt).length;
+      for (const line of txt.split('\n')) if (line) { d.events.push(JSON.parse(line)); dirty = true; }
+    }
+    if (dirty && !document.querySelector('select:focus')) render(); else liveLabel();
+  } catch (e) { $('#live').textContent = 'cockpit server not reachable'; $('#live').className = ''; console.error(e); }
+}
+poll(); setInterval(poll, 3000);
+</script>
+</body>
+</html>
