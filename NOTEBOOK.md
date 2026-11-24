@@ -2791,3 +2791,82 @@ the legal movepool). Phase 0 changes, all in one step:
   Slaking go: 3 / 12 against 1 / 12, within noise); Blaine 0 → **8%**. Hygiene, items, abilities
   and stones do not break the Koga / Blaine wall; phases 1–3 and the reference teams are next.
   Blaine's calc-bot sixes are still Grass / Chlorophyll teams into Desolate Land (stages A / B).
+
+## 2026-11-24 — Plan v3, phase 1: the opponent in the tree (`results/rr_p1_*`)
+
+30 boxes each of Brock, Misty and Erika, the gyms30 settings (`--legal --arena --matchup
+--chooser cover --death-weight 6 --engine 20000`), n = 6 a box, paired by box; `scripts/sprt.py`
+with δ = 8 points.
+
+| enemy that plays | search's enemy model | Brock | Misty | Erika | capped (Misty) |
+|---|---|---|---|---|---|
+| Python RR AI (the real one) | minimax (`rr_p0_gate`, `rr_p1_min_erika`) | 76% / 0.44 | 24% / 0.87 | 35% / 0.80 | 0% |
+| Python RR AI | the Rust port (`rr_p1_ai`) | 64% / 0.50 | 22% / 0.80 | 44% / 0.67 | 6.7% |
+| **Rust port (exact model)** | minimax (`rr_p1_oracle_min`) | 71% / 0.51 | 31% / 0.83 | 27% / 0.85 | 0% |
+| **Rust port (exact model)** | the Rust port (`rr_p1_oracle_ai`) | 81% / 0.33 | 33% / 0.66 | 51% / 0.63 | 12.2% |
+
+- **Against the real AI, following the port is a tie** after phase 0: −1.7 ± 5.7 points, deaths
+  −0.05 ± 0.05 (SPRT: no difference). Before phase 0 it was −13 to −33.
+- **The exact-model oracle says the method works:** with the port as both the enemy and the model,
+  following it beats minimax by **+12.2 ± 6.2 points and −0.19 ± 0.05 deaths/mon** (SPRT: H1).
+  So the gap against the real AI is the port's error, not the search.
+- **On-policy agreement** (`rl/rr_ai_onpolicy.py`, Rust prediction vs the Python AI's actual choice
+  at every searched turn): **70.5%** in minimax play, **74.6%** when the search follows the port
+  (moves 76%, switches 61%); off-policy (`rr_ai_diff.py`, random play) it was 90%. Real battles
+  sit where the port is worse.
+- **The turn-cap stall survives the won-terminal floor under the AI model:** 12% of Misty battles
+  capped even with the exact model, 0% under minimax. A search problem, not a model problem
+  (the plan's fallback: a depth discount).
+
+**Weighted port + mixture** (poke-engine `4855ee8`: `rr_ai_choice_weighted` with the Python AI's
+random rolls as probabilities; `perform_mcts_vs_ai(p_model=...)`: per enemy decision follow the
+port with probability p, else UCB over every enemy option; `POKE_ENGINE_BRANCH_ALL=1` branches
+crits / KO rolls at every depth). Against the real (Python) AI, same 90 boxes as minimax:
+
+| p_model | Brock | Misty | Erika | paired vs minimax (3 bosses) |
+|---|---|---|---|---|
+| minimax | 76% / 0.44 | 24% / 0.87 | 35% / 0.80 | |
+| 1.0 (`rr_p1_mix1.0`) | 59% / 0.54 | 24% / 0.78 (6% capped) | 44% / 0.66 | tie |
+| 0.95 | 59% / 0.53 | 30% / 0.77 | 41% / 0.70 | −1.7 ± 6.3, tie |
+| **0.8** | **78% / 0.39** | **41% / 0.74** | **51% / 0.64** | **+11.3 ± 5.3, −0.12 d/mon: H1** |
+| 0.5 | 80% / 0.37 | 30% / 0.83 | 42% / 0.72 | +5.4 ± 4.3, continue |
+
+- Misty + Erika alone (the plan's gate): **+16.1 ± 6.9 points, −0.15 deaths/mon**, SPRT H1.
+- **Fresh boxes and seeds (`--seed 1`, `rr_p1_s1_*`)**, against the optimizer's curse of picking
+  0.8 out of four: minimax 78 / 45 / 24% → p = 0.8 82 / 57 / 41%: **+11.1 ± 4.8 points, −0.135 ±
+  0.041 deaths/mon**, SPRT H1. Brock +4.
+- Turn-cap losses at p = 0.8: 1.1% (seed 0) / 0.6% (seed 1) of Misty battles, 0 elsewhere.
+- **Branching at every depth** (`rr_p1_mix0.8_branchall`, same iterations): +1.3 ± 3.6 points,
+  −0.02 deaths: no measurable gain; stays off (default).
+- On-policy agreement at p = 1.0 with the weighted build: 74.5% (moves 76%, switches 59%): the
+  random rolls were not the main gap; the port's choices differ, switches most.
+- Reading: following an imperfect model of a scripted enemy most of the time, with a 20% share of
+  ordinary worst-case search per enemy decision as insurance, beats both pure minimax and pure
+  model-following. The pure model loses because 1 in 4 of its predictions is wrong where it
+  matters; the insurance share covers those.
+
+**The model fixed (D4: "p = 0.8 + fix the model"; Opus delegate, poke-engine `9e605fd`).**
+`rl/rr_ai_diff.py --onpolicy <events>` replays a probe's box teams with the real searcher and
+diffs the Rust AI against the Python AI at every enemy decision (`--rescore` re-runs a saved
+file on the current build). The main error was the damage model: the port used poke-engine's
+full calc, the Python AI judges with calc_bot's simpler formula (no Gyro Ball power, Acrobatics
+doubling, Scarf ...); the port now copies the Python AI's view of damage, speed, immunities and
+the player's HP (Showdown's public percentage), and returns every tied switch-in. Two bugs on
+our side, fixed by the lead: the Python AI read its *own* Hidden Power as the mod's Water entry
+(`sim._typed_hidden_power` now types both sides; this changes the enemy, so earlier tables are
+not comparable), and `convert` dropped Showdown's `stall` volatile (now `side_conditions.protect
+= 1`). **On-policy agreement 70–83% → 98.0%** (moves 98.6%, voluntary switches 90.8%, forced
+98.7%); off-policy 90 → 97%.
+
+| run (new enemy, 30 boxes each) | Brock | Misty | Erika | vs minimax |
+|---|---|---|---|---|
+| minimax (`rr_p1b_min`) | 79% / 0.42 | 21% / 0.90 | 36% / 0.80 | |
+| **p = 0.8** | **87% / 0.30** | **48% / 0.66** | **79% / 0.37** | **+26.3 ± 6.2, −0.26 d/mon** |
+| p = 0.95 | 79% / 0.35 | 38% / 0.67 (7% capped) | 81% / 0.36 | +20.4 ± 6.9 |
+| p = 1.0 | 78% / 0.35 | 30% / 0.71 (10% capped) | 79% / 0.36 | +17.0 ± 6.9 |
+| fresh seeds (`--seed 2`): minimax → p = 0.8 | 62 → 83% | 36 → 60% | 23 → 69% | **+30.2 ± 7.0, −0.28 d/mon**, 0 capped |
+
+- p = 0.8 stays (0.95 / 1.0 are −6 / −9 points against it, paired; their loss is Misty battles
+  stalling into the turn cap). The 20% insurance share keeps the search from stalling.
+- **Pool ceiling with the new search** (`rr_p1b_ceiling`, n = 12): Erika 100%, **Koga 8 → 17%,
+  Blaine 8 → 25%**. The wall loosens, not yet broken.

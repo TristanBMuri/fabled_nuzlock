@@ -93,6 +93,17 @@ class SimBridge:
         self.proc.wait(timeout=5)
 
 
+def _typed_hidden_power(mon, moves, gen):
+    """A typed Hidden Power: poke-env keeps only "hiddenpower" (the mod's entry is Water); the
+    engine plays the set's type."""
+    for ms in moves:
+        if to_id_str(ms).startswith("hiddenpower") and to_id_str(ms) != "hiddenpower":
+            mon._moves.base_moves.pop("hiddenpower", None)
+            typed = Move("hiddenpower", raw_id=to_id_str(ms), gen=gen)
+            mon._moves.base_moves[typed.id] = typed
+    return mon
+
+
 class SimBattle:
     def __init__(self, bridge: SimBridge, fmt: str, p1_team: str | None, p2_team: str | None,
                  seed: list[int] | None = None, dedupe: bool = True, carry: list | None = None,
@@ -137,7 +148,8 @@ class SimBattle:
             for m in tb:
                 m.nickname, m.species = m.nickname or None, m.species or None
                 name = m.nickname or m.species
-                b._team[f"{side}: {name}"] = Pokemon(gen=self.gen, teambuilder=m, name=name)
+                # own Hidden Power typed too (it was read as the mod's Water entry: found 2026-11-24)
+                b._team[f"{side}: {name}"] = _typed_hidden_power(Pokemon(gen=self.gen, teambuilder=m, name=name), m.moves, self.gen)
         opp = "p2" if side == "p1" else "p1"
         if self.full_info and self.teams[opp]:
             # both sides know the other's sets (the env built them; the game's trainer AI
@@ -148,12 +160,7 @@ class SimBattle:
                 m.nickname, m.species = m.nickname or None, m.species or None
                 name = m.nickname or m.species
                 m.moves = [x for x in m.moves if to_id_str(x) in data.moves]  # a mod's own moves stay unknown
-                mon = Pokemon(gen=self.gen, teambuilder=m, name=name)
-                for ms in m.moves:  # a typed Hidden Power: poke-env keeps only "hiddenpower" (Normal); the engine plays the type
-                    if to_id_str(ms).startswith("hiddenpower") and to_id_str(ms) != "hiddenpower":
-                        mon._moves.base_moves.pop("hiddenpower", None)
-                        typed = Move("hiddenpower", raw_id=to_id_str(ms), gen=self.gen)
-                        mon._moves.base_moves[typed.id] = typed
+                mon = _typed_hidden_power(Pokemon(gen=self.gen, teambuilder=m, name=name), m.moves, self.gen)
                 raw = compute_raw_stats(to_id_str(m.species or m.nickname), list(m.evs), list(m.ivs),
                                         m.level or 100, (m.nature or "serious").lower(), data)
                 mon.stats = dict(zip(("hp", "atk", "def", "spa", "spd", "spe"), raw))

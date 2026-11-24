@@ -57,7 +57,7 @@ BOOSTS = {"atk": "attack_boost", "def": "defense_boost", "spa": "special_attack_
 # Showdown bookkeeping volatiles with no effect poke-engine needs to know about
 # (twoturnmove: Showdown's charging timer; the move's own volatile, e.g. solarbeam, is the one
 # poke-engine reads, and the charging mon's only choice is that move on both engines)
-IGNORED_VOLATILES = {"choicelock", "stall", "twoturnmove"}
+IGNORED_VOLATILES = {"choicelock", "stall", "twoturnmove"}  # stall: carried as side_conditions.protect (_side)
 # Protosynthesis / Quark Drive end with their field (sun / Electric Terrain) in poke-engine, also
 # when Booster Energy started them; Showdown keeps a booster one
 FIELD_BOOST = {"protosynthesis": ("weather", ("sunnyday", "desolateland")),
@@ -189,6 +189,8 @@ def _side(d: dict, foe: dict, issues: list, dump: dict):
         else:
             issues.append(f"side:{k}")
     cond["toxic_count"] = active["toxic"]
+    if "stall" in active["volatiles"]:  # Showdown: protected last turn; the engine and the RR AI count it here
+        cond["protect"] = 1
     if "healingwish" in d["slot"]:  # Gen 8: waits in the slot for a mon that needs it
         cond["healing_wish"] = 1
     if d.get("canMega") and _RR_ITEMS.get(active["item"]) != "mega" and not _engine_megas_rayquaza():

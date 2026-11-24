@@ -213,7 +213,11 @@ def setup(args, name: str, announce: bool = True):
         cap = max(cap, dump_cap)
     md = rp.load_game("rr")["moves"]
     boss_types = {md[mv]["type"] for mon in enemy_packed.split("]") for mv in mon.split("|")[4].split(",") if mv in md}
-    enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
+    py_enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
+    enemy = py_enemy
+    if getattr(args, "enemy", "python") == "rust":  # phase 1's oracle: the Rust port plays the enemy
+        from rl.engine_search import RustEnemy
+        enemy = RustEnemy(py_enemy)
     calc = calc_brain()
     width = tuple(int(x) for x in args.search.split(","))
     if announce:
@@ -222,7 +226,7 @@ def setup(args, name: str, announce: bool = True):
     return SimpleNamespace(name=name, args=args, known=known, cap=cap, pool=pool, progress=progress, arena=arena,
                            unmodelled=unmodelled, enemy_packed=enemy_packed, enemy_species=enemy_species,
                            boss_types=boss_types, boss=rp.boss_profile(enemy_packed, known, arena), bridge=SimBridge(showdown=str(rp.FORK)), enemy=enemy, calc=calc,
-                           searcher=searcher(args, Searcher(enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed, death_weight=args.death_weight)),
+                           searcher=searcher(args, Searcher(py_enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed, death_weight=args.death_weight)),
                            seeds=seeds, rng=random.Random(f"{name}-team-{args.seed}"), team_score={}, mons={}, t0=time.time())
 
 
@@ -231,7 +235,8 @@ def searcher(args, showdown):
     if not getattr(args, "engine", 0):
         return showdown
     from rl.engine_search import EngineSearcher
-    es = EngineSearcher(showdown, iterations=args.engine, opponent=getattr(args, "engine_opp", "minimax"))
+    es = EngineSearcher(showdown, iterations=args.engine, opponent=getattr(args, "engine_opp", "minimax"),
+                        p_model=getattr(args, "engine_p", 1.0))
     if getattr(args, "states", False) and args.out:
         es.log = str(Path(args.out).with_suffix(".states.jsonl"))
     return es
@@ -639,6 +644,8 @@ def box_job(args, name: str, i: int) -> dict | None:
                "capped": attr[2], "threats": threats}
         if hasattr(ctx.searcher, "stats"):  # --engine: decisions on the engine / on Showdown, and why (cumulative per worker)
             out["engine"] = dict(ctx.searcher.stats)
+        if hasattr(ctx.enemy, "stats"):  # --enemy rust: decisions by the Rust port / the Python AI (cumulative per worker)
+            out["enemy_brain"] = dict(ctx.enemy.stats)
         emit(args, "box", boss=name, i=i, of=args.boxes, **out, deaths_by=dict(attr[0]), matrix=matrix(ctx, team))
         print(f"{name:<10} box {i + 1:>2}/{args.boxes}: {len(box)} mons, team {list(team)} -> win {w:5.0%} deaths/mon {d:.2f} deathless {cl:.0%}; "
               + "; ".join(f"{th['enemy']} killed {th['deaths']}, missing " + (", ".join(f"{sp} ({wh})" for sp, _, _, wh in th["counters"][:1]) or "no counter in the pool") for th in threats)
@@ -718,9 +725,12 @@ def main() -> None:
     ap.add_argument("--no-items", action="store_true", help="no held items (default: the final six hold the items in hand by the boss — care packages + overworld, data/rr/items.json; one per mon, gauntlet.assign_items; C1, 2026-10-14)")
     ap.add_argument("--engine", type=int, default=0, help="stage C's search runs poke-engine MCTS with this many iterations where the position converts "
                     "(rl/engine_search.py), the Showdown search (--search) everywhere else; 0 = Showdown only")
+    ap.add_argument("--engine-p", type=float, default=0.8, help="--engine-opp ai: follow the AI model with this probability per enemy decision, else UCB (phase 1 mixture; 0.8 = D4, 2026-11-24)")
+    ap.add_argument("--enemy", choices=("python", "rust"), default="python", help="rust: the Rust AI port plays the enemy (phase 1's exact-model oracle)")
     ap.add_argument("--states", action="store_true", help="--engine: log every search decision and battle to <out>.states.jsonl")
-    ap.add_argument("--engine-opp", choices=("minimax", "ai"), default="minimax",
-                    help="--engine's model of the boss: both sides search, or the RR AI in Rust")
+    ap.add_argument("--engine-opp", choices=("minimax", "ai"), default="ai",
+                    help="--engine's model of the boss: both sides search, or the RR AI in Rust mixed with search "
+                         "(--engine-p; the default since D4, 2026-11-24: +11 points, -0.13 deaths/mon on fresh seeds)")
     ap.add_argument("--out")
     args = ap.parse_args()
     args.items = not args.no_items

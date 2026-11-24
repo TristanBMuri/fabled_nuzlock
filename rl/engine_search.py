@@ -29,9 +29,9 @@ RR_GAPS = {}
 
 class EngineSearcher:
     def __init__(self, fallback, iterations: int = 20000, rr: bool = True, death: float = 60.0,
-                 opponent: str = "minimax"):
+                 opponent: str = "ai", p_model: float = 0.8):
         # opponent: "minimax" = both sides search (MCTS); "ai" = the enemy plays the RR AI in Rust
-        # (poke-engine rr_ai.rs, 90% agreement with ai_util/rr_ai.py: results/rr_ai_diff.log), so the
+        # (poke-engine rr_ai.rs; agreement with ai_util/rr_ai.py 97% off-policy, 96% on-policy since 2026-11-24), so the
         # search is against the boss's script. Only when the searcher is p1 (side one).
         # death: evaluation points per fainted mon of ours (the engine reads POKE_ENGINE_DEATH once,
         # at its first evaluation). Misty, 10 boxes, 2026-11-23: 0 -> 53% / 0.73 d/mon, 60 -> 52% /
@@ -39,7 +39,10 @@ class EngineSearcher:
         os.environ.setdefault("POKE_ENGINE_DEATH", str(death))
         if rr and not convert.RR:
             convert.use_rr()
-        self.fallback, self.iterations, self.opponent = fallback, iterations, opponent
+        # p_model (opponent "ai"): per enemy decision in the tree, follow the AI model with this
+        # probability, else UCB over every enemy option (phase 1's mixture; 1.0 = pure model).
+        # Default ai / 0.8 since D4 (2026-11-24): +11 points, -0.13 deaths/mon vs minimax on fresh seeds
+        self.fallback, self.iterations, self.opponent, self.p_model = fallback, iterations, opponent, p_model
         self.gaps = {**GAPS, **RR_GAPS}
         self.stats = Counter()
         self.last_scores: dict[str, float] = {}
@@ -84,7 +87,8 @@ class EngineSearcher:
         # seeded from the battle's searcher rng, so a seeded battle replays exactly
         seed = int(self.fallback.rng.integers(1, 2 ** 62)) if hasattr(self.fallback, "rng") else None
         if self.opponent == "ai" and side == "p1":
-            res = convert.pe.monte_carlo_tree_search_vs_ai(state, 60_000, self.iterations, seed=seed).side_one
+            res = convert.pe.monte_carlo_tree_search_vs_ai(state, 60_000, self.iterations, seed=seed,
+                                                           p_model=self.p_model).side_one
         else:
             res = convert.pe.monte_carlo_tree_search(state, 60_000, self.iterations, 1, seed=seed).side_one
         by_id = {convert.engine_choice(dump, side, c): c[0] for c in mine}
@@ -106,6 +110,38 @@ class EngineSearcher:
             with open(self.log, "a") as f:
                 f.write(json.dumps(rec) + "\n")
         return pick
+
+
+class RustEnemy:
+    """The RR AI's Rust port as the real enemy (phase 1's exact-model oracle): a search that
+    models the enemy with the same port then has an exact model, so "the search method is wrong"
+    and "the port is wrong" separate. Samples the AI's weighted choices (uniform over ties on a
+    build without weights) with the global `random`, which the probes seed per battle; the
+    Python AI decides where the position does not convert. Enemy side (p2) only."""
+
+    def __init__(self, fallback):
+        self.fallback, self.stats = fallback, Counter()
+
+    def __call__(self, sb, side: str) -> str:
+        import random
+        if sb.mirrors[side].wait:
+            return "default"
+        dump = sb.bridge.call(op="dump", id=sb.id)
+        mine = dump[side]["choices"]
+        state, issues = convert.to_engine(dump) if len(mine) > 1 else (None, ["single"])
+        if issues:
+            self.stats["python"] += 1
+            return self.fallback(sb, side)
+        pe = convert.pe
+        opts = (pe.rr_ai_choice_weighted(state, "side_two") if hasattr(pe, "rr_ai_choice_weighted")
+                else [(c, 1.0) for c in pe.rr_ai_choice(state, "side_two")])
+        by_id = {convert.engine_choice(dump, side, c): c[0] for c in mine}
+        opts = [(by_id[k], w) for c, w in opts if (k := c.removeprefix("switch ").removesuffix("-mega")) in by_id]
+        if not opts:
+            self.stats["python:options"] += 1
+            return self.fallback(sb, side)
+        self.stats["rust"] += 1
+        return random.choices([c for c, _ in opts], weights=[w for _, w in opts])[0]
 
 
 def _active_features(dump: dict) -> set[str]:

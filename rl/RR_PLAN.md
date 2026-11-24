@@ -55,7 +55,14 @@ user on RL decisions"); the recommendation and the evidence available at that ti
 
 - **Phase 0 (2026-11-24): done**, item audit included (`rl/research/rr_items_teams.md`; reference
   teams for Koga / Blaine are in the same file, for phase 2). Pool ceiling after it: Erika 100%,
-  Koga 8%, Blaine 8% (n = 12): the wall stands. Gate:
+  Koga 8%, Blaine 8% (n = 12): the wall stands.
+- **Phase 1 (2026-11-24): gate passed; D4 = mixture p = 0.8, now the default** (`--engine-opp ai
+  --engine-p 0.8`): +11.1 ± 4.8 points, −0.135 deaths/mon vs minimax on fresh seeds; the
+  exact-model oracle +12.2. Then the Rust AI was fixed (user's choice): on-policy agreement
+  75 → 98%; with it p = 0.8 gives **+30.2 ± 7.0 points, −0.28 deaths/mon** vs minimax on fresh
+  seeds (Brock 83%, Misty 60%, Erika 69%), 0 capped; higher p is worse (Misty stalls). Branching
+  crits at every depth: no gain, off. Pool ceiling: Koga 17%, Blaine 25% (n = 12).
+- Phase 0 gate:
   logging on/off 60/60 boxes identical, zero capped battles, Brock 70 → 76%; Misty 51 → 24%, of
   which ~24 points are the abilities rolled at catch (Misty is before the capsules; the old 51%
   used a per-boss ability the run cannot have yet). NOTEBOOK.md 2026-11-24, `results/rr_p0_*`.
