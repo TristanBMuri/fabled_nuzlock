@@ -2998,3 +2998,81 @@ arena weather (it picked Swift Swim for Golduck before).
   ~12k battles, ~28 min on 10 workers.
 - Approximations (delegate): halving scores a round only on its own seeds; mutants take 1/3 of the
   slots; `--my-box` mons are not evolved; pool mode includes every starter.
+
+**Realistic boxes** (30 sampled boxes each, fast budget ~120 battles a box, paired by box with the
+cover chooser; `results/rr_p3b_*`):
+
+| boss | cover | team search | boxes with a ≥ 50% six | deathless |
+|---|---|---|---|---|
+| Koga | 5% / 0.96 d/mon | **21% / 0.85** | 1 → 6 / 30 | 3% → 2% |
+| Blaine | 28% / 0.83 | **69% / 0.53** | 10 → 25 / 30 | 1% → 6% |
+
+Paired: **+28.3 ± 7.1 points, −0.20 ± 0.06 deaths/mon** (SPRT δ 10: H1). Blaine is now mostly
+winnable from a typical box; Koga only from 1 box in 5 at this budget, and deathless stays rare
+at both. The pool result (Koga 100%) needs species a typical box lacks; the advisor's wide budget
+(4,000 battles) on one box should land between the two.
+
+**Full budget on real-sized Koga boxes** (`rr_search.py --boxes 6 --battles 4000`, stopped by the
+2 h limit after 5 boxes; finals replayed 48× with `line.check`, `results/rr_p3c_*`): win 6 / 38 /
+40 / 12 / 2% on boxes 0 / 1 / 3 / 4 / 5 vs the fast budget's 0 / 17 / 50 / 33 / 17% (n = 6): no
+clear gain from 30× the battles. Koga from a typical box is limited by the box's species.
+**Deaths in won fights** (the user's question): mostly 0–1 (box 3: 58% of wins deathless, 32%
+one death; box 1: 33% / 28%); losses are near-total wipes (5–6 of 6), so mean deaths track the
+loss rate. A death's cost depends on who dies (the user's D14: a run-level value per mon).
+
+## 2026-11-24 — Plan v3, phase 4: fitted leaf evaluation (Texel), first fit
+
+D9 = battle outcomes, D10 = linear first (the user). Data (`logs/p4_data.*`, not in results: 459
+MB): 16 mandatory singles bosses × 60 sampled boxes × 6 battles, `--states`, the D4 battler; every
+4th boss held out (#18 Misty, #34 Erika, #77 Lt. Surge rematch, #95 Giovanni; #75 Brock rematch
+was swapped out: its Ditto trips poke-env's Transform assertion, as did Ditto in our own pool
+in box mode's solo stage, now filtered by `playable`). #74 / #77 / #93 are near-trivial fights
+(6–12 turns, ~100% wins: weak dumped teams). Engine (Opus delegate, poke-engine `150b59d`): 43
+features (`evaluate_features`, ours / theirs: HP, alive, items, statuses, hazards, boosts,
+screens, Tailwind ...; our deaths; damage out / in of the actives, we move first, we KO first,
+answers, unanswered), 2.8 µs a call; `POKE_ENGINE_EVAL_WEIGHTS=<file>` makes an open leaf
+sigmoid(bias + w · f) and a finished battle U.
+
+`rl/fit_eval.py` (soft-label logistic regression, L-BFGS, battle-level split; label = the battle's
+U): 129,298 positions from 5,748 battles.
+
+| model | train | validation | held-out bosses |
+|---|---|---|---|
+| constant (mean U) | 0.692 | 0.691 | 0.689 |
+| **linear (43 features)** | 0.422 | **0.444** | **0.535** |
+| 1×32 net (probe) | 0.377 | 0.419 | 0.575 |
+
+- The net fits seen bosses better and generalises worse (held-out +7.5%): by D10, linear stays.
+- Largest weights (standardised): our HP +1.49, their alive −0.87, their HP −0.71, their
+  Tailwind −0.68 (only Koga's arena has it: a boss marker), our deaths −0.43, our alive +0.43;
+  their paralysis −0.30 / burn −0.22, we move first +0.17, we KO first +0.13.
+- Features constant in training (enemy hazards, screens, Substitute ...) got huge raw weights
+  (sd ≈ 1e-6); now zeroed (`fit_eval.py`), so an unseen feature cannot explode a leaf.
+- Held-out bosses are much harder to predict (0.535 vs 0.444): generalisation across bosses is
+  the open question, as CLAUDE.md warns.
+
+**Play test** (30 boxes each, `--seed 3`, paired; `results/rr_p4_{base,v1}.*`): hand evaluation →
+fitted V1: Brock 91 → 83%, Misty 49 → 52%, Erika 75 → 62%, Koga 9 → 14%, Blaine 24 → 25%;
+**−2.4 ± 3.7 points, +0.055 ± 0.029 deaths/mon** (SPRT δ 5: no difference; deaths worse).
+**Gate failed**: a better predictor of outcomes is not a better guide for the search. Likely
+reasons: (1) the label U charges a death 0.5 / 6 of a win, while the hand evaluation charges 60
+points per death (POKE_ENGINE_DEATH), so the fitted search trades mons more readily (deaths up);
+(2) Monte Carlo labels say who is ahead under the current policy, not which move is better
+(positions differ mostly by features the search cannot change in one turn); (3) the floor /
+terminal change and the leaf change are tested together.
+
+**Hybrid test** (the user's D11 choice; same boxes and seeds; poke-engine: `POKE_ENGINE_EVAL_RELATIVE=1`
+scores an open leaf sigmoid(logit − root logit), centred like the hand evaluation):
+
+| variant | Brock | Misty | Erika | Koga | Blaine | vs hand (paired) |
+|---|---|---|---|---|---|---|
+| hand evaluation | 91% / 0.27 | 49% / 0.65 | 75% / 0.43 | 9% / 0.94 | 24% / 0.84 | |
+| fitted, absolute (V1) | 83 / 0.41 | 52 / 0.66 | 62 / 0.53 | 14 / 0.93 | 25 / 0.88 | −2.4 ± 3.7, +0.055 d/mon |
+| H1: fitted, relative | 88 / 0.36 | 51 / 0.68 | 62 / 0.60 | 12 / 0.93 | 27 / 0.88 | −1.8 ± 3.7, +0.061 |
+| H2: H1 + the hand's death penalty | 76 / 0.42 | 34 / 0.75 | 57 / 0.56 | 4 / 0.97 | 23 / 0.87 | −10.7 ± 3.9, +0.084 |
+
+- Neither saturation (H1) nor the death penalty (H2: worse, the search turns passive) explains it:
+  the outcome-fitted features do not guide the search better than the hand evaluation. A model
+  that predicts *who is winning* well (log-loss 0.44 vs 0.69) need not rank *moves* well: Monte
+  Carlo labels mostly reflect the matchup and the policy, which the search cannot change by its
+  choice at the leaf.

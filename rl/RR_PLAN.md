@@ -77,7 +77,8 @@ user on RL decisions"); the recommendation and the evidence available at that ti
 - **Phase 3 (2026-11-24): gates passed** (`scripts/rr_search.py`): Erika 30 boxes 78 → 89% (+11
   ± 8, SPRT H1); pool Koga **100% win, 88–90% deathless**, Blaine **92–96% win, 10–12% deathless**
   (independently replayed). Cloud Nine found at Blaine but cut by U. Next: D9 / D10 (phase 4) or
-  the deathless question at Blaine.
+  the deathless question at Blaine. **Realistic 30-box tables:** Koga 5 → 21%, Blaine 28 → 69%
+  (+28 ± 7 paired); deathless 2–6%.
 - Phase 0 gate:
   logging on/off 60/60 boxes identical, zero capped battles, Brock 70 → 76%; Misty 51 → 24%, of
   which ~24 points are the abilities rolled at catch (Misty is before the capsules; the old 51%
@@ -155,6 +156,15 @@ SPRT +5 points or −0.05 deaths/mon; mirrors and lines not worse.
 
 **5. Learned team filter (conditional).** Not needed to advise on one box (the wide budget
 covers it); only if routing needs many box evaluations. v2 phase 5 order and gate. **D12**.
+
+**Raised by the user (2026-11-24): what a death costs.** One or two deaths in a win may be fine,
+but it depends on *who* dies: losing the mon that answers Koga costs more than losing filler.
+So a death's cost is that mon's future value over the bosses ahead, a **run-level value
+function** V(box, next bosses) (the nuzlocke's real objective), instead of the flat λ = 0.5 per
+sixth in U. Candidate form: per battle, win · (1 − Σ_dead c_i) with c_i = the drop in the
+box's value for the later bosses when mon i is gone, from the team search's archive (how much
+worse the best six for each later boss gets without it). It needs the routing machinery below;
+**D14** (the user's) once phase 6 is reached.
 
 **6. Routing (~1 d):** "what to catch next" on the plan sheet. Gate: routed boxes +10 points.
 

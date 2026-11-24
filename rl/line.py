@@ -331,7 +331,9 @@ def check(boss: str, cap: int, sets: list, iterations: int, n: int, workers: int
     se = lambda xs: 1.96 * (sum(xs) / n * (1 - sum(xs) / n) / n) ** 0.5
     return {"n": n, "win": sum(won) / n, "win_ci": se(won), "deathless": sum(clean) / n, "deathless_ci": se(clean),
             "deaths": sum(sum(r[1]) for r in res) / n, "capped": sum(r[2] for r in res) / n,
-            "die": [sum(r[1][j] for r in res) / n for j in range(len(res[0][1]))]}
+            "die": [sum(r[1][j] for r in res) / n for j in range(len(res[0][1]))],
+            # deaths in won battles: {k: share of wins with k of ours fainted}
+            "win_deaths": {k: sum(r[0] and sum(r[1]) == k for r in res) / max(sum(won), 1) for k in range(7)}}
 
 
 def main() -> None:

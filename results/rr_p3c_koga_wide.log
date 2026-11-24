@@ -1,0 +1,8 @@
+KOGA: trainer #80, cap 68, pool 460 species; arena {'ai_permanent': True, 'p2': ['tailwind']}; not modelled: []
+KOGA       box  5/6: ['overqwil', 'sharpedo', 'lapras', 'garganacl', 'decidueye', 'golisopod'] (move) -> win 33% deaths/mon 0.72 deathless 0%  (3612s)
+KOGA       box  6/6: ['camerupt', 'carnivine', 'floetteeternal', 'wailord', 'runerigus', 'linoone'] (item) -> win 17% deaths/mon 0.94 deathless 0%  (3617s)
+KOGA       box  2/6: ['excadrill', 'wormadam', 'araquanid', 'dusknoir', 'tangrowth', 'mamoswine'] (swap) -> win 17% deaths/mon 0.83 deathless 17%  (3630s)
+KOGA       box  1/6: ['steelix', 'charizard', 'lapras', 'garganacl', 'tsareena', 'quagsire'] (swap) -> win 17% deaths/mon 0.86 deathless 0%  (3786s)
+KOGA       box  4/6: ['bronzong', 'annihilape', 'floetteeternal', 'golurk', 'gyarados', 'golisopod'] (searched) -> win 50% deaths/mon 0.61 deathless 0%  (4949s)
+/var/home/tristan/.local/share/uv/python/cpython-3.13.9-linux-x86_64-gnu/lib/python3.13/multiprocessing/resource_tracker.py:324: UserWarning: resource_tracker: There appear to be 6 leaked semaphore objects to clean up at shutdown: {'/mp-o_fh8a5_', '/mp-_5gk_dw9', '/mp-c5gsyzty', '/mp-kdj_qe9v', '/mp-pbxqt_cz', '/mp-8k_20pip'}
+  warnings.warn(

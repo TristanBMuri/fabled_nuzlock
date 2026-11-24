@@ -679,7 +679,7 @@ def boxes_start(args, name: str) -> dict | None:
         print(f"{name} FAILED: {e}", flush=True)
         emit(args, "boss_failed", boss=name, error=str(e))
         return None
-    solo, _ = solo_stage(ctx, ctx.pool + [sp for sp in rp.STARTERS if sp not in ctx.pool])
+    solo, _ = solo_stage(ctx, playable(ctx, ctx.pool + [sp for sp in rp.STARTERS if sp not in ctx.pool]))
     print(f"{name}: A solo scores for {len(solo)} species (pool + starters) in {time.time() - ctx.t0:.0f}s", flush=True)
     emit(args, "stage_a", boss=name, scored=len(solo), top=[(sp, round(pr, 3)) for pr, sp in solo[:SHORT]])
     ctx.bridge.close()
