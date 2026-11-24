@@ -1,0 +1,42 @@
+{
+  "_about": "Player teams that beat RR 4.x hardcore Koga / Blaine (rl/research/rr_items_teams.md, Gemini Neon, 2026-11-24). Only what the sources state; rl/line.py --reference fills the rest with our set builder (moves by best4 over the legal pool, nature by choose_nature, ability slot 0). K2-K4 and B3 are v3.02/3.1 runs (Koga had Kyurem for Chi-Yu; B3's Blaine was a different team).",
+  "teams": [
+    {"name": "K1", "boss": "KOGA", "who": "Crappo, 4.1 HC nuzlocke, deathless", "mons": [
+      {"species": "snorlax", "nature": "Impish"},
+      {"species": "meganium", "item": "leftovers", "moves": ["drainingkiss"]},
+      {"species": "incineroar", "ability": "Intimidate", "moves": ["leechlife", "drainpunch"]},
+      {"species": "probopass"},
+      {"species": "gyarados"},
+      {"species": "runerigus", "moves": ["earthquake"]}]},
+    {"name": "K2", "boss": "KOGA", "who": "Stephin Sunny, 3.02 HC nuzlocke HOF #5, deathless", "mons": [
+      {"species": "forretress", "ability": "Sturdy", "moves": ["gyroball"]},
+      {"species": "chesnaught"},
+      {"species": "incineroar", "item": "chopleberry", "moves": ["leechlife"]},
+      {"species": "jellicent", "moves": ["scald"]},
+      {"species": "sylveon", "moves": ["drainingkiss", "quickattack"]},
+      {"species": "runerigus", "moves": ["earthquake"]}]},
+    {"name": "K3", "boss": "KOGA", "who": "Apecio Unbound, 3.02 HC nuzlocke guide, deathless (5 of 6 named)", "mons": [
+      {"species": "delphox", "moves": ["wish"]},
+      {"species": "meganium", "moves": ["bulldoze"]},
+      {"species": "sceptile", "item": "sceptilite", "moves": ["detect", "dualchop"]},
+      {"species": "cinderace", "moves": ["ironhead", "uturn"]},
+      {"species": "donphan", "ability": "Sturdy"}]},
+    {"name": "K4", "boss": "KOGA", "who": "TheFetCet, 3.1 HC (description sets, moves not given)", "mons": [
+      {"species": "forretress", "nature": "Brave", "ability": "Sturdy", "item": "sitrusberry"},
+      {"species": "pyukumuku", "nature": "Sassy", "ability": "Innards Out", "item": "sitrusberry"},
+      {"species": "dragonite", "nature": "Adamant", "ability": "Multiscale", "item": "focussash"},
+      {"species": "runerigus", "nature": "Sassy", "ability": "Wandering Spirit", "item": "rindoberry"},
+      {"species": "wailord", "nature": "Modest", "item": "wacanberry"},
+      {"species": "blissey", "nature": "Calm", "ability": "Natural Cure", "item": "chopleberry"}]},
+    {"name": "B1", "boss": "BLAINE", "who": "Crappo, 4.1 HC nuzlocke, 1 planned death", "mons": [
+      {"species": "emboar", "ability": "Bull Rush", "item": "choiceband", "moves": ["flareblitz"]},
+      {"species": "lanturn", "moves": ["voltswitch"]},
+      {"species": "dragapult", "nature": "Quiet", "item": "lifeorb", "moves": ["dragondarts", "psychicfangs", "suckerpunch", "solarbeam"]},
+      {"species": "drednaw", "nature": "Bold", "ability": "Shell Armor", "item": "choicescarf", "moves": ["rocktomb"]},
+      {"species": "golduck", "ability": "Cloud Nine", "item": "focussash", "moves": ["simplebeam", "flipturn"]},
+      {"species": "slowbro", "ability": "Shell Armor", "item": "slowbronite", "moves": ["psychic"]}]},
+    {"name": "B3", "boss": "BLAINE", "who": "Stephin Sunny / Apecio Unbound, 3.02 HC nuzlocke, deathless with 2 mons (against an older Blaine)", "mons": [
+      {"species": "sceptile", "item": "sceptilite", "moves": ["dualchop", "rocktomb"]},
+      {"species": "golduck", "ability": "Cloud Nine", "moves": ["encore", "surf"]}]}
+  ]
+}

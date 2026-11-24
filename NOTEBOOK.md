@@ -2923,3 +2923,45 @@ Showdown forks share a sleep counter, so the cross-check over-reports sleep turn
 The engine fixes change the battler too (Erika's Showdown wins 88 → 97%): the phase-1 tables
 predate them.
 - Views (Opus delegate): `ui/` Draft, Trace (from states.jsonl), Line, "what it uses".
+
+## 2026-11-24 — Plan v3, phase 2: anchors and blame (`results/rr_p2_*`)
+
+**Reference teams** (`data/rr/reference_teams.json`, players' Koga / Blaine teams from
+`rl/research/rr_items_teams.md`; what the sources state, the rest from our set builder:
+`rl/line.py --reference K2 --no-line --check 48`), our battler (20k, p = 0.8) vs the Python AI:
+
+| team | boss | win | deathless | E[deaths] |
+|---|---|---|---|---|
+| K1 Crappo 4.1 (deathless for him) | Koga | 10 ± 9% | 4% | 5.5 |
+| K2 Stephin Sunny 3.02 | Koga | 35 ± 14% | 8% | 4.3 |
+| K3 Apecio 3.02 (5 mons) | Koga | 0% | 0% | 5.0 |
+| K4 TheFetCet 3.1 (no moves given) | Koga | 38 ± 14% | 2% | 4.4 |
+| B1 Crappo 4.1 (1 planned death) | Blaine | 46 ± 14% | 0% | 5.1 |
+| **B3 Mega Sceptile + Cloud Nine Golduck (2 mons)** | Blaine | **100%** | **100%** | 0 |
+| our best pool six (`rr_p1b_ceiling`, n = 12) | Koga / Blaine | 17% / 25% | 0% | |
+
+- Blaine has a team-choice answer our chooser never finds: Cloud Nine (Golduck) cancels the
+  permanent Desolate Land; the AI keeps clicking Solar Beam, which now charges a turn. The
+  players' guides use exactly this. A builder wall at Blaine.
+- Koga: the players' teams do 2× our best six on win (35–38%) but are nearly never deathless with
+  our battler and filled-in sets (the players played planned lines with their own sets).
+
+**Mirrors** (`scripts/rr_mirror.py --n 48`, the boss's six on both sides; now `--p1 search|calc|ai`,
+the search = the D4 default), `results/rr_p2_mirrors.log`:
+
+| boss | our search vs the AI | AI vs AI (baseline) | gain |
+|---|---|---|---|
+| Erika (arena) | 100% / 0.10 d/mon | 50% / 0.81 | +50 |
+| Koga (no arena) | 77% / 0.54 | 60% / 0.81 | +17 |
+| Blaine (arena) | 98% / 0.33 | 42% / 0.85 | +56 |
+
+The battler is sound (≥ 75% everywhere; Koga just under the +20 margin).
+
+**Iteration ladder** (reference teams, 48 battles, `results/rr_p2_ladder.log`): K2 at Koga 23 → 35
+→ **54%** (2k / 20k / 200k), deaths 4.8 → 4.3 → 3.3; B1 at Blaine 21 → 46 → **56%**, deaths 5.6
+→ 5.1 → 4.7. Search-bound: 20k → 200k still +19 / +10 points. Deathless stays 0–10% at every rung.
+
+**Reading for D6:** (1) team choice: Blaine has a 100% deathless 2-mon answer (Cloud Nine) and
+the Koga reference sixes double our best: a builder wall; (2) search budget / evaluation: more
+iterations keep paying; (3) deathless play: even good teams with 10× search lose 3–5 mons, while
+the players were deathless: their exact sets and planned lines, or fidelity (unknown).

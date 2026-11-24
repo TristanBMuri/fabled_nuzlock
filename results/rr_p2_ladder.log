@@ -1,0 +1,12 @@
+== K2 2000
+Showdown check, 48 battles vs the Python AI: P(win) 22.9% ± 11.9% (line 0.0%), P(deathless) 6.2% ± 6.8% (line 0.0%), E[deaths] 4.83 (line 0.00), capped 0.0%
+== B1 2000
+Showdown check, 48 battles vs the Python AI: P(win) 20.8% ± 11.5% (line 0.0%), P(deathless) 0.0% ± 0.0% (line 0.0%), E[deaths] 5.58 (line 0.00), capped 0.0%
+== K2 20000
+Showdown check, 48 battles vs the Python AI: P(win) 35.4% ± 13.5% (line 0.0%), P(deathless) 8.3% ± 7.8% (line 0.0%), E[deaths] 4.25 (line 0.00), capped 0.0%
+== B1 20000
+Showdown check, 48 battles vs the Python AI: P(win) 45.8% ± 14.1% (line 0.0%), P(deathless) 0.0% ± 0.0% (line 0.0%), E[deaths] 5.10 (line 0.00), capped 0.0%
+== K2 200000
+Showdown check, 48 battles vs the Python AI: P(win) 54.2% ± 14.1% (line 0.0%), P(deathless) 10.4% ± 8.6% (line 0.0%), E[deaths] 3.27 (line 0.00), capped 0.0%
+== B1 200000
+Showdown check, 48 battles vs the Python AI: P(win) 56.2% ± 14.0% (line 0.0%), P(deathless) 0.0% ± 0.0% (line 0.0%), E[deaths] 4.69 (line 0.00), capped 0.0%

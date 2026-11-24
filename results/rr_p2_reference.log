@@ -1,0 +1,24 @@
+== K1
+sets: snorlax Impish Immunity None ['bodyslam', 'woodhammer', 'earthquake', 'reflect']; meganium Mild Overgrow leftovers ['drainingkiss', 'petaldance', 'playrough', 'earthquake']; incineroar Adamant Intimidate None ['leechlife', 'drainpunch', 'flareblitz', 'darkestlariat']; probopass Modest Sturdy None ['flashcannon', 'powergem', 'thunderbolt', 'thunderwave']; gyarados Adamant Intimidate None ['aquatail', 'thrash', 'earthquake', 'thunderwave']; runerigus Adamant Wandering Spirit None ['earthquake', 'shadowclaw', 'zenheadbutt', 'willowisp']
+Showdown check, 48 battles vs the Python AI: P(win) 10.4% ± 8.6% (line 0.0%), P(deathless) 4.2% ± 5.7% (line 0.0%), E[deaths] 5.50 (line 0.00), capped 0.0%
+  P(dies) on Showdown: snorlax 90% (line 0%), meganium 92% (line 0%), incineroar 94% (line 0%), probopass 90% (line 0%), gyarados 90% (line 0%), runerigus 96% (line 0%)
+== K2
+sets: forretress Adamant Sturdy leftovers ['gyroball', 'spinout', 'doubleedge', 'lunge']; chesnaught Adamant Bulletproof leftovers ['woodhammer', 'hammerarm', 'earthquake', 'reflect']; incineroar Adamant Blaze chopleberry ['leechlife', 'flareblitz', 'darkestlariat', 'outrage']; jellicent Modest Water Absorb leftovers ['scald', 'waterspout', 'shadowball', 'psychic']; sylveon Mild Cute Charm leftovers ['drainingkiss', 'quickattack', 'moonblast', 'hypervoice']; runerigus Adamant Wandering Spirit leftovers ['earthquake', 'shadowclaw', 'zenheadbutt', 'willowisp']
+Showdown check, 48 battles vs the Python AI: P(win) 35.4% ± 13.5% (line 0.0%), P(deathless) 8.3% ± 7.8% (line 0.0%), E[deaths] 4.25 (line 0.00), capped 0.0%
+  P(dies) on Showdown: forretress 65% (line 0%), chesnaught 83% (line 0%), incineroar 71% (line 0%), jellicent 65% (line 0%), sylveon 71% (line 0%), runerigus 71% (line 0%)
+== K3
+sets: delphox Modest Blaze leftovers ['wish', 'futuresight', 'flamethrower', 'dazzlinggleam']; meganium Mild Overgrow leftovers ['bulldoze', 'petaldance', 'playrough', 'earthquake']; sceptile Lonely Overgrow sceptilite ['detect', 'dualchop', 'leafstorm', 'dragonclaw']; cinderace Adamant Blaze leftovers ['ironhead', 'uturn', 'pyroball', 'doubleedge']; donphan Adamant Sturdy leftovers ['earthquake', 'headsmash', 'playrough', 'drillrun']
+Showdown check, 48 battles vs the Python AI: P(win) 0.0% ± 0.0% (line 0.0%), P(deathless) 0.0% ± 0.0% (line 0.0%), E[deaths] 5.00 (line 0.00), capped 0.0%
+  P(dies) on Showdown: delphox 100% (line 0%), meganium 100% (line 0%), sceptile 100% (line 0%), cinderace 100% (line 0%), donphan 100% (line 0%)
+== K4
+sets: forretress Brave Sturdy sitrusberry ['spinout', 'doubleedge', 'lunge', 'reflect']; pyukumuku Sassy Innards Out sitrusberry ['recover', 'sleeptalk', 'reflect', 'lightscreen']; dragonite Adamant Multiscale focussash ['outrage', 'fly', 'earthquake', 'roost']; runerigus Sassy Wandering Spirit rindoberry ['earthquake', 'shadowclaw', 'zenheadbutt', 'willowisp']; wailord Modest Water Veil wacanberry ['waterspout', 'icebeam', 'hypervoice', 'toxic']; blissey Calm Natural Cure chopleberry ['hypervoice', 'thunderbolt', 'psychic', 'softboiled']
+Showdown check, 48 battles vs the Python AI: P(win) 37.5% ± 13.7% (line 0.0%), P(deathless) 2.1% ± 4.0% (line 0.0%), E[deaths] 4.35 (line 0.00), capped 0.0%
+  P(dies) on Showdown: forretress 65% (line 0%), pyukumuku 98% (line 0%), dragonite 67% (line 0%), runerigus 77% (line 0%), wailord 62% (line 0%), blissey 67% (line 0%)
+== B1
+sets: emboar Adamant Bull Rush choiceband ['flareblitz', 'superpower', 'headsmash', 'willowisp']; lanturn Modest Volt Absorb leftovers ['voltswitch', 'thunderbolt', 'surf', 'icebeam']; dragapult Quiet Clear Body lifeorb ['dragondarts', 'psychicfangs', 'suckerpunch', 'solarbeam']; drednaw Bold Shell Armor choicescarf ['rocktomb', 'headsmash', 'liquidation', 'superpower']; golduck Timid Cloud Nine focussash ['simplebeam', 'flipturn', 'futuresight', 'surf']; slowbro Modest Shell Armor slowbronite ['psychic', 'futuresight', 'surf', 'icebeam']
+Showdown check, 48 battles vs the Python AI: P(win) 45.8% ± 14.1% (line 0.0%), P(deathless) 0.0% ± 0.0% (line 0.0%), E[deaths] 5.10 (line 0.00), capped 0.0%
+  P(dies) on Showdown: emboar 92% (line 0%), lanturn 77% (line 0%), dragapult 100% (line 0%), drednaw 77% (line 0%), golduck 85% (line 0%), slowbro 79% (line 0%)
+== B3
+sets: sceptile Adamant Overgrow sceptilite ['dualchop', 'rocktomb', 'solarblade', 'dragonclaw']; golduck Modest Cloud Nine leftovers ['encore', 'surf', 'futuresight', 'icebeam']
+Showdown check, 48 battles vs the Python AI: P(win) 100.0% ± 0.0% (line 0.0%), P(deathless) 100.0% ± 0.0% (line 0.0%), E[deaths] 0.00 (line 0.00), capped 0.0%
+  P(dies) on Showdown: sceptile 0% (line 0%), golduck 0% (line 0%)

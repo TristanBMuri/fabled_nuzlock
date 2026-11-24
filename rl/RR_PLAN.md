@@ -68,6 +68,12 @@ user on RL decisions"); the recommendation and the evidence available at that ti
   48 ± 7% (~9 points pessimistic: rolls are branched only on direct KOs), flagged in the output.
   Not done: v1 critical nodes, roll-sensitivity flag, the off-tree rate (replaced by the
   fixed-seed policy check).
+- **Phase 2 (2026-11-24): done; D6 = phase 3 next.** Mirrors 100 / 77 / 98% (Erika / Koga /
+  Blaine) vs AI-vs-AI 50 / 60 / 42%: the battler is sound. Reference teams
+  (`data/rr/reference_teams.json`): Koga 0–38%, Blaine 46% and **100% deathless for a 2-mon
+  Cloud Nine team** (a builder wall). Ladder 2k / 20k / 200k: K2 23 / 35 / 54%, B1 21 / 46 / 56%
+  (search-bound). Deathless 0–10% even then. User: the advisor's final six is planned and played
+  at 200k iterations; team search stays at 20k.
 - Phase 0 gate:
   logging on/off 60/60 boxes identical, zero capped battles, Brock 70 → 76%; Misty 51 → 24%, of
   which ~24 points are the abilities rolled at catch (Misty is before the capsules; the old 51%

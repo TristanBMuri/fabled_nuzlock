@@ -24,24 +24,25 @@ def main() -> None:
     ap.add_argument("--legal", action="store_true")
     ap.add_argument("--arena", action="store_true")
     ap.add_argument("--matchup", action="store_true")
-    ap.add_argument("--calc", action="store_true", help="the calc bot plays instead of the search (a weaker player)")
+    ap.add_argument("--p1", choices=("search", "calc", "ai"), default="search",
+                    help="who plays our side: the search (default: MCTS vs the AI model, p = 0.8), the calc bot, or the RR AI itself (the AI-vs-AI baseline)")
     a = ap.parse_args()
     args = argparse.Namespace(**vars(a), n_solo=1, n_team=1, n_search=a.n, n_screen=0, normal=False, blind_field=False,
-                              items=True, engine_opp="minimax", chooser="cover")
+                              items=True, engine_opp="ai", engine_p=0.8, enemy="python", states=False, out=None, chooser="cover")
     ctx = p.setup(args, a.boss, announce=False)
     from ai_util.sim import SimBattle
     wins = deaths = 0
     for i in range(a.n):
         sb = SimBattle(ctx.bridge, p.rp.FMT, ctx.enemy_packed, ctx.enemy_packed, full_info=True, arena=ctx.arena, seed=ctx.seeds[i])
         p.random.seed(sum(ctx.seeds[i]))
-        sb.play({"p1": ctx.calc if a.calc else ctx.searcher, "p2": ctx.enemy}, 100)
+        sb.play({"p1": {"calc": ctx.calc, "ai": ctx.enemy, "search": ctx.searcher}[a.p1], "p2": ctx.enemy}, 100)
         st = sb.state()
         won, dead = st["winner"] == "p1", sum(m["fainted"] for m in st["p1"])
         wins += won
         deaths += dead
         print(f"{a.boss} mirror {i + 1}/{a.n}: {'win' if won else 'loss'}, our deaths {dead}, theirs {sum(m['fainted'] for m in st['p2'])}, turns {sb.turn}", flush=True)
         sb.close()
-    print(f"{a.boss} mirror ({'calc bot' if a.calc else f'engine {a.engine}'} vs RR AI, same six): win {wins / a.n:.0%}, deaths/mon {deaths / a.n / 6:.2f}", flush=True)
+    print(f"{a.boss} mirror ({a.p1 if a.p1 != 'search' else f'engine {a.engine}'} vs RR AI, same six, arena {a.arena}): win {wins / a.n:.0%}, deaths/mon {deaths / a.n / 6:.2f}", flush=True)
     ctx.bridge.close()
 
 

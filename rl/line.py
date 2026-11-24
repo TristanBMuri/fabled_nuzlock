@@ -227,30 +227,67 @@ class Line:
         return "\n".join(out)
 
 
-def start(events: str, boss: str, label: str | None):
-    """The first decision of a logged six against its boss: (engine state, Showdown battle, dump,
-    six). The six is the first `team` / `box` event of that boss (with `label`, the first so labelled)."""
-    import rr_probe as rp
-    from gauntlet import Mon, pack_team
-    from ai_util.sim import SimBattle, SimBridge
+def logged_sets(events: str, boss: str, label: str | None) -> tuple[int, list[dict]]:
+    """(cap, sets) of a logged six: the first `team` / `box` event of `boss` in a probe run's
+    events (with `label`, the first so labelled)."""
     evs = [json.loads(x) for x in open(events)]
     cap = next(e["cap"] for e in evs if e["kind"] == "boss_start" and e["boss"] == boss)
     row = next(e for e in evs if e["kind"] in ("team", "box") and e["boss"] == boss and (label is None or e.get("label") == label))
+    return cap, row["sets"]
+
+
+def reference_sets(name: str) -> tuple[str, int, list[dict]]:
+    """(boss, cap, sets) of a player's reference team (data/rr/reference_teams.json): what the
+    source states, the rest from our set builder (moves: best4 over the legal pool after the
+    stated ones; nature: choose_nature; ability: slot 0; items: assign_items' picks for the mons
+    the source gives none, from the items in hand by then)."""
+    import rr_probe as rp
+    from rr_postmortem import attribution  # noqa: F401  (switches gauntlet to the RR game)
+    from gauntlet import Mon, assign_items, encounter_moves
+    ref = next(t for t in json.load(open(rp.RR / "reference_teams.json"))["teams"] if t["name"] == name)
+    boss = ref["boss"]
+    by, known = rp.pools()
+    block, cap, _, progress = by[boss]
+    packed, dump_cap, _ = rp.boss_team(boss)
+    cap = max(cap, dump_cap)
+    rp.hardcore()
+    profile = rp.boss_profile(packed, known, rp.arena(block.get("battleEffect", ""))[0])
+    sets = []
+    for m in ref["mons"]:
+        moves = list(m.get("moves", []))
+        moves += [x for x in encounter_moves(m["species"], cap, "best4", progress=progress) if x not in moves][:4 - len(moves)]
+        sets.append({"species": m["species"], "moves": moves, "item": m.get("item"),
+                     "ability": m.get("ability") or known[m["species"]]["abilities"]["0"],
+                     "nature": m.get("nature") or rp.choose_nature(m["species"], moves, known, profile, cap)})
+    mons = [Mon(x["species"], cap, x["moves"], x["ability"]) for x in sets]
+    assign_items(mons, progress)
+    taken = {x["item"] for x in sets if x["item"]}
+    for x, m in zip(sets, mons):
+        if not x["item"] and m.item and m.item not in taken:
+            x["item"] = m.item
+    return boss, cap, sets
+
+
+def start(boss: str, cap: int, sets: list[dict]):
+    """The first decision of a six against its boss: (engine state, party, enemy team, arena, bridge)."""
+    import rr_probe as rp
+    from gauntlet import Mon, pack_team
+    from ai_util.sim import SimBattle, SimBridge
     by, _ = rp.pools()
     arena, _ = rp.arena(by[boss][0].get("battleEffect", ""))
     party = [Mon(s["species"], cap, s["moves"], s["ability"], s["item"] or None, nature=s["nature"],
-                 evs=dict.fromkeys(("hp", "atk", "def", "spa", "spd", "spe"), 0)) for s in row["sets"]]
+                 evs=dict.fromkeys(("hp", "atk", "def", "spa", "spd", "spe"), 0)) for s in sets]
     enemy_packed = rp.boss_team(boss)[0]
     bridge = SimBridge(showdown=str(rp.FORK))
     sb = SimBattle(bridge, rp.FMT, pack_team(party), enemy_packed, full_info=True, arena=arena)
     dump = bridge.call(op="dump", id=sb.id)
     state, issues = convert.to_engine(dump)
     if issues:
-        raise SystemExit(f"the start does not convert: {issues}")
-    return state, party, enemy_packed, arena, bridge, row
+        print(f"note: the start does not convert for the engine: {issues}")
+    return state, party, enemy_packed, arena, bridge
 
 
-def _check_job(events: str, boss: str, label: str | None, iterations: int, seed: int, rust_enemy: bool = False) -> tuple[bool, list[bool], bool]:
+def _check_job(boss: str, cap: int, sets: list, iterations: int, seed: int, rust_enemy: bool = False) -> tuple[bool, list[bool], bool]:
     """One Showdown battle of the line's six: our search (the line's policy) against the real
     (Python) RR AI. (won, our mons dead, hit the turn cap)."""
     import random
@@ -263,7 +300,7 @@ def _check_job(events: str, boss: str, label: str | None, iterations: int, seed:
     from ai_util.sim import SimBattle, player_brain
     from rl.engine_search import EngineSearcher
     convert.use_rr()
-    _, party, enemy_packed, arena, bridge, _ = start(events, boss, label)
+    _, party, enemy_packed, arena, bridge = start(boss, cap, sets)
     enemy = player_brain(RadicalRedAI(battle_format=rp.FMT, start_listening=False, log_level=50))
     py_enemy = enemy
     if rust_enemy:  # the diagnostic: the Rust port plays the enemy, so only the engine's mechanics differ from the line
@@ -283,10 +320,10 @@ def _check_job(events: str, boss: str, label: str | None, iterations: int, seed:
     return st["winner"] == "p1", [m["fainted"] for m in st["p1"]], sb.timed_out
 
 
-def check(events: str, boss: str, label: str | None, iterations: int, n: int, workers: int, rust_enemy: bool = False) -> dict:
+def check(boss: str, cap: int, sets: list, iterations: int, n: int, workers: int, rust_enemy: bool = False) -> dict:
     """n Showdown battles of the six under the line's policy: observed P(win), P(deathless), deaths."""
     import multiprocessing as mp
-    jobs = [(events, boss, label, iterations, 1000 + i, rust_enemy) for i in range(n)]
+    jobs = [(boss, cap, sets, iterations, 1000 + i, rust_enemy) for i in range(n)]
     with mp.get_context("spawn").Pool(workers) as pool:
         res = pool.starmap(_check_job, jobs)
     won = [r[0] for r in res]
@@ -299,8 +336,10 @@ def check(events: str, boss: str, label: str | None, iterations: int, n: int, wo
 
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--events", required=True, help="a probe run's <out>.events.jsonl")
-    ap.add_argument("--boss", required=True)
+    ap.add_argument("--events", help="a probe run's <out>.events.jsonl (with --boss)")
+    ap.add_argument("--boss")
+    ap.add_argument("--reference", help="a player team from data/rr/reference_teams.json by name (K1, B1 ...) instead")
+    ap.add_argument("--no-line", action="store_true", help="skip the line (only --check)")
     ap.add_argument("--label", help="the team event's label (cover, top, searched ...); default the first")
     ap.add_argument("--eps", type=float, default=0.0005, help="expand a branch while its reach probability >= eps")
     ap.add_argument("--iterations", type=int, default=3000, help="search iterations per decision")
@@ -312,11 +351,16 @@ def main() -> None:
     ap.add_argument("--out", help="write the nodes as JSON (the dashboard's Line view)")
     args = ap.parse_args()
     convert.use_rr()
-    state, party, *_, row = start(args.events, args.boss, args.label)
+    if args.reference:
+        args.boss, cap, sets = reference_sets(args.reference)
+    else:
+        cap, sets = logged_sets(args.events, args.boss, args.label)
+    state, party, *_ = start(args.boss, cap, sets)
+    print("sets: " + "; ".join(f"{x['species']} {x['nature']} {x['ability']} {x['item']} {x['moves']}" for x in sets))
     t0 = time.time()
-    line = Line(eps=args.eps, iterations=args.iterations)
+    line = Line(eps=2.0 if args.no_line else args.eps, iterations=args.iterations)
     line.expand(state.to_string())
-    line.estimate_tail(args.playouts)
+    line.estimate_tail(0 if args.no_line else args.playouts)
     s = line.summary()
     print(f"{args.boss}: {[m.species for m in party]}  ({s['nodes']} nodes, {s['playouts']} playouts, "
           f"{s['searches']} searches, {time.time() - t0:.0f}s)")
@@ -326,9 +370,10 @@ def main() -> None:
     print("P(dies): " + ", ".join(f"{m.species} {d:.0%}" for m, d in zip(party, s["die"])))
     print("  note: P(deathless) may be ~10 points low (Erika check, 2026-11-24): the engine branches a damage roll"
           " only when it KOs directly, not when it decides whether poison / chip damage finishes a mon later")
-    print(line.text(args.show))
+    if not args.no_line:
+        print(line.text(args.show))
     if args.check:
-        c = check(args.events, args.boss, args.label, args.iterations, args.check, args.workers, args.rust_enemy)
+        c = check(args.boss, cap, sets, args.iterations, args.check, args.workers, args.rust_enemy)
         print(f"Showdown check, {c['n']} battles vs the {'Rust' if args.rust_enemy else 'Python'} AI: P(win) {c['win']:.1%} ± {c['win_ci']:.1%} "
               f"(line {s['win']:.1%}), P(deathless) {c['deathless']:.1%} ± {c['deathless_ci']:.1%} (line {s['deathless']:.1%}), "
               f"E[deaths] {c['deaths']:.2f} (line {s['deaths']:.2f}), capped {c['capped']:.1%}")
