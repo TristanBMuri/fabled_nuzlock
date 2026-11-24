@@ -56,6 +56,7 @@ from rr_postmortem import attribution  # noqa: E402  (sets gauntlet.GAME = "rr",
 from gauntlet import STATS, Mon, assign_items, encounter_moves, evolve, mega_stone, pack_team  # noqa: E402
 
 SHORT, TOP = 24, 6
+SCREEN_KEEP = 3  # --chooser searched: the screen's best sixes replayed on the table's seeds
 GREEDY_N, SUBSETS = 4, 150
 
 
@@ -98,18 +99,20 @@ def progress(st: dict) -> float:
     return done
 
 
-def build_mon(species: str, cap: int, known: dict, progress: int, boss_types: set = frozenset(), arena: dict = {}) -> Mon | None:
-    """Evolved by level at the cap (no stones), best4 moves over the TMs and tutors in hand
-    by trainer `progress` (data/rr/tms.json, minus gauntlet.BANNED_MOVES), the nature and
-    ability the planner picks for this boss (rr_probe.choose_nature / choose_ability), its mega
+def build_mon(species: str, cap: int, known: dict, progress: int, boss: dict | None = None, seed=0,
+              boss_types: set = frozenset(), arena: dict = {}) -> Mon | None:
+    """Evolved at the cap (stones from the Celadon store on, gauntlet.STONE_GATE), best4 moves over the TMs and tutors in hand
+    by trainer `progress` (data/rr/tms.json, minus gauntlet.BANNED_MOVES), the nature the
+    planner picks for this boss (rr_probe.choose_nature; `boss` = rr_probe.boss_profile), the
+    ability the run has by then (rr_probe.run_ability: rolled at catch, then capsules), its mega
     stone if one is in hand (so stages A / B see the mega; team_mons re-assigns items), no EVs
     (Minimal Grinding Mode)."""
-    ev = evolve(species, cap, None, caught_level=5, trainer_idx=None)
+    ev = evolve(species, cap, None, caught_level=5, trainer_idx=progress)
     moves = encounter_moves(ev, cap, "best4", progress=progress)
     if not moves or ev not in known:
         return None
-    m = Mon(ev, cap, moves, ability=rp.choose_ability(ev, known, boss_types, arena), item=mega_stone(ev, progress), caught_level=5,
-            nature=rp.choose_nature(ev, moves, known))
+    m = Mon(ev, cap, moves, ability=rp.run_ability(species, ev, seed, progress, known, boss_types, arena), item=mega_stone(ev, progress), caught_level=5,
+            nature=rp.choose_nature(ev, moves, known, boss, cap))
     m.evs = dict.fromkeys(STATS, 0)
     return m
 
@@ -129,16 +132,17 @@ def team_mons(ctx, team) -> list[Mon]:
 
 def play(bridge, brain, enemy, party: list[Mon], enemy_packed: str, n: int, search=None, arena=None, seeds=None):
     """n battles; returns (win rate, deaths per mon, mean progress, (our deaths by enemy mon,
-    enemy mons KO'd), deathless-win rate). seeds: one engine seed per battle index, the same
+    enemy mons KO'd, share lost at the 100-turn cap), deathless-win rate). seeds: one engine seed per battle index, the same
     for every team and variant (paired comparisons); it also seeds the RR AI's tie-breaks
     (it uses the global `random`; found 2026-10-11 when two "paired" runs ranked stage A
     differently) and the searcher's rollouts."""
     return fold([one_battle(bridge, brain, enemy, party, enemy_packed, i, search, arena, seeds) for i in range(n)])
 
 
-def one_battle(bridge, brain, enemy, party: list[Mon], enemy_packed: str, i: int, search=None, arena=None, seeds=None) -> tuple:
+def one_battle(bridge, brain, enemy, party: list[Mon], enemy_packed: str, i: int, search=None, arena=None, seeds=None,
+               boss: str = "") -> tuple:
     """Battle i of play(): (won, deathless win, fainted fraction, progress, deaths by enemy mon,
-    enemy mons KO'd). Seeded on its own, so it is the unit of work the pool spreads."""
+    enemy mons KO'd, lost at the turn cap). Seeded on its own, so it is the unit of work the pool spreads."""
     from ai_util.sim import SimBattle
     sb = SimBattle(bridge, rp.FMT, pack_team(party), enemy_packed, full_info=True, arena=arena,
                    seed=seeds[i] if seeds else None)
@@ -147,26 +151,35 @@ def one_battle(bridge, brain, enemy, party: list[Mon], enemy_packed: str, i: int
         if search is not None:
             import numpy as np
             search.rng = np.random.default_rng(seeds[i])
+    log = getattr(search, "log", None)
+    if log:  # --states: the searcher's decision lines carry this tag; the battle line closes them
+        search.tag = {"boss": boss, "battle": i, "battle_seed": seeds[i] if seeds else None, "team": [m.species for m in party]}
     sb.play({"p1": search or brain, "p2": enemy}, 100)
     st = sb.state()
     won = st["winner"] == "p1"
     d, k, _ = attribution(sb.history["p1"])
     sb.close()
-    return won, won and not any(m["fainted"] for m in st["p1"]), sum(m["fainted"] for m in st["p1"]) / len(st["p1"]), progress(st), d, k
+    if log:
+        with open(log, "a") as f:
+            f.write(json.dumps({"kind": "battle", **search.tag, "won": won, "timed_out": sb.timed_out, "turns": sb.turn,
+                                "chosen": sb.chosen, "fainted": [m["fainted"] for m in st["p1"]]}) + "\n")
+    return (won, won and not any(m["fainted"] for m in st["p1"]), sum(m["fainted"] for m in st["p1"]) / len(st["p1"]),
+            progress(st), d, k, sb.timed_out)
 
 
 def fold(battles: list[tuple]) -> tuple:
     """play()'s summary of one_battle() results, in battle order."""
-    n, wins, deaths, prog, clean = len(battles), 0, 0.0, 0.0, 0
+    n, wins, deaths, prog, clean, capped = len(battles), 0, 0.0, 0.0, 0, 0
     deaths_by, kos_on = collections.Counter(), collections.Counter()
-    for won, cl, dfrac, pr, d, k in battles:
+    for won, cl, dfrac, pr, d, k, to in battles:
+        capped += to
         wins += won
         clean += cl
         deaths += dfrac
         prog += pr
         deaths_by += d
         kos_on += k
-    return wins / n, deaths / n, prog / n, (deaths_by, kos_on), clean / n
+    return wins / n, deaths / n, prog / n, (deaths_by, kos_on, capped / n), clean / n
 
 
 def setup(args, name: str, announce: bool = True):
@@ -194,7 +207,7 @@ def setup(args, name: str, announce: bool = True):
         cb.FIELD_AWARE = not args.blind_field
         cb.MATCHUP = args.matchup
     srng = random.Random(f"{name}-seeds-{args.seed}")
-    seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(max(args.n_solo, args.n_team, args.n_search))]
+    seeds = [[srng.randrange(1, 2 ** 16) for _ in range(4)] for _ in range(max(args.n_solo, args.n_team, args.n_search) + getattr(args, "n_screen", 0))]
     if not args.normal:
         enemy_packed, dump_cap, enemy_species = rp.boss_team(int(name[1:]) if name.startswith("#") else name)
         cap = max(cap, dump_cap)
@@ -208,7 +221,7 @@ def setup(args, name: str, announce: bool = True):
              enemy=enemy_sets(enemy_packed), boss_types=sorted(boss_types))
     return SimpleNamespace(name=name, args=args, known=known, cap=cap, pool=pool, progress=progress, arena=arena,
                            unmodelled=unmodelled, enemy_packed=enemy_packed, enemy_species=enemy_species,
-                           boss_types=boss_types, bridge=SimBridge(showdown=str(rp.FORK)), enemy=enemy, calc=calc,
+                           boss_types=boss_types, boss=rp.boss_profile(enemy_packed, known, arena), bridge=SimBridge(showdown=str(rp.FORK)), enemy=enemy, calc=calc,
                            searcher=searcher(args, Searcher(enemy, k=width[0], rollouts=width[1], rollout=calc, seed=args.seed, death_weight=args.death_weight)),
                            seeds=seeds, rng=random.Random(f"{name}-team-{args.seed}"), team_score={}, mons={}, t0=time.time())
 
@@ -218,12 +231,15 @@ def searcher(args, showdown):
     if not getattr(args, "engine", 0):
         return showdown
     from rl.engine_search import EngineSearcher
-    return EngineSearcher(showdown, iterations=args.engine, opponent=getattr(args, "engine_opp", "minimax"))
+    es = EngineSearcher(showdown, iterations=args.engine, opponent=getattr(args, "engine_opp", "minimax"))
+    if getattr(args, "states", False) and args.out:
+        es.log = str(Path(args.out).with_suffix(".states.jsonl"))
+    return es
 
 
 def mon_of(ctx, sp: str) -> Mon | None:
     if sp not in ctx.mons:
-        ctx.mons[sp] = build_mon(sp, ctx.cap, ctx.known, ctx.progress, ctx.boss_types, ctx.arena)
+        ctx.mons[sp] = build_mon(sp, ctx.cap, ctx.known, ctx.progress, ctx.boss, ctx.args.seed, ctx.boss_types, ctx.arena)
     return ctx.mons[sp]
 
 
@@ -273,7 +289,104 @@ def cover_team(ctx, species: list[str]) -> tuple:
             for name in names:
                 w, h = duel(ctx, s, name, ctx.args.n_duel)
                 rows.setdefault(s, {}).setdefault(to_id_str(name), {}).update(win=w, hp=h)
-    return tuple(sorted(cover(rows, [to_id_str(n) for n in names], 6)))
+    trace = []
+    team = tuple(sorted(cover(rows, [to_id_str(n) for n in names], 6, trace)))
+    emit(ctx.args, "draft", boss=ctx.name, picks=trace)  # the draft view: why each pick, and the runner-up
+    return team
+
+
+def playable(ctx, species: list[str]) -> list[str]:
+    """The run rules every stage applies: buildable, one per evolved species (dupes clause), no
+    Truant, no Ditto / Smeargle (poke-env: Transform / Sketch)."""
+    out, seen = [], set()
+    for sp in species:
+        m = mon_of(ctx, sp)
+        if m is None or m.ability == "Truant" or m.species in seen or sp in ("ditto", "smeargle"):
+            continue
+        seen.add(m.species)
+        out.append(sp)
+    return out
+
+
+def lead_first(ctx, team: tuple) -> tuple:
+    """The six with the best answer to the boss's lead first (the tuple's order is the team's
+    order; sorted sixes led alphabetically until 2026-11-24). Best = matchup tiers (safe, race,
+    edge) of the cell against the boss's first mon."""
+    from poke_env.data import to_id_str
+    from ai_util.matchup import edge, race, rows_for, safe
+    rows = rows_for(ctx.bridge, rp.FMT, {s: mon_of(ctx, s) for s in team}, ctx.enemy_packed, ctx.arena)
+    e = to_id_str(ctx.enemy_packed.split("]")[0].split("|")[0])
+    score = lambda c: (safe(rows[c][e]), race(rows[c][e]), edge(rows[c][e])) if e in rows.get(c, {}) else (False, False, -9.0)
+    lead = max(sorted(team), key=score)
+    return (lead,) + tuple(sorted(c for c in team if c != lead))
+
+
+def choose(ctx, species: list[str]) -> tuple:
+    """--chooser's six from a box, lead first. searched: the candidate sixes each play
+    n_screen battles on seeds the table does not use; the best (win, -deaths) is the six."""
+    species = playable(ctx, species)
+    if ctx.args.chooser in ("cover", "duel"):
+        return lead_first(ctx, cover_team(ctx, species))
+    if ctx.args.chooser == "greedy":
+        return lead_first(ctx, greedy(ctx, species))
+    if ctx.args.chooser == "searched":
+        n_s, n_c = ctx.args.n_search, ctx.args.n_screen
+        scored = []
+        for t in searched_cands(ctx, species, ctx.args.cands):
+            w, d, *_ = fold([battle_job(ctx.args, ctx.name, t, n_s + i) for i in range(n_c)])
+            scored.append((w, -d, t))
+        emit(ctx.args, "screen", boss=ctx.name, scored=[(list(t), w, -d) for w, d, t in sorted(scored, reverse=True)])
+        return max(scored)[2]
+    raise ValueError(f"unknown chooser {ctx.args.chooser}")
+
+
+def searched_cands(ctx, species: list[str], n: int, k: int = 5) -> list[tuple]:
+    """(B'') --chooser searched: candidate sixes for the screen. The shortlist is the k best
+    answers (matchup tiers: safe, race, edge) to *each* boss mon, so no enemy is ignored (stage
+    A's solo score only measured the boss's lead). Run rules: one per evolved species (dupes
+    clause), no Truant, at most one mega stone. The cover six over the shortlist, then random
+    sixes that draw one answer per boss mon. The lead is the best answer to the boss's lead
+    (the tuple's order is the team's order)."""
+    from poke_env.data import to_id_str
+    from ai_util.matchup import cover, edge, race, rows_for, safe
+    mons = {sp: mon_of(ctx, sp) for sp in playable(ctx, species)}
+    rows = rows_for(ctx.bridge, rp.FMT, mons, ctx.enemy_packed, ctx.arena)
+    enemies = [to_id_str(x.split("|")[0]) for x in ctx.enemy_packed.split("]")]
+    score = lambda c, e: (safe(rows[c][e]), race(rows[c][e]), edge(rows[c][e])) if e in rows.get(c, {}) else (False, False, -9.0)
+    answers = {e: sorted(rows, key=lambda c: score(c, e), reverse=True)[:k] for e in enemies}
+    short = list(dict.fromkeys(c for e in enemies for c in answers[e]))
+    total = lambda c: sum(score(c, e)[2] for e in enemies)
+
+    def fits(team, c):
+        stone = lambda x: mega_stone(mons[x].species, ctx.progress)  # by the stone, not "holds an item"
+        return c not in team and not (stone(c) and any(stone(t) for t in team))  # one mega stone
+
+    def finish(team):
+        for c in sorted(short, key=total, reverse=True):
+            if len(team) >= 6:
+                break
+            if fits(team, c):
+                team.append(c)
+        lead = max(team, key=lambda c: score(c, enemies[0]))
+        return (lead,) + tuple(sorted(c for c in team if c != lead))
+
+    first = []
+    for c in cover({c: rows[c] for c in short}, enemies, 6):
+        if fits(first, c):
+            first.append(c)
+    cands = [finish(first)]
+    for _ in range(50 * n):
+        if len(cands) >= n:
+            break
+        team = []
+        for e in ctx.rng.sample(enemies, len(enemies)):
+            c = ctx.rng.choice(answers[e])
+            if fits(team, c):
+                team.append(c)
+        t = finish(team)
+        if t not in cands:
+            cands.append(t)
+    return cands
 
 
 def searched(ctx, team: tuple):
@@ -316,7 +429,7 @@ def battle_job(args, name: str, team: tuple, i: int) -> tuple:
     """Searched battle i of `team` against boss `name` (a pool job)."""
     ctx = worker_ctx(args, name)
     return one_battle(ctx.bridge, ctx.calc, ctx.enemy, team_mons(ctx, team), ctx.enemy_packed, i,
-                      search=ctx.searcher, arena=ctx.arena, seeds=ctx.seeds)
+                      search=ctx.searcher, arena=ctx.arena, seeds=ctx.seeds, boss=name)
 
 
 def duel(ctx, sp: str, enemy_mon: str, n: int) -> tuple[float, float]:
@@ -380,7 +493,7 @@ def prelude_job(args, name: str) -> dict | None:
     try:
         ctx = worker_ctx(args, name)
         starter = ctx.rng.choice(rp.STARTERS)  # one per run, at random across every generation
-        pool = sorted(set(ctx.pool) | {starter})
+        pool = playable(ctx, sorted(set(ctx.pool) | {starter}))
         print(f"{name}: starter {starter}; boss attacks with {sorted(ctx.boss_types)}", flush=True)
         solo, _ = solo_stage(ctx, pool)
         short = [sp for _, sp in solo[:SHORT]]
@@ -401,10 +514,13 @@ def prelude_job(args, name: str) -> dict | None:
             top = list(dict.fromkeys([cteam] + top))[:TOP]
         emit(args, "stage_b", boss=name, scored=len(ctx.team_score), greedy=[list(team), round(ctx.team_score[team], 3)],
              fast=[list(ranked[0]), round(ctx.team_score[ranked[0]], 3)], cover=list(cteam) if cteam else None)
+        cands = searched_cands(ctx, pool, args.cands) if args.chooser == "searched" else []
+        if cands:
+            print(f"{name}: searched chooser: {len(cands)} candidate sixes to screen, e.g. {list(cands[0])}", flush=True)
         labels = {team: "greedy", ranked[0]: "fast"}
         if cteam is not None:
             labels[cteam] = args.chooser
-        return {"starter": starter, "pool": pool, "short": short, "top": top, "labels": labels}
+        return {"starter": starter, "pool": pool, "short": short, "top": top, "labels": labels, "cands": cands}
     except Exception as e:
         import traceback
         print(f"{name} FAILED: {type(e).__name__}: {e}\n{traceback.format_exc()[-800:]}", flush=True)
@@ -474,6 +590,23 @@ def run_pool(args, names: list[str]) -> list[dict]:
     for n in set(ctxs) - set(names):
         emit(args, "boss_failed", boss=n, error="prelude failed")
     k, n_s = 0, args.n_search
+    if args.chooser == "searched":  # the screen: every candidate on seeds the table does not use
+        n_c = args.n_screen
+        jobs = [(args, n, t, n_s + i) for n in names for t in pres[n]["cands"] for i in range(n_c)]
+        res = fan(battle_job, jobs)
+        for n in names:
+            scored = []
+            for t in pres[n]["cands"]:
+                w, d, *_ = fold(res[k:k + n_c])
+                k += n_c
+                scored.append((w, -d, t))
+            scored.sort(reverse=True)
+            best = [t for *_, t in scored[:SCREEN_KEEP]]
+            print(f"{n}: screen ({n_c} battles each): " + ", ".join(f"{w:.0%}/{-d:.2f} {list(t)}" for w, d, t in scored[:5]), flush=True)
+            emit(args, "screen", boss=n, scored=[(list(t), w, -d) for w, d, t in scored])
+            pres[n]["labels"].update({t: "screen" for t in best[1:]} | {best[0]: "searched"})
+            pres[n]["top"] = list(dict.fromkeys(best + pres[n]["top"]))
+        k = 0
     battles = fan(battle_job, [(args, n, t, i) for n in names for t in pres[n]["top"] for i in range(n_s)])
     played = {}
     for n in names:
@@ -499,10 +632,11 @@ def box_job(args, name: str, i: int) -> dict | None:
         ctx = worker_ctx(args, name)
         box = rp.sample_box(random.Random(f"{name}-box-{args.seed}-{i}"), ctx.progress, ctx.known)
         species = [sp for sp, _ in box if mon_of(ctx, sp) is not None]
-        team = cover_team(ctx, species) if args.chooser in ("cover", "duel") else greedy(ctx, species)
+        team = choose(ctx, species)
         w, d, pr, attr, cl = searched(ctx, team)
         threats = threats_of(ctx, attr, ctx.pool, exclude=set(species))
-        out = {"box": box, "team": list(team), "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl, "threats": threats}
+        out = {"box": box, "team": list(team), "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl,
+               "capped": attr[2], "threats": threats}
         if hasattr(ctx.searcher, "stats"):  # --engine: decisions on the engine / on Showdown, and why (cumulative per worker)
             out["engine"] = dict(ctx.searcher.stats)
         emit(args, "box", boss=name, i=i, of=args.boxes, **out, deaths_by=dict(attr[0]), matrix=matrix(ctx, team))
@@ -575,13 +709,16 @@ def main() -> None:
     ap.add_argument("--blind-field", action="store_true", help="the calc bot ignores weather / terrain (the pre-2026-10-11 bot)")
     ap.add_argument("--repair", action="store_true", help="offer the counters to the greedy build and play the result too")
     ap.add_argument("--boxes", type=int, default=0, help="sampled-box mode: N boxes per boss drawn by rarity, the chooser picks six from each")
-    ap.add_argument("--chooser", choices=("greedy", "cover", "duel"), default="greedy",
-                    help="six by calc-bot progress (greedy), by matchup cover on the paper matrix (cover), or by cover with every cell judged by n-duel one-on-ones (duel)")
+    ap.add_argument("--chooser", choices=("greedy", "cover", "duel", "searched"), default="greedy",
+                    help="six by calc-bot progress (greedy), by matchup cover on the paper matrix (cover), by cover with every cell judged by n-duel one-on-ones (duel), or by screening --cands sixes built from each boss mon's best answers with searched battles (searched; pool mode)")
+    ap.add_argument("--cands", type=int, default=24, help="--chooser searched: candidate sixes screened per boss")
+    ap.add_argument("--n-screen", type=int, default=4, help="--chooser searched: searched battles per candidate in the screen (own seeds)")
     ap.add_argument("--matchup", action="store_true", help="the calc bot (and so the rollouts) switches on the matchup matrix")
     ap.add_argument("--death-weight", type=float, default=0.5, help="search value: win +-1 minus this x the fainted fraction (6 = one death costs a win)")
     ap.add_argument("--no-items", action="store_true", help="no held items (default: the final six hold the items in hand by the boss — care packages + overworld, data/rr/items.json; one per mon, gauntlet.assign_items; C1, 2026-10-14)")
     ap.add_argument("--engine", type=int, default=0, help="stage C's search runs poke-engine MCTS with this many iterations where the position converts "
                     "(rl/engine_search.py), the Showdown search (--search) everywhere else; 0 = Showdown only")
+    ap.add_argument("--states", action="store_true", help="--engine: log every search decision and battle to <out>.states.jsonl")
     ap.add_argument("--engine-opp", choices=("minimax", "ai"), default="minimax",
                     help="--engine's model of the boss: both sides search, or the RR AI in Rust")
     ap.add_argument("--out")

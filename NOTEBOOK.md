@@ -2668,6 +2668,9 @@ player's search runs on poke-engine wherever the position converts. Details and 
 - **The RR AI in Rust**: 90.3% the same choice as `ai_util/rr_ai.py` (`results/rr_ai_diff.log`);
   searching against it (`--engine-opp ai`) loses badly (Misty −33 points; long passive battles, no
   turn-limit losses: the search exploits the model's errors). Not adopted.
+  **Correction (2026-11-24, Fable + Neon review):** there *are* turn-limit losses: ≥ 10 / 30
+  Misty boxes have deaths/mon < 1 − win (0 / 30 under minimax), so ≥ half the Misty drop is the
+  100-turn force-loss; Brock's −13 has none (ordinary losses). `rl/RR_PLAN.md` plan v2, phase 1.
 - **All six gyms, 30 boxes** (`results/rr_engine_gyms30.*`): Brock 66%, Misty 47%, Lt. Surge 44%,
   Erika 22%, Koga 0%, Blaine 0%. The Showdown search also loses all 10 Koga boxes
   (`results/rr_showdown_koga10.*`): a wall for the sampled boxes and the planner, not the engine.
@@ -2714,3 +2717,77 @@ does *any* six from the whole pool beat Koga / Blaine? Pool mode, the gyms30 set
   diagnostic, not the payoff.
 - Experiments run through `scripts/rr_builder_probe.py` (env switches on top of the probe). Ditto
   and Smeargle are skipped there: poke-env's mirror asserts on Transform / Sketch.
+
+## 2026-11-24 — Plan v3, phase 0: hygiene and instruments (`results/rr_p0_*`)
+
+Plan v3 (`rl/RR_PLAN.md`, top): the final plan after a last pass by Fable and Gemini Neon on the
+user's additions (advisor first, a battle-line planner, the Showdown cross-check, set search over
+the legal movepool). Phase 0 changes, all in one step:
+
+- **Engine (poke-engine fork, Opus delegate):** seeded MCTS (`seed=` in both bindings; replay
+  holds for iteration limits); a Tailwind ≥ 90 turns (the permanent arena Tailwind) never counts
+  down and scores as 4 turns; under `rr` a won leaf scores `0.55 + 0.45 · alive/party` (a costly
+  win no longer scores below an open fight). Build both packages: `uv sync --reinstall-package
+  poke-engine --reinstall-package poke-engine-rr`.
+- **Search plumbing:** mega holders keep their `<move>-mega` options (stripped to the move; they
+  could only switch before); a spent Phoenix Down is sent as no ability (`spent` in the dump); a
+  live mon that must switch after U-turn / Volt Switch / Flip Turn is `force_switch` in
+  `convert.to_engine` (the patch in `rr_ai_diff.py` is gone); the engine seed comes from the
+  battle's searcher rng, so a seeded battle replays exactly.
+- **Logs:** `timed_out` per battle (`capped` per box); `--states` writes `<out>.states.jsonl`
+  (every engine decision: state string, each option's visits and value, the pick, the RR AI
+  model's predicted options; every battle: both sides' chosen actions, seed, outcome; ~100 KB a
+  battle); a `draft` event per cover pick (what it newly answers, gain, runner-up).
+- **Chooser:** `--chooser` is honoured in box mode (searched was silently greedy); the lead is the
+  best answer to the boss's lead (was alphabetical); one filter (`playable`: dupes, Truant,
+  Ditto / Smeargle) in every stage; one mega by the stone, not by "holds an item".
+- **Sets (hardcore):** no Rest (best4 never pairs it with Sleep Talk); no Choice item with a status
+  move; a mixed set takes +Spe only when it outspeeds a boss mon it would not outspeed neutral,
+  else + the stronger attack, − the defence the boss hits less; **abilities are rolled at catch**
+  (slot 0 / 1, per run seed and species, kept by slot on evolution; the user: no capsules), not
+  chosen per boss; `gauntlet.legal_pool` split out of `encounter_moves`.
+- `scripts/sprt.py`: paired SPRT on per-box win differences of two runs (+ deaths/mon interval).
+
+**Gate (Brock / Misty, 30 boxes, the gyms30 settings, n = 6 a box):**
+
+| run | Brock win / d/mon | Misty win / d/mon | capped boxes |
+|---|---|---|---|
+| before (`rr_engine_boxes30`) | 70% / 0.49 | 51% / 0.68 | (Misty 0 under minimax) |
+| phase 0 (`rr_p0_gate`) | 76% / 0.44 | **24%** / 0.87 | 0 / 0 |
+| phase 0 + the old per-boss ability choice, Misty (`rr_p0_ablate_ability`) | | 48% / 0.70 | |
+
+- Logging on / off: **60 / 60 boxes identical** (the first exact replay in the project).
+- Zero battles lost at the turn cap.
+- Brock +6 (3 teams changed by the new rows, 27 kept), within noise of the ±3 target (paired
+  ±8 points).
+- **Misty −27: abilities fixed at catch cost ~24 of it** (the ablation brings it back to 48%).
+  The old builder handed every mon its best slot against the boss (Dry Skin / Water Absorb
+  against Misty, Swift Swim in her rain): an illegal advantage if capsules are unobtainable. 24 of
+  30 Misty sixes changed, and the changed ones carry the drop (58% → 26%).
+- Reading: the earlier RR tables overstate every boss where an ability slot answers the boss.
+  Whether an Ability Capsule / Patch is obtainable in hardcore decides which number is real; it
+  is now a top question for the item research (Gemini Neon, running).
+- **Resolved the same day (user, from the official sheets in `data/rr/sheets`):** raid dens on
+  Route 5 / 6 / 10 / 11, Diglett Cave and Rock Tunnel drop Ability Capsules (25%) and need a badge;
+  the Saffron City Fanclub sells the Ability Pill (2,500) and the Dream Patch (5,000, hidden
+  ability); the Celadon Dept. Store 4F sells every evolution stone. Rule now
+  (`rr_probe.ability_gates` / `run_ability`): abilities rolled at catch before trainer #20, the
+  best slot 0 / 1 per boss from #20, the hidden slot too from #44; stone evolutions from #33
+  (`gauntlet.STONE_GATE` is per game now; RR has no separate place / held-item gates). Brock and
+  Misty are before #20, so the phase-0 table above is the hardcore number for them.
+- Also from the sheets: Focus Sash (Chuck), Assault Vest (Jasmine) and Choice Specs (Blaine, after
+  the fight) are quest rewards, given in hardcore for showing a mon with base stat ≥ 125 in the
+  asked stat; Choice Scarf / Specs / Band come in a care package (×10). Item audit pending.
+- **Item audit (Gemini Neon's online research, `rl/research/rr_items_teams.md`, checked against
+  the official sheets):** `build_rr.py` dropped every EV-quest reward; in hardcore they ask for a
+  base stat ≥ 125 (assumed met). Now in `items.json`: Focus Sash (#51, Chuck), Life Orb ×1 from
+  Koga (#81; ×6 at #91 as before), Assault Vest (#85, Jasmine), Choice Specs (#91, after Blaine),
+  Rocky Helmet (#32); items carry `steps` so a later care package raises the copies (Leftovers and
+  Expert Belt ×6 from #75; `gauntlet.copies`). Sash / Vest / Helmet have rough flat values until
+  phase 3 prices items by battle; resist berries and Heavy-Duty Boots stay unpriced. Natures: no
+  mints in RR, a Nature Changer nurse in every Pokémon Center does it free (same rule as ours).
+- **Pool ceiling after phase 0** (`rr_p0_ceiling*`, the same settings as `rr_pool_ceiling`, n = 12,
+  best of ~6 sixes): Erika 92 → **100%**; Koga 8 → **8%** (25% before the pool filter let Truant
+  Slaking go: 3 / 12 against 1 / 12, within noise); Blaine 0 → **8%**. Hygiene, items, abilities
+  and stones do not break the Koga / Blaine wall; phases 1–3 and the reference teams are next.
+  Blaine's calc-bot sixes are still Grass / Chlorophyll teams into Desolate Land (stages A / B).

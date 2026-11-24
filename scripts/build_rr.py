@@ -163,7 +163,10 @@ HELD = {**{to_id_str(n): {"type": t, "mult": 1.2} for n, t in (
     "oranberry": {"flat": 1.05}, "sitrusberry": {"flat": 1.15}, "berryjuice": {"flat": 1.15}, "shellbell": {"flat": 1.08},
     "leftovers": {"flat": 1.25}, "expertbelt": {"flat": 1.1}, "lifeorb": {"flat": 1.2}, "eviolite": {"flat": 1.5, "nfe": True},
     "choiceband": {"category": "Physical", "mult": 1.5, "lock": True}, "choicespecs": {"category": "Special", "mult": 1.5, "lock": True},
-    "choicescarf": {"flat": 1.1}}
+    "choicescarf": {"flat": 1.1},
+    # 2026-11-24 item audit: rough flat values until phase 3's set search prices items by battle;
+    # resist berries and Heavy-Duty Boots stay out (their worth depends on the boss)
+    "focussash": {"flat": 1.15}, "assaultvest": {"flat": 1.1}, "rockyhelmet": {"flat": 1.05}}
 # the mod's mega stones (66): held by the species they evolve, after the Mega Ring (2026-11-23)
 if (RR / "mod_data.json").exists():
     HELD.update({k: {"mega": to_id_str(v["megaEvolves"])} for k, v in json.load(open(RR / "mod_data.json"))["items"].items()
@@ -326,9 +329,14 @@ def progression() -> None:
             return
         q = re.search(r"\[x(\d+)\]", name)
         iid = to_id_str(re.sub(r"\s*\[.*\]", "", name))
-        if iid in HELD and w is not None and (iid not in held or w < held[iid]["before_trainer"]):
+        if iid not in HELD or w is None:
+            return
+        n = min(int(q.group(1)), 6) if q else 1
+        if iid not in held or w < held[iid]["before_trainer"]:
+            steps = held[iid]["steps"] if iid in held else []
             held[iid] = {"name": re.sub(r"\s*\[.*\]", "", name).strip(), "before_trainer": w, "from": src,
-                         "copies": min(int(q.group(1)), 6) if q else 1, **HELD[iid]}
+                         "copies": n, **HELD[iid], "steps": steps}
+        held[iid]["steps"] = sorted(held[iid]["steps"] + [[w, n]])  # copies in hand from trainer w (gauntlet.copies)
     fill = [(re.search(r'fgColor rgb="([0-9A-F]+)"', f) or [None, None])[1] for f in re.findall(r"<fill>(.*?)</fill>", st, re.S)]
     xf_fill = [int(m) for m in re.findall(r'<xf [^>]*fillId="(\d+)"', re.search(r"<cellXfs[^>]*>(.*?)</cellXfs>", st, re.S).group(1))]
     x = z.read("xl/" + rels[sheets["Care Packages"]].replace("/xl/", "").lstrip("/")).decode()
@@ -350,8 +358,10 @@ def progression() -> None:
                     add(name, stage[1], f"care package: {stage[0].title()}")
     for area in items["overworld"]:
         for it in area["items"]:
-            if "EV" not in it["location"]:
-                add(it["name"], when(f"{area['area']}, {it['location']}"), f"{area['area']}: {it['location'][:60]}")
+            # the EV quests (Focus Sash, Assault Vest, Choice Specs, Koga's Life Orb) ask hardcore players
+            # for a mon with base stat >= 125 in that stat instead (rr_hardcore_info.xlsx, Main): assumed met
+            loc = it["location"].replace("after showing", "after defeating him and showing")  # Koga's: the Mega Stones tab says so
+            add(it["name"], when(f"{area['area']}, {loc}"), f"{area['area']}: {it['location'][:60]}")
     ring = next((when(f"{a['area']}, {it['location']}") for a in items["overworld"] for it in a["items"]
                  if it["name"].strip() == "Mega Ring"), None)
     for k in [k for k, v in held.items() if "mega" in v]:  # a stone is no use before the ring

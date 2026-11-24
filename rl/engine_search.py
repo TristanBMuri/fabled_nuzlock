@@ -10,9 +10,13 @@ no known gap is on either active mon (GAPS); otherwise the existing Showdown rol
     from rl.engine_search import EngineSearcher
     brain = EngineSearcher(Searcher(enemy, k=9, rollouts=8, rollout=calc), iterations=20000)
 
-`stats` counts engine / fallback decisions and why each fallback happened.
+`stats` counts engine / fallback decisions and why each fallback happened. With `log` set to
+a path, every engine decision appends one JSON line (the decision view and phase 4's data):
+`tag` (who set it: boss, team, battle, seed), turn, the engine state string, each option's
+visits and mean value, the pick, and the RR AI model's predicted enemy options.
 """
 
+import json
 import os
 from collections import Counter
 
@@ -39,6 +43,7 @@ class EngineSearcher:
         self.gaps = {**GAPS, **RR_GAPS}
         self.stats = Counter()
         self.last_scores: dict[str, float] = {}
+        self.log, self.tag = None, {}
 
     # the probes seed and read the searcher's attributes (rng, counters): forward them
     def __getattr__(self, name):
@@ -76,12 +81,16 @@ class EngineSearcher:
                                      terrain_turns_remaining=state.terrain_turns_remaining,
                                      trick_room=state.trick_room,
                                      trick_room_turns_remaining=state.trick_room_turns_remaining)
+        # seeded from the battle's searcher rng, so a seeded battle replays exactly
+        seed = int(self.fallback.rng.integers(1, 2 ** 62)) if hasattr(self.fallback, "rng") else None
         if self.opponent == "ai" and side == "p1":
-            res = convert.pe.monte_carlo_tree_search_vs_ai(state, 60_000, self.iterations).side_one
+            res = convert.pe.monte_carlo_tree_search_vs_ai(state, 60_000, self.iterations, seed=seed).side_one
         else:
-            res = convert.pe.monte_carlo_tree_search(state, 60_000, self.iterations, 1).side_one
+            res = convert.pe.monte_carlo_tree_search(state, 60_000, self.iterations, 1, seed=seed).side_one
         by_id = {convert.engine_choice(dump, side, c): c[0] for c in mine}
-        scored = [(r.visits, r.total_score / max(r.visits, 1), r.move_choice.removeprefix("switch ")) for r in res]
+        # a stone holder is offered only `<move>-mega` (the RR build megas on the first move)
+        scored = [(r.visits, r.total_score / max(r.visits, 1), r.move_choice.removeprefix("switch ").removesuffix("-mega"))
+                  for r in res]
         self.last_scores = {by_id[c]: v for _, v, c in scored if c in by_id}
         legal = [x for x in scored if x[2] in by_id]
         if not legal:  # the engine's options and Showdown's request disagree: trust Showdown
@@ -89,7 +98,14 @@ class EngineSearcher:
             self.stats["why:options"] += 1
             return self.fallback(sb, side)
         self.stats["engine"] += 1
-        return by_id[max(legal)[2]]
+        pick = by_id[max(legal)[2]]
+        if self.log:
+            rec = {"kind": "decision", **self.tag, "turn": sb.turn, "side": side, "seed": seed, "state": state.to_string(),
+                   "options": [[c, n, round(v, 4)] for n, v, c in scored], "pick": pick,
+                   "ai_pred": convert.pe.rr_ai_choice(state, "side_two") if hasattr(convert.pe, "rr_ai_choice") else None}
+            with open(self.log, "a") as f:
+                f.write(json.dumps(rec) + "\n")
+        return pick
 
 
 def _active_features(dump: dict) -> set[str]:

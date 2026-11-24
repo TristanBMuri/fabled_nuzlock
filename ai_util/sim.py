@@ -116,6 +116,8 @@ class SimBattle:
         self.stats = {"choices": 0, "rejected": 0, "forced_default": 0, "brain_default": 0}
         self.why: Counter = Counter()  # rejection messages / default-choice contexts
         self.ended, self.winner, self.turn = False, "", 0
+        self.timed_out = False  # lost at the turn cap (play: max_turns)
+        self.chosen: list = []  # (turn, side, choice) as sent: the replay log
         self.mirrors = {s: self._mirror(s) for s in SIDES}
         if bridge is not None and fmt is not None:
             self._absorb(bridge.call(
@@ -209,6 +211,7 @@ class SimBattle:
             self.stats["forced_default"] += 1
             return "default"
         c = brain(self, side)
+        self.chosen.append((self.turn, side, c))
         if c == "default":
             self.stats["brain_default"] += 1
             m = self.mirrors[side]
@@ -224,6 +227,7 @@ class SimBattle:
         while not self.ended and (until is None or self.turn < until):
             if self.turn > max_turns:
                 self._absorb(self.bridge.call(op="forcelose", id=self.id, side="p1"))
+                self.timed_out = True
                 break
             choices = {s: self.choice(s, brains[s]) for s in SIDES if self.pending[s]}
             if not choices:
@@ -245,6 +249,8 @@ class SimBattle:
         new.stats = {k: 0 for k in self.stats}
         new.why = Counter()
         new.ended, new.winner, new.turn = self.ended, self.winner, self.turn
+        new.timed_out = self.timed_out
+        new.chosen = list(self.chosen)
         self.bridge.call(op="fork", id=self.id, new=new.id, reseed=reseed, seed=seed)
         # the mirrors are copied, not replayed: a pickle round trip is ~0.6 ms flat, the
         # replay of the whole history was 1.6 -> 5.8 ms as a fight went on (72 forks per

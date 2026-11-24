@@ -26,6 +26,22 @@ The prior attempt lives at `~/CodingProjects/DSPRO2_Pokemon/DSPRO2-FS26-Pokemon_
 - Keep files short. One file per concern. No `src/` package tree until there are
   enough files to justify it.
 
+## Working with the user on RL decisions
+
+The user is learning RL through this project and wants to be part of every RL decision, not
+just shown the result.
+
+- Before an RL / ML design decision (method, features, reward, gate, what to train next), lay out
+  the options, the basis for each (our data or measurements, a paper or method — say whether it
+  was read or recalled — cost, the CLAUDE.md constraints), and a recommendation. Then let the
+  user decide. Routine engineering (bug fixes, plumbing) needs no stop.
+- After an experiment, explain what the result means and what it rules in or out, before
+  proposing the next step.
+- Name and briefly explain the RL concept involved (e.g. "this is policy iteration", "this is
+  a value function fitted by regression") the first time it comes up.
+- Record each decision and its basis as a Step in the decision-log doc
+  (https://claude.ai/artifact/MtNncQqoPMFw3Zjmiz7yMG).
+
 ## Commands
 
 ```bash

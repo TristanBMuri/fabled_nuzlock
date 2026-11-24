@@ -100,30 +100,39 @@ def edge(p: dict) -> float:
     return min(p["ko_us"], 9) - min(p["ko_them"], 9) + (0.5 if p["faster"] else 0.0)
 
 
-def cover(rows: dict, enemies: list[str], k: int = 6) -> list:
+def cover(rows: dict, enemies: list[str], k: int = 6, trace: list | None = None) -> list:
     """rows: {candidate: {enemy: pair}}. Greedy set cover in two tiers: the candidate that is
     the safe answer to most uncovered enemies, then the race-winner to most, ties by total
     edge, until every enemy has one or none is left; enemies nobody answers get the best
-    edge; the remaining slots go to total edge."""
+    edge; the remaining slots go to total edge. trace: gets one row per pick (why, what it
+    newly answers, its gain and the runner-up's) for the draft view."""
     team, uncovered = [], set(enemies)
+    note = (lambda **r: trace.append(r)) if trace is not None else (lambda **r: None)
     while len(team) < k and uncovered:
         def gain(c):
             return (sum(safe(rows[c][e]) for e in uncovered if e in rows[c]),
                     sum(race(rows[c][e]) for e in uncovered if e in rows[c]),
                     sum(edge(rows[c][e]) for e in enemies if e in rows[c]))
-        best = max((c for c in rows if c not in team), key=gain, default=None)
+        ranked = sorted((c for c in rows if c not in team), key=gain, reverse=True)
+        best = ranked[0] if ranked else None
         if best is None or gain(best)[:2] == (0, 0):
             break
         team.append(best)
-        uncovered -= {e for e in uncovered if e in rows[best] and race(rows[best][e])}
+        newly = sorted(e for e in uncovered if e in rows[best] and race(rows[best][e]))
+        note(pick=best, why="cover", answers=newly, gain=list(gain(best)),
+             runner_up=ranked[1] if len(ranked) > 1 else None, runner_up_gain=list(gain(ranked[1])) if len(ranked) > 1 else None)
+        uncovered -= set(newly)
     for e in sorted(uncovered):  # no safe answer in the pool: the least bad one
         if len(team) >= k:
             break
         best = max((c for c in rows if c not in team and e in rows[c]), key=lambda c: edge(rows[c][e]), default=None)
         if best is not None:
             team.append(best)
+            note(pick=best, why="least bad answer", answers=[e], gain=[round(edge(rows[best][e]), 2)])
     while len(team) < k and len(team) < len(rows):  # second answers: total edge
-        team.append(max((c for c in rows if c not in team), key=lambda c: sum(edge(rows[c][e]) for e in enemies if e in rows[c])))
+        best = max((c for c in rows if c not in team), key=lambda c: sum(edge(rows[c][e]) for e in enemies if e in rows[c]))
+        team.append(best)
+        note(pick=best, why="total edge", answers=[], gain=[round(sum(edge(rows[best][e]) for e in enemies if e in rows[best]), 2)])
     return team
 
 

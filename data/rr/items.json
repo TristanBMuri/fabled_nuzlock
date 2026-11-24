@@ -5,7 +5,13 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Rock",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "mysticwater": {
 "name": "Mystic Water",
@@ -13,7 +19,13 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Water",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "nevermeltice": {
 "name": "Never-Melt Ice",
@@ -21,14 +33,38 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Ice",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "oranberry": {
 "name": "Oran Berry",
 "before_trainer": 1,
 "from": "care package: Entering Route 2",
 "copies": 6,
-"flat": 1.05
+"flat": 1.05,
+"steps": [
+[
+1,
+6
+],
+[
+1,
+6
+],
+[
+7,
+1
+],
+[
+17,
+1
+]
+]
 },
 "pixieplate": {
 "name": "Pixie Plate",
@@ -36,7 +72,13 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Fairy",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "poisonbarb": {
 "name": "Poison Barb",
@@ -44,7 +86,13 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Poison",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "sharpbeak": {
 "name": "Sharp Beak",
@@ -52,7 +100,13 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Flying",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "silverpowder": {
 "name": "Silver Powder",
@@ -60,7 +114,13 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Bug",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "softsand": {
 "name": "Soft Sand",
@@ -68,7 +128,17 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Ground",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+],
+[
+24,
+1
+]
+]
 },
 "spelltag": {
 "name": "Spell Tag",
@@ -76,7 +146,13 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Ghost",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "twistedspoon": {
 "name": "Twisted Spoon",
@@ -84,7 +160,13 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Psychic",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "magnet": {
 "name": "Magnet",
@@ -92,14 +174,26 @@
 "from": "care package: Entering Route 2",
 "copies": 6,
 "type": "Electric",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "shellbell": {
 "name": "Shell Bell",
 "before_trainer": 1,
 "from": "care package: Entering Route 2",
 "copies": 6,
-"flat": 1.08
+"flat": 1.08,
+"steps": [
+[
+1,
+6
+]
+]
 },
 "miracleseed": {
 "name": "Miracle Seed",
@@ -107,7 +201,13 @@
 "from": "care package: Exiting Viridian Forest",
 "copies": 6,
 "type": "Grass",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+5,
+6
+]
+]
 },
 "dragonfang": {
 "name": "Dragon Fang",
@@ -115,7 +215,13 @@
 "from": "care package: Exiting Viridian Forest",
 "copies": 6,
 "type": "Dragon",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+5,
+6
+]
+]
 },
 "blackglasses": {
 "name": "Black Glasses",
@@ -123,7 +229,17 @@
 "from": "care package: Exiting Viridian Forest",
 "copies": 6,
 "type": "Dark",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+5,
+6
+],
+[
+36,
+1
+]
+]
 },
 "blackbelt": {
 "name": "Black Belt",
@@ -131,21 +247,47 @@
 "from": "care package: Exiting Viridian Forest",
 "copies": 6,
 "type": "Fighting",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+5,
+6
+]
+]
 },
 "berryjuice": {
 "name": "Berry Juice",
 "before_trainer": 8,
 "from": "care package: Route 3 After Lass Sally",
 "copies": 6,
-"flat": 1.15
+"flat": 1.15,
+"steps": [
+[
+8,
+6
+]
+]
 },
 "sitrusberry": {
 "name": "Sitrus Berry",
 "before_trainer": 8,
 "from": "care package: Route 3 After Lass Sally",
 "copies": 6,
-"flat": 1.15
+"flat": 1.15,
+"steps": [
+[
+8,
+6
+],
+[
+20,
+1
+],
+[
+91,
+1
+]
+]
 },
 "silkscarf": {
 "name": "Silk Scarf",
@@ -153,7 +295,13 @@
 "from": "care package: Nugget Bridge After Defeating Grunt",
 "copies": 6,
 "type": "Normal",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+17,
+6
+]
+]
 },
 "charcoal": {
 "name": "Charcoal",
@@ -161,7 +309,13 @@
 "from": "care package: Cerulean City After Defeating Grunt",
 "copies": 6,
 "type": "Fire",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+20,
+6
+]
+]
 },
 "eviolite": {
 "name": "Eviolite",
@@ -169,7 +323,26 @@
 "from": "Route 11: From Whitney after defeating her.",
 "copies": 1,
 "flat": 1.5,
-"nfe": true
+"nfe": true,
+"steps": [
+[
+25,
+1
+]
+]
+},
+"rockyhelmet": {
+"name": "Rocky Helmet",
+"before_trainer": 32,
+"from": "Route 8: From an Ace Trainer, after defeating him. (Requires Mega Rin",
+"copies": 1,
+"flat": 1.05,
+"steps": [
+[
+32,
+1
+]
+]
 },
 "metalcoat": {
 "name": "Metal Coat",
@@ -177,329 +350,687 @@
 "from": "care package: Entering Celadon City Gym",
 "copies": 6,
 "type": "Steel",
-"mult": 1.2
+"mult": 1.2,
+"steps": [
+[
+33,
+6
+]
+]
 },
 "mewtwonitey": {
 "name": "Mewtwonite Y",
 "before_trainer": 44,
 "from": "Route 4 (East): From Giovanni after defeating him in Cerulean Cave.",
 "copies": 1,
-"mega": "mewtwo"
+"mega": "mewtwo",
+"steps": [
+[
+39,
+1
+]
+]
 },
 "coalossite": {
 "name": "Coalossite",
 "before_trainer": 44,
 "from": "Rock Tunnel: B1F, in room with northeast crossroads. (Rock Smash HM neede",
 "copies": 1,
-"mega": "coalossal"
+"mega": "coalossal",
+"steps": [
+[
+31,
+1
+]
+]
 },
 "gengarite": {
 "name": "Gengarite",
 "before_trainer": 44,
 "from": "Lavender Town: From Morty in Fuji's house after showing a Pok\u00e9mon with max ",
 "copies": 1,
-"mega": "gengar"
+"mega": "gengar",
+"steps": [
+[
+32,
+1
+]
+]
 },
 "centiskite": {
 "name": "Centiskite",
 "before_trainer": 44,
 "from": "Route 8: From an Ace Trainer, after defeating him. (Requires Mega Rin",
 "copies": 1,
-"mega": "centiskorch"
+"mega": "centiskorch",
+"steps": [
+[
+32,
+1
+]
+]
 },
 "lucarionite": {
 "name": "Lucarionite",
 "before_trainer": 44,
 "from": "Celadon City: From Lucario owner at Pok\u00e9mon Center with Lucario follower (",
 "copies": 1,
-"mega": "lucario"
+"mega": "lucario",
+"steps": [
+[
+33,
+1
+]
+]
 },
 "alakazite": {
 "name": "Alakazite",
 "before_trainer": 44,
 "from": "Celadon City: Department Store's rooftop, from a little girl sitting behin",
 "copies": 1,
-"mega": "alakazam"
+"mega": "alakazam",
+"steps": [
+[
+33,
+1
+]
+]
 },
 "sablenite": {
 "name": "Sablenite",
 "before_trainer": 44,
 "from": "Pok\u00e9mon Tower: 3F, north east area.",
 "copies": 1,
-"mega": "sableye"
+"mega": "sableye",
+"steps": [
+[
+36,
+1
+]
+]
 },
 "alcremite": {
 "name": "Alcremite",
 "before_trainer": 44,
 "from": "Saffron City: From a woman in the western house, after getting her ingredi",
 "copies": 1,
-"mega": "alcremie"
+"mega": "alcremie",
+"steps": [
+[
+44,
+1
+]
+]
 },
 "swampertite": {
 "name": "Swampertite",
 "before_trainer": 44,
 "from": "Saffron City: From the Dumbass Mudkip Kid in the north-western house after",
 "copies": 1,
-"mega": "swampert"
+"mega": "swampert",
+"steps": [
+[
+44,
+1
+]
+]
 },
 "garbodorite": {
 "name": "Garbodorite",
 "before_trainer": 44,
 "from": "Silph Co.: 4F, in the room on the far left side. (Keycard required)",
 "copies": 1,
-"mega": "garbodor"
+"mega": "garbodor",
+"steps": [
+[
+44,
+1
+]
+]
 },
 "audinite": {
 "name": "Audinite",
 "before_trainer": 44,
 "from": "Silph Co.: 6F, bottom item in the bottom left room. (Keycard required)",
 "copies": 1,
-"mega": "audino"
+"mega": "audino",
+"steps": [
+[
+44,
+1
+]
+]
 },
 "kangaskhanite": {
 "name": "Kangaskhanite",
 "before_trainer": 44,
 "from": "Silph Co.: 7F, in the bottom left area of the floor, near a Scientist.",
 "copies": 1,
-"mega": "kangaskhan"
+"mega": "kangaskhan",
+"steps": [
+[
+44,
+1
+]
+]
 },
 "expertbelt": {
 "name": "Expert Belt",
 "before_trainer": 51,
 "from": "Saffron City: From Chuck after defeating him in the Dojo.",
 "copies": 1,
-"flat": 1.1
+"flat": 1.1,
+"steps": [
+[
+51,
+1
+],
+[
+75,
+6
+]
+]
+},
+"galladite": {
+"name": "Galladite",
+"before_trainer": 51,
+"from": "Saffron City: Requires Mega Ring - From Chuck after defeating him and show",
+"copies": 1,
+"mega": "gallade",
+"steps": [
+[
+51,
+1
+]
+]
+},
+"focussash": {
+"name": "Focus Sash",
+"before_trainer": 51,
+"from": "Saffron City: Requires Mega Ring - From Chuck after defeating him and show",
+"copies": 1,
+"flat": 1.15,
+"steps": [
+[
+51,
+1
+]
+]
 },
 "leftovers": {
 "name": "Leftovers",
 "before_trainer": 53,
 "from": "Route 16: Use Itemfinder Key Item on the exact spot Snorlax was on.",
 "copies": 1,
-"flat": 1.25
+"flat": 1.25,
+"steps": [
+[
+53,
+1
+],
+[
+53,
+1
+],
+[
+75,
+6
+]
+]
 },
 "venusaurite": {
 "name": "Venusaurite",
 "before_trainer": 53,
 "from": "Route 16: Upstairs in northern gate on Route 16, from Scientist upon s",
 "copies": 1,
-"mega": "venusaur"
+"mega": "venusaur",
+"steps": [
+[
+53,
+1
+]
+]
 },
 "charizarditex": {
 "name": "Charizardite X",
 "before_trainer": 53,
 "from": "Route 16: Upstairs in northern gate on Route 16, from Scientist upon s",
 "copies": 1,
-"mega": "charizard"
+"mega": "charizard",
+"steps": [
+[
+53,
+1
+],
+[
+91,
+1
+]
+]
 },
 "charizarditey": {
 "name": "Charizardite Y",
 "before_trainer": 53,
 "from": "Route 16: Upstairs in northern gate on Route 16, from Scientist upon s",
 "copies": 1,
-"mega": "charizard"
+"mega": "charizard",
+"steps": [
+[
+53,
+1
+],
+[
+91,
+1
+]
+]
 },
 "blastoisinite": {
 "name": "Blastoisinite",
 "before_trainer": 53,
 "from": "Route 16: Upstairs in northern gate on Route 16, from Scientist upon s",
 "copies": 1,
-"mega": "blastoise"
+"mega": "blastoise",
+"steps": [
+[
+53,
+1
+]
+]
 },
 "absolite": {
 "name": "Absolite",
 "before_trainer": 53,
 "from": "Route 17: At bottom of Route, middle, beside signpost between ponds.",
 "copies": 1,
-"mega": "absol"
+"mega": "absol",
+"steps": [
+[
+53,
+1
+]
+]
 },
 "altarianite": {
 "name": "Altarianite",
 "before_trainer": 53,
 "from": "Route 18: Below the gate, in the bottom left corner of the grass patch",
 "copies": 1,
-"mega": "altaria"
+"mega": "altaria",
+"steps": [
+[
+53,
+1
+]
+]
 },
 "sharpedonite": {
 "name": "Sharpedonite",
 "before_trainer": 53,
 "from": "Route 12 (Lower Area): In the fisherman's house, if you show him a Sharpedo followe",
 "copies": 1,
-"mega": "sharpedo"
+"mega": "sharpedo",
+"steps": [
+[
+53,
+1
+]
+]
 },
 "sandacondite": {
 "name": "Sandacondite",
 "before_trainer": 63,
 "from": "Route 15: From a Female Ace Trainer after defeating her in the western",
 "copies": 1,
-"mega": "sandaconda"
+"mega": "sandaconda",
+"steps": [
+[
+63,
+1
+]
+]
 },
 "orbeetlite": {
 "name": "Orbeetlite",
 "before_trainer": 75,
 "from": "Route 2: Above Diglett's Cave. (Rock Smash HM required)",
 "copies": 1,
-"mega": "orbeetle"
+"mega": "orbeetle",
+"steps": [
+[
+75,
+1
+]
+]
 },
 "butterfrite": {
 "name": "Butterfrite",
 "before_trainer": 75,
 "from": "Viridian Forest: Follow the small path at the end of the forest. (Rock Smash ",
 "copies": 1,
-"mega": "butterfree"
+"mega": "butterfree",
+"steps": [
+[
+75,
+1
+]
+]
+},
+"lifeorb": {
+"name": "Life Orb",
+"before_trainer": 81,
+"from": "Fuchsia City: From Koga after showing him a Pok\u00e9mon with at least 150 EV i",
+"copies": 1,
+"flat": 1.2,
+"steps": [
+[
+81,
+1
+],
+[
+91,
+6
+]
+]
 },
 "scizorite": {
 "name": "Scizorite",
 "before_trainer": 81,
 "from": "Route 22: In the middle of the Route in between the pond and a ledge. ",
 "copies": 1,
-"mega": "scizor"
+"mega": "scizor",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "tyranitarite": {
 "name": "Tyranitarite",
 "before_trainer": 81,
 "from": "Route 24: On a small islet to the left of the Nugget Bridge. (Surf HM ",
 "copies": 1,
-"mega": "tyranitar"
+"mega": "tyranitar",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "copperajite": {
 "name": "Copperajite",
 "before_trainer": 81,
 "from": "Vermilion City: On islet below the Gym. (Surf HM required)",
 "copies": 1,
-"mega": "copperajah"
+"mega": "copperajah",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "slowbronite": {
 "name": "Slowbronite",
 "before_trainer": 81,
 "from": "Route 12 (Lower Area): On a small islet to the south west from the Snorlax. (Surf H",
 "copies": 1,
-"mega": "slowbro"
+"mega": "slowbro",
+"steps": [
+[
+81,
+1
+]
+]
+},
+"toxtricitite": {
+"name": "Toxtricitite",
+"before_trainer": 81,
+"from": "Fuchsia City: From Koga after showing him a Pok\u00e9mon with at least 150 EV i",
+"copies": 1,
+"mega": "toxtricity",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "heracronite": {
 "name": "Heracronite",
 "before_trainer": 81,
 "from": "Safari Zone: East Area, left of the Rest House in the north eastern part ",
 "copies": 1,
-"mega": "heracross"
+"mega": "heracross",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "pidgeotite": {
 "name": "Pidgeotite",
 "before_trainer": 81,
 "from": "Safari Zone: North Area, in the north-central part of the area, just abov",
 "copies": 1,
-"mega": "pidgeot"
+"mega": "pidgeot",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "lopunnite": {
 "name": "Lopunnite",
 "before_trainer": 81,
 "from": "Safari Zone: West Area, southwest part, in grass below heightened platfor",
 "copies": 1,
-"mega": "lopunny"
+"mega": "lopunny",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "drednawite": {
 "name": "Drednawite",
 "before_trainer": 81,
 "from": "Route 19: On a small islet on the south part of the Route. (Surf HM re",
 "copies": 1,
-"mega": "drednaw"
+"mega": "drednaw",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "laprasite": {
 "name": "Laprasite",
 "before_trainer": 81,
 "from": "Seafoam Islands: B1F, in the north western part of the floor.",
 "copies": 1,
-"mega": "lapras"
+"mega": "lapras",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "abomasite": {
 "name": "Abomasite",
 "before_trainer": 81,
 "from": "Seafoam Islands: B2F, in the south western part of the floor.",
 "copies": 1,
-"mega": "abomasnow"
+"mega": "abomasnow",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "medichamite": {
 "name": "Medichamite",
 "before_trainer": 81,
 "from": "Route 20 (West): On small islet in middle of Route, below stationary female S",
 "copies": 1,
-"mega": "medicham"
+"mega": "medicham",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "latiosite": {
 "name": "Latiosite",
 "before_trainer": 81,
 "from": "Cinnabar Island: In Pok\u00e9mon Lab's rightmost room, from Scientist at left tabl",
 "copies": 1,
-"mega": "latios"
+"mega": "latios",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "latiasite": {
 "name": "Latiasite",
 "before_trainer": 81,
 "from": "Cinnabar Island: In Pok\u00e9mon Lab's rightmost room, from Scientist at left tabl",
 "copies": 1,
-"mega": "latias"
+"mega": "latias",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "blazikenite": {
 "name": "Blazikenite",
 "before_trainer": 81,
 "from": "Cinnabar Island: From May after you defeat her in front of the Pok\u00e9mon Mansio",
 "copies": 1,
-"mega": "blaziken"
+"mega": "blaziken",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "gardevoirite": {
 "name": "Gardevoirite",
 "before_trainer": 81,
 "from": "Pok\u00e9mon Mansion: 1F, in the south east part of the floor with lots of palm tr",
 "copies": 1,
-"mega": "gardevoir"
+"mega": "gardevoir",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "cameruptite": {
 "name": "Cameruptite",
 "before_trainer": 81,
 "from": "Pok\u00e9mon Mansion: 1F, in the south east part of the floor with lots of palm tr",
 "copies": 1,
-"mega": "camerupt"
+"mega": "camerupt",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "banettite": {
 "name": "Banettite",
 "before_trainer": 81,
 "from": "Pok\u00e9mon Mansion: B1F, in the south west part of the floor.",
 "copies": 1,
-"mega": "banette"
+"mega": "banette",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "machampite": {
 "name": "Machampite",
 "before_trainer": 81,
 "from": "Power Plant: From Dumbass trainer after defeating him in the central room",
 "copies": 1,
-"mega": "machamp"
+"mega": "machamp",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "ampharosite": {
 "name": "Ampharosite",
 "before_trainer": 81,
 "from": "Power Plant: In the north east corner.",
 "copies": 1,
-"mega": "ampharos"
+"mega": "ampharos",
+"steps": [
+[
+81,
+1
+]
+]
 },
 "glalitite": {
 "name": "Glalitite",
 "before_trainer": 83,
 "from": "Route 20 (East): From Pryce after defeating him in front of Seafom Islands.",
 "copies": 1,
-"mega": "glalie"
+"mega": "glalie",
+"steps": [
+[
+83,
+1
+]
+]
 },
 "choicescarf": {
 "name": "Choice Scarf",
 "before_trainer": 83,
 "from": "Route 20 (East): From Pryce after defeating him in front of Seafom Islands.",
 "copies": 1,
-"flat": 1.1
+"flat": 1.1,
+"steps": [
+[
+83,
+1
+]
+]
 },
 "aggronite": {
 "name": "Aggronite",
 "before_trainer": 85,
 "from": "Cinnabar Island: From Jasmine after defeating her in Pok\u00e9mon Lab.",
 "copies": 1,
-"mega": "aggron"
+"mega": "aggron",
+"steps": [
+[
+85,
+1
+]
+]
 },
 "choiceband": {
 "name": "Choice Band",
@@ -508,69 +1039,157 @@
 "copies": 1,
 "category": "Physical",
 "mult": 1.5,
-"lock": true
+"lock": true,
+"steps": [
+[
+85,
+1
+]
+]
 },
-"lifeorb": {
-"name": "Life Orb",
+"assaultvest": {
+"name": "Assault Vest",
+"before_trainer": 85,
+"from": "Cinnabar Island: From Jasmine after defeating her in Pok\u00e9mon Lab and showing ",
+"copies": 1,
+"flat": 1.1,
+"steps": [
+[
+85,
+1
+]
+]
+},
+"steelixite": {
+"name": "Steelixite",
+"before_trainer": 85,
+"from": "Cinnabar Island: From Jasmine after defeating her in Pok\u00e9mon Lab and showing ",
+"copies": 1,
+"mega": "steelix",
+"steps": [
+[
+85,
+1
+]
+]
+},
+"choicespecs": {
+"name": "Choice Specs",
 "before_trainer": 91,
-"from": "care package: Defeating Blaine",
-"copies": 6,
-"flat": 1.2
+"from": "Cinnabar Island: From Blaine after defeating him and showing him a Pok\u00e9mon wi",
+"copies": 1,
+"category": "Special",
+"mult": 1.5,
+"lock": true,
+"steps": [
+[
+91,
+1
+]
+]
 },
 "snorlaxite": {
 "name": "Snorlaxite",
 "before_trainer": 91,
 "from": "Route 23: In the north east corner of the Volcano badge check gate.",
 "copies": 1,
-"mega": "snorlax"
+"mega": "snorlax",
+"steps": [
+[
+91,
+1
+]
+]
 },
 "metagrossite": {
 "name": "Metagrossite",
 "before_trainer": 91,
 "from": "Victory Road: 2F, in the north east part of the floor, near a Juggler.",
 "copies": 1,
-"mega": "metagross"
+"mega": "metagross",
+"steps": [
+[
+91,
+1
+]
+]
 },
 "houndoominite": {
 "name": "Houndoominite",
 "before_trainer": 94,
 "from": "Cerulean Cave: 1F, from Archer after defeating him in battle.",
 "copies": 1,
-"mega": "houndoom"
+"mega": "houndoom",
+"steps": [
+[
+94,
+1
+]
+]
 },
 "mawilite": {
 "name": "Mawilite",
 "before_trainer": 95,
 "from": "Cerulean Cave: 1F, from Ariana after defeating her in battle.",
 "copies": 1,
-"mega": "mawile"
+"mega": "mawile",
+"steps": [
+[
+95,
+1
+]
+]
 },
 "diancite": {
 "name": "Diancite",
 "before_trainer": 98,
 "from": "Cerulean Cave: 2F, northeast area, reached by climbing northeast ladder on ",
 "copies": 1,
-"mega": "diancie"
+"mega": "diancie",
+"steps": [
+[
+98,
+1
+]
+]
 },
 "garchompite": {
 "name": "Garchompite",
 "before_trainer": 98,
 "from": "Cerulean Cave: B1F, in the north east area of the floor.",
 "copies": 1,
-"mega": "garchomp"
+"mega": "garchomp",
+"steps": [
+[
+98,
+1
+]
+]
 },
 "sceptilite": {
 "name": "Sceptilite",
 "before_trainer": 102,
 "from": "Route 23: From Brendan after defeating him in front of Victory Road's ",
 "copies": 1,
-"mega": "sceptile"
+"mega": "sceptile",
+"steps": [
+[
+102,
+1
+]
+]
 },
 "salamencite": {
 "name": "Salamencite",
 "before_trainer": 114,
 "from": "Route 4 (East): From Lance after defeating Giovanni in Cerulean Cave.",
 "copies": 1,
-"mega": "salamence"
+"mega": "salamence",
+"steps": [
+[
+114,
+1
+]
+]
 }
 }

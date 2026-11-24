@@ -190,6 +190,21 @@ STATUS_MOVES = ["swordsdance", "dragondance", "nastyplot", "calmmind", "bulkup",
                 "leechseed", "reflect", "lightscreen", "substitute", "protect"]
 
 
+def legal_pool(species: str, level: int, progress: int | None = None) -> list[str]:
+    """Every move `species` may know at `level`: the level-up moves learned so far (a relearner
+    teaches any of them), then the TMs and tutors in hand at trainer index `progress` (tms.json;
+    None = none; later = preferred on ties), minus BANNED_MOVES and the SPECIES_MOVES limits.
+    No egg moves and no pre-evolution-only moves (the user's RR hardcore run, 2026-11-24)."""
+    game = load_game()
+    ls = game["learnsets"].get(species, {})
+    legal = lambda m: m not in BANNED_MOVES and species in SPECIES_MOVES.get(m, (species,))
+    pool = list(dict.fromkeys(m for m, lvl in ls.get("levelup", []) if lvl <= level and legal(m)))
+    if progress is not None:
+        pool += [m for m in ls.get("tm", []) if m not in pool and legal(m)
+                 and m in game["tms"] and game["tms"][m]["before_trainer"] <= progress]
+    return pool
+
+
 def encounter_moves(species: str, level: int, rule: str = "best4",
                     progress: int | None = None) -> list[str]:
     """A mon's moves at `level` under the moveset rule; progress = the trainer
@@ -208,14 +223,10 @@ def encounter_moves(species: str, level: int, rule: str = "best4",
             attacks (Seismic Toss, Low Kick) count as 50 power; NO_SLOT_MOVES
             (self-KO, recharge, conditional) never get a slot."""
     game = load_game()
-    ls = game["learnsets"].get(species, {})
-    legal = lambda m: m not in BANNED_MOVES and species in SPECIES_MOVES.get(m, (species,))
-    pool = list(dict.fromkeys(m for m, lvl in ls.get("levelup", []) if lvl <= level and legal(m)))
+    pool = legal_pool(species, level)
     if rule == "last4" or not pool:
         return pool[-4:]
-    if progress is not None:  # TMs in hand, after the level-up moves (later = preferred on ties)
-        pool += [m for m in ls.get("tm", []) if m not in pool and legal(m)
-                 and m in game["tms"] and game["tms"][m]["before_trainer"] <= progress]
+    pool = legal_pool(species, level, progress)
     md, sp = game["moves"], game["species"].get(species, {})
     stab, bs = set(sp.get("types", [])), sp.get("baseStats", {"atk": 1, "spa": 1})
     fit = {"Physical": bs["atk"], "Special": bs["spa"]}
@@ -239,6 +250,9 @@ def encounter_moves(species: str, level: int, rule: str = "best4",
     return picks[:4]
 
 
+CHOICE_ALL_ATTACKS = False  # RR hardcore (rr_probe.hardcore): no Choice item on a set with a status move
+
+
 def item_value(m: Mon, item: dict, md: dict, types: set[str]) -> float:
     """What holding `item` is worth to m: the multiplier on its attacks of the
     boosted type (1.2 STAB / 1.1 off-type) or category (Choice locks: x0.85), or
@@ -254,6 +268,8 @@ def item_value(m: Mon, item: dict, md: dict, types: set[str]) -> float:
     if "type" in item:
         hit = [a for a in attacks if a["type"] == item["type"]]
         return item["mult"] if any(a["type"] in types for a in hit) else (1.0 + (item["mult"] - 1) / 2 if hit else 1.0)
+    if item.get("lock") and CHOICE_ALL_ATTACKS and any(md[x]["category"] == "Status" for x in m.moves if x in md):
+        return 1.0  # locked into one move, a status move is dead weight
     if any(a["category"] == item["category"] for a in attacks[:1]):  # the strongest attack's category
         return item["mult"] * (0.85 if item.get("lock") else 1.0)
     return 1.0
@@ -267,6 +283,12 @@ def mega_stone(species: str, progress: int | None) -> str | None:
     return next((k for k, v in load_game()["items"].items() if v.get("mega") == sid and v["before_trainer"] <= progress), None)
 
 
+def copies(item: dict, progress: int) -> int:
+    """Holders of `item` at trainer `progress`: the most any source in hand by then gives
+    (`steps` [[trainer, copies], ...]; a later care package can raise one to six)."""
+    return max([n for t, n in item.get("steps", []) if t <= progress] or [item["copies"]])
+
+
 def assign_items(mons: list[Mon], progress: int | None) -> None:
     """E9: hand the items in hand at trainer `progress` (None = no items) to the
     party, greedily by item_value, one item per mon and `copies` holders per item.
@@ -277,7 +299,7 @@ def assign_items(mons: list[Mon], progress: int | None) -> None:
         return
     game = load_game()
     md, sp = game["moves"], game["species"]
-    left = {k: v["copies"] for k, v in game["items"].items() if v["before_trainer"] <= progress}
+    left = {k: copies(v, progress) for k, v in game["items"].items() if v["before_trainer"] <= progress}
     cands = sorted(((item_value(m, game["items"][k], md, set(sp.get(m.species, {}).get("types", []))), m.level, k, i)
                     for i, m in enumerate(mons) for k in left), reverse=True)
     for value, _, k, i in cands:
@@ -291,7 +313,9 @@ def load_evolutions() -> dict:
 
 # Evolution methods without an in-game mechanic here, as progression rules:
 FRIENDSHIP_LEVELS = 10   # a friendship evolution fires this many levels after the catch
-STONE_GATE = "Eterna Gym"  # the Grand Underground (every evolution stone) opens in Eterna City
+# every evolution stone: BDSP's Grand Underground opens in Eterna City; RR's Celadon Dept. Store
+# sells them all (official sheet, Shops tab; RR has no place / held-item gates here: all = stones)
+STONE_GATE = {"bdsp": "Eterna Gym", "rr": "CELADON CITY"}
 EVO_GATES = {"leafeon": "Eterna Forest", "glaceon": "Route 217",            # Moss Rock, Ice Rock
              "magnezone": "Route 208", "probopass": "Route 208"}            # Mt. Coronet's field
 ITEM_GATES = {"Razor Claw": "Victory Road", "Razor Fang": "Victory Road"}  # Weavile, Gliscor
@@ -300,8 +324,9 @@ ITEM_GATES = {"Razor Claw": "Victory Road", "Razor Fang": "Victory Road"}  # Wea
 
 @functools.lru_cache(maxsize=None)
 def first_index(location: str) -> int:
-    """order_index of the first trainer whose location starts with `location`."""
-    return next(e["order_index"] for e in load_game()["order"] if e["location"].startswith(location))
+    """order_index of the first trainer whose location starts with `location` (RR's order has
+    no order_index: its position is the trainer index)."""
+    return next(e.get("order_index", i) for i, e in enumerate(load_game()["order"]) if e["location"].startswith(location))
 
 
 def _evo_due(species: str, e: dict, level: int, caught_level, trainer_idx) -> bool:
@@ -314,7 +339,7 @@ def _evo_due(species: str, e: dict, level: int, caught_level, trainer_idx) -> bo
     if t == "levelFriendship":
         return caught_level is not None and level >= caught_level + FRIENDSHIP_LEVELS
     if t in ("useItem", "levelHold", "levelExtra"):
-        gate = EVO_GATES.get(e["to"]) or ITEM_GATES.get(e["item"] or "") or STONE_GATE
+        gate = (EVO_GATES.get(e["to"]) or ITEM_GATES.get(e["item"] or "") if GAME == "bdsp" else None) or STONE_GATE[GAME]
         return trainer_idx is not None and trainer_idx >= first_index(gate)
     return False
 

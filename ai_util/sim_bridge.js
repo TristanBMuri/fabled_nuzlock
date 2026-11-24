@@ -142,6 +142,7 @@ function dumpSide(side) {
       lastMove: i === 0 && p.lastMove ? p.lastMove.id : null,  // Encore / Disable read it
       moveActions: p.activeMoveActions,  // 0 = not moved since switching in (Fake Out, Speed Boost)
       abilityCounter: p.abilityState.counter || 0,  // Slow Start: turns left
+      spent: !!p.abilityState.phoenixDownActivated,  // RR Phoenix Down: once per battle
       // Rollout / Ice Ball: hits done; Protosynthesis / Quark Drive: the boosted stat
       volatileData: i === 0 ? Object.fromEntries(Object.entries(p.volatiles)
         .filter(([, v]) => v.hitCount !== undefined || v.bestStat)

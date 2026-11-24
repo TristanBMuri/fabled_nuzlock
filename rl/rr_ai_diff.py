@@ -51,57 +51,6 @@ def _canon_py(dump: dict, py_order) -> tuple[str, str]:
     return msg, "switch" if msg.startswith("switch") else "move"
 
 
-def _with_force_switch(state, dump: dict):
-    """Carry dump['p1'/'p2']['forced'] into poke-engine Side.force_switch when the active mon
-    is still alive (Volt Switch / U-turn / Flip Turn pivot). When hp == 0 poke-engine already
-    treats the side as force-switching (including simultaneous double-KOs)."""
-    f1 = bool(dump["p1"]["forced"] and dump["p1"]["pokemon"][0]["hp"] > 0)
-    f2 = bool(dump["p2"]["forced"] and dump["p2"]["pokemon"][0]["hp"] > 0)
-    if not f1 and not f2:
-        return state
-    pe = convert.pe
-
-    def copy_side(sd, forced: bool):
-        if not forced or sd.force_switch:
-            return sd
-        return pe.Side(
-            pokemon=list(sd.pokemon),
-            side_conditions=sd.side_conditions,
-            active_index=sd.active_index,
-            baton_passing=sd.baton_passing,
-            shed_tailing=sd.shed_tailing,
-            volatile_status_durations=sd.volatile_status_durations,
-            wish=sd.wish,
-            future_sight=sd.future_sight,
-            force_switch=True,
-            force_trapped=sd.force_trapped,
-            slow_uturn_move=sd.slow_uturn_move,
-            volatile_statuses=set(sd.volatile_statuses),
-            substitute_health=sd.substitute_health,
-            attack_boost=sd.attack_boost,
-            defense_boost=sd.defense_boost,
-            special_attack_boost=sd.special_attack_boost,
-            special_defense_boost=sd.special_defense_boost,
-            speed_boost=sd.speed_boost,
-            accuracy_boost=sd.accuracy_boost,
-            evasion_boost=sd.evasion_boost,
-            last_used_move=sd.last_used_move,
-            switch_out_move_second_saved_move=sd.switch_out_move_second_saved_move,
-        )
-
-    return pe.State(
-        side_one=copy_side(state.side_one, f1),
-        side_two=copy_side(state.side_two, f2),
-        weather=state.weather,
-        weather_turns_remaining=state.weather_turns_remaining,
-        terrain=state.terrain,
-        terrain_turns_remaining=state.terrain_turns_remaining,
-        trick_room=state.trick_room,
-        trick_room_turns_remaining=state.trick_room_turns_remaining,
-        team_preview=state.team_preview,
-    )
-
-
 def _canon_rust(opt: str) -> str:
     return opt.removesuffix("-mega").removesuffix("-tera")
 
@@ -192,7 +141,6 @@ def collect_diffs(n_positions: int, seed: int, max_per_boss: int, bosses_filter:
                                     for iss in set(issues):
                                         skipped_issues[iss] += 1
                                 else:
-                                    state = _with_force_switch(state, dump)
                                     rust_raw = convert.pe.rr_ai_choice(state, "side_two")
                                     rust_canon = [_canon_rust(x) for x in rust_raw]
                                     py_canon, py_kind = _canon_py(dump, py_order)

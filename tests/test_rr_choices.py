@@ -18,11 +18,34 @@ def test_nature_follows_the_set():
     assert mixed in ("Timid", "Jolly")
 
 
+def test_mixed_set_takes_speed_only_when_it_outspeeds_a_boss_mon():
+    slow = {"spe": [10], "phys": 1.0}  # outsped neutral anyway: + the stronger attack, - Sp. Def (the boss is physical)
+    assert rp.choose_nature("electabuzz", ["thunderpunch", "thunderbolt", "swift", "thunderwave"], KNOWN, slow, 30) == "Rash"
+    mine = rp.speed(KNOWN["electabuzz"]["baseStats"]["spe"], 30)
+    close = {"spe": [mine + 1], "phys": 1.0}  # +Spe turns a loss of the speed race into a win
+    assert rp.choose_nature("electabuzz", ["thunderpunch", "thunderbolt", "swift", "thunderwave"], KNOWN, close, 30) == "Timid"
+
+
+def test_ability_is_rolled_at_catch_and_kept_by_slot():
+    slots = KNOWN["gyarados"]["abilities"]
+    a = rp.catch_ability("magikarp", "gyarados", 7)
+    assert a == rp.catch_ability("magikarp", "gyarados", 7) and a in (slots["0"], slots.get("1"))
+    assert {rp.catch_ability("magikarp", "gyarados", s) for s in range(20)} <= {slots["0"], slots.get("1")}
+
+
 def test_ability_prefers_an_immunity_to_the_boss_and_the_gym_weather():
     rain = {"weather": "raindance", "ai_permanent": True}
     assert rp.choose_ability("jynx", KNOWN, {"Water", "Ice"}, rain) == "Dry Skin"       # Water immunity vs Misty
     assert rp.choose_ability("jynx", KNOWN, {"Rock"}, {}) == KNOWN["jynx"]["abilities"]["0"]  # nothing to gain: slot 0
     assert rp.choose_ability("gyarados", KNOWN, {"Water"}, {}) == "Intimidate"
+
+
+def test_ability_gates_follow_raids_and_the_saffron_shop():
+    capsule, patch = rp.ability_gates()
+    import json
+    names = [e["name"] for e in json.load(open(rp.RR / "order.json"))["entries"]]
+    assert names.index("MISTY") < capsule <= names.index("LT. SURGE")  # Route 5 dens open after Misty
+    assert patch < names.index("SABRINA") < names.index("KOGA")      # Saffron's Fanclub before Sabrina
 
 
 def test_sample_box_is_one_encounter_per_open_location():

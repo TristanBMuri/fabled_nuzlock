@@ -98,7 +98,8 @@ def main() -> None:
     for sp in r["best_team"]:
         ev = evolve(sp, cap, None, caught_level=5, trainer_idx=None)
         mv = encounter_moves(ev, cap, "best4", progress=t)
-        m = Mon(ev, cap, mv, ability=rp.choose_ability(ev, known, boss_types, arena), caught_level=5, nature=rp.choose_nature(ev, mv, known))
+        m = Mon(ev, cap, mv, ability=rp.catch_ability(sp, ev, 0), caught_level=5,
+                nature=rp.choose_nature(ev, mv, known, rp.boss_profile(enemy_packed, known, arena), cap))
         m.evs = dict.fromkeys(STATS, 0)
         party.append(m)
     print("team:", [(m.species, m.nature, m.ability, m.moves) for m in party])

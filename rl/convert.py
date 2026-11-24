@@ -119,7 +119,8 @@ def _item(p: dict) -> str:
 
 def _mon(p: dict, issues: list):
     item = _item(p)
-    for kind, name in [("species", p["species"]), ("ability", p["ability"])] + \
+    ability = "none" if p.get("spent") else p["ability"]  # a used Phoenix Down revives no more
+    for kind, name in [("species", p["species"]), ("ability", ability)] + \
                       ([("item", item)] if item else []) + [("move", _move_id(m, p)) for m, _ in p["moves"]]:
         if not known(kind, name):
             issues.append(f"{kind}:{name}")
@@ -129,7 +130,7 @@ def _mon(p: dict, issues: list):
     rest = sl.get("time", 0) if sl.get("rest") else 0  # both engines count Rest sleep down from 3
     slept = 0 if rest or not sl else sl["start"] - sl["time"]
     return pe.Pokemon(id=p["species"], level=p["level"], types=tuple(types[:2]), base_types=tuple(types[:2]),
-                   hp=p["hp"], maxhp=p["maxhp"], ability=p["ability"], base_ability=p["ability"],
+                   hp=p["hp"], maxhp=p["maxhp"], ability=ability, base_ability=ability,
                    item=item or "none", attack=st["atk"], defense=st["def"], special_attack=st["spa"],
                    special_defense=st["spd"], speed=st["spe"], status=STATUS.get(p["status"], "none"),
                    sleep_turns=max(0, slept), rest_turns=rest, weight_kg=p["weightkg"],
@@ -198,6 +199,8 @@ def _side(d: dict, foe: dict, issues: list, dump: dict):
     # poke-engine marks "switched in, has not moved yet" with a switch as the last move
     last = ("switch:0" if active["moveActions"] == 0 else
             f"move:{names.index(active['lastMove'])}" if active["lastMove"] in names else "move:none")
+    # a pivot (U-turn, Volt Switch, Flip Turn) leaves a live mon that must switch; a fainted one the engine sees
+    extra["force_switch"] = bool(d.get("forced") and active["hp"] > 0)
     return pe.Side(pokemon=mons + [pe.Pokemon.create_fainted() for _ in range(6 - len(mons))],
                 volatile_statuses=vols, side_conditions=pe.SideConditions(**cond),
                 volatile_status_durations=pe.VolatileStatusDurations(**durations), last_used_move=last,

@@ -14,6 +14,7 @@ player's TMs / items / EV training unless --tms (an upper bound), doubles.
 """
 
 import argparse
+import functools
 import json
 import re
 import multiprocessing as mp
@@ -263,17 +264,46 @@ def arena(effect: str) -> tuple[dict, list[str]]:
 STARTERS = ["bulbasaur", "charmander", "squirtle", "chikorita", "cyndaquil", "totodile", "treecko", "torchic",
             "mudkip", "turtwig", "chimchar", "piplup", "snivy", "tepig", "oshawott", "chespin", "fennekin",
             "froakie", "rowlet", "litten", "popplio", "grookey", "scorbunny", "sobble", "sprigatito", "fuecoco", "quaxly"]
-NATURE = {("atk", "spa"): "Adamant", ("spa", "atk"): "Modest", ("spe", "atk"): "Timid", ("spe", "spa"): "Jolly"}
+NATURE = {("atk", "spa"): "Adamant", ("spa", "atk"): "Modest", ("spe", "atk"): "Timid", ("spe", "spa"): "Jolly",
+          ("atk", "def"): "Lonely", ("atk", "spd"): "Naughty", ("spa", "def"): "Mild", ("spa", "spd"): "Rash"}
 
 
-def choose_nature(species: str, moves: list[str], known: dict) -> str:
-    """Mints are free (hardcore sells them): + the attacking stat the set uses, - the other;
-    a mixed set takes +Spe and drops the weaker attacking stat."""
+def speed(base: int, level: int, iv: int = 31, ev: int = 0, mult: float = 1.0) -> int:
+    return int(((2 * base + iv + ev // 4) * level // 100 + 5) * mult)
+
+
+def boss_profile(enemy_packed: str, known: dict, arena: dict) -> dict:
+    """What the nature choice reads off the boss: each mon's speed (doubled under its permanent
+    Tailwind) and the share of its attacks that are physical."""
+    from poke_env.data import GenData
+    natures, md = GenData.from_gen(9).natures, load_game("rr")["moves"]
+    tail = 2 if "tailwind" in arena.get("p2", []) else 1
+    spe, cats = [], []
+    for x in enemy_packed.split("]"):
+        f = x.split("|")
+        base = known.get(to_id_str(f[1] or f[0]), {}).get("baseStats", {}).get("spe", 0)
+        ivs, evs = (f[8] or "31,31,31,31,31,31").split(","), (f[6] or "0,0,0,0,0,0").split(",")
+        spe.append(speed(base, int(f[10] or 100), int(ivs[5] or 31), int(evs[5] or 0),
+                         natures.get(to_id_str(f[5]), {}).get("spe", 1)) * tail)
+        cats += [md[m]["category"] for m in f[4].split(",") if m in md and md[m]["category"] != "Status"]
+    return {"spe": spe, "phys": sum(c == "Physical" for c in cats) / max(len(cats), 1)}
+
+
+def choose_nature(species: str, moves: list[str], known: dict, boss: dict | None = None, level: int = 100) -> str:
+    """Mints are free (hardcore sells them): + the attacking stat the set uses, - the other. A
+    mixed set takes +Spe (dropping the weaker attacking stat) only when it outspeeds a boss mon
+    that it would not outspeed neutral (`boss` = boss_profile); otherwise + the stronger
+    attacking stat, - the defence the boss hits less (2026-11-24: +Spe on every mixed set made
+    a Jolly base-30 Coalossal)."""
     md = load_game("rr")["moves"]
     cats = [md[m]["category"] for m in moves if m in md and md[m]["category"] != "Status"]
-    bs = known.get(species, {}).get("baseStats", {"atk": 1, "spa": 1})
+    bs = known.get(species, {}).get("baseStats", {"atk": 1, "spa": 1, "spe": 1})
     if "Physical" in cats and "Special" in cats:
-        return NATURE[("spe", "atk" if bs["atk"] < bs["spa"] else "spa")]
+        weak, strong = ("atk", "spa") if bs["atk"] < bs["spa"] else ("spa", "atk")
+        mine = speed(bs.get("spe", 1), level)
+        if boss is None or any(mine <= e < int(mine * 1.1) for e in boss["spe"]):
+            return NATURE[("spe", weak)]
+        return NATURE[(strong, "def" if boss["phys"] < 0.5 else "spd")]
     return NATURE[("atk", "spa")] if "Physical" in cats or not cats else NATURE[("spa", "atk")]
 
 
@@ -291,6 +321,11 @@ def hardcore() -> None:
     gauntlet.BANNED_MOVES = {to_id_str(m) for m in r["banned_moves"]}
     allowed = {to_id_str(s) for s in r["toxic_leech_seed_allowed_species"]}
     gauntlet.SPECIES_MOVES = {"toxic": allowed, "leechseed": allowed}
+    # set rules (2026-11-24): Rest only with Sleep Talk, which best4 never pairs, so no Rest;
+    # no Choice item on a set with a status move
+    gauntlet.NO_SLOT_MOVES = gauntlet.NO_SLOT_MOVES | {"rest"}
+    gauntlet.STATUS_MOVES = [m for m in gauntlet.STATUS_MOVES if m != "rest"]
+    gauntlet.CHOICE_ALL_ATTACKS = True
     ABILITY_SWAPS.update({to_id_str(a): b for a, b in r["ability_changes"].items()})
     for name, ab in r["species_ability_changes"].items():  # "Mega Tyranitar" -> tyranitarmega
         SPECIES_SWAPS[to_id_str(name[5:]) + "mega" if name.startswith("Mega ") else to_id_str(name)] = ab
@@ -307,10 +342,10 @@ def player_ability(species: str, ability: str) -> str:
     return SPECIES_SWAPS.get(species, ABILITY_SWAPS[a])
 
 
-def choose_ability(species: str, known: dict, boss_types: set, arena: dict) -> str | None:
-    """Capsules (and the patch) make every slot available: an immunity to a type the boss
-    attacks with, a speed ability for the gym's weather / terrain, Intimidate; else slot 0.
-    Each slot is scored as what the player actually gets (player_ability: the hardcore swaps)."""
+def choose_ability(species: str, known: dict, boss_types: set, arena: dict, hidden: bool = True) -> str | None:
+    """Capsules (and with `hidden` the Dream Patch) make the slots available: an immunity to a
+    type the boss attacks with, a speed ability for the gym's weather / terrain, Intimidate;
+    else slot 0. Each slot is scored as what the player actually gets (player_ability)."""
     from ai_util.calc_bot import ABILITY_IMMUNE_TYPE, SPEED_ABILITY
     slots = {k: player_ability(species, v) for k, v in known.get(species, {}).get("abilities", {}).items()}
     if not slots:
@@ -322,7 +357,46 @@ def choose_ability(species: str, known: dict, boss_types: set, arena: dict) -> s
         a = to_id_str(ab)
         return (2 * (ABILITY_IMMUNE_TYPE.get(a) in boss_types) + 2 * (a == weather or (a == "surgesurfer" and arena.get("terrain") == "electricterrain"))
                 + (a == "intimidate") + (a in SPEED_ABILITY and SPEED_ABILITY[a] and False))
-    return max((slots[k] for k in ("0", "1", "H") if k in slots), key=score)
+    return max((slots[k] for k in ("0", "1", "H")[:3 if hidden else 2] if k in slots), key=score)
+
+
+@functools.cache
+def ability_gates() -> tuple[int, int]:
+    """(trainer index from which Ability Capsules are in hand, from which the Dream Patch is).
+    The user's rule (2026-11-24, from the official sheets): capsules (slot 0 / 1) drop from raid
+    dens, which need a badge and sit on Route 5 / 6 / 10 / 11, Diglett Cave, Rock Tunnel;
+    the Saffron City Fanclub sells the Ability Pill and the Dream Patch (hidden ability)."""
+    enc = json.load(open(RR / "tracker_encounters.json"))
+    order = json.load(open(RR / "order.json"))["entries"]
+    locs = [l["name"] for l in enc["locations"] if not l["postgame"]]
+    dens = {l["location"].upper() for l in enc["raids"]["locations"]
+            if any("Ability Capsule" in str(d.get("drops")) for d in l["dens"])}
+    first_den = min(i for i, name in enumerate(locs) if any(name.startswith(d) for d in dens))
+    brock = next(t for t, e in enumerate(order) if e["name"] == "BROCK")
+    capsule = next(t for t, e in enumerate(order) if t > brock and e["reach"] >= first_den)
+    patch = next(t for t, e in enumerate(order) if e["location"].startswith(("SAFFRON", "SILPH")))
+    return capsule, patch
+
+
+def run_ability(species: str, evolved: str, seed, progress: int, known: dict, boss_types: set, arena: dict) -> str | None:
+    """The ability the player's mon has at trainer `progress`: rolled at catch before capsules
+    are in hand, the best slot for this boss after, the hidden slot too once the patch is."""
+    capsule, patch = ability_gates()
+    if progress < capsule:
+        return catch_ability(species, evolved, seed)
+    return choose_ability(evolved, known, boss_types, arena, hidden=progress >= patch)
+
+
+def catch_ability(species: str, evolved: str, seed) -> str | None:
+    """Abilities are fixed at catch in the user's hardcore run (no capsules; user, 2026-11-24):
+    slot 0 or 1 at even odds, rolled once per (run seed, caught species), kept by slot on
+    evolution; what the player gets under the hardcore swaps (player_ability)."""
+    ab = gauntlet.roll_ability(species, random.Random(f"{seed}-{species}-ability"))
+    if ab is None:
+        return None
+    if evolved != species:
+        ab = gauntlet.evolved_ability(species, ab, evolved)
+    return player_ability(evolved, ab) if ab else None
 
 
 def pools() -> tuple[dict, dict]:
