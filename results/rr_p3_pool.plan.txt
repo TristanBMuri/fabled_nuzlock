@@ -1,0 +1,19 @@
+KOGA plan (trainer #80, level cap 68; origin pivot, halving scores [0.9744, 0.9968, 0.984, 0.9936, 0.9884, 0.986])
+  fresh seeds, n = 48: U 0.986 ± 0.012, win 100% ± 0%, deathless 90% ± 9%, deaths/mon 0.03, capped 0%
+  lead bronzong L68 @ leftovers, Lonely, Levitate: earthquake, spinout, futuresight, hypnosis
+    2. annihilape L68 @ leftovers, Adamant, Vital Spirit: closecombat, earthquake, shadowclaw, uturn
+    3. chesnaught L68 @ leftovers, Adamant, Bulletproof: woodhammer, earthquake, pinmissile, hammerarm
+    4. incineroar L68 @ leftovers, Adamant, Intimidate: earthquake, leechlife, flareblitz, darkestlariat
+    5. mrmime L68 @ leftovers, Modest, Soundproof: psychoboost, moonblast, sparklyswirl, thunderbolt
+    6. grimmsnarl L68 @ leftovers, Adamant, Prankster: playrough, stompingtantrum, foulplay, hammerarm
+  riskiest enemy mons (our deaths in the n battles): Nidoking 5, Chi-Yu 3
+
+BLAINE plan (trainer #90, level cap 76; origin move, halving scores [0.8518])
+  fresh seeds, n = 48: U 0.816 ± 0.073, win 92% ± 8%, deathless 10% ± 9%, deaths/mon 0.28, capped 0%
+  lead screamtail L76 @ leftovers, Modest, Protosynthesis: icebeam, dazzlinggleam, thunderbolt, psychic
+    2. charizard L76 @ charizarditey, Timid, Blaze: flamethrower, rockslide, airslash, flareblitz
+    3. corviknight L76 @ leftovers, Adamant, Pressure: bravebird, ironhead, bodyslam, roost
+    4. dondozo L76 @ leftovers, Adamant, Unaware: rockslide, doubleedge, zenheadbutt, wavecrash
+    5. ironhands L76 @ leftovers, Adamant, Quark Drive: plasmafists, firepunch, closecombat, earthquake
+    6. rapidashgalar L76 @ choiceband, Adamant, Flash Fire: playrough, wildcharge, flareblitz, megahorn
+  riskiest enemy mons (our deaths in the n battles): Ho-Oh 45, Charizard 19, Sandy Shocks 7

@@ -74,6 +74,10 @@ user on RL decisions"); the recommendation and the evidence available at that ti
   Cloud Nine team** (a builder wall). Ladder 2k / 20k / 200k: K2 23 / 35 / 54%, B1 21 / 46 / 56%
   (search-bound). Deathless 0–10% even then. User: the advisor's final six is planned and played
   at 200k iterations; team search stays at 20k.
+- **Phase 3 (2026-11-24): gates passed** (`scripts/rr_search.py`): Erika 30 boxes 78 → 89% (+11
+  ± 8, SPRT H1); pool Koga **100% win, 88–90% deathless**, Blaine **92–96% win, 10–12% deathless**
+  (independently replayed). Cloud Nine found at Blaine but cut by U. Next: D9 / D10 (phase 4) or
+  the deathless question at Blaine.
 - Phase 0 gate:
   logging on/off 60/60 boxes identical, zero capped battles, Brock 70 → 76%; Misty 51 → 24%, of
   which ~24 points are the abilities rolled at catch (Misty is before the capsules; the old 51%

@@ -64,16 +64,19 @@ def events_path(out: str) -> Path:
     return Path(out).with_suffix(".events.jsonl")
 
 
+def append_line(path, obj) -> None:
+    """One JSON line, a single O_APPEND write, so the workers' lines never interleave."""
+    fd = os.open(path, os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
+    try:
+        os.write(fd, (json.dumps(obj) + "\n").encode())
+    finally:
+        os.close(fd)
+
+
 def emit(args, kind: str, **data) -> None:
-    """One structured event for the dashboard (ui/, UI_TODO.md) next to --out: a single
-    O_APPEND write per line, so the workers' lines never interleave. No --out, no events."""
+    """One structured event for the dashboard (ui/, UI_TODO.md) next to --out. No --out, no events."""
     if args.out:
-        line = json.dumps({"t": round(time.time(), 1), "kind": kind, **data}) + "\n"
-        fd = os.open(events_path(args.out), os.O_WRONLY | os.O_APPEND | os.O_CREAT, 0o644)
-        try:
-            os.write(fd, line.encode())
-        finally:
-            os.close(fd)
+        append_line(events_path(args.out), {"t": round(time.time(), 1), "kind": kind, **data})
 
 
 def enemy_sets(packed: str) -> list[dict]:
@@ -431,9 +434,11 @@ def worker_ctx(args, name: str):
 
 
 def battle_job(args, name: str, team: tuple, i: int) -> tuple:
-    """Searched battle i of `team` against boss `name` (a pool job)."""
+    """Searched battle i of `team` against boss `name` (a pool job). team: species ids (the
+    builder's sets), or set dicts (sets_of / scripts/rr_search.py: explicit moves, item, nature)."""
     ctx = worker_ctx(args, name)
-    return one_battle(ctx.bridge, ctx.calc, ctx.enemy, team_mons(ctx, team), ctx.enemy_packed, i,
+    party = team_mons(ctx, team) if isinstance(team[0], str) else [set_mon(s) for s in team]
+    return one_battle(ctx.bridge, ctx.calc, ctx.enemy, party, ctx.enemy_packed, i,
                       search=ctx.searcher, arena=ctx.arena, seeds=ctx.seeds, boss=name)
 
 
@@ -479,7 +484,15 @@ def say_threats(ctx, threats: list[dict], tag: str = "") -> None:
 
 
 def sets_of(ctx, team) -> list[dict]:
-    return [{"species": m.species, "nature": m.nature, "ability": m.ability, "item": m.item, "moves": m.moves} for m in team_mons(ctx, team)]
+    return [{"species": m.species, "level": m.level, "nature": m.nature, "ability": m.ability, "item": m.item, "moves": m.moves}
+            for m in team_mons(ctx, team)]
+
+
+def set_mon(s: dict) -> Mon:
+    """The Mon of a set dict (sets_of's form), no EVs (Minimal Grinding Mode)."""
+    m = Mon(s["species"], s["level"], list(s["moves"]), s["ability"], s["item"] or None, caught_level=5, nature=s["nature"])
+    m.evs = dict.fromkeys(STATS, 0)
+    return m
 
 
 def matrix(ctx, team) -> dict:

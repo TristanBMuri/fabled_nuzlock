@@ -1,0 +1,232 @@
+[
+ {
+  "boss": "KOGA",
+  "team": [
+   "bronzong",
+   "annihilape",
+   "chesnaught",
+   "incineroar",
+   "mrmime",
+   "grimmsnarl"
+  ],
+  "sets": [
+   {
+    "species": "bronzong",
+    "level": 68,
+    "ability": "Levitate",
+    "item": "leftovers",
+    "moves": [
+     "earthquake",
+     "spinout",
+     "futuresight",
+     "hypnosis"
+    ],
+    "nature": "Lonely"
+   },
+   {
+    "species": "annihilape",
+    "level": 68,
+    "ability": "Vital Spirit",
+    "item": "leftovers",
+    "moves": [
+     "closecombat",
+     "earthquake",
+     "shadowclaw",
+     "uturn"
+    ],
+    "nature": "Adamant"
+   },
+   {
+    "species": "chesnaught",
+    "level": 68,
+    "ability": "Bulletproof",
+    "item": "leftovers",
+    "moves": [
+     "woodhammer",
+     "earthquake",
+     "pinmissile",
+     "hammerarm"
+    ],
+    "nature": "Adamant"
+   },
+   {
+    "species": "incineroar",
+    "level": 68,
+    "ability": "Intimidate",
+    "item": "leftovers",
+    "moves": [
+     "earthquake",
+     "leechlife",
+     "flareblitz",
+     "darkestlariat"
+    ],
+    "nature": "Adamant"
+   },
+   {
+    "species": "mrmime",
+    "level": 68,
+    "ability": "Soundproof",
+    "item": "leftovers",
+    "moves": [
+     "psychoboost",
+     "moonblast",
+     "sparklyswirl",
+     "thunderbolt"
+    ],
+    "nature": "Modest"
+   },
+   {
+    "species": "grimmsnarl",
+    "level": 68,
+    "ability": "Prankster",
+    "item": "leftovers",
+    "moves": [
+     "playrough",
+     "stompingtantrum",
+     "foulplay",
+     "hammerarm"
+    ],
+    "nature": "Adamant"
+   }
+  ],
+  "origin": "pivot",
+  "halving_scores": [
+   0.9744,
+   0.9968,
+   0.984,
+   0.9936,
+   0.9884,
+   0.986
+  ],
+  "n": 48,
+  "win": 1.0,
+  "win_ci": 0.0,
+  "deathless": 0.8958333333333334,
+  "deathless_ci": 0.08641983748066866,
+  "deaths_per_mon": 0.02777777777777778,
+  "U": 0.9861111111111112,
+  "U_ci": 0.012238732669582227,
+  "capped": 0.0,
+  "deaths_by": {
+   "Chi-Yu": 3,
+   "Nidoking": 5
+  },
+  "cap": 68,
+  "progress": 80,
+  "mode": "pool"
+ },
+ {
+  "boss": "BLAINE",
+  "team": [
+   "screamtail",
+   "charizard",
+   "corviknight",
+   "dondozo",
+   "ironhands",
+   "rapidashgalar"
+  ],
+  "sets": [
+   {
+    "species": "screamtail",
+    "level": 76,
+    "ability": "Protosynthesis",
+    "item": "leftovers",
+    "moves": [
+     "icebeam",
+     "dazzlinggleam",
+     "thunderbolt",
+     "psychic"
+    ],
+    "nature": "Modest"
+   },
+   {
+    "species": "charizard",
+    "level": 76,
+    "ability": "Blaze",
+    "item": "charizarditey",
+    "moves": [
+     "flamethrower",
+     "rockslide",
+     "airslash",
+     "flareblitz"
+    ],
+    "nature": "Timid"
+   },
+   {
+    "species": "corviknight",
+    "level": 76,
+    "ability": "Pressure",
+    "item": "leftovers",
+    "moves": [
+     "bravebird",
+     "ironhead",
+     "bodyslam",
+     "roost"
+    ],
+    "nature": "Adamant"
+   },
+   {
+    "species": "dondozo",
+    "level": 76,
+    "ability": "Unaware",
+    "item": "leftovers",
+    "moves": [
+     "rockslide",
+     "doubleedge",
+     "zenheadbutt",
+     "wavecrash"
+    ],
+    "nature": "Adamant"
+   },
+   {
+    "species": "ironhands",
+    "level": 76,
+    "ability": "Quark Drive",
+    "item": "leftovers",
+    "moves": [
+     "plasmafists",
+     "firepunch",
+     "closecombat",
+     "earthquake"
+    ],
+    "nature": "Adamant"
+   },
+   {
+    "species": "rapidashgalar",
+    "level": 76,
+    "ability": "Flash Fire",
+    "item": "choiceband",
+    "moves": [
+     "playrough",
+     "wildcharge",
+     "flareblitz",
+     "megahorn"
+    ],
+    "nature": "Adamant"
+   }
+  ],
+  "origin": "move",
+  "halving_scores": [
+   0.8518
+  ],
+  "n": 48,
+  "win": 0.9166666666666666,
+  "win_ci": 0.07818988046676763,
+  "deathless": 0.10416666666666667,
+  "deathless_ci": 0.08641983748066867,
+  "deaths_per_mon": 0.2847222222222222,
+  "U": 0.8159722222222222,
+  "U_ci": 0.07277863215260147,
+  "capped": 0.0,
+  "deaths_by": {
+   "Ho-Oh": 45,
+   "Sandy Shocks": 7,
+   "Charizard": 19,
+   "Walking Wake": 6,
+   "Charizard-Mega-X": 5
+  },
+  "cap": 76,
+  "progress": 90,
+  "mode": "pool"
+ }
+]

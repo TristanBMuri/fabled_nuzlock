@@ -344,8 +344,9 @@ def player_ability(species: str, ability: str) -> str:
 
 def choose_ability(species: str, known: dict, boss_types: set, arena: dict, hidden: bool = True) -> str | None:
     """Capsules (and with `hidden` the Dream Patch) make the slots available: an immunity to a
-    type the boss attacks with, a speed ability for the gym's weather / terrain, Intimidate;
-    else slot 0. Each slot is scored as what the player actually gets (player_ability)."""
+    type the boss attacks with, a speed ability for the gym's weather / terrain, Cloud Nine /
+    Air Lock against the gym's weather (2026-11-24, phase 3: Blaine's Desolate Land; it chose
+    Golduck's Swift Swim before), Intimidate; else slot 0. Each slot is scored as what the player actually gets (player_ability)."""
     from ai_util.calc_bot import ABILITY_IMMUNE_TYPE, SPEED_ABILITY
     slots = {k: player_ability(species, v) for k, v in known.get(species, {}).get("abilities", {}).items()}
     if not slots:
@@ -356,7 +357,7 @@ def choose_ability(species: str, known: dict, boss_types: set, arena: dict, hidd
     def score(ab: str) -> int:
         a = to_id_str(ab)
         return (2 * (ABILITY_IMMUNE_TYPE.get(a) in boss_types) + 2 * (a == weather or (a == "surgesurfer" and arena.get("terrain") == "electricterrain"))
-                + (a == "intimidate") + (a in SPEED_ABILITY and SPEED_ABILITY[a] and False))
+                + 2 * (a in ("cloudnine", "airlock") and bool(arena.get("weather"))) + (a == "intimidate") + (a in SPEED_ABILITY and SPEED_ABILITY[a] and False))
     return max((slots[k] for k in ("0", "1", "H")[:3 if hidden else 2] if k in slots), key=score)
 
 

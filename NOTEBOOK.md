@@ -2965,3 +2965,36 @@ The battler is sound (≥ 75% everywhere; Koga just under the +20 margin).
 the Koga reference sixes double our best: a builder wall; (2) search budget / evaluation: more
 iterations keep paying; (3) deathless play: even good teams with 10× search lose 3–5 mons, while
 the players were deathless: their exact sets and planned lines, or fidelity (unknown).
+
+## 2026-11-24 — Plan v3, phase 3: team and set search (`scripts/rr_search.py`, `results/rr_p3_*`)
+
+Opus delegate, to the user's D7 (attack, utility and item swaps battle-tested in every halving
+round) and D8 (score = progress − 0.5 · deaths/mon while a boss's best wins < 20%, then U).
+Candidates: cover, `searched_cands`, the best six per archetype (negate weather / terrain,
+speed, pivot, mega, priority, bulk), random sixes; sets from a per-boss shortlist (top-2
+attacks per boss mon + one per utility class) by matchup-row gain; **sequential halving** on
+paired seeds with mutations (box swap, lead, move, item) joining every round; archive of every
+evaluated row (`<out>.archive.jsonl`, phase 4's data) and a plan sheet (`<out>.plan.{txt,json}`).
+Rule change to review: `rr_probe.choose_ability` now scores Cloud Nine / Air Lock under an
+arena weather (it picked Swift Swim for Golduck before).
+
+| gate | before | phase 3 |
+|---|---|---|
+| Erika, 30 boxes, fast budget (~120 battles a box), paired | cover 78% / 0.40 d/mon | **89% / 0.28** (+11.1 ± 8.2, SPRT δ 10: H1) |
+| Koga, pool, wide budget (best six, 48 fresh seeds) | 17% (best of ~6, n = 12) | **100%, deathless 90 ± 9%**, 0.03 d/mon |
+| Blaine, pool, wide budget | 25% | **92 ± 8%, deathless 10 ± 9%** |
+
+- **Lead's independent replay** (`rl/line.py check`, other seeds, 48 each): Koga 100% / 88% deathless
+  / 0.17 deaths; Blaine 96% / 12% / 1.40. Confirmed.
+- Koga six: Bronzong (lead), Annihilape, Chesnaught, Incineroar (Intimidate), Mr. Mime (RR level-up
+  Psycho Boost / Sparkly Swirl), Grimmsnarl; every one carries Earthquake or a Steel / Psychic
+  answer to Koga's Poison types. Blaine six: Scream Tail, Charizard @ Charizardite Y, Corviknight,
+  Dondozo, Iron Hands, Galarian Rapidash @ Choice Band; Ho-Oh causes 45 of 48 battles' deaths.
+- **Cloud Nine at Blaine was found** (the `negate` archetype: the same six with Golduck for
+  Charizard, best in round 1, 90% win and 21–27% deathless) but cut in round 2 at 0.808 vs ~0.81–
+  0.83: under U = win · (1 − 0.5 · deaths/6) a higher deathless rate does not outweigh a few
+  points of win rate.
+- The wall was team and set choice: the old chooser never fielded these sixes or sets. Cost:
+  ~12k battles, ~28 min on 10 workers.
+- Approximations (delegate): halving scores a round only on its own seeds; mutants take 1/3 of the
+  slots; `--my-box` mons are not evolved; pool mode includes every starter.
