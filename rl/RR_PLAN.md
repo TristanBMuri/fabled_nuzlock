@@ -62,6 +62,12 @@ user on RL decisions"); the recommendation and the evidence available at that ti
   75 → 98%; with it p = 0.8 gives **+30.2 ± 7.0 points, −0.28 deaths/mon** vs minimax on fresh
   seeds (Brock 83%, Misty 60%, Erika 69%), 0 capped; higher p is worse (Misty stalls). Branching
   crits at every depth: no gain, off. Pool ceiling: Koga 17%, Blaine 25% (n = 12).
+- **Phase 1.5 (2026-11-24): done, D5 = accept and flag.** `rl/line.py` (policy tree + playouts),
+  `engine_diff --from-states` (found 4 engine / converter bugs), `ui/` Draft / Trace / Line views.
+  Line vs 200 Showdown battles at Erika: win 96 vs 97 ± 2%, deaths 1.0 vs 0.9; deathless 39 vs
+  48 ± 7% (~9 points pessimistic: rolls are branched only on direct KOs), flagged in the output.
+  Not done: v1 critical nodes, roll-sensitivity flag, the off-tree rate (replaced by the
+  fixed-seed policy check).
 - Phase 0 gate:
   logging on/off 60/60 boxes identical, zero capped battles, Brock 70 → 76%; Misty 51 → 24%, of
   which ~24 points are the abilities rolled at catch (Misty is before the capsules; the old 51%

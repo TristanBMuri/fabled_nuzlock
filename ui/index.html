@@ -100,6 +100,17 @@ dialog::backdrop { background: rgb(0 0 0 / .4); }
 .strip > .m { position: absolute; top: -2px; bottom: -2px; width: 1px; background: var(--ink-3); opacity: .6; }
 .strip > .d { position: absolute; top: 1px; bottom: 1px; width: 3px; margin-left: -1px; background: var(--bad); border-radius: 1px; }
 .eps td { vertical-align: middle; }
+/* draft, search trace, line */
+.badge { font-size: 11px; padding: 0 6px; border-radius: 4px; font-family: var(--mono); background: var(--surface-2); color: var(--ink-2); white-space: nowrap; }
+.badge.bad { background: var(--bad); color: #fff; } .badge.ok { color: var(--good); }
+.opts { display: grid; grid-template-columns: minmax(120px, max-content) minmax(80px, 1fr) 5em 4em; gap: 2px 8px; align-items: center; font: 12px var(--mono); margin-top: 4px; }
+.opts .bar { height: 9px; } .opts .pick { font-weight: 700; } .opts .r { text-align: right; }
+.curve { width: 100%; height: auto; display: block; }
+pre.state { white-space: pre-wrap; word-break: break-all; font-size: 11px; color: var(--ink-2); max-height: 260px; overflow: auto; background: var(--bg); padding: 6px; border-radius: 6px; }
+.tree { font-size: 12px; }
+.tree .tr { display: grid; grid-template-columns: 18px 5.5em 1fr max-content; gap: 6px; padding: 2px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
+.tree .tw { cursor: pointer; color: var(--blue); font-family: var(--mono); }
+.note { font-size: 12px; color: var(--ink-2); max-width: 110ch; }
 </style>
 </head>
 <body>
@@ -111,8 +122,8 @@ dialog::backdrop { background: rgb(0 0 0 / .4); }
 <main id="main"></main>
 <dialog id="dlg"><div class="row" style="justify-content:space-between"><h3 id="dlgt"></h3><button data-act="close">close</button></div><div id="dlgb" style="margin-top:10px"></div></dialog>
 <script>
-const TABS = [["runs", "Runs"], ["compare", "Compare"], ["deaths", "Deaths"], ["traces", "Traces"], ["matrices", "Matrices"]];
-const S = { data: null, open: new Set(), sort: {}, cmp: [null, null], matrix: null, hist: false };
+const TABS = [["runs", "Runs"], ["compare", "Compare"], ["deaths", "Deaths"], ["traces", "Traces"], ["line", "Line"], ["matrices", "Matrices"], ["uses", "What it uses"]];
+const S = { data: null, open: new Set(), sort: {}, cmp: [null, null], matrix: null, hist: false, states: null, battle: null, line: null, got: {} };
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const pct = x => x == null ? "–" : Math.round(x * 100) + "%";
@@ -279,8 +290,8 @@ function bossPool(r, b) {
   const teams = b.teams.length ? `<div><h4>C · under search (n=${r.config.n_search})</h4><div class="scroll"><table><thead><tr><th>build</th><th>team (evolved)</th><th class="n">win</th><th class="n">deaths/mon</th><th class="n">deathless</th><th>killed by</th><th></th></tr></thead><tbody>
     ${b.teams.map((t, i) => `<tr class="${t === best ? "best" : ""}"><td><span class="chip">${esc(t.label)}</span></td><td>${esc(t.sets.map(s => s.species).join(", "))}</td>
       <td class="n">${pct(t.win)}</td><td class="n">${f2(t.deaths_per_mon)}</td><td class="n">${pct(t.deathless)}</td><td class="small">${killers(t.deaths_by)}</td>
-      <td><button data-act="mx-team" data-key="${esc(key)}" data-i="${i}">matrix</button></td></tr>`).join("")}</tbody></table></div></div>` : "";
-  const chosen = best ? `<div><h4>${done ? "best team" : "best so far"} · ${pct(best.win)} win · ${f2(best.deaths_per_mon)} deaths/mon · ${pct(best.deathless)} deathless</h4>${setHTML(best.sets)}</div>` : "";
+      <td><button data-act="mx-team" data-key="${esc(key)}" data-i="${i}">matrix</button> <button data-act="draft-team" data-key="${esc(key)}" data-i="${i}">draft</button></td></tr>`).join("")}</tbody></table></div></div>` : "";
+  const chosen = best ? `<div><h4>${done ? "best team" : "best so far"} · ${pct(best.win)} win · ${f2(best.deaths_per_mon)} deaths/mon · ${pct(best.deathless)} deathless</h4>${setHTML(best.sets)}</div>${draftHTML(best, b.boss_start?.enemy || [])}` : "";
   const th = b.threats ? `<div><h4>threats to the best team</h4>${threatsHTML(b.threats.threats)}</div>` : "";
   const rp = b.repaired ? `<div><h4>repaired</h4><div class="small">counters offered ${esc(b.repaired.counters_offered.join(", "))}, taken <b>${esc(b.repaired.counters_taken.join(", ") || "none")}</b> →
     <span class="mono">${pct(b.repaired.win)} win · ${f2(b.repaired.deaths_per_mon)} d/mon · ${pct(b.repaired.deathless)} deathless</span></div>${setHTML(b.repaired.sets)}</div>` : "";
@@ -297,6 +308,7 @@ function bossBoxes(r, b) {
     const miss = x.threats.map(t => t.counters[0] ? `${esc(t.counters[0][0])} <span class="muted">vs ${esc(t.enemy)} · ${esc(t.counters[0][3])}</span>` : `<span class="down">none vs ${esc(t.enemy)}</span>`).join("<br>");
     const detail = open ? `<tr class="detail"><td colspan="${BOX_COLS.length}"><div style="display:grid;gap:12px">
       <div><h4>the box (${x.box.length})</h4><table class="small"><tbody>${x.box.map(([sp, w]) => `<tr><td>${fielded.has(sp) ? "★ <b>" + esc(sp) + "</b>" : esc(sp)}</td><td class="muted">${esc(w)}</td></tr>`).join("")}</tbody></table></div>
+      ${draftHTML(x, b.boss_start?.enemy || [])}
       <div><h4>fielded six</h4>${setHTML(x.sets)}</div><div><h4>threats</h4>${threatsHTML(x.threats)}</div>
       <div><h4>matchup matrix</h4>${matrixHTML(x.team, x.sets, x.matrix, b.boss_start?.enemy || [])}</div></div></td></tr>` : "";
     return `<tr class="click" data-act="toggle" data-key="${esc(dk)}"><td class="n">${x.i + 1}</td><td>${esc(starter?.[0] || "–")}</td><td class="n">${x.size}</td>
@@ -389,8 +401,8 @@ function hpHTML(p, right = false) {
 }
 function renderTraces() {
   const ts = (S.data?.traces || []).filter(d => S.hist || d.file.startsWith("logs/"));
-  if (!ts.length) return `<div class="empty">No traces. <code>uv run python scripts/rr_trace.py BROCK --source … --json</code> writes one.</div>`;
-  return ts.slice().sort((a, b) => a.boss.localeCompare(b.boss) || a.battle - b.battle).map(traceCard).join("");
+  if (!ts.length) return statesHTML() + `<div class="empty">No rr_trace.py traces (Showdown searcher). <code>uv run python scripts/rr_trace.py BROCK --source … --json</code> writes one.</div>`;
+  return statesHTML() + `<h3 style="margin:16px 0 8px">rr_trace.py traces (Showdown searcher)</h3>` + ts.slice().sort((a, b) => a.boss.localeCompare(b.boss) || a.battle - b.battle).map(traceCard).join("");
 }
 function traceCard(t) {  // one fight; the turn-by-turn breakdown is folded away until asked for
   const key = "turns|" + t.file, open = S.open.has(key);
@@ -418,6 +430,198 @@ function traceCard(t) {  // one fight; the turn-by-turn breakdown is folded away
     <button data-act="toggle" data-key="${esc(key)}" style="margin-top:10px">▴ hide turn by turn (${esc(t.boss)} · battle ${t.battle})</button></div>`;
 }
 
+// ---------- draft: how the six was picked (cover chooser's `draft` event, matrix, `screen` event) ----------
+const tierOf = p => p.safe ? 2 : p.race ? 1 : 0;
+const TIER = ["no answer", "race", "safe"];
+const cellTxt = p => `${hits(p.ko_them)}/${hits(p.ko_us)}${p.faster ? "›" : ""}`;
+function gainTxt(why, g) {
+  if (!g) return "–";
+  return why === "cover" ? `safe ${g[0]} · race ${g[1]} · edge ${(+g[2]).toFixed(1)}` : `edge ${(+g[0]).toFixed(1)}`;
+}
+function draftHTML(x, enemy) {
+  const evo = sp => x.sets?.[x.team.indexOf(sp)]?.species || sp, name = id => enemy.find(e => e.id === id)?.species || id;
+  const answer = (r, e) => r ? `<b>${esc(evo(r[0]))}</b> <span class="mono">${cellTxt(r[1])}</span> <span class="badge ${r[1].safe ? "ok" : ""}">${TIER[tierOf(r[1])]}</span>` : "–";
+  const rows = enemy.map(e => {
+    const ranked = x.team.map(sp => [sp, x.matrix?.[sp]?.[e.id]]).filter(r => r[1]).sort((a, b) => tierOf(b[1]) - tierOf(a[1]) || edge(b[1]) - edge(a[1]));
+    const open = !ranked[0] || !tierOf(ranked[0][1]);
+    return [e, ranked, open];
+  });
+  const open = rows.filter(r => r[2]).map(r => r[0].species);
+  const answers = `<div><h4>answer table · our best and second-best answer to each boss mon</h4>
+    <div class="note">cell = hits we need / hits they need, › we move first (Matrix legend). <b>safe</b>: we KO in ≤ 2 hits and survive with a hit to spare; <b>race</b>: we KO first with one hit of margin.
+    Unanswered: ${open.length ? `<span class="down">${esc(open.join(", "))}</span>` : "none"}</div>
+    <div class="scroll"><table class="small"><thead><tr><th>boss mon</th><th>best answer</th><th>second</th></tr></thead><tbody>
+    ${rows.map(([e, r, o]) => `<tr><td class="${o ? "down" : ""}">${esc(e.species)} L${e.level}</td><td>${answer(r[0])}</td><td>${answer(r[1])}</td></tr>`).join("")}</tbody></table></div></div>`;
+  const picks = x.draft ? `<div><h4>pick order (greedy set cover)</h4>
+    <div class="note">Each pick is the mon that safely answers the most boss mons nobody answers yet (then race wins, then total edge over all six boss mons); once every boss mon is answered or nobody can answer the rest, the free slots go to total edge. The runner-up is the mon that would have been picked instead.</div>
+    <div class="scroll"><table class="small"><thead><tr><th class="n">#</th><th>pick</th><th>why</th><th>newly answers</th><th>gain</th><th>runner-up</th><th>its gain</th></tr></thead><tbody>
+    ${x.draft.map((p, i) => `<tr><td class="n">${i + 1}</td><td><b>${esc(evo(p.pick))}</b>${evo(p.pick) !== p.pick ? ` <span class="muted">(${esc(p.pick)})</span>` : ""}</td><td><span class="chip">${esc(p.why)}</span></td>
+      <td>${esc(p.answers.map(name).join(", ") || "–")}</td><td class="mono">${gainTxt(p.why, p.gain)}</td><td>${esc(p.runner_up || "–")}</td><td class="mono muted">${gainTxt(p.why, p.runner_up_gain)}</td></tr>`).join("")}</tbody></table></div></div>` : "";
+  const six = x.team.slice().sort().join();
+  const screen = x.screen ? `<div><h4>screen · candidate sixes ranked by n_screen battles each (searched chooser)</h4><div class="scroll"><table class="small"><thead><tr><th class="n">#</th><th>six</th><th class="n">win</th><th class="n">deaths/mon</th></tr></thead><tbody>
+    ${x.screen.map(([t, w, d], i) => `<tr class="${t.slice().sort().join() === six ? "best" : ""}"><td class="n">${i + 1}</td><td>${esc(t.join(", "))}</td><td class="n">${pct(w)}</td><td class="n">${f2(-d)}</td></tr>`).join("")}</tbody></table></div></div>` : "";
+  return x.matrix ? `<div style="display:grid;gap:12px">${answers}${picks}${screen}</div>` : "";
+}
+
+// ---------- search trace (states.jsonl: every engine decision of a battle) ----------
+const pickOf = d => d.options.reduce((a, o) => !a || o[1] > a[1] || (o[1] === a[1] && o[2] > a[2]) ? o : a, null);
+async function getJSON(url) {
+  if (!(url in S.got)) {
+    S.got[url] = null;
+    try { const r = await fetch(url); S.got[url] = r.ok ? await r.json() : { error: `${r.status} (served mode only: ui/build.py --serve)` }; }
+    catch (e) { S.got[url] = { error: e.message }; }
+    render();
+  }
+  return S.got[url];
+}
+function openBattle(file, k) { S.battle = [file, k]; getJSON(`battle?file=${encodeURIComponent(file)}&k=${k}`); render(); }
+function curveSVG(ds) {
+  const v = ds.map(d => pickOf(d)?.[2] ?? null), W = 700, H = 130, L = 30, n = Math.max(1, v.length - 1);
+  const X = i => L + i / n * (W - L - 10), Y = y => 10 + (1 - y) * (H - 30);
+  let drop = [0, -1];
+  v.forEach((y, i) => { if (i && y != null && v[i - 1] != null && v[i - 1] - y > drop[0]) drop = [v[i - 1] - y, i]; });
+  const pts = v.map((y, i) => y == null ? "" : `${X(i)},${Y(y)}`).filter(Boolean).join(" ");
+  const ticks = ds.map((d, i) => i % Math.ceil(ds.length / 20) ? "" : `<text x="${X(i)}" y="${H - 4}" font-size="10" text-anchor="middle" style="fill:var(--ink-3)">T${d.turn}</text>`).join("");
+  const mark = drop[1] > 0 ? `<line x1="${X(drop[1] - 1)}" y1="${Y(v[drop[1] - 1])}" x2="${X(drop[1])}" y2="${Y(v[drop[1]])}" style="stroke:var(--bad);stroke-width:4"/>
+    <text x="${X(drop[1])}" y="${Y(v[drop[1]]) + 14}" font-size="11" style="fill:var(--bad)" text-anchor="middle">−${drop[0].toFixed(2)} at T${ds[drop[1]].turn}</text>` : "";
+  return `<svg class="curve" viewBox="0 0 ${W} ${H}">
+    ${[0, .5, 1].map(y => `<line x1="${L}" x2="${W - 10}" y1="${Y(y)}" y2="${Y(y)}" style="stroke:var(--line)"/><text x="2" y="${Y(y) + 4}" font-size="10" style="fill:var(--ink-3)">${y}</text>`).join("")}
+    <polyline points="${pts}" style="fill:none;stroke:var(--blue);stroke-width:2"/>${v.map((y, i) => y == null ? "" : `<circle cx="${X(i)}" cy="${Y(y)}" r="2.5" style="fill:var(--blue)"><title>T${ds[i].turn}: ${y.toFixed(3)}</title></circle>`).join("")}${mark}${ticks}</svg>`;
+}
+const stateTxt = s => String(s || "").split("/").map((side, i) => `${["── side one (us)", "── side two (boss)", "── field"][Math.min(i, 2)]}\n${side.split("=").join("\n")}`).join("\n");
+function battleHTML(b) {
+  if (!b) return `<div class="empty">loading the battle…</div>`;
+  if (b.error) return `<div class="empty">${esc(b.error)}</div>`;
+  const ds = b.decisions, seen = new Set();
+  const turns = ds.map((d, i) => {
+    const pk = pickOf(d), tot = d.options.reduce((a, o) => a + o[1], 0) || 1, sw = new Set((d.team || []).map(toId));
+    const opts = d.options.slice().sort((x, y) => y[1] - x[1]).map(o => `<span class="${o === pk ? "pick" : ""}">${o === pk ? "▶ " : ""}${sw.has(toId(o[0])) ? "→ " : ""}${esc(o[0])}</span>${bar(o[1] / tot)}<span class="r">${o[1]}</span><span class="r ${o === pk ? "pick" : ""}">${o[2].toFixed(3)}</span>`).join("");
+    const first = !seen.has(d.turn) && seen.add(d.turn), pred = (d.ai_pred || []).filter(p => p !== "No Move");
+    const ai = !first ? `<span class="badge">same turn (forced switch)</span>` : !pred.length ? `<span class="badge">AI model: no prediction</span>`
+      : `<span class="badge ${d.hit === false ? "bad" : "ok"}" title="the RR AI model's predicted enemy options vs what the enemy (Python AI on Showdown) chose">AI model ${esc(pred.join(" / "))} · actual ${esc(d.actual || "–")}${d.hit === false ? " ✗" : " ✓"}</span>`;
+    const dv = i && pickOf(ds[i - 1]) && pk ? pk[2] - pickOf(ds[i - 1])[2] : null;
+    return `<div class="turn"><div class="tno">T${d.turn}</div><div><div class="row">${ai}${dv != null ? `<span class="small mono ${dv < -0.2 ? "down" : "muted"}">value ${dv >= 0 ? "+" : "−"}${Math.abs(dv).toFixed(2)}</span>` : ""}</div>
+      <div class="opts"><span class="muted">option</span><span class="muted">share of visits</span><span class="r muted">visits</span><span class="r muted">value</span>${opts}</div>
+      <details><summary class="small muted">engine state the search started from</summary><pre class="state">${esc(stateTxt(d.state))}</pre></details></div></div>`;
+  }).join("");
+  const fainted = b.team.map((sp, i) => b.fainted?.[i] ? `<span class="down">✝ ${esc(sp)}</span>` : esc(sp)).join(", ");
+  return `<div class="panel"><div class="row"><h3>${esc(b.boss)} · battle ${b.battle}</h3><span class="pill ${b.won ? "running" : "failed"}">${b.won ? "WIN" : "LOSS"}</span>
+    <span class="small muted">${b.turns} turns${b.timed_out ? " · turn cap" : ""} · seed ${esc((b.battle_seed || []).join(","))} · ${ds.length} searched decisions · AI model missed ${b.miss}/${b.checked}</span></div>
+    <div class="small" style="margin-top:4px">${fainted}</div>
+    <h4 style="margin-top:10px">value of the picked option per decision · red = the largest one-turn drop</h4>${curveSVG(ds)}
+    <div class="note">Each decision runs MCTS on the Rust engine: the option played is the most-visited one; value = the mean score of the simulated futures through it (a finished battle scores win × (1 − 0.5·deaths/6), U from D1). Visits concentrate on what the search believes; values near each other mean the search is unsure.</div>
+    <div style="margin-top:8px">${turns}</div></div>`;
+}
+function statesHTML() {
+  const fs = (S.data?.states || []).filter(d => S.hist || d.file.startsWith("logs/"));
+  if (!fs.length) return `<div class="panel empty">No searched battles. Run the probe with <code>--engine 20000 --states --out logs/x.jsonl</code>; it writes <code>logs/x.states.jsonl</code>.</div>`;
+  const f = fs.find(x => x.file === S.states) || fs[0];
+  const sel = S.battle && S.battle[0] === f.file ? S.battle[1] : null;
+  const rows = f.battles.map(r => `<tr class="click ${r.k === sel ? "best" : ""}" data-act="battle" data-file="${esc(f.file)}" data-k="${r.k}"><td>${esc(r.boss)}</td><td class="n">${r.battle}</td><td class="small">${esc(r.team.join(", "))}</td>
+    <td>${r.won ? "win" : `<span class="down">loss</span>`}${r.timed_out ? " (cap)" : ""}</td><td class="n">${r.deaths}</td><td class="n">${r.turns}</td><td class="n">${r.n}</td>
+    <td class="n">${r.checked ? pct(r.miss / r.checked) : "–"}</td><td class="n ${r.drop >= .4 ? "down" : ""}">${r.drop.toFixed(2)}${r.drop_turn ? ` <span class="muted">T${r.drop_turn}</span>` : ""}</td></tr>`).join("");
+  const battle = sel != null ? battleHTML(S.got[`battle?file=${encodeURIComponent(f.file)}&k=${sel}`]) : "";
+  return `<div class="panel" style="margin-bottom:12px"><div class="row"><h3>Searched battles</h3><select data-states>${fs.map(x => `<option value="${esc(x.file)}" ${x === f ? "selected" : ""}>${esc(x.file)} (${x.n} battles)</option>`).join("")}</select>
+    <span class="small muted">${f.won}/${f.n} won · the AI model named the enemy's actual choice ${f.checked ? pct(1 - f.miss / f.checked) : "–"} of ${f.checked} turns · ${f.battles.length < f.n ? `showing the ${f.battles.length} worst` : "all battles"} (lost, deaths, value drop)</span></div>
+    <div class="scroll" style="max-height:320px;overflow-y:auto;margin-top:8px"><table class="small"><thead><tr><th>boss</th><th class="n">#</th><th>six</th><th>result</th><th class="n">deaths</th><th class="n">turns</th><th class="n">searched</th><th class="n">AI model miss</th><th class="n">largest drop</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="small muted">click a battle: per turn our options (visits, value), the pick, the AI model's prediction vs the enemy's actual move, the value curve</div></div>${battle}`;
+}
+
+// ---------- line: the policy tree of rl/line.py ----------
+function lineReach(nodes) {  // a merged state has several parents: sum over every path (the graph is acyclic)
+  const indeg = nodes.map(() => 0), reach = nodes.map(() => 0), q = [0];
+  for (const n of nodes) for (const c of n.children || []) indeg[c[3]]++;
+  reach[0] = 1;
+  while (q.length) { const i = q.pop(); for (const [p, , , c] of nodes[i].children || []) { reach[c] += reach[i] * p; if (--indeg[c] === 0) q.push(c); } }
+  return reach;
+}
+const ourFaint = lab => (String(lab).split(", them:")[0].match(/(\w+) faints/g) || []).map(m => m.replace(" faints", ""));
+const vals = n => `<span class="mono">win ${pct(n.win)} · deathless ${pct(n.clean)} · E[deaths] ${f2(n.deaths)}</span>${n.open > .005 ? ` <span class="badge" title="share of this branch's probability below ε, valued by playouts instead of exactly">${pct(n.open)} estimated</span>` : ""}`;
+function treeRows(L, i, depth, reach, path, out) {
+  const n = L.nodes[i], groups = new Map();
+  for (const [p, e, lab, c] of n.children || []) {  // siblings with the same next action and deathless odds within 2 points fold into one row
+    const k = L.nodes[c], key = `${k.action || k.leaf}|${Math.round(k.clean / .02)}`;
+    const g = groups.get(key) || groups.set(key, { p: 0, labs: [], c, e }).get(key);
+    g.p += p; g.labs.push(lab);
+  }
+  let hidden = 0;
+  for (const g of [...groups.values()].sort((a, b) => b.p - a.p)) {
+    const k = L.nodes[g.c], r = reach * g.p, key = `line|${S.line}|${path}.${g.c}`;
+    if (r < 0.001) { hidden += r; continue; }
+    const can = !!k.action, open = can && (S.open.has(key) ? r < 0.05 || depth > 2 : r >= 0.05 && depth <= 2);
+    const what = g.labs.length === 1 ? g.labs[0] : `${g.labs.length} outcomes, e.g. ${g.labs[0]}`, dies = ourFaint(g.labs[0]);
+    const next = k.action ? `→ T${k.turn + 1} <b>${esc(k.action)}</b>` : `<span class="${k.leaf === "win" ? "up" : k.leaf === "open" ? "muted" : "down"}">${esc(k.leaf === "open" ? "unexplored (below ε)" : k.leaf)}</span>`;
+    out.push(`<div class="tr" style="padding-left:${depth * 16}px">${can ? `<span class="tw" data-act="toggle" data-key="${esc(key)}">${open ? "▾" : "▸"}</span>` : "<span></span>"}
+      <span class="mono" title="probability given the parent; reach = probability of getting here from the start">${(g.p * 100).toFixed(1)}%<br><span class="muted">reach ${(r * 100).toFixed(r < .01 ? 2 : 1)}%</span></span>
+      <span>enemy <b>${esc(g.e)}</b>: <span class="${dies.length ? "down" : ""}">${esc(what)}</span> ${next}</span><span>${vals(k)}</span></div>`);
+    if (open) treeRows(L, g.c, depth + 1, r, `${path}.${g.c}`, out);
+  }
+  if (hidden > 0) out.push(`<div class="tr muted" style="padding-left:${depth * 16}px"><span></span><span class="mono">${(hidden * 100).toFixed(2)}%</span><span>reach, in branches under 0.1% (not shown)</span><span></span></div>`);
+}
+function lineHTML(L, meta) {
+  if (!L) return `<div class="empty">loading the line…</div>`;
+  if (L.error) return `<div class="empty">${esc(L.error)}</div>`;
+  const s = L.summary, root = L.nodes[0], reach = lineReach(L.nodes), c = s.check;
+  const risks = [];
+  for (const n of L.nodes) for (const [p, e, lab, ch] of n.children || []) {
+    const dies = ourFaint(lab);
+    if (dies.length && reach[n.id] * p > 1e-4) risks.push({ r: reach[n.id] * p, n, e, lab, k: L.nodes[ch], dies });
+  }
+  risks.sort((a, b) => b.r - a.r);
+  const inCI = (x, m, ci) => Math.abs(x - m) <= ci;
+  const check = c ? `<div class="panel"><h4>Showdown check · ${c.n} battles following the line vs the real (Python) AI</h4><table class="small"><thead><tr><th></th><th class="n">line</th><th class="n">Showdown</th><th></th></tr></thead><tbody>
+    <tr><td>P(win)</td><td class="n">${pct(s.win)}</td><td class="n">${pct(c.win)} ± ${pct(c.win_ci)}</td><td>${inCI(s.win, c.win, c.win_ci) ? `<span class="up">inside</span>` : `<span class="down">outside</span>`}</td></tr>
+    <tr><td>P(deathless win)</td><td class="n">${pct(s.deathless)}</td><td class="n">${pct(c.deathless)} ± ${pct(c.deathless_ci)}</td><td>${inCI(s.deathless, c.deathless, c.deathless_ci) ? `<span class="up">inside</span>` : `<span class="down">outside</span>`}</td></tr>
+    <tr><td>E[deaths]</td><td class="n">${f2(s.deaths)}</td><td class="n">${f2(c.deaths)}</td><td></td></tr><tr><td>turn cap</td><td></td><td class="n">${pct(c.capped)}</td><td></td></tr>
+    ${c.die ? L.team.map((m, i) => `<tr><td>P(${esc(m)} dies)</td><td class="n">${pct(s.die[i])}</td><td class="n">${pct(c.die[i])}</td><td></td></tr>`).join("") : ""}</tbody></table>
+    <div class="note">± is the 95% interval of the Showdown rate. Outside = the engine or the AI model disagrees with Showdown somewhere on the line, or the mean-damage approximation bites (see rl/line.py).</div></div>` : `<div class="panel muted small">no Showdown check in this file (rl/line.py --check 200)</div>`;
+  const die = `<div class="hbars">${L.team.map((m, i) => `<span>${esc(m)}</span>${bar(s.die[i], `exact ≥ ${pct(root.die_lo?.[i])}`)}<span class="mono">${pct(s.die[i])} <span class="muted">(exact ≥ ${pct(root.die_lo?.[i])})</span></span>`).join("")}</div>`;
+  const tree = [];
+  treeRows(L, 0, 1, 1, "0", tree);
+  return `<div class="cols" style="margin-bottom:12px"><div class="panel"><h4>${esc(L.boss)} · ${esc(L.team.join(", "))}</h4>
+      <div class="stats"><div><div class="muted">P(win)</div><div class="big">${pct(s.win)}</div></div><div><div class="muted">P(deathless win)</div><div class="big">${pct(s.deathless)}</div></div>
+      <div><div class="muted">E[deaths]</div><div class="big">${f2(s.deaths)}</div></div><div><div class="muted">explored exactly</div><div class="big">${pct(1 - s.unexplored)}</div></div></div>
+      <div class="note" style="margin-top:6px">Exact part: win ≥ ${pct(s.exact.win)}, deathless ≥ ${pct(s.exact.deathless)} (lower bounds: unexplored counts as neither). The ${pct(s.unexplored)} below ε is valued by ${s.playouts} playouts. ${s.nodes} nodes, ${s.searches} searches.</div></div>
+    <div class="panel"><h4>P(each mon dies)</h4>${die}</div>${check}</div>
+    <div class="panel" style="margin-bottom:12px"><h4>riskiest branches · where one of ours faints, by reach × probability</h4><div class="scroll"><table class="small"><thead><tr><th class="n">P</th><th>turn</th><th>we play</th><th>enemy</th><th>what happens</th><th>after it</th></tr></thead><tbody>
+      ${risks.slice(0, 15).map(x => `<tr><td class="n mono">${(x.r * 100).toFixed(2)}%</td><td>T${x.n.turn + 1}</td><td><b>${esc(x.n.action)}</b></td><td>${esc(x.e)}</td><td class="down">${esc(x.lab)}</td><td>${x.k.action ? `→ ${esc(x.k.action)} · ` : esc(x.k.leaf) + " · "}${vals(x.k)}</td></tr>`).join("") || `<tr><td colspan="6" class="muted">no death on the explored line</td></tr>`}</tbody></table></div></div>
+    <div class="panel"><h4>the line · our plan and the chance events that branch it</h4>
+      <div class="note">Read top-down: we play the action, the enemy (RR AI model) picks, the engine rolls (crit, miss, KO roll, secondary effect, speed tie), and the row says what we play next. Siblings after which we play the same thing with deathless odds within 2 points are folded into one row. Values are backed up exactly over the explored part. Turns are Showdown's (line.py counts from 0).</div>
+      <div class="tree" style="margin-top:8px"><div class="tr"><span></span><span class="mono">T${root.turn + 1}</span><span><b>${esc(root.action)}</b> <span class="muted small">search's top: ${esc(root.top.map(([a, n, v]) => `${a} ${n} visits ${v.toFixed(3)}`).join(" · "))}</span></span><span>${vals(root)}</span></div>${tree.join("")}</div></div>`;
+}
+function renderLine() {
+  const ls = (S.data?.lines || []).filter(d => S.hist || d.file.startsWith("logs/"));
+  if (!ls.length) return `<div class="empty">No battle lines. <code>uv run python rl/line.py --events results/rr_p1b_ceiling.events.jsonl --boss ERIKA --label cover --out logs/line_erika.json</code> writes one.</div>`;
+  const m = ls.find(x => x.file === S.line) || ls[0];
+  S.line = m.file;
+  const url = `line?file=${encodeURIComponent(m.file)}`;
+  if (!(url in S.got)) getJSON(url);
+  return `<div class="panel row" style="margin-bottom:12px"><select data-line>${ls.map(x => `<option value="${esc(x.file)}" ${x === m ? "selected" : ""}>${esc(x.boss)} · ${esc(x.team.join(", "))} (${esc(x.file)})</option>`).join("")}</select>
+    <span class="small muted">the battle line is a policy tree: our search's pick at every decision × every enemy choice and chance outcome, with exact probabilities (an MDP: the enemy is a known script)</span></div>${lineHTML(S.got[url], m)}`;
+}
+
+// ---------- what each component uses (static; rl/RR_PLAN.md plan v3, architecture page) ----------
+const USES = [
+  ["Which moves", "Legal pool (level-up ≤ level, TMs in hand, tutors reached); damage of every move against each boss mon; utility classes (priority, pivot, recovery, status, speed control)", "Rules today (best STAB + coverage + one status). From phase 3: calc shortlist of ~8–10, best 4 by row gain, battles test the utility slots", "Runs → a box → fielded six; Matrices"],
+  ["Which six and lead", "6×6 matchup cells (damage each way, KO, who is faster, under the arena); paired battle results", "Greedy cover (and a battle screen for --chooser searched) today; lead = best answer to the boss's lead. From phase 3: sequential halving over cover, archetypes and one-swap mutations", "Runs → a box (or a boss's best team) → answer table, pick order, screen"],
+  ["Each turn's move", "The full battle state (both teams' HP, status, boosts, field, items); the boss's known sets", "MCTS on the Rust engine, 20k iterations; the enemy in the tree is the RR AI model mixed with search (p = 0.8, default since phase 1); leaves scored by a hand-written evaluation (fitted in phase 4)", "Traces → searched battles: visits and value per option, predicted vs actual enemy move, value curve"],
+  ["What to do after a crit or miss", "Exact outcome odds from the engine; the AI model's weighted choices", "Line planner (rl/line.py): policy tree, expanded while a branch has ≥ ε chance, the rest valued by playouts", "Line: P(win), P(deathless), per-mon death risk, unexplored share, Showdown check"],
+  ["Is the engine right?", "Logged turns of bad battles and a 5% random control", "Per-turn comparison with ~200 Showdown replays of the same turn (phase 1.5, engine_diff --from-states)", "Cross-check report (not built yet)"],
+];
+const STEPS = ["Showdown's state is converted to the Rust engine (rl/convert.py).",
+  "20,000 times: walk down the tree choosing our option by UCB (try promising moves, still explore the rest); the enemy's option comes mostly (p = 0.8) from the RR AI model, otherwise from the search.",
+  "At a new node the engine lists the chance outcomes (crit, miss, damage roll, secondary effect) with their probabilities and samples one (crits and rolls at the root and depth 1 only).",
+  "The leaf is scored; a finished battle scores U = win × (1 − 0.5 · deaths/6). The score is averaged back up the path.",
+  "Our most-visited option is played on Showdown; the Python RR AI plays the enemy's move."];
+function renderUses() {
+  return `<div class="panel" style="margin-bottom:12px"><h3>What each decision looks at</h3>
+    <div class="note" style="margin:4px 0 8px">No part uses species identity or memorised boss facts: everything comes from the game data, the damage calc and battles. Two parts: the <b>planner</b> runs once per boss (six, lead, sets, line); the <b>battler</b> runs every turn (a tree search that plays a battle, which the planner uses to score teams).</div>
+    <div class="scroll"><table><thead><tr><th>decision</th><th>uses</th><th>decided by</th><th>see it in</th></tr></thead><tbody>
+    ${USES.map(r => `<tr>${r.map((c, i) => `<td class="${i ? "small" : ""}">${i ? esc(c) : `<b>${esc(c)}</b>`}</td>`).join("")}</tr>`).join("")}</tbody></table></div></div>
+    <div class="panel"><h3>One turn of the battler</h3><ol class="small">${STEPS.map(s => `<li>${esc(s)}</li>`).join("")}</ol>
+    <div class="note">Sources: rl/RR_PLAN.md (plan v3), rl/research/final_fable.md §7 and final_neon.md §7, the architecture page (claude.ai/artifact/Y4iDRRU9vDPKCvqRJEypy4).</div></div>`;
+}
+
 // ---------- matrices ----------
 function renderMatrices() {
   const ms = (S.data?.matrices || []).filter(d => S.hist || d.file.startsWith("logs/"));
@@ -429,7 +633,7 @@ function renderMatrices() {
 }
 
 // ---------- shell ----------
-const VIEWS = { runs: renderRuns, compare: renderCompare, deaths: renderDeaths, traces: renderTraces, matrices: renderMatrices };
+const VIEWS = { runs: renderRuns, compare: renderCompare, deaths: renderDeaths, traces: renderTraces, matrices: renderMatrices, line: renderLine, uses: renderUses };
 function render() {
   $("tabs").innerHTML = TABS.map(([k, l]) => `<a href="#${k}" class="${tab() === k ? "on" : ""}">${l}</a>`).join("");
   if (S.data) $("main").innerHTML = (VIEWS[tab()] || renderRuns)();
@@ -455,6 +659,11 @@ document.addEventListener("click", e => {
   if (a.dataset.act === "close") return $("dlg").close();
   if (a.dataset.act === "watch") return window.open(a.dataset.href, "_blank", "noopener");
   if (a.dataset.act === "toggle") { S.open.has(a.dataset.key) ? S.open.delete(a.dataset.key) : S.open.add(a.dataset.key); return render(); }
+  if (a.dataset.act === "draft-team") {
+    const [rid, boss] = a.dataset.key.split("|"), b = runById(rid).bosses.find(x => x.name === boss), t = b.teams[+a.dataset.i];
+    $("dlgt").textContent = `${boss} · ${t.label} · draft`; $("dlgb").innerHTML = draftHTML(t, b.boss_start?.enemy || []) || "no matrix for this six"; return $("dlg").showModal();
+  }
+  if (a.dataset.act === "battle") return openBattle(a.dataset.file, +a.dataset.k);
   if (a.dataset.act === "mx-team") {
     e.stopPropagation();
     const [rid, boss] = a.dataset.key.split("|"), b = runById(rid).bosses.find(x => x.name === boss), t = b.teams[+a.dataset.i];
@@ -465,6 +674,8 @@ document.addEventListener("change", e => {
   if (e.target.id === "hist") { S.hist = e.target.checked; return render(); }
   if (e.target.dataset.cmp) { S.cmp[+e.target.dataset.cmp] = e.target.value || null; return render(); }
   if ("matrix" in e.target.dataset) { S.matrix = e.target.value; return render(); }
+  if ("states" in e.target.dataset) { S.states = e.target.value; S.battle = null; return render(); }
+  if ("line" in e.target.dataset) { S.line = e.target.value; return render(); }
 });
 window.addEventListener("hashchange", render);
 render(); load(); setInterval(load, 30000);

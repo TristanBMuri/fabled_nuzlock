@@ -131,6 +131,7 @@ function dumpSide(side) {
     pokemon: side.pokemon.map((p, i) => ({
       species: p.species.id, types: p.getTypes(), level: p.level, weightkg: p.getWeight() / 10, hp: p.hp, maxhp: p.maxhp,
       stats: p.storedStats, ability: p.ability, item: p.item, status: p.status, hpType: p.hpType || '',
+      nature: p.set.nature || '', evs: p.set.evs,  // a mega's stats are recomputed from them (rl/convert.py)
       // rest: Rest sets its own fixed 3-turn timer, with the sleeper as the source
       sleep: p.status === 'slp' ? { time: p.statusState.time, start: p.statusState.startTime,
         rest: p.statusState.source === p && p.statusState.startTime === 3 } : null,

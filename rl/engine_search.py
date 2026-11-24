@@ -47,6 +47,7 @@ class EngineSearcher:
         self.stats = Counter()
         self.last_scores: dict[str, float] = {}
         self.log, self.tag = None, {}
+        self.fixed_seed = None
 
     # the probes seed and read the searcher's attributes (rng, counters): forward them
     def __getattr__(self, name):
@@ -86,6 +87,8 @@ class EngineSearcher:
                                      trick_room_turns_remaining=state.trick_room_turns_remaining)
         # seeded from the battle's searcher rng, so a seeded battle replays exactly
         seed = int(self.fallback.rng.integers(1, 2 ** 62)) if hasattr(self.fallback, "rng") else None
+        if self.fixed_seed is not None:  # one deterministic policy pi(state) (rl/line.py's, for its Showdown check)
+            seed = self.fixed_seed
         if self.opponent == "ai" and side == "p1":
             res = convert.pe.monte_carlo_tree_search_vs_ai(state, 60_000, self.iterations, seed=seed,
                                                            p_model=self.p_model).side_one

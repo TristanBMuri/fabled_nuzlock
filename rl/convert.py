@@ -134,6 +134,9 @@ def _mon(p: dict, issues: list):
                    item=item or "none", attack=st["atk"], defense=st["def"], special_attack=st["spa"],
                    special_defense=st["spd"], speed=st["spe"], status=STATUS.get(p["status"], "none"),
                    sleep_turns=max(0, slept), rest_turns=rest, weight_kg=p["weightkg"],
+                   # the engine recomputes a mega's stats from these (IVs: always 31 there)
+                   **({"nature": p["nature"].lower() or "serious", "evs": tuple(p["evs"][k] for k in ("hp", "atk", "def", "spa", "spd", "spe"))}
+                      if p.get("evs") else {}),
                    mega_evolved=p["species"] in _RR_MEGAS, moves=[pe.Move(id=_move_id(m, p), pp=pp) for m, pp in p["moves"]])
 
 

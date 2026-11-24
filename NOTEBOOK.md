@@ -2870,3 +2870,56 @@ not comparable), and `convert` dropped Showdown's `stall` volatile (now `side_co
   stalling into the turn cap). The 20% insurance share keeps the search from stalling.
 - **Pool ceiling with the new search** (`rr_p1b_ceiling`, n = 12): Erika 100%, **Koga 8 → 17%,
   Blaine 8 → 25%**. The wall loosens, not yet broken.
+
+## 2026-11-24 — Plan v3, phase 1.5: the battle line (`rl/line.py`), first numbers
+
+The line is our search's policy written out as a tree against the Rust AI model: at our nodes
+the action MCTS-vs-AI (p = 0.8, fixed seed) picks, at chance nodes every enemy choice the model
+weighs × every outcome `generate_instructions` lists, with exact probabilities. Merged by state
+string (a graph); cycles and branches below `eps` reach are unexplored and valued by playouts
+from them under the same policy (Monte Carlo policy evaluation, drawn by reach). Exact-only
+expansion does not reach the end of a 6v6 fight: at eps = 5e-5 still 94% unexplored (1k
+iterations); with the full 20k-iteration search the policy ends fights sooner and at eps = 0.002
+**42% of the probability is exact** (1,034 nodes + 200 playouts, 55 s).
+
+**Erika, the cover six** (armarouge, beheeyem, swalot, noivern, corviknight, slowbro-galar):
+
+| | P(win) | P(deathless) | E[deaths] | P(lead armarouge dies) |
+|---|---|---|---|---|
+| line (exact 42% + playouts) | 98.6% | 35.4% | 2.00 | 56% |
+| engine-only playouts from the root | 98.5% | 39.0% | 1.82 | 53% |
+| Showdown, 100 battles, same fixed-seed policy (`--check`) | 88 ± 6% | 56 ± 10% | 1.20 | 17% |
+| Showdown with the Rust AI as enemy | 85 ± 7% | 52 ± 10% | 1.43 | |
+
+- **Not calibrated yet:** the engine's whole-fight simulation is more optimistic about winning
+  and more pessimistic about deaths than Showdown. Not the AI model (the Rust enemy gives the
+  same gap); turn 1 agrees exactly (engine_diff: tv 0.002); the tree code agrees with plain
+  engine playouts. Part of it is that small HP differences flip near-tied search choices (turn 2:
+  slowbro 4744 vs swalot 4455 visits), so "the same policy" is not reproduced exactly on
+  Showdown. The per-turn cross-check (`engine_diff --from-states`, Opus delegate) is to find the rest.
+
+**The gap, found** (Opus delegate; `engine_diff.py --from-states` replays logged battles from their
+seed and actions and compares every turn: engine outcome table vs 100 Showdown forks; classes
+engine / AI / converter / luck / search, with a 5% control). Erika's flags were 31 / 34 engine:
+- Synchronoise hit any target in the engine (Showdown: only one sharing a type with the user):
+  the search used it and lost; Quick Draw never moved first (Showdown 30%); Roost skipped the
+  Grassy Terrain heal; `last_used_move` was stale outside the MCTS (the AI model's first-turn
+  rules); megas were recomputed without nature / EVs (`to_engine`, the bridge). poke-engine
+  `624921c`, `rl/convert.py`, `ai_util/sim_bridge.js`.
+- The line searched with death weight 0 (POKE_ENGINE_DEATH unset), the battler with 60: a
+  different policy (35%-HP Armarouge into Mega Sceptile). `Line` now sets 60.
+
+| Erika cover six, 200 Showdown battles | P(win) | P(deathless) | E[deaths] |
+|---|---|---|---|
+| line, before | 98.6% | 35.4% | 2.00 |
+| line, after (`results/rr_line_erika.json`) | 96.0% | 38.8% | 1.01 |
+| Showdown, after | 97.0 ± 2.4% | 47.5 ± 6.9% | 0.89 |
+
+P(win) and deaths agree; P(deathless) is ~9 points pessimistic (Galarian Slowbro 47% vs 38%).
+Delegate's runs (100 battles): Misty box 1 line 20% / 0 / 5.4 vs 11 ± 6% / 0 / 5.6; Brock box 2
+98% / 36% / 1.0 vs 96 ± 4% / 24 ± 8% / 1.3. Residual engine gap: a damage roll is branched only
+when it KOs directly, not when it decides whether poison / chip damage finishes a mon later; and
+Showdown forks share a sleep counter, so the cross-check over-reports sleep turns as engine bugs.
+The engine fixes change the battler too (Erika's Showdown wins 88 → 97%): the phase-1 tables
+predate them.
+- Views (Opus delegate): `ui/` Draft, Trace (from states.jsonl), Line, "what it uses".

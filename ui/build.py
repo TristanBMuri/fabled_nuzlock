@@ -1,6 +1,9 @@
 """Dashboard data (UI_TODO.md): folds the probe's event files (`<run>.events.jsonl`) and
 the trace / deaths / matrix JSON (`rr_trace.py`, `rr_deaths.py`, `rr_matchups.py --json`)
-from logs/ and results/ into one object for ui/index.html.
+from logs/ and results/ into one object for ui/index.html. The searched battles
+(`<run>.states.jsonl`, `--states`) and battle lines (`rl/line.py --out logs/line_*.json`) are
+indexed here and read one at a time by the page (served mode only):
+`/battle?file=logs/x.states.jsonl&k=N` (one battle, every decision), `/line?file=logs/line_x.json`.
 
   uv run python ui/build.py               # writes ui/data.json once
   uv run python ui/build.py --serve       # http://localhost:8765, data.json rebuilt on every fetch
@@ -96,10 +99,18 @@ def fold(path: Path, where: str, ps: str) -> dict:
         b = bosses.setdefault(e.get("boss"), {"name": e.get("boss"), "teams": [], "boxes": []}) if "boss" in e else None
         if e["kind"] in ("team", "box"):
             b[{"team": "teams", "box": "boxes"}[e["kind"]]].append(e)
+        elif e["kind"] in ("draft", "screen"):  # matched to their six below
+            b.setdefault(e["kind"], []).append(e)
         elif b is not None:
             b[e["kind"]] = e
     for b in bosses.values():
         b["boxes"].sort(key=lambda e: e.get("i", 0))  # the workers finish boxes out of order
+        # a box's draft / screen events carry no box number: the six they produced identifies them
+        drafts = {tuple(sorted(p["pick"] for p in d["picks"])): d["picks"] for d in b.pop("draft", [])}
+        screens = {tuple(sorted(s["scored"][0][0])): s["scored"][:24] for s in b.pop("screen", []) if s["scored"]}
+        for x in b["boxes"] + b["teams"]:
+            six = tuple(sorted(x["team"]))
+            x["draft"], x["screen"] = drafts.get(six), screens.get(six)
     end = next((e for e in events if e["kind"] == "end"), None)
     out = start["config"].get("out") or ""
     running = end is None and where == "logs" and bool(out) and Path(out).name in ps
@@ -112,9 +123,104 @@ def fold(path: Path, where: str, ps: str) -> dict:
             "bosses": [b for name, b in bosses.items() if name is not None]}
 
 
+CACHE: dict = {}  # path -> ((mtime, size), value): the states files are tens of MB, data.json is rebuilt every fetch
+
+
+def cached(path: Path, fn):
+    st = path.stat()
+    key = (st.st_mtime, st.st_size)
+    if CACHE.get(path, (None,))[0] != key:
+        CACHE[path] = (key, fn(path))
+    return CACHE[path][1]
+
+
+def enemy_act(chosen: list, turn: int) -> str | None:
+    """The enemy's first chosen action of a turn, as a move / species id ("move bulletseed mega" -> bulletseed)."""
+    a = next((a for t, side, a in chosen if t == turn and side == "p2"), None)
+    return a and "".join(c for c in a.split()[1].lower() if c.isalnum())
+
+
+def pred_hit(pred: list | None, act: str | None) -> bool | None:
+    """Did the AI model name the enemy's actual choice? None when there is nothing to compare."""
+    pred = [p.lower().removeprefix("switch ") for p in pred or [] if p != "No Move"]
+    pred = [p.rstrip("0123456789") if p.startswith("hiddenpower") else p for p in pred]  # hiddenpowerrock60
+    if not pred or not act:
+        return None
+    return any(act == "".join(c for c in p if c.isalnum()) or act.startswith(p) for p in pred)
+
+
+def picked(d: dict) -> list:
+    return max(d["options"], key=lambda o: (o[1], o[2], o[0])) if d["options"] else [d.get("pick"), 0, None]
+
+
+def states_index(path: Path) -> list[dict]:
+    """One row per battle of a states file: its result, AI-model misses, the largest one-turn
+    drop of the picked option's value, and the byte offsets of its decision lines. Decisions are
+    written before their battle line by the same worker; workers interleave, the tag separates them."""
+    pending, out, off = {}, [], 0
+    with open(path, "rb") as f:
+        for line in f:
+            try:
+                e = json.loads(line)
+            except json.JSONDecodeError:
+                e = {}
+            key = (e.get("boss"), e.get("battle"), str(e.get("battle_seed")), str(e.get("team")))
+            if e.get("kind") == "decision":
+                pending.setdefault(key, []).append((off, e["turn"], e.get("ai_pred"), picked(e)[2]))
+            elif e.get("kind") == "battle":
+                ds, seen = pending.pop(key, []), set()
+                hits = [pred_hit(p, enemy_act(e["chosen"], t)) for _, t, p, _ in ds if not (t in seen or seen.add(t))]
+                vals = [v for *_, v in ds if v is not None]
+                drop = max([(a - b, ds[i + 1][1]) for i, (a, b) in enumerate(zip(vals, vals[1:]))], default=(0, None))
+                out.append({"k": len(out), "boss": e["boss"], "battle": e["battle"], "team": e["team"], "won": e["won"],
+                            "deaths": sum(e["fainted"]), "turns": e["turns"], "timed_out": e["timed_out"],
+                            "n": len(ds), "miss": hits.count(False), "checked": len(hits) - hits.count(None),
+                            "drop": round(drop[0], 3), "drop_turn": drop[1], "offsets": [o for o, *_ in ds], "line": off})
+            off += len(line)
+    return out
+
+
+def states_summary(path: Path, where: str) -> dict:
+    rows = cached(path, states_index)
+    # the page lists at most 300 battles a file: the bad ones first (lost, most deaths, largest drop)
+    show = sorted(rows, key=lambda r: (r["won"], -r["deaths"], -r["drop"]))[:300]
+    return {"file": f"{where}/{path.name}", "mtime": path.stat().st_mtime, "n": len(rows),
+            "won": sum(r["won"] for r in rows), "miss": sum(r["miss"] for r in rows), "checked": sum(r["checked"] for r in rows),
+            "battles": [{k: v for k, v in r.items() if k not in ("offsets", "line")} for r in show]}
+
+
+def battle(query: str) -> dict | None:
+    """One battle of a states file: the battle line plus every decision (state string, options, pick, AI model's prediction)."""
+    q = urllib.parse.parse_qs(query)
+    name, k = q.get("file", [""])[0], int(q.get("k", ["-1"])[0] or -1)
+    if name not in {f"{w}/{f.name}" for w in DIRS for f in (ROOT / w).glob("*.states.jsonl")}:
+        return None
+    rows = cached(ROOT / name, states_index)
+    if not 0 <= k < len(rows):
+        return None
+    row, decisions = dict(rows[k]), []
+    with open(ROOT / name, "rb") as f:
+        for o in row.pop("offsets"):
+            f.seek(o)
+            decisions.append(json.loads(f.readline()))
+        f.seek(row.pop("line"))
+        e = json.loads(f.readline())  # the battle line: both sides' chosen actions
+    row.update(chosen=e["chosen"], fainted=e["fainted"], battle_seed=e["battle_seed"])
+    for d in decisions:
+        d["actual"] = enemy_act(row["chosen"], d["turn"])
+        d["hit"] = pred_hit(d.get("ai_pred"), d["actual"])
+    row["decisions"] = decisions
+    return row
+
+
+def line_summary(path: Path) -> dict:
+    d = json.loads(path.read_text())
+    return {"boss": d["boss"], "team": d["team"], "summary": d["summary"]}
+
+
 def build() -> dict:
     ps = subprocess.run(["ps", "-eo", "args"], capture_output=True, text=True).stdout
-    data = {"runs": [], "traces": [], "deaths": [], "matrices": []}
+    data = {"runs": [], "traces": [], "deaths": [], "matrices": [], "states": [], "lines": []}
     for where in DIRS:
         for f in sorted((ROOT / where).glob("*.events.jsonl")):
             try:
@@ -129,6 +235,13 @@ def build() -> dict:
                     data[kind].append({"file": f"{where}/{f.name}", "mtime": f.stat().st_mtime, **d})
                 except json.JSONDecodeError:
                     pass
+        for f in sorted((ROOT / where).glob("*.states.jsonl")):
+            data["states"].append(states_summary(f, where))
+        for f in sorted((ROOT / where).glob("line_*.json")):
+            try:
+                data["lines"].append({"file": f"{where}/{f.name}", "mtime": f.stat().st_mtime, **cached(f, line_summary)})
+            except (json.JSONDecodeError, KeyError):
+                pass
     data["runs"].sort(key=lambda r: -r["updated"])
     return data
 
@@ -153,6 +266,14 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         if path == "/replay":
             page = replay(query)
             return self.send_body(page.encode(), "text/html") if page else self.send_error(404, "no such trace (or it has no log)")
+        if path == "/battle":
+            b = battle(query)
+            return self.send_body(json.dumps(b).encode(), "application/json") if b else self.send_error(404, "no such battle")
+        if path == "/line":
+            name = urllib.parse.parse_qs(query).get("file", [""])[0]
+            if name not in {f"{w}/{f.name}" for w in DIRS for f in (ROOT / w).glob("line_*.json")}:
+                return self.send_error(404, "no such line file")
+            return self.send_body((ROOT / name).read_bytes(), "application/json")
         if path != "/data.json":
             return super().do_GET()
         self.send_body(json.dumps(build()).encode(), "application/json")

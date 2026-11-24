@@ -9,6 +9,19 @@ tables, matrix per team and box), Compare, Deaths, Traces, Matrices; the
 replay viewer (`/replay?file=…&turn=N`, p1's protocol log; sprites and the viewer load
 from play.pokemonshowdown.com, so it needs internet). The plan below is kept as the spec.
 
+**Phase 1.5 views (2026-11-24, rl/RR_PLAN.md plan v3):** *Draft* — Runs → open a box (or a
+pool boss's best team; "draft" button per team): the answer table (per boss mon our best and
+second-best answer, cell and tier, unanswered threats), the cover pick order (why, newly
+answered, gain, runner-up and its gain; `draft` events matched to their six since they carry no
+box number) and the `screen` ranking for `--chooser searched`. *Traces* → "Searched battles"
+(`<out>.states.jsonl`, indexed in build.py, the 300 worst a file listed; `/battle?file=&k=`
+reads one battle): per decision the options with visits and mean value, the pick, the AI
+model's predicted vs actual enemy move (red on a miss), the engine state string, and the value
+curve with the largest one-turn drop. *Line* — `logs/line_*.json` (`/line?file=`): summary with
+exact bounds and the Showdown check, P(each mon dies), riskiest branches (reach × P of a
+transition where one of ours faints), and the folded policy tree. *What it uses* — static table
+from the architecture page. Trace and Line need served mode.
+
 A local page that shows how every Radical Red run is going, in detail, instead
 of `scripts/rr_status.py`'s one line per log. Governing constraint still holds
 (CLAUDE.md: minimal code): one static HTML file with vanilla JS, one small
