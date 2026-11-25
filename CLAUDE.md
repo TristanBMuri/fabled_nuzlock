@@ -32,9 +32,18 @@ The user is learning RL through this project and wants to be part of every RL de
 just shown the result.
 
 - Before an RL / ML design decision (method, features, reward, gate, what to train next), lay out
-  the options, the basis for each (our data or measurements, a paper or method — say whether it
-  was read or recalled — cost, the CLAUDE.md constraints), and a recommendation. Then let the
-  user decide. Routine engineering (bug fixes, plumbing) needs no stop.
+  the options and the basis for each (our data or measurements, a paper or method — say whether it
+  was read or recalled — cost, the CLAUDE.md constraints). At a `D#` decision, ask once before
+  giving your recommendation: *"Your call first? (option + 5/7/9 confidence, or `rec`)"*, log
+  `user call: <choice> <conf>%` in that `NOTEBOOK.md` entry, then give your recommendation and let
+  the user decide (auto-off after 3 consecutive `rec`/`skip`s until re-enabled). Routine
+  engineering (bug fixes, plumbing) needs no stop.
+- When launching a multi-minute experiment run in the background, ask once while it runs: *"Bet
+  before it finishes? (outcome + 5/7/9, or `skip`)"*; if answered, post your own honest live bet
+  before reading results and record `user bet: ...` in that run's `NOTEBOOK.md` entry for
+  `/rl-tutor` to settle later.
+- When the user invokes `/rl-tutor` or explicitly asks to learn or be quizzed on RL, follow
+  `.agents/skills/rl-tutor/SKILL.md`. Never enter tutor mode during normal debugging or coding.
 - After an experiment, explain what the result means and what it rules in or out, before
   proposing the next step.
 - Name and briefly explain the RL concept involved (e.g. "this is policy iteration", "this is

@@ -21,3 +21,6 @@ ui/data.json
 
 # poke-engine: our fork of pmariglia/poke-engine (branch nuzlock), not our code
 poke-engine/
+
+# rl-tutor local learner ledger (shared across worktrees via --git-common-dir)
+rl/LEARNING.md
