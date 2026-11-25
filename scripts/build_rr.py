@@ -57,6 +57,18 @@ console.log(JSON.stringify({learnsets, evos, species, moves}));
 
 STATS = ("hp", "atk", "def", "spa", "spd", "spe")
 ITEM_ALIASES = {"Charzardite X": "Charizardite X", "Charzardite Y": "Charizardite Y"}  # typos in the dump
+SPECIES_ALIASES = {
+    "taurosblaze": "taurospaldeablaze",
+    "taurosaqua": "taurospaldeaaqua",
+    "ursalunabm": "ursalunabloodmoon",
+    "flabébé": "flabebe",
+    "anycappikachu": "pikachuoriginal",
+}
+
+
+def norm_species(name: str) -> str:
+    s = to_id_str(name)
+    return SPECIES_ALIASES.get(s, s)
 
 
 def trainer_evs(trainer: str) -> dict:
@@ -281,18 +293,25 @@ def progression() -> None:
         if mid not in tms or (w or 999) < tms[mid]["before_trainer"]:
             tms[mid] = {"name": cells[0][0], "before_trainer": w if w is not None else 999, "from": f"tutor: {place}"}
     # gifts and in-game trades: species, level (a trade keeps the given mon's level: None), the trainer
-    # index at which they are in hand (rematch rewards and the Sevii Islands never), how
+    # index at which they are in hand (rematch rewards and the Sevii Islands never), kind, how
     gifts = []
     for g in enc["gifts"]:
+        if g["location"] == "SAFFRON CITY'S DOJO" and norm_species(g["species"]) == "taurospaldeaaqua":
+            continue  # merged spreadsheet cell with Tauros-Blaze; recorded as choice_options below
         w = when(f"{g['location']}, {g['requirements']}")
         lv = re.search(r"Lv\. ?(\d+)", g.get("info", "") + g.get("requirements", ""))
         if w is not None and lv:
-            gifts.append({"species": to_id_str(g["species"]), "level": int(lv.group(1)), "t": w,
-                          "how": f"gift: {g['location']} — {g['requirements']}"})
+            rec = {"species": norm_species(g["species"]), "level": int(lv.group(1)), "t": w,
+                   "kind": "gift", "how": f"gift: {g['location']} — {g['requirements']}"}
+            if g["location"] == "SAFFRON CITY'S DOJO" and rec["species"] == "taurospaldeablaze":
+                rec["choice"] = "SAFFRON DOJO"
+                rec["choice_options"] = ["taurospaldeablaze", "taurospaldeaaqua"]
+            gifts.append(rec)
     for tr in enc["trades"]:
         w = when(tr["location"])
         if w is not None and tr["receive"] != "?":
-            gifts.append({"species": to_id_str(tr["receive"]), "level": None, "t": w,
+            gifts.append({"species": norm_species(tr["receive"]), "level": None, "t": w,
+                          "kind": "trade", "give": norm_species(tr["give"]),
                           "how": f"trade: give {tr['give']} at {tr['location']}"})
     (RR / "order.json").write_text(json.dumps({"entries": entries, "gates": gates, "gifts": gifts}, indent=0))
     (RR / "tms.json").write_text(json.dumps(tms))
@@ -384,13 +403,23 @@ def main() -> None:
     bosses = json.load(open(RR / "tracker_bosses.json"))
     names = {e["species"] for l in enc["locations"] for t in l["methods"].values() for e in t}
     names |= {p["species"] for mode in bosses.values() for c in mode["categories"] for x in c["bosses"] for p in x["pokemon"]}
-    # the player's possible starters (every generation; drawn at random per run) are not wild encounters
+    names |= {g["species"] for g in enc.get("gifts", []) if g.get("species")}
+    names |= {tr["receive"] for tr in enc.get("trades", []) if tr.get("receive") and tr["receive"] != "?"}
+    names |= {tr["give"] for tr in enc.get("trades", []) if tr.get("give")}
+    names |= {sp for sps in enc.get("fossils", {}).values() for sp in sps}
+    names |= {sp for sps in enc.get("eggVendor", {}).values() for sp in sps}
+    names |= {st["species"] for st in enc.get("statics", []) if st.get("species")}
+    # the player's possible starters (every generation) are not wild encounters
     starters = ["bulbasaur", "charmander", "squirtle", "chikorita", "cyndaquil", "totodile", "treecko", "torchic", "mudkip",
                 "turtwig", "chimchar", "piplup", "snivy", "tepig", "oshawott", "chespin", "fennekin", "froakie", "rowlet",
                 "litten", "popplio", "grookey", "scorbunny", "sobble", "sprigatito", "fuecoco", "quaxly"]
-    ids = sorted({to_id_str(n) for n in names} | set(starters))
+    ids = sorted({norm_species(n) for n in names} | set(starters))
     raw = subprocess.run(["node", "-e", NODE, str(FORK), *ids], capture_output=True, text=True, check=True).stdout
     data = json.loads(raw)
+    # Fix Burmy cloak evolutions (Showdown Dex shares base Burmy's evos list across all 3 cloaks)
+    for bsp, keep_worm in (("burmy", "wormadam"), ("burmysandy", "wormadamsandy"), ("burmytrash", "wormadamtrash")):
+        if bsp in data["evos"]:
+            data["evos"][bsp] = [e for e in data["evos"][bsp] if e["to"] in (keep_worm, "mothim")]
     missing = [i for i in ids if i not in data["species"]]
     (RR / "learnsets.json").write_text(json.dumps(data["learnsets"]))
     (RR / "evolutions.json").write_text(json.dumps(data["evos"]))

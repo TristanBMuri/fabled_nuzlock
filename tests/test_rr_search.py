@@ -31,6 +31,15 @@ def test_score_is_progress_while_losing_and_the_objective_after():
     assert abs(rs.score((True, False, 0.5, 1.5, None, None, False), False, 2) - (1 - 0.5 * 1 / 6)) < 1e-9  # deaths over 6, not the party
 
 
+def test_d14_score_prefers_sacrificing_expendable_over_carry():
+    d14 = {"bronzong": 0.25, "bibarel": 0.0}
+    win_lose_carry = (True, False, 1 / 6, 1 + 5 / 6, None, None, False, ("bronzong",))
+    win_lose_filler = (True, False, 1 / 6, 1 + 5 / 6, None, None, False, ("bibarel",))
+    assert rs.score(win_lose_filler, False, 6, d14) == 1.0
+    assert abs(rs.score(win_lose_carry, False, 6, d14) - 0.75) < 1e-9
+    assert rs.score(win_lose_filler, False, 6, d14) > rs.score(win_lose_carry, False, 6, d14)
+
+
 def test_key_keeps_the_lead_but_not_the_order_of_the_rest_or_the_moves():
     s = lambda sp, moves: {"from": sp, "moves": moves, "item": None, "nature": "Modest", "ability": "x"}
     a = (s("a", ["m1", "m2"]), s("b", ["m3"]), s("c", ["m4"]))

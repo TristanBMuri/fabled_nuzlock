@@ -3175,3 +3175,85 @@ scores an open leaf sigmoid(logit − root logit), centred like the hand evaluat
   deaths/mon, slightly fewer deathless sweeps on already-won fights).
 - **Adopted as default:** wired `data/rr/eval_weights_r2.txt` + `POKE_ENGINE_EVAL_RELATIVE=1` as default
   in `rl/engine_search.py` and `rl/line.py` (`POKE_ENGINE_EVAL_WEIGHTS=""` reverts to hand). Phase 4 done.
+
+## 2026-11-25 — Plan v3, phase 6 (first pass): encounter routing, Celadon eggs & D14 (`scripts/rr_route.py`, `results/rr_p6_route*`)
+
+Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
+- Models the previously unused `tracker_encounters.json` choice pools: **Celadon Mansion Starter Egg
+  Vendor** (`eggVendor`, pre-Erika `#33`: Green/Blue/Red/Yellow Shards), Mt. Moon & Celadon shard
+  fossils, Saffron Dojo (Tauros-Blaze vs Aqua), plus all 27 starters with Mega forms once their Mega
+  Stone unlocks (`items.json`: Swampertite `#44`, Kanto starter megas `#53`, Blazikenite `#81`, Sceptilite `#102`).
+- Starter cover ranking (Brock → Blaine, with Mega forms): **#1 Mudkip** (6.98, Swampertite `#44`),
+  **#2 Bulbasaur** (6.67, Venusaurite `#53`), **#3 Fuecoco** (6.52), **#4 Fennekin** (6.25), **#5 Chikorita** (5.97);
+  Celadon Eggs pre-Erika: **Red Shard** (E[gain] 4.99) > **Green** (4.67) > **Blue** (3.46) > **Yellow** (0.00).
+- **D14 per-mon death costs** (`death_costs()`): ranks each mon in a box by drop in future-boss value when
+  removed, naming the exact upcoming threats lost, normalised around `0.5/6`.
+
+**Phase 6 gate test (30 boxes × 5 bosses, `--seed 5`, default R2 battler, `cover_team` chooser):**
+- Pass 1 (binary `2·safe + race + 0.1·edge` cover, `results/rr_p6_route.log`): routed +2.4 ± 5.4% overall
+  (Brock +2.2%, **Misty +10.6%** `72.8 → 83.3%`, Erika −8.9%, Koga +5.0% / +6.7% w/ egg, Blaine +3.3%).
+  Two bugs found: binary score saturated at `3.1` on 38–74 mon boxes (alphabetical tie-breaking) and egg roll
+  scrambled wild RNG.
+- Pass 2 (unsaturated continuous `cell_score` + 3-deep cover + strictly paired per-location RNG, `results/rr_p6_route2.log`):
+  - `routed` vs `random`: Brock +2.2%, **Misty +6.1%** (`64.4 → 70.6%`), Erika −7.2%, Koga −3.9%, Blaine −7.8%
+    (**−2.1 ± 5.4% overall**, SPRT δ 10%: H0, LLR −9.37).
+  - `routed+egg` vs `routed` (strictly identical wild boxes + 1 Celadon starter): Erika **+3.9%** (+6.5% on the
+    18 boxes where the team changed), Koga −1.6%, Blaine −3.4% (−9.1% on 11 changed boxes because `cover_team`
+    dropped `Floette-Eternal` to field `Bulbasaur`!).
+  - `routed+full` (Bulbasaur starter + routed methods + egg + choice gifts) vs `random`: **Misty +12.8%**
+    (`64.4 → 77.2%`, −0.102 d/mon), Brock +2.2% (−0.048 d/mon), Erika −7.8%, Koga −1.7%, Blaine 0.0% (+1.1 ± 5.5% overall).
+- **Root cause found (Optimizer's Curse on the paper matrix):** correlation between static 1v1 paper score
+  vs real R2/R3 battle win-rate lift across species:
+  - Misty: paper **`+0.455`**, solo Showdown battle `+0.019` → paper routing worked (+6 to +13 pts).
+  - Erika: paper `+0.071`, **solo battle `+0.274`**.
+  - Koga: paper **`−0.052`**, **solo battle `+0.135`** (paper router chased `dondozo` 24/30 & `wailmer` 16/30; real winners are `bronzor +36%`, `dewpider +15%`, `heracross +14%`).
+  - Blaine: paper **`−0.182`**, **solo battle `+0.236`** (paper router chased `slowpokegalar` & `exeggcute`).
+- **Takeaway:** Static paper-matrix routing works early (Misty) but fails mid/late because the paper matrix
+  correlates negatively with real 6v6 outcomes at Koga/Blaine — routing needs a battle-grounded scorer
+  (`tp.solo_stage` + `rr_search`, or Phase 5's T1 learned team scorer).
+
+### 2026-11-25 — Phase 6 Step A + Step B: branched evolutions, Nuzlocke gift/trade rules, duel-grounded routing, D14 in `rr_search`, ability audit
+
+- **Step A (evolution, gift/trade, and ID fidelity):**
+  - `scripts/build_rr.py` + rebuilt `data/rr/*.json`: included gifts/trades/fossils/eggVendor/statics in dex build
+    (`kubfu` → `urshifu`/`urshifurapidstrike` now exists), normalized tracker IDs (`taurosblaze`/`taurosaqua` →
+    `taurospaldeablaze`/`taurospaldeaaqua`, `ursalunabm` → `ursalunabloodmoon`, `flabébé` → `flabebe`,
+    `anycappikachu` → `pikachuoriginal`), fixed Burmy cloak evos (`burmytrash` → `wormadamtrash`/`mothim`), tagged
+    `order.json["gifts"]` with `kind` (`gift`/`trade`), `give`, and Saffron Dojo `choice_options`.
+  - Branched evolutions (`gauntlet.evolve_options`, `expand_branches`, `evo_line`, `base>target` keys,
+    `cover(..., limits, group_fn)`): all 35 branched species (Eevee ×1–2, Charcadet, Kirlia, Slowpoke, Applin,
+    Kubfu, Hisuian starters, etc.) now expand across all legal branches with strict per-caught-mon slot limits
+    (allowing 2 distinct Eeveelutions from Route 5 + Celadon 4F Eevees).
+  - User's Nuzlocke rules wired into `rr_probe.py` & `rr_route.py`: free starter choice out of 27, 1 Celadon
+    Starter Egg total (choose shard pool), accepted story gifts, in-game trades disabled unless the box actually
+    owns a mon in `evo_line(give)` (and swapping out the traded mon if executed). Evolved names (`caught→evolved`)
+    printed everywhere.
+- **Step B (duel-grounded routing + D14 death costs in `rr_search.py`):**
+  - Validated correlation against logged R2/R3/P3 real-battle win rates: Showdown 1v1 `duel(n=2)` beat paper on
+    Misty (`+0.306` vs `+0.204`), Erika (`+0.261` vs `+0.167`), and Blaine (`+0.225` vs `+0.162`), while matching
+    Koga (`+0.381` / `+0.424` w/ solo).
+  - Built cached Showdown duel routing (`scripts/rr_route.py --scorer duel`, `logs/duel_cache/`, 33s cold / 9s warm)
+    and wired D14 per-mon death costs (`--d14-bosses`) into `scripts/rr_search.py` (`one_battle` returns fainted
+    species tuple; `score()` scores `win * (1 - Σ_dead c_i)`).
+  - **Phase 6 paired 30-box × 5-boss benchmark (`results/rr_p6_duel.log`, duel scorer + duel chooser + R2 battler,
+    seed 5, no free trades):**
+    - `routed` vs `random`: **every boss improved on both win rate and deaths/mon** — Brock +1.1% (−0.073 d/mon),
+      Misty **+11.1%** (−0.085), Erika **+5.6%** (−0.046), Koga **+5.6%** (14.4 → 20.0%, ≥50% 13 → 23%, −0.042),
+      Blaine +0.6% (≥50% 30 → 47%, −0.003); **overall +4.8% ± 4.9%, −0.050 ± 0.038 d/mon** (`n=150`, SPRT δ 5%
+      LLR +1.82; +6.9 pts turnaround over paper routing's −2.1%).
+    - `routed+egg` (+1 Celadon Starter Egg) vs `random`: Brock +1.1%, Misty **+11.1%**, Erika **+8.9%** (88.9%,
+      97% ≥50%), Koga +4.4%, Blaine +1.7% (47% ≥50%); **overall +5.4% ± 5.0%, −0.054 ± 0.039 d/mon** (LLR +2.28).
+    - `routed+full` (Mudkip starter + routed + egg + choices) vs `random`: Misty **+15.0%**, Erika **+10.0%** (90.0%),
+      Blaine **+15.6%** (48.3%, 63% ≥50%), but Brock −8.3% and Koga −10.0% (Mega Swampert drafted on 30/30 Koga
+      teams crowded out non-Water answers into Iron Bundle Freeze-Dry / Tapu Lele).
+- **Starter & Battle Bond / Emergency Exit ability audit:**
+  - Verified `Emergency Exit` in RR triggers at **end of turn** (`gen9rr/abilities.ts:185-205`) and is faithfully
+    implemented in `poke-engine/src/genx/rr_abilities.rs:768-806`; `Battle Bond` (`GRENINJABOND` → `GRENINJAASH` +
+    3-hit Water Shuriken) is implemented in both Showdown and Rust (`rr_abilities.rs:153-170`), but `Mon.pack()`
+    packed `greninja` instead of `Greninja-Bond` and `choose_ability()` defaulted 18/27 starters to
+    `Overgrow`/`Blaze`/`Torrent` (missing `Unaware` Skeledirge, `Sharpness` Samurott, `Magic Guard` Delphox,
+    `Tinted Lens` Decidueye, `Quill Rush` Decidueye-Hisui, `Self Sufficient` Torterra, `Iron Fist` Infernape,
+    `Solar Power` Charizard in Sun, `Bad Company` Serperior, `Natural Cure` Meganium, etc.).
+  - Fixed `Mon.pack()` (`Greninja-Bond`) and upgraded `rr_probe.choose_ability()` to use `mod_data.json` ability
+    ratings below boss-specific immunities/weather/Cloud Nine/Intimidate (gating weather/drawback abilities to
+    active weather); bumped `DUEL_CACHE_VERSION = 3`. Tests: 21/21 passing.

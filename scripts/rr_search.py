@@ -34,7 +34,7 @@ sys.path[:0] = [str(Path(__file__).resolve().parents[1]), str(Path(__file__).res
 import rr_team_probe as tp  # noqa: E402  (switches gauntlet to the RR game)
 import rr_probe as rp  # noqa: E402
 import gauntlet  # noqa: E402
-from gauntlet import Mon, copies, legal_pool, load_game, mega_stone  # noqa: E402
+from gauntlet import Mon, base_species, copies, format_species, legal_pool, load_game, mega_stone  # noqa: E402
 from poke_env.data import GenData, to_id_str  # noqa: E402
 from ai_util.matchup import HEALS, edge, hits_to_ko, race, safe  # noqa: E402
 
@@ -73,10 +73,19 @@ def schedule(k: int, battles: int) -> tuple[list[int], list[int]]:
     return sizes, [n0 * 2 ** r for r in range(len(sizes))]
 
 
-def score(b: tuple, low: bool, size: int) -> float:
-    """D8 for one battle (one_battle's tuple): progress - 0.5 deaths/mon while the best candidate
-    wins < 20% (low), else the objective U = win (1 - 0.5 deaths/6)."""
+def score(b: tuple, low: bool, size: int, d14_weights: dict[str, float] | None = None) -> float:
+    """D8 / D14 for one battle (one_battle's tuple):
+    - Default (D8): progress - 0.5 deaths/mon while the best candidate wins < 20% (low),
+      else U = win * (1 - 0.5 * deaths / 6).
+    - With `d14_weights` ({evolved_species: future_death_cost}, D14): replaces flat 0.5/6
+      with the sum of future-boss costs of the specific mons that fainted (b[7]), capped at 0.9
+      so any win still beats any loss while strongly preferring to sacrifice expendable filler
+      over irreplaceable future-boss carries."""
     won, _, dfrac, prog = b[:4]
+    if d14_weights is not None and len(b) >= 8:
+        fainted = b[7]
+        dead_cost = min(0.9, sum(d14_weights.get(to_id_str(sp), 0.5 / 6) for sp in fainted))
+        return prog - dead_cost if low else won * (1.0 - dead_cost)
     return prog - 0.5 * dfrac if low else won * (1 - 0.5 * dfrac * size / 6)
 
 
@@ -189,11 +198,26 @@ def flags(ctx, sp: str) -> set:
         | ({"bulk"} if ab == "intimidate" or bs.get("hp", 0) * (bs.get("def", 0) + bs.get("spd", 0)) >= 20000 else set())
 
 
+def _slot_ok(ctx, sets: list, sp: str, drop_idx: int | None = None) -> bool:
+    """True if `sp` can join `sets` (optionally replacing `sets[drop_idx]`) without duplicating an
+    evolved species or exceeding per-caught-mon slot limits for branched evolutions."""
+    rest = [s for idx, s in enumerate(sets) if idx != drop_idx]
+    ev = tp.mon_of(ctx, sp).species
+    if any(s["species"] == ev for s in rest):
+        return False
+    limits = getattr(ctx, "slot_limits", None)
+    if limits is not None:
+        b = base_species(sp)
+        if sum(1 for s in rest if base_species(s["from"]) == b) >= limits.get(b, 1):
+            return False
+    return True
+
+
 def fill(ctx, sets: list, species: list) -> list:
-    """Greedy to six by team row value (one per evolved species)."""
+    """Greedy to six by team row value (one per evolved species, respecting branch slot limits)."""
     while len(sets) < 6:
-        have = {s["species"] for s in sets}
-        best = max((sp for sp in species if tp.mon_of(ctx, sp).species not in have), key=lambda sp: team_value(ctx, sets + [default_set(ctx, sp)]), default=None)
+        best = max((sp for sp in species if _slot_ok(ctx, sets, sp)),
+                   key=lambda sp: team_value(ctx, sets + [default_set(ctx, sp)]), default=None)
         if best is None:
             break
         sets.append(default_set(ctx, best))
@@ -249,10 +273,9 @@ def mutate(ctx, parent: tuple, species: list, rng: random.Random) -> tuple[str, 
                          and not (v.get("lock") and gauntlet.CHOICE_ALL_ATTACKS and status(s["moves"]))]
         sets[j] = dict(s, item=rng.choice(opts))
     elif kind == "swap":
-        have = {x["species"] for x in sets}
         base = team_value(ctx, sets)
         gains = sorted(((team_value(ctx, sets[:k] + [default_set(ctx, sp)] + sets[k + 1:]) - base, k, sp)
-                        for sp in species if tp.mon_of(ctx, sp).species not in have for k in range(len(sets))), reverse=True)[:3]
+                        for k in range(len(sets)) for sp in species if _slot_ok(ctx, sets, sp, drop_idx=k)), reverse=True)[:3]
         if not gains:
             return None
         _, k, sp = rng.choice(gains)
@@ -271,7 +294,9 @@ def halving(ctx, species: list, tag) -> dict:
     ctx.rng = random.Random(f"{ctx.name}-cands-{args.seed}-{tag}")  # searched_cands' draws, per box (not per worker history)
     info(ctx, species)
     species = [sp for sp in species if sp in ctx.info]
-    raw = [("box", tp.lead_first(ctx, tuple(species)))] if len(species) <= 6 else (
+    limits = getattr(ctx, "slot_limits", None)
+    small_box = len(species) <= 6 and (limits is None or sum(limits.values()) == len(species))
+    raw = [("box", tp.lead_first(ctx, tuple(species)))] if small_box else (
         [("cover", tp.lead_first(ctx, tp.cover_team(ctx, species)))] + [("searched", t) for t in tp.searched_cands(ctx, species, max(2, args.cands // 3))])
     cands, seen = [], set()
 
@@ -286,7 +311,14 @@ def halving(ctx, species: list, tag) -> dict:
     n_random = max(1, args.cands // 8) if len(species) > 6 else 0
     cands = cands[:args.cands - n_random]
     for _ in range(n_random):
-        add("random", team_of(ctx, tp.lead_first(ctx, tuple(rng.sample(species, 6)))))
+        pick = []
+        for sp in rng.sample(species, len(species)):
+            if _slot_ok(ctx, [default_set(ctx, x) for x in pick], sp):
+                pick.append(sp)
+            if len(pick) == 6:
+                break
+        if pick:
+            add("random", team_of(ctx, tp.lead_first(ctx, tuple(pick))))
     sizes, ns = schedule(args.cands, args.battles)
 
     def mutants(parents, m):
@@ -306,13 +338,14 @@ def halving(ctx, species: list, tag) -> dict:
         cands += new
         everyone += new
     base, battler = args.n_search, {"engine": args.engine, "engine_opp": args.engine_opp, "engine_p": args.engine_p, "death_weight": args.death_weight}
+    d14_w = getattr(ctx, "d14_weights", None)
     for r, n in enumerate(ns):
         res = tp.fan(tp.battle_job, [(args, ctx.name, c["sets"], base + j) for c in cands for j in range(n)])
         for k, c in enumerate(cands):
             c["b"] = res[k * n:(k + 1) * n]
         low = max(sum(b[0] for b in c["b"]) / n for c in cands) < 0.2
         for c in cands:
-            c["score"] = sum(score(b, low, len(c["sets"])) for b in c["b"]) / n
+            c["score"] = sum(score(b, low, len(c["sets"]), d14_w) for b in c["b"]) / n
             c["scores"].append(round(c["score"], 4))
             w, d, _, (db, _, capped), cl = tp.fold(c["b"])
             if args.out:
@@ -342,22 +375,27 @@ def halving(ctx, species: list, tag) -> dict:
 def final(ctx, best: dict) -> dict:
     """The winner on --n-search seeds no round used: win, deaths, U with 95% intervals."""
     n = ctx.args.n_search
+    d14_w = getattr(ctx, "d14_weights", None)
     bs = tp.fan(tp.battle_job, [(ctx.args, ctx.name, best["sets"], j) for j in range(n)])
     w, d, _, (db, _, capped), cl = tp.fold(bs)
-    u = [score(b, False, len(best["sets"])) for b in bs]
+    u = [score(b, False, len(best["sets"]), d14_w) for b in bs]
     mu = sum(u) / n
     ci = lambda p: 1.96 * math.sqrt(p * (1 - p) / n)
-    return {"boss": ctx.name, "team": [s["species"] for s in best["sets"]], "sets": [{k: v for k, v in s.items() if k != "from"} for s in best["sets"]],
-            "origin": best["origin"], "halving_scores": best["scores"], "n": n, "win": w, "win_ci": ci(w), "deathless": cl, "deathless_ci": ci(cl),
-            "deaths_per_mon": d, "U": mu, "U_ci": 1.96 * math.sqrt(sum((x - mu) ** 2 for x in u) / max(n - 1, 1) / n), "capped": capped,
-            "deaths_by": dict(db), "cap": ctx.cap, "progress": ctx.progress}
+    out = {"boss": ctx.name, "team": [s["species"] for s in best["sets"]],
+           "sets": [{k: v for k, v in s.items() if k != "from"} | ({"from_base": base_species(s["from"])} if base_species(s["from"]) != s["species"] else {}) for s in best["sets"]],
+           "origin": best["origin"], "halving_scores": best["scores"], "n": n, "win": w, "win_ci": ci(w), "deathless": cl, "deathless_ci": ci(cl),
+           "deaths_per_mon": d, "U": mu, "U_ci": 1.96 * math.sqrt(sum((x - mu) ** 2 for x in u) / max(n - 1, 1) / n), "capped": capped,
+           "deaths_by": dict(db), "cap": ctx.cap, "progress": ctx.progress}
+    if d14_w:
+        out["d14_team_costs"] = {s["species"]: round(d14_w.get(to_id_str(s["species"]), 0.5 / 6), 3) for s in best["sets"]}
+    return out
 
 
 def box_job(args, name: str, i: int) -> dict | None:
     try:
         ctx = tp.worker_ctx(args, name)
         box = rp.sample_box(random.Random(f"{name}-box-{args.seed}-{i}"), ctx.progress, ctx.known)
-        r = final(ctx, halving(ctx, tp.playable(ctx, [sp for sp, _ in box]), i))
+        r = final(ctx, halving(ctx, tp.expand_box(ctx, [sp for sp, _ in box]), i))
         tp.emit(args, "box", i=i, of=args.boxes, box=box, **r)
         print(f"{name:<10} box {i + 1:>2}/{args.boxes}: {r['team']} ({r['origin']}) -> win {r['win']:.0%} deaths/mon {r['deaths_per_mon']:.2f} "
               f"deathless {r['deathless']:.0%}  ({time.time() - ctx.t0:.0f}s)", flush=True)
@@ -369,18 +407,32 @@ def box_job(args, name: str, i: int) -> dict | None:
 
 
 def load_box(ctx, path: str) -> list[str]:
-    """--my-box: [{species, level, nature, ability, moves}] as the run has them (not evolved; known
-    moves join the legal pool; the ability is kept before the capsules; natures are chosen per boss)."""
+    """--my-box: [{species, level, nature, ability, moves, evolve?}] as the run has them.
+    Already-evolved mons stay as entered; set `evolve: true` (or pass a plain species string)
+    to auto-evolve to the boss cap and evaluate all legal evolution branches."""
     capsule, patch = rp.ability_gates()
-    out = []
+    out, limits = [], {}
     for x in json.load(open(path)):
-        sp, lvl = to_id_str(x["species"]), int(x.get("level") or ctx.cap)
+        if isinstance(x, str):
+            x = {"species": x, "evolve": True}
+        sp = to_id_str(x["species"])
+        if x.get("evolve"):
+            opts = gauntlet.evolve_options(sp, ctx.cap, caught_level=5, trainer_idx=ctx.progress)
+            keys = [f"{sp}>{ev}" for ev in opts] if len(opts) > 1 else [sp]
+            limits[sp] = limits.get(sp, 0) + 1
+            for k in keys:
+                if k not in out:
+                    out.append(k)
+            continue
+        lvl = int(x.get("level") or ctx.cap)
         known = [to_id_str(m) for m in x.get("moves", [])]
         ab = x.get("ability") if ctx.progress < capsule else rp.choose_ability(sp, ctx.known, ctx.boss_types, ctx.arena, hidden=ctx.progress >= patch)
         m = Mon(sp, lvl, (known or gauntlet.encounter_moves(sp, lvl, "best4", progress=ctx.progress))[:4], ability=ab, caught_level=5, nature=x.get("nature"))
         m.evs, m.known = dict.fromkeys(gauntlet.STATS, 0), known
         ctx.mons[sp] = m
+        limits[sp] = limits.get(sp, 0) + 1
         out.append(sp)
+    ctx.slot_limits = limits
     return tp.playable(ctx, out)
 
 
@@ -388,9 +440,12 @@ def plan_text(r: dict) -> str:
     out = [f"{r['boss']} plan (trainer #{r['progress']}, level cap {r['cap']}; origin {r['origin']}, halving scores {r['halving_scores']})",
            f"  fresh seeds, n = {r['n']}: U {r['U']:.3f} ± {r['U_ci']:.3f}, win {r['win']:.0%} ± {r['win_ci']:.0%}, "
            f"deathless {r['deathless']:.0%} ± {r['deathless_ci']:.0%}, deaths/mon {r['deaths_per_mon']:.2f}, capped {r['capped']:.0%}"]
-    out += [f"  {'lead' if k == 0 else f'{k + 1}.':>4} {s['species']} L{s['level']} @ {s['item'] or '-'}, {s['nature']}, {s['ability']}: {', '.join(s['moves'])}"
+    out += [f"  {'lead' if k == 0 else f'{k + 1}.':>4} {format_species(s.get('from_base', s['species']), s['species'])} L{s['level']} @ {s['item'] or '-'}, {s['nature']}, {s['ability']}: {', '.join(s['moves'])}"
             for k, s in enumerate(r["sets"])]
     out.append("  riskiest enemy mons (our deaths in the n battles): " + (", ".join(f"{e} {k}" for e, k in collections.Counter(r["deaths_by"]).most_common(3)) or "none"))
+    if r.get("d14_team_costs"):
+        dc = ", ".join(f"{sp}={w:.3f}" for sp, w in sorted(r["d14_team_costs"].items(), key=lambda kv: -kv[1]))
+        out.append(f"  D14 future death costs (higher = protect): {dc}")
     if r.get("line"):
         ln = r["line"]
         out.append(f"  line ({ln['iterations']} iterations): P(win) {ln['win']:.1%}, P(deathless) {ln['deathless']:.1%} (~10 points pessimistic), "
@@ -429,6 +484,7 @@ def main() -> None:
     ap.add_argument("--matchup", action="store_true")
     ap.add_argument("--no-items", action="store_true")
     ap.add_argument("--death-weight", type=float, default=6.0)
+    ap.add_argument("--d14-bosses", default="", help="comma-separated future bosses for D14 per-mon death costs (e.g. KOGA,BLAINE)")
     ap.add_argument("--engine", type=int, default=20000)
     ap.add_argument("--engine-opp", choices=("minimax", "ai"), default="ai")
     ap.add_argument("--engine-p", type=float, default=0.8)
@@ -467,7 +523,22 @@ def main() -> None:
         else:
             for n in names:
                 ctx = tp._CTX[n] = tp.setup(args, n)
-                species = load_box(ctx, args.my_box) if args.my_box else tp.playable(ctx, sorted(set(ctx.pool) | set(rp.STARTERS)))
+                species = load_box(ctx, args.my_box) if args.my_box else tp.expand_box(ctx, sorted(set(ctx.pool) | set(rp.STARTERS)))
+                if args.d14_bosses:
+                    import rr_route as rt
+                    future_names = [b.strip() for b in args.d14_bosses.split(",") if b.strip()]
+                    ftables = [rt.build_boss_table(b, seed=args.seed) for b in future_names]
+                    ftables = [tb for tb in ftables if tb["progress"] > ctx.progress]
+                    if ftables:
+                        raw_box = [base_species(sp) for sp in species]
+                        costs = rt.death_costs(raw_box, ftables)
+                        d14_map = {}
+                        for r_c in costs:
+                            m = tp.mon_of(ctx, r_c["species"])
+                            if m:
+                                d14_map[to_id_str(m.species)] = max(d14_map.get(to_id_str(m.species), 0.0), r_c["d14_weight"])
+                        ctx.d14_weights = d14_map
+                        print(f"{n}: D14 per-mon death costs enabled over {[tb['boss'] for tb in ftables]} ({len(d14_map)} species)", flush=True)
                 print(f"{n}: {len(species)} playable species; budget {args.battles} battles, {args.cands} candidates", flush=True)
                 rows.append(final(ctx, halving(ctx, species, "pool")) | {"mode": "my-box" if args.my_box else "pool"})
                 tp.emit(args, "team", label="search", **rows[-1])

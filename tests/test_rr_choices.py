@@ -38,6 +38,18 @@ def test_ability_prefers_an_immunity_to_the_boss_and_the_gym_weather():
     assert rp.choose_ability("jynx", KNOWN, {"Water", "Ice"}, rain) == "Dry Skin"       # Water immunity vs Misty
     assert rp.choose_ability("jynx", KNOWN, {"Rock"}, {}) == KNOWN["jynx"]["abilities"]["0"]  # nothing to gain: slot 0
     assert rp.choose_ability("gyarados", KNOWN, {"Water"}, {}) == "Intimidate"
+    # Greninja prefers Battle Bond (with capsule) / Protean (with patch), and Battle Bond packs as Greninja-Bond
+    assert rp.choose_ability("greninja", KNOWN, {"Fire"}, {}, hidden=False) == "Battle Bond"
+    assert rp.choose_ability("greninja", KNOWN, {"Fire"}, {}, hidden=True) == "Protean"
+    packed_g = gauntlet.Mon("greninja", 50, ["surf"], ability="Battle Bond").pack()
+    assert "|Greninja-Bond|" in packed_g
+    # Starters no longer default to Overgrow/Blaze/Torrent when stronger abilities are unlocked
+    assert rp.choose_ability("skeledirge", KNOWN, {"Poison"}, {}, hidden=True) == "Unaware"
+    assert rp.choose_ability("samurotthisui", KNOWN, {"Poison"}, {}, hidden=True) == "Sharpness"
+    assert rp.choose_ability("delphox", KNOWN, {"Poison"}, {}, hidden=True) == "Magic Guard"
+    assert rp.choose_ability("decidueye", KNOWN, {"Poison"}, {}, hidden=True) == "Tinted Lens"
+    assert rp.choose_ability("torterra", KNOWN, {"Poison"}, {}, hidden=False) == "Self Sufficient"
+    assert rp.choose_ability("charizard", KNOWN, {"Fire"}, {"weather": "desolateland"}, hidden=True) == "Solar Power"
 
 
 def test_ability_gates_follow_raids_and_the_saffron_shop():

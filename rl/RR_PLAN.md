@@ -92,6 +92,14 @@ user on RL decisions"); the recommendation and the evidence available at that ti
   **+13.1 ± 7.6 pts**; beat hand on all 5 bosses on both win rate and deaths/mon). Mirrors (n = 48):
   Erika 98% / 0.07, Koga 67% / 0.58, Blaine 100% / 0.36; Erika line check: 93% vs 87% Showdown win
   (line predictions within 95% CI, 0% capped). Next: Phase 6 (routing + D14 per-mon death costs).
+- **Phase 6 (2026-11-25): Step A (branched evolutions, Kubfu/Tauros/Ursaluna/Burmy fixes, user Nuzlocke
+  gift/trade/starter/Celadon-egg rules) + Step B (cached Showdown duel routing `--scorer duel` + D14 per-mon
+  death costs wired into `rr_search.py --d14-bosses` + `choose_ability()` rating upgrade + `Greninja-Bond`
+  packing fix) done.** Paired 30-box × 5-boss duel-routing benchmark (`results/rr_p6_duel.log`, seed 5, R2
+  battler, no free trades): **`routed` +4.8 ± 4.9% / −0.050 ± 0.038 d/mon** (+6.9 pts turnaround over paper
+  routing's −2.1%; improved all 5 bosses on both win rate and deaths/mon: Misty +11.1%, Erika +5.6%, Koga +5.6%),
+  **`routed+egg` +5.4 ± 5.0% / −0.054 ± 0.039 d/mon** (Erika 88.9%, 97% ≥50%), **`routed+full` +15.0% Misty,
+  +10.0% Erika, +15.6% Blaine (48.3%)** (Mudkip starter dragged Koga −10% via Water-stacking into Freeze-Dry).
 - Phase 0 gate:
   logging on/off 60/60 boxes identical, zero capped battles, Brock 70 → 76%; Misty 51 → 24%, of
   which ~24 points are the abilities rolled at catch (Misty is before the capsules; the old 51%

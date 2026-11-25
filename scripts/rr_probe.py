@@ -342,22 +342,66 @@ def player_ability(species: str, ability: str) -> str:
     return SPECIES_SWAPS.get(species, ABILITY_SWAPS[a])
 
 
+@functools.cache
+def _ability_ratings() -> dict[str, float]:
+    """Showdown / gen9rr ability quality ratings from data/rr/mod_data.json."""
+    try:
+        ab = json.load(open(RR / "mod_data.json")).get("abilities", {})
+        return {k: float(v.get("rating", 0.0)) for k, v in ab.items()}
+    except Exception:
+        return {}
+
+
+# Weather / terrain / drawback abilities that only earn their rating when the boss/arena activates them
+_CONDITIONAL_ABILITIES = {
+    "chlorophyll", "swiftswim", "sandrush", "slushrush", "surgesurfer",
+    "solarpower", "raindish", "dryskin", "sandveil", "snowcloak", "icebody",
+    "hydration", "leafguard", "harvest", "sandforce", "forecast",
+}
+
+
 def choose_ability(species: str, known: dict, boss_types: set, arena: dict, hidden: bool = True) -> str | None:
-    """Capsules (and with `hidden` the Dream Patch) make the slots available: an immunity to a
-    type the boss attacks with, a speed ability for the gym's weather / terrain, Cloud Nine /
-    Air Lock against the gym's weather (2026-11-24, phase 3: Blaine's Desolate Land; it chose
-    Golduck's Swift Swim before), Intimidate; else slot 0. Each slot is scored as what the player actually gets (player_ability)."""
-    from ai_util.calc_bot import ABILITY_IMMUNE_TYPE, SPEED_ABILITY
+    """Capsules (and with `hidden` the Dream Patch) make the slots available:
+    1. Boss-specific synergy (+10 each): immunity to a boss attack type (not Dry Skin into Fire/Sun),
+       active gym weather/terrain boost (Swift Swim / Chlorophyll / Solar Power / Sand Rush /
+       Slush Rush / Surge Surfer), Cloud Nine / Air Lock against gym weather.
+    2. Intimidate (+4.5) and general unconditional combat rating from mod_data.json (e.g.
+       Unaware 4.0, Magic Guard 4.0, Sharpness 3.5, Tinted Lens 4.0, Bad Company 4.0,
+       Quill Rush 3.5, Self Sufficient 3.0, Iron Fist 3.0, Battle Bond 3.5, Protean 4.5 vs
+       Overgrow/Blaze/Torrent 2.0), keeping conditional weather/drawback abilities at 0 unless
+       their condition is active. Each slot is scored after Hardcore swaps (`player_ability`)."""
+    from ai_util.calc_bot import ABILITY_IMMUNE_TYPE
     slots = {k: player_ability(species, v) for k, v in known.get(species, {}).get("abilities", {}).items()}
     if not slots:
         return None
-    weather = {"raindance": "swiftswim", "sunnyday": "chlorophyll", "sandstorm": "sandrush", "snow": "slushrush",
-               "desolateland": "chlorophyll", "primordialsea": "swiftswim"}.get(arena.get("weather", ""), "")
+    w = arena.get("weather", "")
+    sun = w in ("sunnyday", "desolateland")
+    rain = w in ("raindance", "primordialsea")
+    weather_speed = {"raindance": "swiftswim", "sunnyday": "chlorophyll", "sandstorm": "sandrush", "snow": "slushrush",
+                     "desolateland": "chlorophyll", "primordialsea": "swiftswim"}.get(w, "")
+    ratings = _ability_ratings()
 
-    def score(ab: str) -> int:
+    def score(ab: str) -> float:
         a = to_id_str(ab)
-        return (2 * (ABILITY_IMMUNE_TYPE.get(a) in boss_types) + 2 * (a == weather or (a == "surgesurfer" and arena.get("terrain") == "electricterrain"))
-                + 2 * (a in ("cloudnine", "airlock") and bool(arena.get("weather"))) + (a == "intimidate") + (a in SPEED_ABILITY and SPEED_ABILITY[a] and False))
+        s = 0.0
+        if ABILITY_IMMUNE_TYPE.get(a) in boss_types:
+            s += 10.0
+        if a == "dryskin" and ("Fire" in boss_types or sun):
+            s -= 6.0
+        if a == weather_speed or (a == "surgesurfer" and arena.get("terrain") == "electricterrain"):
+            s += 10.0
+        if a == "solarpower" and sun:
+            s += 10.0
+        if a == "raindish" and rain:
+            s += 4.0
+        if a in ("cloudnine", "airlock") and bool(w):
+            s += 10.0
+        if a == "intimidate":
+            s += 4.5
+        elif a not in _CONDITIONAL_ABILITIES:
+            s += ratings.get(a, 0.0)
+        return s
+
     return max((slots[k] for k in ("0", "1", "H")[:3 if hidden else 2] if k in slots), key=score)
 
 
@@ -420,7 +464,11 @@ def pools() -> tuple[dict, dict]:
         if (block is None and e["name"] not in DUMP_ID) or not e["cap"]:
             continue
         block = block or {"battleEffect": e.get("effect", ""), "pokemon": []}
-        pool = {g["species"] for g in order.get("gifts", []) if g["t"] <= t and (g["level"] or 0) <= e["cap"]}
+        pool = set()
+        for g in order.get("gifts", []):
+            if g["t"] <= t and (g["level"] or 0) <= e["cap"]:
+                pool.add(g["species"])
+                pool.update(g.get("choice_options", []))
         for l in locs[:e["reach"] + 1]:
             for meth, tb in l["methods"].items():
                 if (0 if meth.startswith("grass") else order["gates"].get(meth, 999)) > t:
@@ -432,19 +480,50 @@ def pools() -> tuple[dict, dict]:
     return out, known
 
 
-def sample_box(rng: random.Random, t: int, known: dict) -> list[tuple[str, str]]:
-    """A run's box at trainer t (user decision 2026-10-11: random, one encounter per open
-    location, drawn by the tracker's rarity): per location one method a run would use
-    (grass by day or night, a rod or Surf once in hand, equal odds) and one species from it
-    by rarity among those at or under the cap; a species already in the box is re-rolled
-    up to three times (dupes clause); plus one random starter and the gifts / trades in
-    hand. Returns [(species id, where)]."""
+def eligible_trades(box_species: list[str] | set[str], t: int, known: dict) -> list[dict]:
+    """In-game trades unlocked by trainer `t` for which the box actually owns a member of the
+    required `give` evolution line (and does not already own `receive`).
+    Returns [{species, give, owned_match, t, how}]."""
+    from gauntlet import base_species, evo_line
+    order = json.load(open(RR / "order.json"))
+    dex9 = GenData.from_gen(9).pokedex
+    owned = [base_species(s) for s in box_species]
+    owned_set = set(owned)
+    out = []
+    for g in order.get("gifts", []):
+        if g.get("kind") != "trade" or g["t"] > t:
+            continue
+        rec = g["species"]
+        give = g.get("give")
+        if not give or rec in owned_set or rec not in known or rec not in dex9:
+            continue
+        line = evo_line(give)
+        match = next((s for s in owned if s in line), None)
+        if match is not None:
+            out.append({"species": rec, "give": give, "owned_match": match, "t": g["t"], "how": g["how"]})
+    return out
+
+
+def sample_box(rng: random.Random, t: int, known: dict, starter: str | None = None,
+               include_trades: bool = False) -> list[tuple[str, str]]:
+    """A run's box at trainer t (random wild encounters, one per open location, drawn by rarity):
+    per location one method a run would use (grass by day or night, a rod or Surf once in hand,
+    equal odds) and one species from it by rarity among those at or under the cap; a species
+    already in the box is re-rolled up to three times (dupes clause); plus one starter (random
+    unless `starter` is given) and accepted story gifts in hand.
+    - Story gifts are accepted (including a 2nd Eevee gift since Eevee has 8 distinct evolutions;
+      Saffron Dojo picks between Tauros-Paldea-Blaze / Tauros-Paldea-Aqua).
+    - In-game trades are disabled unless you actually own a mon in the required `give` line (and
+      only executed in `sample_box` when `include_trades=True`, removing the traded-away mon).
+    Returns [(species id, where)]."""
+    from gauntlet import evo_line
     enc = json.load(open(RR / "tracker_encounters.json"))
     order = json.load(open(RR / "order.json"))
     e = order["entries"][t]
     dex9 = GenData.from_gen(9).pokedex
-    box = [(rng.choice(STARTERS), "starter")]
-    have = {box[0][0]}
+    st = starter or rng.choice(STARTERS)
+    box = [(st, "starter")]
+    have = {st}
     for l in [x for x in enc["locations"] if not x["postgame"]][:e["reach"] + 1]:
         methods = {m: [x for x in tb if int(x["levels"].split("-")[0]) <= e["cap"]
                        and to_id_str(x["species"]) in known and to_id_str(x["species"]) in dex9]
@@ -464,9 +543,32 @@ def sample_box(rng: random.Random, t: int, known: dict) -> list[tuple[str, str]]
             have.add(sp)
             box.append((sp, f"{l['name']} / {meth} {pick['rarity']}"))
     for g in order.get("gifts", []):
-        if g["t"] <= t and (g["level"] or 0) <= e["cap"] and g["species"] in known and g["species"] not in have:
-            have.add(g["species"])
-            box.append((g["species"], g["how"]))
+        if g["t"] > t or (g["level"] or 0) > e["cap"]:
+            continue
+        kind = g.get("kind") or ("trade" if g.get("how", "").startswith("trade:") else "gift")
+        if kind == "trade":
+            if not include_trades:
+                continue
+            give = g.get("give")
+            if not give or g["species"] not in known or g["species"] not in dex9 or g["species"] in have:
+                continue
+            line = evo_line(give)
+            idx = next((k for k, (s, _) in enumerate(box) if s in line), None)
+            if idx is not None:
+                removed = box.pop(idx)[0]
+                have.discard(removed)
+                have.add(g["species"])
+                box.append((g["species"], g["how"]))
+            continue
+        # Accepted story gift
+        opts = [s for s in g.get("choice_options", [g["species"]]) if s in known and s in dex9]
+        if not opts:
+            continue
+        sp = rng.choice(opts) if len(opts) > 1 else opts[0]
+        # Allow a 2nd Eevee gift (Route 5 + Celadon 4F) because Eevee has 8 distinct evolutions
+        if sp not in have or sp == "eevee":
+            have.add(sp)
+            box.append((sp, g["how"]))
     return box
 
 

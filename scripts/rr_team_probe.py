@@ -53,7 +53,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from poke_env.data import to_id_str  # noqa: E402
 import rr_probe as rp  # noqa: E402
 from rr_postmortem import attribution  # noqa: E402  (sets gauntlet.GAME = "rr", injects the mod data)
-from gauntlet import STATS, Mon, assign_items, encounter_moves, evolve, mega_stone, pack_team  # noqa: E402
+from gauntlet import (STATS, Mon, assign_items, base_species, encounter_moves, evolve,  # noqa: E402
+                      expand_branches, format_species, mega_stone, pack_team, split_evo_key)
 
 SHORT, TOP = 24, 6
 SCREEN_KEEP = 3  # --chooser searched: the screen's best sixes replayed on the table's seeds
@@ -104,17 +105,19 @@ def progress(st: dict) -> float:
 
 def build_mon(species: str, cap: int, known: dict, progress: int, boss: dict | None = None, seed=0,
               boss_types: set = frozenset(), arena: dict = {}) -> Mon | None:
-    """Evolved at the cap (stones from the Celadon store on, gauntlet.STONE_GATE), best4 moves over the TMs and tutors in hand
+    """Evolved at the cap (stones from the Celadon store on, gauntlet.STONE_GATE; supports
+    branch-pinned keys like 'eevee>jolteon'), best4 moves over the TMs and tutors in hand
     by trainer `progress` (data/rr/tms.json, minus gauntlet.BANNED_MOVES), the nature the
     planner picks for this boss (rr_probe.choose_nature; `boss` = rr_probe.boss_profile), the
     ability the run has by then (rr_probe.run_ability: rolled at catch, then capsules), its mega
     stone if one is in hand (so stages A / B see the mega; team_mons re-assigns items), no EVs
     (Minimal Grinding Mode)."""
+    base, _ = split_evo_key(species)
     ev = evolve(species, cap, None, caught_level=5, trainer_idx=progress)
     moves = encounter_moves(ev, cap, "best4", progress=progress)
     if not moves or ev not in known:
         return None
-    m = Mon(ev, cap, moves, ability=rp.run_ability(species, ev, seed, progress, known, boss_types, arena), item=mega_stone(ev, progress), caught_level=5,
+    m = Mon(ev, cap, moves, ability=rp.run_ability(base, ev, seed, progress, known, boss_types, arena), item=mega_stone(ev, progress), caught_level=5,
             nature=rp.choose_nature(ev, moves, known, boss, cap))
     m.evs = dict.fromkeys(STATS, 0)
     return m
@@ -166,15 +169,17 @@ def one_battle(bridge, brain, enemy, party: list[Mon], enemy_packed: str, i: int
         with open(log, "a") as f:
             f.write(json.dumps({"kind": "battle", **search.tag, "won": won, "timed_out": sb.timed_out, "turns": sb.turn,
                                 "chosen": sb.chosen, "fainted": [m["fainted"] for m in st["p1"]]}) + "\n")
+    fainted_sp = tuple(to_id_str(m["species"]) for m in st["p1"] if m["fainted"])
     return (won, won and not any(m["fainted"] for m in st["p1"]), sum(m["fainted"] for m in st["p1"]) / len(st["p1"]),
-            progress(st), d, k, sb.timed_out)
+            progress(st), d, k, sb.timed_out, fainted_sp)
 
 
 def fold(battles: list[tuple]) -> tuple:
     """play()'s summary of one_battle() results, in battle order."""
     n, wins, deaths, prog, clean, capped = len(battles), 0, 0.0, 0.0, 0, 0
     deaths_by, kos_on = collections.Counter(), collections.Counter()
-    for won, cl, dfrac, pr, d, k, to in battles:
+    for b in battles:
+        won, cl, dfrac, pr, d, k, to = b[:7]
         capped += to
         wins += won
         clean += cl
@@ -275,9 +280,15 @@ def team_value(ctx, team: tuple) -> float:
 def greedy(ctx, short: list[str], start: tuple = ()) -> tuple:
     """(B) add the species that lifts the team's calc-bot progress most, until six (or the
     box runs out)."""
+    limits = getattr(ctx, "slot_limits", None)
     team = tuple(sorted(start))
-    while len(team) < 6 and any(s not in team for s in short):
-        best = max((s for s in short if s not in team), key=lambda s: team_value(ctx, tuple(sorted(team + (s,)))))
+    while len(team) < 6:
+        avail = [s for s in short if s not in team and (
+            limits is None or sum(1 for t in team if base_species(t) == base_species(s)) < limits.get(base_species(s), 1)
+        )]
+        if not avail:
+            break
+        best = max(avail, key=lambda s: team_value(ctx, tuple(sorted(team + (s,)))))
         team = tuple(sorted(team + (best,)))
     return team
 
@@ -298,7 +309,8 @@ def cover_team(ctx, species: list[str]) -> tuple:
                 w, h = duel(ctx, s, name, ctx.args.n_duel)
                 rows.setdefault(s, {}).setdefault(to_id_str(name), {}).update(win=w, hp=h)
     trace = []
-    team = tuple(sorted(cover(rows, [to_id_str(n) for n in names], 6, trace)))
+    limits = getattr(ctx, "slot_limits", None)
+    team = tuple(sorted(cover(rows, [to_id_str(n) for n in names], 6, trace, limits=limits, group_fn=base_species)))
     emit(ctx.args, "draft", boss=ctx.name, picks=trace)  # the draft view: why each pick, and the runner-up
     return team
 
@@ -309,10 +321,28 @@ def playable(ctx, species: list[str]) -> list[str]:
     out, seen = [], set()
     for sp in species:
         m = mon_of(ctx, sp)
-        if m is None or m.ability == "Truant" or m.species in seen or sp in ("ditto", "smeargle"):
+        if m is None or m.ability == "Truant" or m.species in seen or base_species(sp) in ("ditto", "smeargle"):
             continue
         seen.add(m.species)
         out.append(sp)
+    return out
+
+
+def expand_box(ctx, raw_species: list[str]) -> list[str]:
+    """Expand any unpinned branched species in a box into `'base>target'` candidates and record
+    `ctx.slot_limits` so every chooser respects per-caught-mon counts (e.g. 1 branch for 1 Eevee,
+    up to 2 distinct Eeveelutions if both Route 5 & Celadon Eevees are owned)."""
+    expanded, limits = expand_branches(raw_species, ctx.cap, caught_level=5, trainer_idx=ctx.progress)
+    ctx.slot_limits = limits
+    return playable(ctx, expanded)
+
+
+def evolved_names(ctx, team) -> list[str]:
+    """Human-readable evolved species names for a team of box keys."""
+    out = []
+    for s in team:
+        m = mon_of(ctx, s)
+        out.append(format_species(s, m.species if m else None))
     return out
 
 
@@ -330,9 +360,10 @@ def lead_first(ctx, team: tuple) -> tuple:
 
 
 def choose(ctx, species: list[str]) -> tuple:
-    """--chooser's six from a box, lead first. searched: the candidate sixes each play
-    n_screen battles on seeds the table does not use; the best (win, -deaths) is the six."""
-    species = playable(ctx, species)
+    """--chooser's six from a box, lead first. Expands branched evolutions and respects per-caught
+    slot limits. searched: the candidate sixes each play n_screen battles on seeds the table does
+    not use; the best (win, -deaths) is the six."""
+    species = expand_box(ctx, species)
     if ctx.args.chooser in ("cover", "duel"):
         return lead_first(ctx, cover_team(ctx, species))
     if ctx.args.chooser == "greedy":
@@ -352,9 +383,9 @@ def searched_cands(ctx, species: list[str], n: int, k: int = 5) -> list[tuple]:
     """(B'') --chooser searched: candidate sixes for the screen. The shortlist is the k best
     answers (matchup tiers: safe, race, edge) to *each* boss mon, so no enemy is ignored (stage
     A's solo score only measured the boss's lead). Run rules: one per evolved species (dupes
-    clause), no Truant, at most one mega stone. The cover six over the shortlist, then random
-    sixes that draw one answer per boss mon. The lead is the best answer to the boss's lead
-    (the tuple's order is the team's order)."""
+    clause), per-caught-mon slot limits for branched evolutions, no Truant, at most one mega stone.
+    The cover six over the shortlist, then random sixes that draw one answer per boss mon. The lead
+    is the best answer to the boss's lead (the tuple's order is the team's order)."""
     from poke_env.data import to_id_str
     from ai_util.matchup import cover, edge, race, rows_for, safe
     mons = {sp: mon_of(ctx, sp) for sp in playable(ctx, species)}
@@ -364,10 +395,17 @@ def searched_cands(ctx, species: list[str], n: int, k: int = 5) -> list[tuple]:
     answers = {e: sorted(rows, key=lambda c: score(c, e), reverse=True)[:k] for e in enemies}
     short = list(dict.fromkeys(c for e in enemies for c in answers[e]))
     total = lambda c: sum(score(c, e)[2] for e in enemies)
+    limits = getattr(ctx, "slot_limits", None)
 
     def fits(team, c):
         stone = lambda x: mega_stone(mons[x].species, ctx.progress)  # by the stone, not "holds an item"
-        return c not in team and not (stone(c) and any(stone(t) for t in team))  # one mega stone
+        if c in team or (stone(c) and any(stone(t) for t in team)):
+            return False
+        if limits is not None:
+            b = base_species(c)
+            if sum(1 for t in team if base_species(t) == b) >= limits.get(b, 1):
+                return False
+        return True
 
     def finish(team):
         for c in sorted(short, key=total, reverse=True):
@@ -379,7 +417,7 @@ def searched_cands(ctx, species: list[str], n: int, k: int = 5) -> list[tuple]:
         return (lead,) + tuple(sorted(c for c in team if c != lead))
 
     first = []
-    for c in cover({c: rows[c] for c in short}, enemies, 6):
+    for c in cover({c: rows[c] for c in short}, enemies, 6, limits=limits, group_fn=base_species):
         if fits(first, c):
             first.append(c)
     cands = [finish(first)]
@@ -653,14 +691,14 @@ def box_job(args, name: str, i: int) -> dict | None:
         team = choose(ctx, species)
         w, d, pr, attr, cl = searched(ctx, team)
         threats = threats_of(ctx, attr, ctx.pool, exclude=set(species))
-        out = {"box": box, "team": list(team), "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl,
+        out = {"box": box, "team": list(team), "evolved_team": [mon_of(ctx, s).species for s in team], "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl,
                "capped": attr[2], "threats": threats}
         if hasattr(ctx.searcher, "stats"):  # --engine: decisions on the engine / on Showdown, and why (cumulative per worker)
             out["engine"] = dict(ctx.searcher.stats)
         if hasattr(ctx.enemy, "stats"):  # --enemy rust: decisions by the Rust port / the Python AI (cumulative per worker)
             out["enemy_brain"] = dict(ctx.enemy.stats)
         emit(args, "box", boss=name, i=i, of=args.boxes, **out, deaths_by=dict(attr[0]), matrix=matrix(ctx, team))
-        print(f"{name:<10} box {i + 1:>2}/{args.boxes}: {len(box)} mons, team {list(team)} -> win {w:5.0%} deaths/mon {d:.2f} deathless {cl:.0%}; "
+        print(f"{name:<10} box {i + 1:>2}/{args.boxes}: {len(box)} mons, team {evolved_names(ctx, team)} -> win {w:5.0%} deaths/mon {d:.2f} deathless {cl:.0%}; "
               + "; ".join(f"{th['enemy']} killed {th['deaths']}, missing " + (", ".join(f"{sp} ({wh})" for sp, _, _, wh in th["counters"][:1]) or "no counter in the pool") for th in threats)
               + f"  ({time.time() - ctx.t0:.0f}s)", flush=True)
         return out

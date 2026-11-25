@@ -932,84 +932,111 @@
 "species": "magikarp",
 "level": 5,
 "t": 10,
+"kind": "gift",
 "how": "gift: ROUTE 4'S POKEMON CENTER \u2014 Buy for 500$ from a guy inside"
 },
 {
 "species": "eevee",
 "level": 5,
 "t": 20,
+"kind": "gift",
 "how": "gift: ROUTE 5'S POKEMON DAYCARE \u2014 Defeat the man in a Hisui-themed battle"
 },
 {
 "species": "eevee",
 "level": 25,
 "t": 33,
+"kind": "gift",
 "how": "gift: CELADON CITY'S MANSION \u2014 Go to the room in 4F and pick up the Pok\u00e9ball"
 },
 {
-"species": "taurosblaze",
+"species": "taurospaldeablaze",
 "level": 35,
 "t": 44,
-"how": "gift: SAFFRON CITY'S DOJO \u2014 Defeat Chuck"
+"kind": "gift",
+"how": "gift: SAFFRON CITY'S DOJO \u2014 Defeat Chuck",
+"choice": "SAFFRON DOJO",
+"choice_options": [
+"taurospaldeablaze",
+"taurospaldeaaqua"
+]
 },
 {
 "species": "lapras",
 "level": 25,
 "t": 44,
+"kind": "gift",
 "how": "gift: SILPH CO. 7F \u2014 Defeat your rival and talk to the guy behind him"
 },
 {
 "species": "kubfu",
 "level": 30,
 "t": 98,
+"kind": "gift",
 "how": "gift: CERULEAN CAVE 2F \u2014 Defeat Ketchup after Team Rocket leaves"
 },
 {
 "species": "carnivine",
 "level": null,
 "t": 10,
+"kind": "trade",
+"give": "snom",
 "how": "trade: give Snom at CERULEAN CITY"
 },
 {
 "species": "chatot",
 "level": null,
 "t": 33,
+"kind": "trade",
+"give": "murkrow",
 "how": "trade: give Murkrow at CELADON CITY RESTAURANT"
 },
 {
 "species": "eiscue",
 "level": null,
 "t": 20,
+"kind": "trade",
+"give": "carbink",
 "how": "trade: give Carbink at ROUTE 5 UNDERGROUND PATH"
 },
 {
 "species": "morpeko",
 "level": null,
 "t": 53,
+"kind": "trade",
+"give": "dedenne",
 "how": "trade: give Dedenne at ROUTE 18'S GATE UPSTAIRS"
 },
 {
 "species": "farfetchdgalar",
 "level": null,
 "t": 21,
+"kind": "trade",
+"give": "pikipek",
 "how": "trade: give Pikipek at VERMILION CITY"
 },
 {
 "species": "mimikyu",
 "level": null,
 "t": 81,
+"kind": "trade",
+"give": "aegislash",
 "how": "trade: give Aegislash at CINNABAR ISLAND LAB"
 },
 {
 "species": "floetteeternal",
 "level": null,
 "t": 24,
+"kind": "trade",
+"give": "florges",
 "how": "trade: give Florges at ROUTE 11'S GATE UPSTAIRS"
 },
 {
-"species": "ursalunabm",
+"species": "ursalunabloodmoon",
 "level": null,
 "t": 81,
+"kind": "trade",
+"give": "ursaluna",
 "how": "trade: give Ursaluna at CINNABAR ISLAND LAB"
 }
 ]

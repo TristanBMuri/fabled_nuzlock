@@ -131,6 +131,8 @@ class Mon:
         The nickname is the base species (what Showdown names a forme anyway)."""
         spread = lambda d: ",".join(str(d[k]) for k in STATS)
         name, nick = species_name(self.species), base_name(self.species)
+        if to_id_str(self.species) == "greninja" and to_id_str(self.ability or "") == "battlebond":
+            name = "Greninja-Bond"  # gen9rr Battle Bond only triggers Ash-Greninja transform on greninjabond
         return "|".join([nick, name if name != nick else "", to_id_str(self.item or ""),
                          to_id_str(self.ability or ""), ",".join(to_id_str(m) for m in self.moves),
                          self.nature or "Serious", spread(self.evs or PLAYER_EVS), "M",
@@ -344,14 +346,131 @@ def _evo_due(species: str, e: dict, level: int, caught_level, trainer_idx) -> bo
     return False
 
 
+def split_evo_key(species: str) -> tuple[str, str | None]:
+    """Split a branch-pinned species key ('eevee>jolteon' -> ('eevee', 'jolteon'); 'bronzor' -> ('bronzor', None))."""
+    if ">" in species:
+        base, target = species.split(">", 1)
+        return base, target or None
+    return species, None
+
+
+def base_species(species: str) -> str:
+    """Caught/base species id from a plain or branch-pinned key ('eevee>jolteon' -> 'eevee')."""
+    return species.split(">", 1)[0]
+
+
+def format_species(sp: str, evolved: str | None = None) -> str:
+    """Human-readable label showing evolved form when it differs from caught base species."""
+    base, target = split_evo_key(sp)
+    ev = evolved or target or base
+    return f"{base}→{ev}" if ev != base else ev
+
+
+def evolve_options(species: str, level: int, caught_level: int | None = None,
+                   trainer_idx: int | None = None, distinct: bool = True) -> list[str]:
+    """All terminal (maximally evolved) species legally reachable from `species` at
+    `(level, caught_level, trainer_idx)`. Single-path species return `[ev]`; branched
+    species (Eevee, Charcadet, Kirlia, Slowpoke, Hisuian starters, Kubfu, ...) return
+    every legal branch. `distinct=True` collapses purely cosmetic forms with identical
+    types, base stats, and abilities (e.g. Maushold-Four, Dudunsparce-Three-Segment)."""
+    base, forced = split_evo_key(species)
+    evos = load_evolutions()
+    terminals: list[str] = []
+    seen_nodes: set[str] = set()
+
+    def walk(sp: str) -> None:
+        if sp in seen_nodes:
+            return
+        seen_nodes.add(sp)
+        due = [e["to"] for e in evos.get(sp, []) if _evo_due(sp, e, level, caught_level, trainer_idx)]
+        if not due:
+            if sp not in terminals:
+                terminals.append(sp)
+            return
+        for nxt in due:
+            walk(nxt)
+
+    walk(base)
+    if distinct and len(terminals) > 1:
+        sp_meta = load_game()["species"]
+        deduped, sigs = [], set()
+        for t in terminals:
+            info = sp_meta.get(t)
+            if not info:
+                deduped.append(t)
+                continue
+            bs = info.get("baseStats", {})
+            sig = (tuple(info.get("types", ())),
+                   tuple(bs.get(k, 0) for k in STATS),
+                   tuple(sorted(info.get("abilities", {}).items())))
+            if sig not in sigs:
+                sigs.add(sig)
+                deduped.append(t)
+        terminals = deduped
+    if forced and forced in terminals:
+        return [forced]
+    return terminals
+
+
+def evo_line(species: str) -> set[str]:
+    """Full connected evolution family (ancestors + descendants) of `species`."""
+    evos = load_evolutions()
+    base = base_species(species)
+    parents: dict[str, list[str]] = {}
+    for src, lst in evos.items():
+        for e in lst:
+            parents.setdefault(e["to"], []).append(src)
+    line, stack = {base}, [base]
+    while stack:
+        cur = stack.pop()
+        for nxt in [e["to"] for e in evos.get(cur, [])] + parents.get(cur, []):
+            if nxt not in line:
+                line.add(nxt)
+                stack.append(nxt)
+    return line
+
+
+def expand_branches(species_list: list[str], level: int, caught_level: int | None = None,
+                    trainer_idx: int | None = None) -> tuple[list[str], dict[str, int]]:
+    """Expand any unpinned branched species in `species_list` into `'base>target'` keys.
+    Returns `(expanded_keys, slot_limits)` where `slot_limits[base]` is how many copies of
+    `base` the box owns (e.g. 1 for a single Eevee, 2 if both Route 5 & Celadon Eevees are owned)."""
+    limits: dict[str, int] = {}
+    expanded: list[str] = []
+    seen: set[str] = set()
+    for sp in species_list:
+        base, forced = split_evo_key(sp)
+        limits[base] = limits.get(base, 0) + 1
+        if forced is not None:
+            key = sp
+            if key not in seen:
+                seen.add(key)
+                expanded.append(key)
+            continue
+        opts = evolve_options(base, level, caught_level=caught_level, trainer_idx=trainer_idx)
+        keys = [f"{base}>{ev}" for ev in opts] if len(opts) > 1 else [base]
+        for k in keys:
+            if k not in seen:
+                seen.add(k)
+                expanded.append(k)
+    return expanded, limits
+
+
 def evolve(species: str, level: int, rng=None, caught_level: int | None = None,
            trainer_idx: int | None = None) -> str:
     """Species after every evolution due at `level`: level-up always; friendship
     needs caught_level, stones / items / places need trainer_idx (the gates
-    above); trade never. Branches (Wurmple, Eevee) pick with rng, first without."""
+    above); trade never. Branches (Wurmple, Eevee) pick with rng, first without.
+    Branch-pinned keys ('eevee>jolteon') evolve directly to the pinned target if legal."""
+    base, forced = split_evo_key(species)
+    if forced is not None:
+        opts = evolve_options(base, level, caught_level=caught_level, trainer_idx=trainer_idx, distinct=False)
+        if forced in opts:
+            return forced
     evos = load_evolutions()
+    sp = base
     while True:
-        due = [e["to"] for e in evos.get(species, []) if _evo_due(species, e, level, caught_level, trainer_idx)]
+        due = [e["to"] for e in evos.get(sp, []) if _evo_due(sp, e, level, caught_level, trainer_idx)]
         if not due:
-            return species
-        species = rng.choice(due) if rng else due[0]
+            return sp
+        sp = rng.choice(due) if rng else due[0]
