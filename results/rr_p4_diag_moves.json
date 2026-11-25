@@ -1,0 +1,501 @@
+{
+ "summary": {
+  "positions": 192,
+  "agree": 0.5572916666666666,
+  "disagreements_scored": 60,
+  "mean_U_diff_fitted_minus_hand": 0.00027777777777777496,
+  "se": 0.021127366375396684,
+  "fitted_better": 15,
+  "hand_better": 19,
+  "entropy": {
+   "hand": 1.4273314783225608,
+   "fitted": 1.8369662697880151
+  },
+  "value_spread": {
+   "hand": 0.1893171733144957,
+   "fitted": 0.09606789383560675
+  }
+ },
+ "rows": [
+  {
+   "i": 0,
+   "boss": "#10",
+   "hand_pick": "switch arbok",
+   "fitted_pick": "dig",
+   "hand_value": 1.0,
+   "fitted_value": 1.0
+  },
+  {
+   "i": 2,
+   "boss": "#10",
+   "hand_pick": "switch greedent",
+   "fitted_pick": "razorshell",
+   "hand_value": 0.4458333333333334,
+   "fitted_value": 0.86875
+  },
+  {
+   "i": 4,
+   "boss": "#10",
+   "hand_pick": "jumpkick",
+   "fitted_pick": "dig",
+   "hand_value": 0.95625,
+   "fitted_value": 0.9354166666666666
+  },
+  {
+   "i": 5,
+   "boss": "#10",
+   "hand_pick": "switch drednaw",
+   "fitted_pick": "rocktomb",
+   "hand_value": 0.11666666666666665,
+   "fitted_value": 0.7666666666666666
+  },
+  {
+   "i": 6,
+   "boss": "#10",
+   "hand_pick": "wildcharge",
+   "fitted_pick": "firelash",
+   "hand_value": 0.8916666666666666,
+   "fitted_value": 0.86875
+  },
+  {
+   "i": 7,
+   "boss": "#10",
+   "hand_pick": "icywind",
+   "fitted_pick": "switch tentacruel",
+   "hand_value": 0.9291666666666666,
+   "fitted_value": 0.8625
+  },
+  {
+   "i": 9,
+   "boss": "#10",
+   "hand_pick": "headbutt",
+   "fitted_pick": "dig",
+   "hand_value": 0.9166666666666666,
+   "fitted_value": 0.9166666666666666
+  },
+  {
+   "i": 10,
+   "boss": "#10",
+   "hand_pick": "hypnosis",
+   "fitted_pick": "switch drednaw",
+   "hand_value": 0.0,
+   "fitted_value": 0.0
+  },
+  {
+   "i": 11,
+   "boss": "#10",
+   "hand_pick": "poisonfang",
+   "fitted_pick": "steelwing",
+   "hand_value": 1.0,
+   "fitted_value": 1.0
+  },
+  {
+   "i": 16,
+   "boss": "#18",
+   "hand_pick": "bite",
+   "fitted_pick": "switch purugly",
+   "hand_value": 0.15208333333333335,
+   "fitted_value": 0.20625
+  },
+  {
+   "i": 17,
+   "boss": "#18",
+   "hand_pick": "thunderwave",
+   "fitted_pick": "flash",
+   "hand_value": 0.3770833333333333,
+   "fitted_value": 0.09791666666666668
+  },
+  {
+   "i": 19,
+   "boss": "#18",
+   "hand_pick": "switch tentacruel",
+   "fitted_pick": "switch lokix",
+   "hand_value": 0.0,
+   "fitted_value": 0.0
+  },
+  {
+   "i": 20,
+   "boss": "#18",
+   "hand_pick": "switch pachirisu",
+   "fitted_pick": "vinewhip",
+   "hand_value": 0.0,
+   "fitted_value": 0.0
+  },
+  {
+   "i": 22,
+   "boss": "#18",
+   "hand_pick": "switch machoke",
+   "fitted_pick": "switch carnivine",
+   "hand_value": 0.0,
+   "fitted_value": 0.0
+  },
+  {
+   "i": 28,
+   "boss": "#23",
+   "hand_pick": "switch gyarados",
+   "fitted_pick": "switch crobat",
+   "hand_value": 0.9166666666666666,
+   "fitted_value": 0.9166666666666666
+  },
+  {
+   "i": 30,
+   "boss": "#23",
+   "hand_pick": "switch orbeetle",
+   "fitted_pick": "switch ursaring",
+   "hand_value": 0.07083333333333333,
+   "fitted_value": 0.13541666666666669
+  },
+  {
+   "i": 31,
+   "boss": "#23",
+   "hand_pick": "roost",
+   "fitted_pick": "brickbreak",
+   "hand_value": 0.8375,
+   "fitted_value": 0.9208333333333332
+  },
+  {
+   "i": 32,
+   "boss": "#23",
+   "hand_pick": "roost",
+   "fitted_pick": "brickbreak",
+   "hand_value": 0.8791666666666667,
+   "fitted_value": 0.9041666666666666
+  },
+  {
+   "i": 34,
+   "boss": "#23",
+   "hand_pick": "psybeam",
+   "fitted_pick": "flash",
+   "hand_value": 0.9145833333333332,
+   "fitted_value": 0.8333333333333334
+  },
+  {
+   "i": 35,
+   "boss": "#23",
+   "hand_pick": "roost",
+   "fitted_pick": "brickbreak",
+   "hand_value": 0.7208333333333334,
+   "fitted_value": 0.68125
+  },
+  {
+   "i": 40,
+   "boss": "#26",
+   "hand_pick": "switch gogoat",
+   "fitted_pick": "drainingkiss",
+   "hand_value": 0.93125,
+   "fitted_value": 0.7708333333333334
+  },
+  {
+   "i": 44,
+   "boss": "#26",
+   "hand_pick": "switch floetteeternal",
+   "fitted_pick": "switch swampert",
+   "hand_value": 0.9354166666666666,
+   "fitted_value": 0.9125
+  },
+  {
+   "i": 45,
+   "boss": "#26",
+   "hand_pick": "switch donphan",
+   "fitted_pick": "roost",
+   "hand_value": 0.7874999999999999,
+   "fitted_value": 0.15
+  },
+  {
+   "i": 49,
+   "boss": "#34",
+   "hand_pick": "shadowball",
+   "fitted_pick": "roost",
+   "hand_value": 0.8104166666666668,
+   "fitted_value": 0.6354166666666667
+  },
+  {
+   "i": 51,
+   "boss": "#34",
+   "hand_pick": "ironhead",
+   "fitted_pick": "temperflare",
+   "hand_value": 0.9104166666666667,
+   "fitted_value": 0.9104166666666667
+  },
+  {
+   "i": 52,
+   "boss": "#34",
+   "hand_pick": "thunderwave",
+   "fitted_pick": "switch hypno",
+   "hand_value": 0.0,
+   "fitted_value": 0.0
+  },
+  {
+   "i": 56,
+   "boss": "#34",
+   "hand_pick": "switch gothitelle",
+   "fitted_pick": "switch musharna",
+   "hand_value": 0.5166666666666667,
+   "fitted_value": 0.43125
+  },
+  {
+   "i": 59,
+   "boss": "#34",
+   "hand_pick": "switch jellicent",
+   "fitted_pick": "icebeam",
+   "hand_value": 0.33333333333333337,
+   "fitted_value": 0.10208333333333335
+  },
+  {
+   "i": 61,
+   "boss": "#38",
+   "hand_pick": "switch golemalola",
+   "fitted_pick": "liquidation",
+   "hand_value": 0.95,
+   "fitted_value": 0.90625
+  },
+  {
+   "i": 63,
+   "boss": "#38",
+   "hand_pick": "switch golemalola",
+   "fitted_pick": "aquafang",
+   "hand_value": 0.6625,
+   "fitted_value": 0.4291666666666667
+  },
+  {
+   "i": 65,
+   "boss": "#38",
+   "hand_pick": "switch garganacl",
+   "fitted_pick": "switch coalossal",
+   "hand_value": 0.014583333333333332,
+   "fitted_value": 0.0
+  },
+  {
+   "i": 74,
+   "boss": "#44",
+   "hand_pick": "powergem",
+   "fitted_pick": "sludgewave",
+   "hand_value": 0.0,
+   "fitted_value": 0.0
+  },
+  {
+   "i": 76,
+   "boss": "#44",
+   "hand_pick": "switch luxray",
+   "fitted_pick": "bravebird",
+   "hand_value": 0.3625,
+   "fitted_value": 0.2416666666666667
+  },
+  {
+   "i": 77,
+   "boss": "#44",
+   "hand_pick": "switch lapras",
+   "fitted_pick": "rockwrecker",
+   "hand_value": 0.125,
+   "fitted_value": 0.12083333333333332
+  },
+  {
+   "i": 78,
+   "boss": "#44",
+   "hand_pick": "thunderwave",
+   "fitted_pick": "dragonpulse",
+   "hand_value": 0.6729166666666667,
+   "fitted_value": 0.55
+  },
+  {
+   "i": 80,
+   "boss": "#44",
+   "hand_pick": "lightofruin",
+   "fitted_pick": "moonblast",
+   "hand_value": 0.0,
+   "fitted_value": 0.01875
+  },
+  {
+   "i": 81,
+   "boss": "#44",
+   "hand_pick": "switch vikavolt",
+   "fitted_pick": "moonblast",
+   "hand_value": 0.08958333333333333,
+   "fitted_value": 0.2416666666666667
+  },
+  {
+   "i": 82,
+   "boss": "#44",
+   "hand_pick": "switch gyarados",
+   "fitted_pick": "sing",
+   "hand_value": 0.12291666666666665,
+   "fitted_value": 0.2625
+  },
+  {
+   "i": 87,
+   "boss": "#46",
+   "hand_pick": "switch gyarados",
+   "fitted_pick": "leechlife",
+   "hand_value": 0.95,
+   "fitted_value": 0.8770833333333332
+  },
+  {
+   "i": 92,
+   "boss": "#46",
+   "hand_pick": "thunderwave",
+   "fitted_pick": "aquatail",
+   "hand_value": 0.014583333333333332,
+   "fitted_value": 0.0
+  },
+  {
+   "i": 93,
+   "boss": "#46",
+   "hand_pick": "thunderwave",
+   "fitted_pick": "aquatail",
+   "hand_value": 0.4604166666666667,
+   "fitted_value": 0.4916666666666667
+  },
+  {
+   "i": 94,
+   "boss": "#46",
+   "hand_pick": "thunderwave",
+   "fitted_pick": "switch mukalola",
+   "hand_value": 0.19583333333333333,
+   "fitted_value": 0.5083333333333333
+  },
+  {
+   "i": 95,
+   "boss": "#46",
+   "hand_pick": "headsmash",
+   "fitted_pick": "switch camerupt",
+   "hand_value": 0.45,
+   "fitted_value": 0.5958333333333334
+  },
+  {
+   "i": 96,
+   "boss": "#6",
+   "hand_pick": "switch pidgeotto",
+   "fitted_pick": "flamewheel",
+   "hand_value": 0.6208333333333333,
+   "fitted_value": 0.69375
+  },
+  {
+   "i": 98,
+   "boss": "#6",
+   "hand_pick": "flash",
+   "fitted_pick": "switch linoone",
+   "hand_value": 0.8666666666666668,
+   "fitted_value": 0.8604166666666668
+  },
+  {
+   "i": 100,
+   "boss": "#6",
+   "hand_pick": "roost",
+   "fitted_pick": "switch marshtomp",
+   "hand_value": 0.3125,
+   "fitted_value": 0.19583333333333333
+  },
+  {
+   "i": 104,
+   "boss": "#6",
+   "hand_pick": "switch furret",
+   "fitted_pick": "switch grimer",
+   "hand_value": 0.7875,
+   "fitted_value": 0.8854166666666666
+  },
+  {
+   "i": 105,
+   "boss": "#6",
+   "hand_pick": "switch ivysaur",
+   "fitted_pick": "roost",
+   "hand_value": 0.15,
+   "fitted_value": 0.375
+  },
+  {
+   "i": 106,
+   "boss": "#6",
+   "hand_pick": "stunspore",
+   "fitted_pick": "flash",
+   "hand_value": 0.0,
+   "fitted_value": 0.11875
+  },
+  {
+   "i": 108,
+   "boss": "#74",
+   "hand_pick": "dracobarrage",
+   "fitted_pick": "airslash",
+   "hand_value": 1.0,
+   "fitted_value": 1.0
+  },
+  {
+   "i": 111,
+   "boss": "#74",
+   "hand_pick": "poisonjab",
+   "fitted_pick": "wickedblow",
+   "hand_value": 1.0,
+   "fitted_value": 1.0
+  },
+  {
+   "i": 112,
+   "boss": "#74",
+   "hand_pick": "switch drampa",
+   "fitted_pick": "switch lapras",
+   "hand_value": 1.0,
+   "fitted_value": 1.0
+  },
+  {
+   "i": 113,
+   "boss": "#74",
+   "hand_pick": "switch ironhands",
+   "fitted_pick": "shadowball",
+   "hand_value": 1.0,
+   "fitted_value": 0.9979166666666666
+  },
+  {
+   "i": 114,
+   "boss": "#74",
+   "hand_pick": "belch",
+   "fitted_pick": "thunderbolt",
+   "hand_value": 1.0,
+   "fitted_value": 1.0
+  },
+  {
+   "i": 123,
+   "boss": "#77",
+   "hand_pick": "switch floetteeternal",
+   "fitted_pick": "outrage",
+   "hand_value": 1.0,
+   "fitted_value": 0.9770833333333334
+  },
+  {
+   "i": 128,
+   "boss": "#77",
+   "hand_pick": "switch annihilape",
+   "fitted_pick": "petaldance",
+   "hand_value": 0.99375,
+   "fitted_value": 0.9979166666666666
+  },
+  {
+   "i": 131,
+   "boss": "#77",
+   "hand_pick": "switch floetteeternal",
+   "fitted_pick": "dazzlinggleam",
+   "hand_value": 1.0,
+   "fitted_value": 0.9958333333333332
+  },
+  {
+   "i": 132,
+   "boss": "#80",
+   "hand_pick": "switch jellicent",
+   "fitted_pick": "hypnosis",
+   "hand_value": 0.0,
+   "fitted_value": 0.0
+  },
+  {
+   "i": 135,
+   "boss": "#80",
+   "hand_pick": "switch jellicent",
+   "fitted_pick": "switch revavroom",
+   "hand_value": 0.0,
+   "fitted_value": 0.0
+  },
+  {
+   "i": 136,
+   "boss": "#80",
+   "hand_pick": "thunderwave",
+   "fitted_pick": "thunderbolt",
+   "hand_value": 0.0,
+   "fitted_value": 0.0
+  }
+ ]
+}

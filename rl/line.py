@@ -76,6 +76,10 @@ class Line:
     def __init__(self, eps: float = 0.005, iterations: int = 3000, max_turns: int = 40, p_model: float = 0.8, seed: int = 0):
         self.eps, self.iterations, self.max_turns, self.p_model, self.seed = eps, iterations, max_turns, p_model, seed
         os.environ.setdefault("POKE_ENGINE_DEATH", "60")  # the battler's death weight (engine_search.py), so the line plays its policy
+        w = ROOT / "data" / "rr" / "eval_weights_r2.txt"
+        if w.exists():
+            os.environ.setdefault("POKE_ENGINE_EVAL_WEIGHTS", str(w))
+            os.environ.setdefault("POKE_ENGINE_EVAL_RELATIVE", "1")
         self.nodes: list[dict] = []
         self.memo: dict[str, int] = {}
         self.searches = 0

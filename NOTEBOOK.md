@@ -3076,3 +3076,102 @@ scores an open leaf sigmoid(logit − root logit), centred like the hand evaluat
   that predicts *who is winning* well (log-loss 0.44 vs 0.69) need not rank *moves* well: Monte
   Carlo labels mostly reflect the matchup and the policy, which the search cannot change by its
   choice at the leaf.
+
+**Analysis** (the user asked for it; `results/rr_p4_diag*`, page https://claude.ai/artifact/DQrMhxF4RKjAYBpUekxniN):
+- What the fit learned: a per-boss constant alone reaches log-loss 0.506 (one constant 0.692,
+  linear 0.426): ~70% of the gain is boss identity. The fitted logit varies 4.5 between battles,
+  1.4 within one; the search only compares positions within a battle.
+- Calibration: exact on training bosses; held-out under-confident low (0.19 → 0.27), over-confident
+  high (0.79 → 0.72).
+- Search behaviour (192 positions, 20k, same seed): same pick in 56%; root value spread 0.189
+  (hand) vs 0.096 (fitted); visits on the pick 48% vs 29%; entropy 1.43 vs 1.84; switches 38% vs
+  30%. The UCB constant was tuned for the hand evaluation's scale: the fitted search explores more,
+  commits less.
+- Move quality where they disagree (60 positions, 40 playouts per pick, same continuation): fitted
+  − hand U +0.000 ± 0.021 (15 better, 19 worse). The worst fitted picks stay in where a switch wins
+  (Roost 0.15 vs switch Donphan 0.79); bench-answer features got ~0 weight (answers +0.02,
+  unanswered −0.23 standardised).
+- Options (for the user, next session): A rescale the logits ~2× / retune UCB (cheap test of the
+  indecision mechanism); B fit the within-battle signal (the battle's start value as an offset or a
+  TD-style difference target, bench-answer-after-switch features); C deep-search targets; D stop.
+
+**Option A (2026-11-25): rescale logits 2× (`data/rr/eval_weights_v1_2x.txt`, `POKE_ENGINE_EVAL_RELATIVE=1`,
+`results/rr_p4_a2.*`).**
+- 192-position scale sweep: `abs_2x` still saturates (`spread 0.108, top_share 29.5%, entropy 1.80`),
+  whereas `rel_1x` (H1) already recovered most of the spread (`0.175, 46.0%, 1.47`) and `rel_2x` matches/edges
+  past hand (`0.212, 52.3%, 1.32`, agree with hand `64.1%`); `rel_3x`/`rel_4x` plateau (`0.223`/`0.225`).
+  Switch rate stays stuck at `31–32%` vs hand `38.0%` at every scale.
+- 30-box play test (same boxes & seed 3): Brock **92% / 0.31**, Misty **53% / 0.68**, Erika **62% / 0.55**,
+  Koga **18% / 0.89**, Blaine **31% / 0.86**.
+  - vs H1 (`rel_1x`): **+3.2 ± 3.2 pts, −0.031 ± 0.020 d/mon** (indecision hypothesis confirmed).
+  - vs hand (`base`): **+1.4 ± 4.4 pts, +0.030 ± 0.031 d/mon** (SPRT δ 5: LLR −1.07, continue).
+  - Sharp train vs held-out split: **seen bosses (Brock / Koga / Blaine) +5.6 ± 5.1 pts, +0.002 d/mon**
+    (Koga 9 → 18%, Blaine 24 → 31%); **held-out (Misty / Erika) −4.7 ± 7.6 pts, +0.071 ± 0.055 d/mon**,
+    entirely from Erika (−13.3 ± 12.3 pts, stuck at 62% across V1 / H1 / A2).
+- Reading: rescaling recovered ~3 pts and halved the death regression, showing the fitted signal is
+  real once MCTS isn't indecisive — but inverted/confounded between-battle weights (`our_items −0.33`,
+  `our_boost_off −0.45`, `their_par −0.96`, `answers +0.01`) still hurt switching and held-out Erika.
+  Strong case to test **Option B** (within-battle target + bench features) next.
+
+**Option B (2026-11-25): within-matchup fixed-effects fit (`rl/fit_eval.py --within-team --scale 2.0`,
+`POKE_ENGINE_EVAL_RELATIVE=1`, `results/rr_p4_{b1,b2}.*`).**
+- **B1** (`data/rr/eval_weights_b1.txt`, existing 43 features, fitting `α[boss, team] + w · (f(s) − f(s₀))`):
+  - Within-team log-loss: train `0.3594` (vs group-const `0.4118`), val `0.3894` (`0.4276`), **held-out
+    bosses `0.4148` vs `0.4721` (−12.1%, r = 0.376)**. Confounded signs fixed (`our_items −0.33 → +0.16`,
+    `their_brn −0.33 → +0.08`, `their_tailwind −0.57 → 0.00`); 192-pos switch rate `31.8 → 35.9%` (hand 38.0%).
+  - 30-box play test (seed 3): Brock **93% / 0.27**, Misty **63% / 0.61**, Erika **74% / 0.48**,
+    Koga **16% / 0.91**, Blaine **31% / 0.85**.
+  - vs hand (`base`): **+5.9 ± 3.8 pts, −0.006 ± 0.030 d/mon** (`SPRT δ 5%: LLR +4.39 → H1`, gate passed);
+    seen +5.4 ± 5.1, held-out +6.7 ± 6.0 (Misty +13.9, Erika recovered 62 → 74%).
+- **B2** (`data/rr/eval_weights_b2.txt`, 46 features in `poke-engine/src/genx/evaluate.rs`): fixed
+  `answers` / `unanswered` so the active mon is judged by direct 1v1 (`ko_first`) while bench mons are
+  judged after eating a switch-in hit (previously switching in a counter and taking 35% chip could flip
+  `answers` 1 → 0 and `unanswered` 0 → 1), and added `safest_switch_in`, `bench_answers`, `sweep_exposure`.
+  - Within-team held-out log-loss improved further: **0.4109 vs 0.4721 (−13.0%, r = 0.386)**;
+    `unanswered` strengthened (−0.56 → −0.66), `safest_switch_in` −0.21, `answers` −0.10 → −0.02.
+  - 30-box play test (seed 3): Brock **95% / 0.24**, Misty **64% / 0.59**, Erika **75% / 0.47**,
+    Koga **19% / 0.89**, Blaine **35% / 0.83** (beat B1 on all 5 bosses).
+  - vs hand (`base`): **+8.0 ± 3.7 pts, −0.023 ± 0.028 d/mon** (`SPRT δ 5%: LLR +7.75 → H1`);
+    seen **+8.3 ± 4.8 pts** (−0.030 d/mon), held-out **+7.5 ± 5.8 pts** (−0.011 d/mon) — virtually zero
+    generalisation gap.
+  - vs B1: +2.1 ± 3.2 pts, −0.017 ± 0.023 d/mon.
+- **Mirrors check for B2** (`results/rr_p4_b2_mirrors.log`, n = 48): Erika (arena) **98% / 0.12** (hand
+  100% / 0.10), Koga (no arena) **69% / 0.58** (hand 77% / 0.54; within n = 48 noise, 33 vs 37 of 48),
+  Blaine (arena) **100% / 0.41** (hand 98% / 0.33).
+- **Round 2 refit (2026-11-25, policy iteration under B2):** collected 2,874 on-policy B2 battles
+  (66,865 positions) across the 12 non-trivial bosses (`--boxes 40 --seed 10`, `logs/p4_r2_data.*`;
+  same held-out `#18` Misty, `#34` Erika). Fitted both **R2-only** (`data/rr/eval_weights_r2_only.txt`)
+  and **R1 + R2 combined** (`data/rr/eval_weights_r2.txt`, 196,163 positions, 8,622 battles; held-out
+  within-team log-loss `0.4370` vs `0.4979`, −12.2%, r = 0.401), play-tested on seed 3 (`results/rr_p4_r2*`):
+  - **R2-only:** Brock 88% / 0.36, Misty 62% / 0.62, Erika 68% / 0.53, Koga 14% / 0.93, Blaine 30% / 0.86
+    (**+2.8 ± 3.6 pts** vs hand, **−5.2 ± 3.9 pts** vs B2). Classic policy-iteration forgetting: throwing
+    away Round 1 off-policy coverage let rare status features (`their_par +0.99`, `their_confusion +1.13`)
+    over-inflate and bait MCTS into status moves.
+  - **R1 + R2 combined (replay buffer):** Brock **95% / 0.26**, Misty **72% / 0.58**, Erika **78% / 0.45**,
+    Koga **22% / 0.89**, Blaine **36% / 0.82** — beats hand on all 5 bosses!
+    - vs hand (`base`): **+11.0 ± 3.5 pts, −0.028 ± 0.028 d/mon** (`SPRT δ 5%: LLR +13.17 → H1`);
+      seen **+9.6 ± 4.4 pts** (−0.027 d/mon), held-out **+13.1 ± 5.8 pts** (−0.029 d/mon; Misty +22.8, Erika +3.3).
+    - vs B2: **+3.0 ± 3.2 pts, −0.005 ± 0.022 d/mon**.
+- **Round 3 refit (2026-11-25, ceiling check):** collected 2,874 more on-policy battles under R2
+  (`--boxes 40 --seed 20`, `logs/p4_r3_data.*`), refitted on `R1 + R2 + R3` (260,576 positions, 11,496
+  battles → `data/rr/eval_weights_r3.txt`, held-out within-team log-loss `0.4472` vs `0.5066`, r = 0.412).
+  Play test on seed 3 (`results/rr_p4_r3.*`): Brock 96% / 0.24, Misty 64% / 0.61, Erika 78% / 0.45,
+  Koga 18% / 0.90, Blaine 37% / 0.81 (**+8.9 ± 3.5 pts**, −0.026 d/mon vs hand, LLR +9.91 → H1;
+  **−2.1 ± 2.7 pts vs R2**, SPRT H0: LLR −11.85). Linear ceiling reached; **R2 (`eval_weights_r2.txt`)
+  stays the winner.**
+- **Fresh-seed confirmation (`--seed 4`, untouched, `results/rr_p4_fresh_{hand,r2}.*`):**
+  - Hand: Brock 87% / 0.27, Misty 46% / 0.66, Erika 77% / 0.42, Koga 2% / 0.99, Blaine 33% / 0.81.
+  - **R2 (`eval_weights_r2.txt`):** Brock **96% / 0.27**, Misty **65% / 0.63**, Erika **84% / 0.41**,
+    Koga **11% / 0.93**, Blaine **44% / 0.80** (beat hand on win rate AND deaths/mon on all 5 bosses!).
+  - Paired vs hand: **+11.0 ± 4.1 pts, −0.022 ± 0.029 d/mon** (`SPRT δ 5%: LLR +9.61 → H1`);
+    seen **+9.6 ± 4.7 pts**, held-out **+13.1 ± 7.6 pts** (reproduced seed 3 to the tenth of a point!).
+- **Mirrors for R2** (`results/rr_p4_r2_mirrors.log`, n = 48): Erika (arena) **98% / 0.07** (hand
+  100% / 0.10), Koga (no arena) **67% / 0.58** (hand 77% / 0.54; within noise), Blaine (arena)
+  **100% / 0.36** (hand 98% / 0.33).
+- **Erika line check (100 Showdown battles, `rr_p4_base` box 0):** hand Showdown 87.0 ± 6.6% win (line
+  81.2%), 26.0 ± 8.6% deathless (line 21.5%), exact mass 0.5%; **R2** Showdown **93.0 ± 5.0% win** (line
+  96.8%), 11.0 ± 6.1% deathless (line 13.9%), exact mass **18.0%**, 0% capped. Note: R2 trades a mon
+  more readily to secure wins under U = win · (1 − 0.5 · deaths/6) (higher win rate, lower overall
+  deaths/mon, slightly fewer deathless sweeps on already-won fights).
+- **Adopted as default:** wired `data/rr/eval_weights_r2.txt` + `POKE_ENGINE_EVAL_RELATIVE=1` as default
+  in `rl/engine_search.py` and `rl/line.py` (`POKE_ENGINE_EVAL_WEIGHTS=""` reverts to hand). Phase 4 done.

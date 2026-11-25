@@ -19,12 +19,17 @@ visits and mean value, the pick, and the RR AI model's predicted enemy options.
 import json
 import os
 from collections import Counter
+from pathlib import Path
 
 from rl import convert
 from rl.route import GAPS, turn_gaps
 
 # what the RR build still gets wrong, on top of route.GAPS (rl/README.md -> Radical Red)
 RR_GAPS = {}
+# Phase 4 fitted leaf evaluation (R1+R2 replay buffer, within-team fixed effects, relative 2x):
+# +11.0 ± 4.1 pts, -0.022 d/mon vs hand on untouched fresh seed 4 (SPRT LLR +9.61 -> H1).
+# Set POKE_ENGINE_EVAL_WEIGHTS="" to revert to the hand-written evaluation.
+DEFAULT_EVAL_WEIGHTS = Path(__file__).resolve().parents[1] / "data" / "rr" / "eval_weights_r2.txt"
 
 
 class EngineSearcher:
@@ -37,6 +42,9 @@ class EngineSearcher:
         # at its first evaluation). Misty, 10 boxes, 2026-11-23: 0 -> 53% / 0.73 d/mon, 60 -> 52% /
         # 0.66 (the Showdown search: 52% / 0.69), 200 -> nearly every box lost
         os.environ.setdefault("POKE_ENGINE_DEATH", str(death))
+        if rr and DEFAULT_EVAL_WEIGHTS.exists():
+            os.environ.setdefault("POKE_ENGINE_EVAL_WEIGHTS", str(DEFAULT_EVAL_WEIGHTS))
+            os.environ.setdefault("POKE_ENGINE_EVAL_RELATIVE", "1")
         if rr and not convert.RR:
             convert.use_rr()
         # p_model (opponent "ai"): per enemy decision in the tree, follow the AI model with this

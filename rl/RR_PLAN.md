@@ -79,6 +79,19 @@ user on RL decisions"); the recommendation and the evidence available at that ti
   (independently replayed). Cloud Nine found at Blaine but cut by U. Next: D9 / D10 (phase 4) or
   the deathless question at Blaine. **Realistic 30-box tables:** Koga 5 → 21%, Blaine 28 → 69%
   (+28 ± 7 paired); deathless 2–6%.
+- **Phase 4 (2026-11-25): done, gate passed & adopted as default** (`rl/fit_eval.py
+  --within-team --scale 2.0`, `data/rr/eval_weights_r2.txt`, `POKE_ENGINE_EVAL_RELATIVE=1`, wired into
+  `rl/engine_search.py` and `rl/line.py`; `POKE_ENGINE_EVAL_WEIGHTS=""` reverts to hand): first raw-outcome
+  fit failed (−2.4 pts, +0.055 d/mon) due to boss/box confounding, UCB value-spread compression, and an
+  active-vs-bench bug in `answers`. Fixing scale (`A2`: +1.4 pts), removing boss/box difficulty via
+  per-`(boss, team)` fixed effects on `f(s) − f(s₀)` (`B1`: +5.9 pts), fixing `answers` + adding
+  `safest_switch_in` / `bench_answers` / `sweep_exposure` (`B2`, 46 features: +8.0 pts), and adding Round 2
+  on-policy B2 trajectories to the replay buffer (`R1 + R2`, 196k positions) reached **+11.0 ± 3.5 pts** on
+  seed 3 (Round 3 plateaued at +8.9 pts, −2.1 vs R2, H0). **Untouched fresh-seed 4 confirmation:**
+  **+11.0 ± 4.1 pts, −0.022 ± 0.029 d/mon** vs hand (SPRT δ 5%: LLR +9.61 → H1; seen +9.6, held-out
+  **+13.1 ± 7.6 pts**; beat hand on all 5 bosses on both win rate and deaths/mon). Mirrors (n = 48):
+  Erika 98% / 0.07, Koga 67% / 0.58, Blaine 100% / 0.36; Erika line check: 93% vs 87% Showdown win
+  (line predictions within 95% CI, 0% capped). Next: Phase 6 (routing + D14 per-mon death costs).
 - Phase 0 gate:
   logging on/off 60/60 boxes identical, zero capped battles, Brock 70 → 76%; Misty 51 → 24%, of
   which ~24 points are the abilities rolled at catch (Misty is before the capsules; the old 51%
