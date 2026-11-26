@@ -3538,3 +3538,79 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   adjusts IVs so Hidden Power takes any type the player picks. Before Saffron it plays as Dark (all-31 IVs);
   from Saffron on, Hidden Power is a free-type coverage move, and the calc and best4 should choose its type per
   boss instead of fixing it to Dark (not modelled yet; gate on the Saffron progress point).
+
+## 2026-11-26 — D17: what to do with B′ → the team builder must be learned
+
+- Options posed: (1) keep best4 default, B′ opt-in; (2) simulated battles choose best4 vs B′ per team
+  (separate choosing / scoring seeds); (3) hand-code utility-move value into the calc, re-test held-out.
+- **user call: none of 1–3, conf not given.** Movesets are too complex for heuristics. The team builder
+  (team + sets) sets the battler's floor and ceiling, so it must be good. It has to carry over to other games and
+  ROM hacks where move choices are permanent (no relearner, one-use TMs), so it can hard-stick a run. If data is
+  what blocks a learned builder, solve data next. best4 stays the baseline that a learned builder must beat
+  held-out.
+- Claude: agrees heuristics are near their limit (B′: +3.2 train, −1.6 held-out). Permanent choices make team
+  building part of the run-level decision problem (roadmap step 2), and its evaluator is a team-vs-boss
+  win-probability model (roadmap step 1's deliverable). Existing data: 7,787 box results in 89
+  `results/rr_*.events.jsonl` (mixed configs, teams only from our own chooser). → D18 (where the data comes from).
+
+## 2026-11-26 — D18: where the team builder's data comes from → A first (fit on logged boxes)
+
+- Options: A fit a team-vs-boss win-probability model on the logged boxes; B generate data with deliberately
+  varied teams / sets (exploration, poke-engine); C search picks between set options at scale and the model
+  imitates it (expert iteration). **user call: A now, conf not given**, while researching where to get many
+  more good enemy teams (competitive teams for RR and vanilla, other ROM hacks' bosses), where they sit on
+  box progress, and how to design boxes so the builder learns well (research agent running).
+- `rl/fit_teamwin.py`: 5,982 box events (hardcore legality, every run with a matrix), label = win rate over
+  6 battles, 20 features (per-enemy "do we answer it" summaries of the 6x6 matchup matrix, team means, counts
+  of pivots / priority attacks / status moves). Train on Brock / Misty / Erika / Koga / Blaine (validation =
+  a fifth of their boxes), held out Lt. Surge / Giovanni / Sabrina / Pryce / Clair (402 boxes). Battle noise
+  is 20–50% of each boss's win-rate variance (6 battles per label).
+
+  | model | log-loss train / val / held-out | rank corr within boss, held-out | same box, which team/sets wins (held-out, 125 pairs) |
+  |---|---|---:|---:|
+  | constant | 0.692 / 0.692 / 0.688 | – | – |
+  | one hand feature (share of enemy mons answered safely) | – | +0.19 | – |
+  | linear | 0.544 / 0.545 / 0.577 | +0.28 | 61%, corr of differences +0.05 |
+  | 1x32 probe | 0.484 / 0.494 / 0.656 | +0.26 | 53%, −0.08 |
+
+- Meaning: the features tell strong boxes from weak ones a little better than one hand feature, on new bosses
+  too. But the team builder's actual question, "for this box, which six / which sets", is near a coin flip
+  on new bosses: the 125 held-out pairs are mostly the D16 A vs B′ boxes (same team, different sets), and
+  the matrix features cannot see what made B′ win or lose (the calc's blind spots again). The probe fits the
+  five training bosses well (val rank +0.58) and loses it on new ones: **five bosses are five environments**,
+  more boxes of the same bosses will not fix that. Also the data has few same-box contrasts, and only among
+  teams our chooser liked. Both point at the research question (many more distinct enemy teams) and at
+  D18 B (varied teams per box), not at a bigger model.
+- Enemy-team research (agent, sources fetched and parsed unless marked recalled):
+  1. RR 4.1 itself: `data/rr/trainers_hardcore.json` (already parsed by `build_rr.py` from the dump) has 736
+     trainers / 2,307 mons; 573 at fixed levels, 163 relative to the cap. `rr41_{normal,easy}_trainers.txt` are
+     not parsed yet. So far only ~20 bosses are used as opponents.
+  2. Dynamic-Calc (github hzla): trainer sets for ~44 ROM hacks, ~88k sets in one JSON schema (Run & Bun 1.8k,
+     Renegade Platinum 2.8k, Emerald Kaizo 1.7k, Inclement, Imperium, BB2 Redux, ...), trainer order for ~20
+     hacks; no license file (research use, don't redistribute). Other mechanics generations: played under RR
+     mechanics they are diverse opponents, not faithful copies.
+  3. Showdown's random-battle generator (MIT, already in our Node bridge): unlimited level-balanced teams,
+     gen9 sets L64–100 and baby sets L5–9.
+  4. metamon-teams (HF): 44k+ gen9ou teams, L100 (late game only). 5. Smogon chaos stats (LC fits early game).
+  6. hzla/romhack-usage-statistics: real players' parties chosen from their boxes per trainer (no outcomes):
+     a human prior for the team builder itself.
+  Placement on progress: by absolute ace level → the RR checkpoint whose cap is the smallest ≥ it (badge counts
+  don't transfer across hacks); don't level-scale L100 competitive teams to early caps. Hold out by source
+  family (RR Normal shares sets with Hardcore). → D19 (enemy pool and holdout).
+
+## 2026-11-26 — D19: enemy pool → RR only first
+
+- Options: (1) all 736 RR hardcore trainers as opponents, hold out the gym leaders / big bosses; (2) plus other
+  hacks (Dynamic-Calc), hold out hack families; (3) plus random-battle filler.
+- **user call: 1, 70%.** **user bet:** "I expect overfitting and not getting what we want, but it still being
+  better" than the 5-boss model (held-out same-box choice 61% / rank 0.28).
+- Plumbing: `rr_team_probe.py --alt K` (box mode): also plays K variants of each box's six (1–3 mons swapped for
+  other box mons, the main six's seeds: paired), logged as `box_alt` events; skips the threat duels.
+  `rl/fit_teamwin.py --split d19` trains on non-boss trainers, holds out bosses (gym leaders incl. Johto,
+  Giovanni, E4, Lance, rematches; rivals / Brendan / May / Rocket admins stay in training); `--label utility` =
+  win × (1 − 0.5 × deaths/mon). Validation is now split by box (a box's variants together): the d18 probe's
+  validation rank fell 0.58 → 0.38 (row split leaked boxes); held-out numbers barely moved (linear 0.27 / 60%).
+- Data run `results/rr_d19_all` (seed 11): all 112 order trainers with a team (not #40 Ghost), 20 boxes each,
+  `--alt 3`, greedy chooser, best4 sets, engine 20000, 12 workers (user gaming). Doubles fights play as singles.
+- Claude bet (before results): the d19 model is **not** clearly better than d18 on the held-out bosses'
+  same-box pairs (within ±5 points of 60%), but ranks boxes on bosses about as well (0.25–0.35); 70%.
