@@ -1,6 +1,12 @@
-"""D19 bet check: does a team model trained on non-boss trainers (D19) judge boss teams better than one
-trained on five bosses (D18)? Same held-out set for both: every logged box of Lt. Surge, Giovanni, Sabrina,
-Pryce and Clair, and their same-box pairs (D19 --alt variants included).
+"""Team-judge comparisons on fixed held-out boss sets (D19 bet check, D23 data).
+
+Training sets (non-boss trainers only, linear model, fit_teamwin features): D18 (five bosses' boxes), D19 (the
+D19 data run: greedy six + swaps, 6 battles at 20,000 iterations), D23 (the D23 data run: cover six + swaps +
+random sixes, 16 battles at 2,000 iterations), D19+D23. Held-out sets: (1) every logged box of Lt. Surge,
+Giovanni, Sabrina, Pryce and Clair outside the D23 run (20k labels, 6 battles), (2) every boss box of the D23
+run (gym leaders, Giovanni, E4, Lance; 2k labels, 16 battles), (3) the same without the random sixes (the
+chooser's six vs its swaps: the builder's real question). Reported: same-box pairs where the model picks
+the measured better team, and the within-boss rank correlation.
 
     uv run python rl/teamwin_compare.py [win|utility]
 """
@@ -11,32 +17,55 @@ from rl.fit_teamwin import load, features, boss_name, BOSSES, NAMES, spearman
 from rl.fit_eval import fit
 torch.manual_seed(0)
 label = sys.argv[1] if len(sys.argv) > 1 else 'win'
-rows = load(sorted(glob.glob('results/rr_*.events.jsonl*')))
+D23 = 'results/rr_d23_data.events.jsonl.xz'
+old = load(sorted(p for p in glob.glob('results/rr_*.events.jsonl*') if p != D23))
+new = load([D23]) if glob.glob(D23) else []
+rows = old + new
+src = np.array(['old'] * len(old) + ['d23'] * len(new))
 X = np.array([features(e) for e in rows], dtype=np.float32)
 Y = np.array([e['win'] * (1 - 0.5 * e['deaths_per_mon']) if label == 'utility' else e['win'] for e in rows], dtype=np.float32)
 name = np.array([boss_name(e['boss']) for e in rows])
-H = np.isin(name, ['LT. SURGE', 'GIOVANNI', 'SABRINA', 'PRYCE', 'CLAIR'])  # the D18 held-out bosses, every run
-trains = {'d18 (Brock..Blaine boxes)': np.isin(name, ['BROCK', 'MISTY', 'ERIKA', 'KOGA', 'BLAINE']),
-          'd19 (non-boss trainers)': ~np.isin(name, list(BOSSES)),
-          'd18+d19': np.isin(name, ['BROCK', 'MISTY', 'ERIKA', 'KOGA', 'BLAINE']) | ~np.isin(name, list(BOSSES))}
-groups = {}
-for i, e in enumerate(rows):
-    if H[i]:
-        groups.setdefault((e['boss'], json.dumps(e['box']), json.dumps(e['cfg'])), []).append(i)
-pairs = [(i, j) for idx in groups.values() for a, i in enumerate(idx) for j in idx[a + 1:] if Y[i] != Y[j] and rows[i]['sets'] != rows[j]['sets']]
-print(f'label {label}; held-out boxes {H.sum()}, same-box pairs {len(pairs)}')
-for tag, tr in trains.items():
-    rng = random.Random(1); vb = {}
-    val = np.array([vb.setdefault((e['boss'], json.dumps(e['box'])), rng.random() < 0.2) for e in rows]) & tr
-    t = tr & ~val
-    mu, sd = X[t].mean(0), X[t].std(0) + 1e-6
-    T = lambda m: (torch.tensor((X[m] - mu) / sd), torch.tensor(Y[m]))
-    (x, y), (xv, yv) = T(t), T(val)
-    lin = fit(torch.nn.Linear(len(NAMES), 1), x, y, xv, yv)
-    with torch.no_grad():
-        p = torch.sigmoid(lin(torch.tensor((X - mu) / sd)).squeeze(-1)).numpy()
-    acc = np.mean([(p[i] - p[j]) * (Y[i] - Y[j]) > 0 for i, j in pairs])
+boss = np.array([e['boss'] for e in rows])
+is_boss = np.isin(name, list(BOSSES))
+five = ['LT. SURGE', 'GIOVANNI', 'SABRINA', 'PRYCE', 'CLAIR']
+run19 = np.array([e['boss'].startswith('#') for e in rows]) & (src == 'old')  # the D19 run keys trainers by order index
+trains = {'d18 (Brock..Blaine boxes)': np.isin(name, ['BROCK', 'MISTY', 'ERIKA', 'KOGA', 'BLAINE']) & (src == 'old'),
+          'd19 (non-boss, D19 run)': ~is_boss & run19,
+          'd23 (non-boss, D23 run)': ~is_boss & (src == 'd23'),
+          'd19+d23': ~is_boss & (run19 | (src == 'd23'))}
+helds = {'old held-out (5 bosses, 20k x6)': np.isin(name, five) & (src == 'old'),
+         'D23 bosses (2k x16)': is_boss & (src == 'd23'),
+         'D23 bosses, no random sixes': is_boss & (src == 'd23') & ~np.array([bool(e.get('rand')) for e in rows])}
+
+
+def same_box_pairs(H):
+    groups = {}
+    for i in np.flatnonzero(H):
+        e = rows[i]
+        groups.setdefault((src[i], e['boss'], json.dumps(e['box']), json.dumps(e['cfg'])), []).append(i)
+    return [(i, j) for idx in groups.values() for a, i in enumerate(idx) for j in idx[a + 1:]
+            if Y[i] != Y[j] and rows[i]['sets'] != rows[j]['sets']]
+
+
+print(f'label {label}; rows old {len(old)}, D23 {len(new)}')
+for tag, H in helds.items():
+    pairs = same_box_pairs(H)
+    if not pairs:
+        continue
     big = [(i, j) for i, j in pairs if abs(Y[i] - Y[j]) >= 0.5]
-    accb = np.mean([(p[i] - p[j]) * (Y[i] - Y[j]) > 0 for i, j in big])
-    rc = spearman(p[H], Y[H], np.array([e['boss'] for e in rows])[H])
-    print(f'  {tag:<28} train boxes {t.sum():>6}: same-box picks better {acc:.1%} (pairs with a >=50-pt gap: {accb:.1%}, n={len(big)}), rank corr {rc:+.3f}')
+    print(f'{tag}: {H.sum()} boxes, {len(pairs)} same-box pairs ({len(big)} with a >=50-pt gap)')
+    for ttag, tr in trains.items():
+        if tr.sum() < 50:
+            continue
+        rng = random.Random(1); vb = {}
+        val = np.array([vb.setdefault((e['boss'], json.dumps(e['box'])), rng.random() < 0.2) for e in rows]) & tr
+        t = tr & ~val
+        mu, sd = X[t].mean(0), X[t].std(0) + 1e-6
+        T = lambda m: (torch.tensor((X[m] - mu) / sd), torch.tensor(Y[m]))
+        (x, y), (xv, yv) = T(t), T(val)
+        lin = fit(torch.nn.Linear(len(NAMES), 1), x, y, xv, yv)
+        with torch.no_grad():
+            p = torch.sigmoid(lin(torch.tensor((X - mu) / sd)).squeeze(-1)).numpy()
+        acc = np.mean([(p[i] - p[j]) * (Y[i] - Y[j]) > 0 for i, j in pairs])
+        accb = np.mean([(p[i] - p[j]) * (Y[i] - Y[j]) > 0 for i, j in big]) if big else float('nan')
+        print(f'  {ttag:<26} train {t.sum():>6}: picks better {acc:.1%} (>=50-pt gap {accb:.1%}), rank corr {spearman(p[H], Y[H], boss[H]):+.3f}')

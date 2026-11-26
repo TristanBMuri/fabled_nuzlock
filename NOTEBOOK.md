@@ -3853,3 +3853,29 @@ independent second analyst (logs only), then a paired lever test by Claude.
   complements: a better chooser pays only on a box that still holds its answers (greedy 18 → 26 with the dead back,
   cover 25 → 67), and keeping the answers alive pays only with a chooser that fields them. So D21's routine-death cut
   and D14's per-mon value (spare the mons a later boss needs) are back in the picture, next to the chooser.
+
+## 2026-11-26 — D23 result: better labels, the same judge
+
+- Data run done (`results/rr_d23_data.*`, 4 h 05 on 12 workers, no failures): 2,240 boxes × (cover six + 3 swaps +
+  2 random sixes) = 13,245 labelled teams, 16 battles each at 2,000 iterations, D21 weights. Random sixes are a floor
+  (mostly 0% wins).
+- `rl/teamwin_compare.py` (`results/teamwin_compare_d23.log`): the linear judge on the 20 matrix features, trained on
+  non-boss trainers of each run, scored on bosses it never saw. Win label, same-box pairs where it picks the better:
+
+  | trained on | old held-out (5 bosses, 6 battles at 20k; 713 pairs) | D23 bosses (16 at 2k; 5,048) | D23 bosses, no random sixes (2,080) |
+  |---|---:|---:|---:|
+  | D18 (five bosses) | 64.5% / rank 0.37 | 72.7% / 0.53 | 64.9% / 0.40 |
+  | D19 run | 66.2% / 0.37 | 75.9% / 0.55 | 69.1% / 0.42 |
+  | **D23 run** | 65.5% / 0.40 | 77.9% / 0.59 | **71.6% / 0.47** |
+  | D19 + D23 | 66.6% / 0.36 | 76.1% / 0.56 | 69.5% / 0.43 |
+
+  Utility label: the same order (hard pairs 63.0 / 65.9 / 67.0 / 65.9%).
+- Meaning: the better labels mostly made the **measurement** sharper, not the judge: the same D19 judge scores 66%
+  on 6-battle labels and 69% on 16-battle ones (hard pairs), so part of the "65% ceiling" was label noise. Trained on
+  D23 the judge gains +2.5 on hard pairs (about 1.5 se, and its training teams come from the same generator as the
+  test teams, which flatters it) and nothing on the old held-out. With 20 summary features, more and cleaner data
+  buys little: the inputs are the ceiling, as D19 said. D23's data is now the right substrate for richer inputs
+  (16-battle labels, random sixes for coverage, paired swaps for contrasts). Not done yet: the 20k spot-check of
+  boss labels.
+- Bets: user none. Claude (posted before reading) "D23 judge within ±3 of D19's on the old held-out pairs, 60%":
+  hit (−0.7).

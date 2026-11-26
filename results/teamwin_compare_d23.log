@@ -1,0 +1,32 @@
+label win; rows old 15451, D23 13245
+old held-out (5 bosses, 20k x6): 1342 boxes, 713 same-box pairs (183 with a >=50-pt gap)
+  d18 (Brock..Blaine boxes)  train   5179: picks better 64.5% (>=50-pt gap 77.0%), rank corr +0.368
+  d19 (non-boss, D19 run)    train   5440: picks better 66.2% (>=50-pt gap 80.3%), rank corr +0.369
+  d23 (non-boss, D23 run)    train   8032: picks better 65.5% (>=50-pt gap 80.9%), rank corr +0.398
+  d19+d23                    train  13472: picks better 66.6% (>=50-pt gap 82.5%), rank corr +0.362
+D23 bosses (2k x16): 3116 boxes, 5048 same-box pairs (1214 with a >=50-pt gap)
+  d18 (Brock..Blaine boxes)  train   5179: picks better 72.7% (>=50-pt gap 88.1%), rank corr +0.528
+  d19 (non-boss, D19 run)    train   5440: picks better 75.9% (>=50-pt gap 90.2%), rank corr +0.554
+  d23 (non-boss, D23 run)    train   8032: picks better 77.9% (>=50-pt gap 91.4%), rank corr +0.588
+  d19+d23                    train  13472: picks better 76.1% (>=50-pt gap 90.5%), rank corr +0.562
+D23 bosses, no random sixes: 2080 boxes, 2080 same-box pairs (332 with a >=50-pt gap)
+  d18 (Brock..Blaine boxes)  train   5179: picks better 64.9% (>=50-pt gap 82.5%), rank corr +0.397
+  d19 (non-boss, D19 run)    train   5440: picks better 69.1% (>=50-pt gap 86.7%), rank corr +0.421
+  d23 (non-boss, D23 run)    train   8032: picks better 71.6% (>=50-pt gap 88.6%), rank corr +0.467
+  d19+d23                    train  13472: picks better 69.5% (>=50-pt gap 87.3%), rank corr +0.434
+label utility; rows old 15451, D23 13245
+old held-out (5 bosses, 20k x6): 1342 boxes, 952 same-box pairs (91 with a >=50-pt gap)
+  d18 (Brock..Blaine boxes)  train   5179: picks better 61.2% (>=50-pt gap 73.6%), rank corr +0.349
+  d19 (non-boss, D19 run)    train   5440: picks better 63.9% (>=50-pt gap 81.3%), rank corr +0.338
+  d23 (non-boss, D23 run)    train   8032: picks better 62.8% (>=50-pt gap 83.5%), rank corr +0.361
+  d19+d23                    train  13472: picks better 63.0% (>=50-pt gap 83.5%), rank corr +0.335
+D23 bosses (2k x16): 3116 boxes, 5990 same-box pairs (729 with a >=50-pt gap)
+  d18 (Brock..Blaine boxes)  train   5179: picks better 70.8% (>=50-pt gap 92.3%), rank corr +0.480
+  d19 (non-boss, D19 run)    train   5440: picks better 72.3% (>=50-pt gap 94.2%), rank corr +0.490
+  d23 (non-boss, D23 run)    train   8032: picks better 73.3% (>=50-pt gap 94.4%), rank corr +0.509
+  d19+d23                    train  13472: picks better 72.4% (>=50-pt gap 94.5%), rank corr +0.487
+D23 bosses, no random sixes: 2080 boxes, 2490 same-box pairs (176 with a >=50-pt gap)
+  d18 (Brock..Blaine boxes)  train   5179: picks better 63.0% (>=50-pt gap 88.1%), rank corr +0.352
+  d19 (non-boss, D19 run)    train   5440: picks better 65.9% (>=50-pt gap 92.6%), rank corr +0.369
+  d23 (non-boss, D23 run)    train   8032: picks better 67.0% (>=50-pt gap 93.8%), rank corr +0.399
+  d19+d23                    train  13472: picks better 65.9% (>=50-pt gap 93.8%), rank corr +0.370
