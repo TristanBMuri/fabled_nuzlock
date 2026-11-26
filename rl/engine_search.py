@@ -55,7 +55,9 @@ class EngineSearcher:
         # probability, else UCB over every enemy option (phase 1's mixture; 1.0 = pure model).
         # Default ai / 0.8 since D4 (2026-11-24): +11 points, -0.13 deaths/mon vs minimax on fresh seeds
         self.fallback, self.iterations, self.opponent, self.p_model = fallback, iterations, opponent, p_model
-        self.gaps = {**GAPS, **RR_GAPS}
+        # Rivalry: trainers' genders are unknown (Showdown rolls them), the engine has none = no effect, the mean of
+        # +25% / -25%; played on the engine since 2026-11-26 (the user, D23 data run: it was a top fallback)
+        self.gaps = {k: v for k, v in {**GAPS, **RR_GAPS}.items() if k != "ability:rivalry"}
         self.stats = Counter()
         self.last_scores: dict[str, float] = {}
         self.log, self.tag = None, {}

@@ -3797,3 +3797,8 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   swaps 0–56%, random sixes 0–38% (mostly 0: random teams lose; a floor, low contrast). The slow trainers are
   the ones where the engine falls back to the Showdown search (one Soul-Heart mon at #24: ~8% of decisions,
   ~90% of the time, 7x slower boxes); D19's fallback reasons: trapping volatiles and enemy Rivalry most often.
+- User: go on the proposed run, and enemy Rivalry on the engine (`engine_search`: dropped from the fallback gaps;
+  the engine has no genders = no effect, the mean of ±25%; Showdown rolled random genders anyway).
+- **Data run launched** `logs/rr_d23_data` (seed 23): D19's 112 trainers × 20 boxes, `--chooser cover --alt 3
+  --rand 2 --n-search 16 --engine 2000`, D21 weights, 12 workers. Plan: refit `fit_teamwin.py` on D23 labels and on
+  D19's, score both on the same held-out boss pairs; spot-check boss labels at 20,000 iterations.
