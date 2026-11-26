@@ -1,5 +1,18 @@
 # HANDOFF — state of the project as of 2026-10-12
 
+**2026-11-26 (later): team-builder data, first Nuzlocke runs, death price** (NOTEBOOK.md, decision log Steps
+22–25; branch `rr/d15-d21`, not pushed; `main` = origin/main, old tip in `backup/main-2026-11-26`).
+- D17/D18: the team builder must be learned; best4 is the baseline. `rl/fit_teamwin.py` (team-vs-boss win model
+  on logged boxes). D19: every ordered trainer as an opponent (`rr_team_probe.py --alt K`, data run
+  `results/rr_d19_all*.xz`); a model trained on route trainers judges boss teams as well as one trained on bosses
+  (~65% same-box, `rl/teamwin_compare.py`): the features are the ceiling.
+- `scripts/rr_run.py`: simulated hardcore runs. 36 seeds clear a median 13–14 of 93 fights; attrition in routine
+  fights (~0.6 deaths per won fight) guts the box before Misty. D20 (safe chooser): no effect.
+- D21: `fit_eval.py --death-cost 1.0` (a death = 1/6 win) → `data/rr/eval_weights_d21.txt`: deaths per won
+  fight 0.63 → 0.50, deathless boss wins 5 → 10%, boss wins −3.5 pts, fights cleared unchanged. Not shipped
+  (D15 default). Open D22 (user's call pending): D21 in routine fights, D15 at bosses (needs a per-call weights
+  switch in the fork), per-mon death weights later.
+
 **2026-11-26: D16 movesets, D17 open** (NOTEBOOK.md last entries, decision log Step 21). Boss-aware sets
 B′ (`rr_team_probe.py --sets boss`, `rr_search.default_set`) gain +3.2 ± 1.5 on the five bosses they were tuned
 on (Blaine +14.7) but −1.6 ± 1.8 on held-out Lt. Surge / Giovanni / Sabrina / Pryce / Clair: the damage-only
