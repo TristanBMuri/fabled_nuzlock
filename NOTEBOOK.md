@@ -3742,3 +3742,30 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   what we want yes (~65%); better: marginally (+1.7, within noise) → mostly a miss on "overfit", hit on "not
   what we want". Claude "not clearly better, within ±5 of 60%; rank 0.25–0.35" (70%): within ±5 of the D18
   model yes (both ~65%), rank 0.37 slightly above the range → mostly hit.
+
+## 2026-11-26 — D22: where the D21 death price applies → b (everywhere)
+
+- Options: (a) D21 weights in routine fights, D15 at bosses (per-call weights switch in the fork); (b) D21 everywhere;
+  (c) keep D15, attack deaths elsewhere (per-mon death weights, the team picker).
+- **user call: b, conf not given.** "If we want to beat the complete gauntlet we might need to go with b."
+- Claude: agrees (~65%). Every fight but the last carries its deaths forward; a boss won with 4 dead is close to a
+  loss for the run (Test B: 0.68 deaths per mon at bosses in every arm; D21 doubles deathless boss wins 5 → 10%
+  for −3.5 pts of wins). Runs cleared the same either way, so (a)'s fork change buys nothing measurable now. Note
+  the tension with the D20 principle (the battler plays to win, the chooser carries safety): D20 showed the
+  chooser cannot carry it with small early boxes. The principled version is a run-state death price (the last
+  fight prices deaths at 0; per-mon value, D14), not a boss/route switch.
+- Shipped: `rl/engine_search.DEFAULT_EVAL_WEIGHTS` and `rl/line.py` → `data/rr/eval_weights_d21.txt`. Every
+  table before this entry is on D15.
+
+## 2026-11-26 — Rivalry never chosen; typed Hidden Power from Saffron on
+
+- User: never use Rivalry (no genders, bad anyway). `rr_probe.choose_ability` skips a Rivalry slot when another
+  exists (a mon rolled Rivalry before capsules keeps it).
+- Hidden Power: the NPC next to Saffron's Poké Mart sets its type (the user). The TM is in Silph Co. 1F
+  (tms.json, `before_trainer` 44), so from #44 on: `rr_probe.HP_NPC`, the 16 typed entries in the game tables;
+  best4 sets type an untyped Hidden Power against the opponent (`type_hidden_power`: summed effectiveness,
+  a 4x weakness counts double); `--sets boss` (B′) gets all 16 typed Hidden Powers in its pool and the calc
+  picks. Before #44 it stays Dark (all-31 IVs).
+- Scope: best4 picks Hidden Power in 5 of 1,200 boss set slots (Test B logs), so the default is barely
+  touched; B′ picks it often (smoke, 9 boxes at Koga / Blaine / Pryce: Gengar / Glaceon / Walrein HP Rock,
+  Vikavolt HP Ground, Scizor HP Fighting). Runs end before #44 today, so no run number moves yet.

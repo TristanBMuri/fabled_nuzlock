@@ -115,6 +115,8 @@ def info(ctx, species: list[str]) -> dict:
                 continue
             pool = [x for x in dict.fromkeys(legal_pool(m.species, m.level, ctx.progress) + getattr(m, "known", []) + m.moves)
                     if x in gd and x not in gauntlet.NO_SLOT_MOVES]
+            if ctx.progress >= rp.HP_NPC and "hiddenpower" in pool:  # every type the Saffron NPC sets: the calc picks
+                pool = [x for x in pool if x != "hiddenpower"] + ["hiddenpower" + t.lower() for t in rp.HP_TYPES]
             dmg = {x: {o.species: dmg_frac(me, o, Move(x, 9), True, b) for o in b.opponent_team.values()}
                    for x in pool if gd[x]["category"] != "Status"}
             enemies = [o.species for o in b.opponent_team.values()]
@@ -431,7 +433,8 @@ def load_box(ctx, path: str) -> list[str]:
         lvl = int(x.get("level") or ctx.cap)
         known = [to_id_str(m) for m in x.get("moves", [])]
         ab = x.get("ability") if ctx.progress < capsule else rp.choose_ability(sp, ctx.known, ctx.boss_types, ctx.arena, hidden=ctx.progress >= patch)
-        m = Mon(sp, lvl, (known or gauntlet.encounter_moves(sp, lvl, "best4", progress=ctx.progress, dead=rp.dead_types(ctx.arena, ab), ability=ab))[:4], ability=ab, caught_level=5, nature=x.get("nature"))
+        moves = rp.type_hidden_power(known or gauntlet.encounter_moves(sp, lvl, "best4", progress=ctx.progress, dead=rp.dead_types(ctx.arena, ab), ability=ab), ctx.progress, ctx.boss)
+        m = Mon(sp, lvl, moves[:4], ability=ab, caught_level=5, nature=x.get("nature"))
         m.evs, m.known = dict.fromkeys(gauntlet.STATS, 0), known
         ctx.mons[sp] = m
         limits[sp] = limits.get(sp, 0) + 1

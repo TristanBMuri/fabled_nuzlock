@@ -30,8 +30,10 @@ RR_GAPS = {}
 # +11.0 ± 4.1 pts, -0.022 d/mon vs hand on untouched fresh seed 4 (SPRT LLR +9.61 -> H1).
 # D15 (2026-11-25): + hazard battles, hazards as switch-in damage (evaluate.rs) -> eval_weights_d15.txt:
 # Blaine Kleavor lead 45 -> 56%, fresh seed 4 -0.7 +- 2.6 pts vs R2 (SPRT: no difference). NOTEBOOK.md.
+# D22 (2026-11-26, user call b): the D21 refit (a death = 1/6 win) everywhere: deaths per won run fight
+# 0.63 -> 0.50, deathless boss wins 5 -> 10%, boss wins -3.5 pts. eval_weights_d15.txt is the old default.
 # Set POKE_ENGINE_EVAL_WEIGHTS="" to revert to the hand-written evaluation.
-DEFAULT_EVAL_WEIGHTS = Path(__file__).resolve().parents[1] / "data" / "rr" / "eval_weights_d15.txt"
+DEFAULT_EVAL_WEIGHTS = Path(__file__).resolve().parents[1] / "data" / "rr" / "eval_weights_d21.txt"
 
 
 class EngineSearcher:

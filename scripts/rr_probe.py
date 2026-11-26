@@ -55,8 +55,30 @@ def inject_mod_data() -> dict:
     # Hidden Power's type comes from IVs; the player's are all 31 (gauntlet.PLAYER_IVS), so Showdown
     # plays it as Dark. mod_data says Water and moves.json Normal: calc and best4 mistyped it (D16 sets).
     g.moves["hiddenpower"]["type"] = "Dark"
-    gauntlet.load_game("rr")["moves"]["hiddenpower"]["type"] = "Dark"
+    md = gauntlet.load_game("rr")["moves"]
+    md["hiddenpower"]["type"] = "Dark"
+    for t in HP_TYPES:  # the Saffron NPC's typed Hidden Powers (type_hidden_power), as the game tables know them
+        md.setdefault("hiddenpower" + t.lower(), dict(md["hiddenpower"], type=t, name=f"Hidden Power {t}"))
     return counts
+
+
+# The NPC next to Saffron's Poke Mart sets a mon's Hidden Power type (the user, 2026-11-26): from the
+# first Saffron fight (order #44, Silph Co.; the TM is there too) the player types it per opponent.
+HP_NPC = 44
+HP_TYPES = ["Fighting", "Flying", "Poison", "Ground", "Rock", "Bug", "Ghost", "Steel", "Fire", "Water", "Grass",
+            "Electric", "Psychic", "Ice", "Dragon", "Dark"]
+
+
+def type_hidden_power(moves: list[str], progress: int, boss: dict | None) -> list[str]:
+    """From HP_NPC on, an untyped Hidden Power takes the type with the highest summed effectiveness on
+    the opponent's mons (boss_profile types: a 4x weakness counts twice a 2x one); Dark before."""
+    if "hiddenpower" not in moves or progress < HP_NPC or not boss or not boss.get("types"):
+        return moves
+    from poke_env.data import GenData
+    tc = GenData.from_gen(9).type_chart
+    eff = lambda t, ts: functools.reduce(lambda a, d: a * tc.get(d.upper(), {}).get(t.upper(), 1), ts, 1.0)
+    best = max(HP_TYPES, key=lambda t: sum(eff(t, ts) for ts in boss["types"]))
+    return ["hiddenpower" + best.lower() if m == "hiddenpower" else m for m in moves]
 
 
 MOD_ADDED = inject_mod_data()
@@ -299,15 +321,16 @@ def boss_profile(enemy_packed: str, known: dict, arena: dict) -> dict:
     from poke_env.data import GenData
     natures, md = GenData.from_gen(9).natures, load_game("rr")["moves"]
     tail = 2 if "tailwind" in arena.get("p2", []) else 1
-    spe, cats = [], []
+    spe, cats, types = [], [], []
     for x in enemy_packed.split("]"):
         f = x.split("|")
+        types.append(known.get(to_id_str(f[1] or f[0]), {}).get("types", []))
         base = known.get(to_id_str(f[1] or f[0]), {}).get("baseStats", {}).get("spe", 0)
         ivs, evs = (f[8] or "31,31,31,31,31,31").split(","), (f[6] or "0,0,0,0,0,0").split(",")
         spe.append(speed(base, int(f[10] or 100), int(ivs[5] or 31), int(evs[5] or 0),
                          natures.get(to_id_str(f[5]), {}).get("spe", 1)) * tail)
         cats += [md[m]["category"] for m in f[4].split(",") if m in md and md[m]["category"] != "Status"]
-    return {"spe": spe, "phys": sum(c == "Physical" for c in cats) / max(len(cats), 1)}
+    return {"spe": spe, "phys": sum(c == "Physical" for c in cats) / max(len(cats), 1), "types": types}
 
 
 def choose_nature(species: str, moves: list[str], known: dict, boss: dict | None = None, level: int = 100) -> str:
@@ -426,8 +449,9 @@ def choose_ability(species: str, known: dict, boss_types: set, arena: dict, hidd
             s += ratings.get(a, 0.0)
         return s
 
-    return max((slots[k] for k in ("0", "1", "H")[:3 if hidden else 2] if k in slots),
-               key=lambda ab: (score(ab), tiebreak(ab) if tiebreak else 0))
+    opts = [slots[k] for k in ("0", "1", "H")[:3 if hidden else 2] if k in slots]
+    opts = [ab for ab in opts if to_id_str(ab) != "rivalry"] or opts  # never Rivalry (the user, 2026-11-26: no genders, bad anyway)
+    return max(opts, key=lambda ab: (score(ab), tiebreak(ab) if tiebreak else 0))
 
 
 @functools.cache

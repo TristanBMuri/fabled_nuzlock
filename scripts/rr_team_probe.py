@@ -117,7 +117,8 @@ def build_mon(species: str, cap: int, known: dict, progress: int, boss: dict | N
     if ev not in known:
         return None
     ability = rp.run_ability(base, ev, seed, progress, known, boss_types, arena, level=cap)
-    moves = encounter_moves(ev, cap, "best4", progress=progress, dead=rp.dead_types(arena, ability), ability=ability)
+    moves = rp.type_hidden_power(encounter_moves(ev, cap, "best4", progress=progress, dead=rp.dead_types(arena, ability), ability=ability),
+                                 progress, boss)
     if not moves:
         return None
     m = Mon(ev, cap, moves, ability=ability, item=mega_stone(ev, progress), caught_level=5,
