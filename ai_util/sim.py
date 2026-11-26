@@ -27,6 +27,8 @@ BRIDGE = Path(__file__).with_name("sim_bridge.js")
 SIDES = ("p1", "p2")
 _LOG = logging.getLogger("sim")
 _LOG.setLevel(logging.CRITICAL)
+# poke-env warns once per unknown effect id (RR's Shell Trap and friends): ~99% of every run log, 2026-11-26
+logging.getLogger("poke-env").setLevel(logging.ERROR)
 _IDS = itertools.count()
 _IGNORE = Player.MESSAGES_TO_IGNORE | {"message"}
 _DEX = GenData.from_gen(9).pokedex  # base species for nickname dedupe (formes)
