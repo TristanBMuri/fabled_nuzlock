@@ -3769,3 +3769,31 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
 - Scope: best4 picks Hidden Power in 5 of 1,200 boss set slots (Test B logs), so the default is barely
   touched; B′ picks it often (smoke, 9 boxes at Koga / Blaine / Pryce: Gengar / Glaceon / Walrein HP Rock,
   Vikavolt HP Ground, Scizor HP Fighting). Runs end before #44 today, so no run number moves yet.
+
+## 2026-11-26 — D23: the team builder's next gear → B (better data)
+
+- Options: (A) richer inputs on the data we have (36 per-mon cells, the sets); (B) better data: more battles per
+  team (label noise is 20–50% of a boss's variance at 6 battles) and teams the chooser would not pick (coverage);
+  (C) search labels / expert iteration; (D) wire today's judge into the chooser and run.
+- **user call: B, 70%.**
+- Claude: agrees, with a correction to how B was pitched ("engine battles cost a tenth"): the data runs already
+  search on poke-engine. Profile (2 route trainers × 2 boxes, 160 s, one process): greedy chooser 74 s (46%;
+  calc-bot battles on Showdown), the searched label battles 37 s (23%; 35 s of it the engine's 20,000-iteration
+  MCTS, ~75 ms a decision, ~20 decisions a battle), threat duels 29 s, stage A 19 s. So B's levers are
+  (1) skip the chooser for exploration teams (random legal sixes), (2) a cheaper search for labels if it ranks
+  teams the same, (3) more battles per team with what that saves. A on B's data afterwards.
+- Gate for (2) running: `logs/d23_gate_2k` = D19's boxes and variants at #17 / #18 / #24 / #26 / #50 / #95
+  (the trainers with the widest team spread), `--engine 2000`, D15 weights (D19's), compared by
+  `rl/label_gate.py` against the D19 labels.
+- **Gate result** (`logs/d23_gate_2k`, 6 min on 12 workers, 232 of 240 teams matched to D19): 2,000-iteration labels
+  vs D19's 20,000: **r = 0.83, noise-only ceiling ~0.82** (two 6-battle labels of the same team): cheap labels rank
+  teams as well as this noise level can tell. Per trainer r +0.73 (#95) to +0.89 (#24). Mean win is lower at 2k
+  (−4 to −15 pts: the weaker search plays worse), so 2k labels are for ranking teams, not for absolute win rates.
+  Bets: user skip. Claude "within 0.1 of the ceiling, 60%; mean win −3 to −10": hit; the drop ran to −15 (#17).
+  Wall time barely moved (the chooser, not the search, was D19's cost).
+- Plumbing: `rr_team_probe.py --rand K` (K random legal sixes per box as `box_alt` events with `rand: true`,
+  after the `--alt` swaps; skips the threat duels). Timing (`--chooser cover --alt 3 --rand 2 --n-search 16
+  --engine 2000`, #50, 4 boxes): 384 battles in 34 s on 8 workers, ~30 s per box-job. Cover six 56% mean win,
+  swaps 0–56%, random sixes 0–38% (mostly 0: random teams lose; a floor, low contrast). The slow trainers are
+  the ones where the engine falls back to the Showdown search (one Soul-Heart mon at #24: ~8% of decisions,
+  ~90% of the time, 7x slower boxes); D19's fallback reasons: trapping volatiles and enemy Rivalry most often.

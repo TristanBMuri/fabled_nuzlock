@@ -701,10 +701,10 @@ def run_pool(args, names: list[str]) -> list[dict]:
 # cores, 165 min); a worker builds a boss's context once and keeps it.
 
 
-def variants(ctx, team: tuple, species: list[str], rng: random.Random, k: int) -> list[tuple]:
+def variants(ctx, team: tuple, species: list[str], rng: random.Random, k: int) -> list[tuple[tuple, bool]]:
     """--alt (D19 data): k other sixes from the same box, each the chooser's six with 1-3 mons swapped for
     random box mons (one per evolution line), lead first. Teams near the chooser's picks give the
-    same-box contrasts the team builder learns from."""
+    same-box contrasts the team builder learns from. Then --rand random legal sixes. (six, is_random) pairs."""
     rest = [s for s in expand_box(ctx, species) if s not in team]
     line = lambda s: s.split(">")[0]
     out = []
@@ -722,7 +722,16 @@ def variants(ctx, team: tuple, species: list[str], rng: random.Random, k: int) -
         alt = lead_first(ctx, tuple(alt))
         if len(alt) == len(team) and set(alt) != set(team) and alt not in out:
             out.append(alt)
-    return out
+    swaps = len(out)
+    for _ in range(ctx.args.rand):  # --rand (D23 data): random legal sixes, teams no chooser would pick
+        six = []
+        for s in rng.sample(rest + list(team), len(rest) + len(team)):
+            if len(six) < len(team) and line(s) not in {line(x) for x in six}:
+                six.append(s)
+        six = lead_first(ctx, tuple(six))
+        if set(six) != set(team) and six not in out:
+            out.append(six)
+    return [(t, n >= swaps) for n, t in enumerate(out)]
 
 
 def box_job(args, name: str, i: int) -> dict | None:
@@ -733,11 +742,11 @@ def box_job(args, name: str, i: int) -> dict | None:
         species = [sp for sp, _ in box if mon_of(ctx, sp) is not None]
         team = choose(ctx, species)
         w, d, pr, attr, cl = searched(ctx, team)
-        threats = [] if args.alt else threats_of(ctx, attr, ctx.pool, exclude=set(species))
-        for k, alt in enumerate(variants(ctx, team, species, random.Random(f"{name}-alt-{args.seed}-{i}"), args.alt)):
+        threats = [] if args.alt or args.rand else threats_of(ctx, attr, ctx.pool, exclude=set(species))
+        for k, (alt, rnd) in enumerate(variants(ctx, team, species, random.Random(f"{name}-alt-{args.seed}-{i}"), args.alt) if args.alt or args.rand else []):
             aw, ad, _, aattr, acl = searched(ctx, alt)  # the main six's seeds: paired
             emit(args, "box_alt", boss=name, i=i, k=k, box=box, team=list(alt), evolved_team=[mon_of(ctx, s).species for s in alt],
-                 sets=sets_of(ctx, alt), win=aw, deaths_per_mon=ad, deathless=acl, deaths_by=dict(aattr[0]), matrix=matrix(ctx, alt))
+                 sets=sets_of(ctx, alt), win=aw, deaths_per_mon=ad, deathless=acl, deaths_by=dict(aattr[0]), matrix=matrix(ctx, alt), rand=rnd)
         out = {"box": box, "team": list(team), "evolved_team": [mon_of(ctx, s).species for s in team], "sets": sets_of(ctx, team), "win": w, "deaths_per_mon": d, "deathless": cl,
                "capped": attr[2], "threats": threats}
         if hasattr(ctx.searcher, "stats"):  # --engine: decisions on the engine / on Showdown, and why (cumulative per worker)
@@ -834,6 +843,7 @@ def main() -> None:
                     help="battle movesets: generic best4, or boss-aware rr_search.default_set (D16)")
     ap.add_argument("--alt", type=int, default=0, help="--boxes data mode (D19): also play K variants of each box's six "
                     "(1-3 mons swapped for other box mons, paired seeds) as box_alt events; skips the threat duels")
+    ap.add_argument("--rand", type=int, default=0, help="box mode (D23 data): also play K random legal sixes per box (box_alt events with rand=true; skips the threat duels)")
     ap.add_argument("--out")
     args = ap.parse_args()
     args.items = not args.no_items
