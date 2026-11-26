@@ -1,5 +1,15 @@
 # HANDOFF — state of the project as of 2026-10-12
 
+**2026-11-26: D16 movesets, D17 open** (NOTEBOOK.md last entries, decision log Step 21). Boss-aware sets
+B′ (`rr_team_probe.py --sets boss`, `rr_search.default_set`) gain +3.2 ± 1.5 on the five bosses they were tuned
+on (Blaine +14.7) but −1.6 ± 1.8 on held-out Lt. Surge / Giovanni / Sabrina / Pryce / Clair: the damage-only
+calc drops utility attacks (U-turn, Dig, Sucker Punch). best4 stays the default. **D17 is waiting on the
+user's call:** (1) keep best4, B′ opt-in; (2) screening battles choose best4 vs B′ per team; (3) teach the
+calc utility moves. Also open: Hidden Power is played as Dark (all-31 IVs); from Saffron on, the NPC next to the Poké
+Mart sets its type (the user, 2026-11-26), not modelled yet. Fixed this session: Transform / Sketch request moves, Ice Hammer null
+self, ability-changed types through effectiveness, ability tie-break by best4 power, Sheer Force on Stone
+Axe / Ceaseless Edge. Commits up to this one are local, not pushed (ask first).
+
 **2026-11-23 (later): RR on the Rust engine** (NOTEBOOK.md last entry, rl/README.md → "Radical Red on
 poke-engine"). `rr_team_probe.py --engine 20000` runs the player's search on poke-engine's `rr` build
 (97% agreement with the RR Showdown sim on boss positions), Showdown as the fallback: the same

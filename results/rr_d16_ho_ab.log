@@ -1,0 +1,426 @@
+LT. SURGE: trainer #26, cap 36, pool 256 species; arena {'ai_permanent': True, 'terrain': 'electricterrain'}; not modelled: []
+LT. SURGE: A solo scores for 281 species (pool + starters) in 4s
+GIOVANNI: trainer #38, cap 47, pool 353 species; arena {'ai_permanent': True}; not modelled: []
+GIOVANNI: A solo scores for 363 species (pool + starters) in 7s
+SABRINA: trainer #51, cap 59, pool 359 species; arena {'ai_permanent': True, 'pseudo': ['trickroom']}; not modelled: ['DOUBLES']
+SABRINA: A solo scores for 368 species (pool + starters) in 4s
+PRYCE: trainer #82, cap 73, pool 553 species; arena {'ai_permanent': True, 'weather': 'snow'}; not modelled: []
+PRYCE: A solo scores for 445 species (pool + starters) in 7s
+CLAIR: trainer #97, cap 81, pool 583 species; arena {'ai_permanent': True}; not modelled: ['UNABLE TO USE FAIRY TYPES', "CAN'T REMOVE HAZARDS"]
+CLAIR: A solo scores for 465 species (pool + starters) in 10s
+LT. SURGE  box 16/30: 24 mons, team ['stufful→bewear', 'mienfoo→mienshao', 'pachirisu', 'sobble→inteleon', 'solrock', 'zubat→crobat'] -> win    0% deaths/mon 1.00 deathless 0%; Raichu-Alola killed 18, missing seedot (ROUTE 1 / grass_night 8%); Pawmot killed 10, missing cutiefly (PEWTER CITY / grass_day 5%)  (21s)
+LT. SURGE  box 11/30: 24 mons, team ['torchic→blaziken', 'oddish→gloom', 'rockruff→lycanrocdusk', 'sentret→furret', 'shroomish→breloom', 'zigzagoongalar→obstagoon'] -> win   50% deaths/mon 0.75 deathless 0%; Hitmonlee killed 9, missing snubbull (ROUTE 22 / grass_day 10%); Ampharos killed 7, missing skiddo (PEWTER CITY / grass_night 10%)  (23s)
+LT. SURGE  box 26/30: 24 mons, team ['scraggy', 'slugma→magcargo', 'tentacool→tentacruel', 'treecko→sceptile', 'wimpod→golisopod', 'zubat→crobat'] -> win    0% deaths/mon 1.00 deathless 0%; Pawmot killed 9, missing cutiefly (PEWTER CITY / grass_day 5%); Raichu-Alola killed 8, missing seedot (ROUTE 1 / grass_night 8%)  (25s)
+LT. SURGE  box  6/30: 24 mons, team ['cyndaquil→typhlosionhisui', 'barboach→whiscash', 'chinchou→lanturn', 'clobbopus→grapploct', 'nincada→shedinja', 'noibat→noivern'] -> win   83% deaths/mon 0.17 deathless 83%; Hitmonlee killed 6, missing snubbull (ROUTE 22 / grass_day 10%)  (25s)
+LT. SURGE  box 21/30: 24 mons, team ['chinchou→lanturn', 'lillipup→stoutland', 'starly→staraptor', 'tentacool→tentacruel', 'wimpod→golisopod', 'wooloo→dubwool'] -> win   67% deaths/mon 0.72 deathless 0%; Raichu-Alola killed 8, missing seedot (ROUTE 1 / grass_night 8%); Ampharos killed 6, missing skiddo (PEWTER CITY / grass_night 10%)  (26s)
+LT. SURGE  box  1/30: 24 mons, team ['clobbopus→grapploct', 'cherubi→cherrim', 'glameow→purugly', 'growlithe', 'magikarp→gyarados', 'wishiwashi'] -> win    0% deaths/mon 1.00 deathless 0%; Pawmot killed 17, missing cutiefly (PEWTER CITY / grass_day 5%); Raichu-Alola killed 14, missing seedot (ROUTE 1 / grass_night 8%)  (26s)
+GIOVANNI   box  1/30: 34 mons, team ['wimpod→golisopod', 'eevee→vaporeon', 'ekans→arbok', 'krabby→kingler', 'ralts→gardevoir', 'zubat→crobat'] -> win   83% deaths/mon 0.39 deathless 17%; Genesect killed 7, missing salandit (ROUTE 9 / grass_night 10%); Delphox killed 5, missing seedot (ROUTE 1 / grass_night 8%)  (46s)
+GIOVANNI   box  6/30: 35 mons, team ['fletchling→talonflame', 'eevee→vaporeon', 'inkay→malamar', 'slowpoke→slowking', 'sneaselhisui→sneasler', 'varoom→revavroom'] -> win  100% deaths/mon 0.14 deathless 33%; Delphox killed 3, missing seedot (ROUTE 1 / grass_night 8%); Moltres-Galar killed 1, missing seedot (ROUTE 1 / grass_night 8%)  (46s)
+LT. SURGE  box 27/30: 24 mons, team ['drilbur→excadrill', 'eevee→umbreon', 'remoraid→octillery', 'shuppet→banette', 'snubbull→granbull', 'stunky→skuntank'] -> win   67% deaths/mon 0.78 deathless 0%; Raichu-Alola killed 12, missing seedot (ROUTE 1 / grass_night 8%); Electrode-Hisui killed 6, missing wimpod (VERMILLION CITY / good_rod 20%)  (48s)
+LT. SURGE  box 17/30: 24 mons, team ['yamper→boltund', 'eevee→umbreon', 'morelull→shiinotic', 'poochyena→mightyena', 'rowlet→decidueye', 'snubbull→granbull'] -> win   83% deaths/mon 0.44 deathless 0%; Hitmonlee killed 4, missing marill (VIRIDIAN CITY / old_rod 70%); Ampharos-Mega killed 3, missing no counter in the pool  (48s)
+LT. SURGE  box 22/30: 24 mons, team ['mudkip→swampert', 'poochyena→mightyena', 'qwilfish', 'spoink→grumpig', 'torkoal', 'zangoose'] -> win   17% deaths/mon 0.89 deathless 0%; Raichu-Alola killed 12, missing seedot (ROUTE 1 / grass_night 8%); Pawmot killed 9, missing cutiefly (PEWTER CITY / grass_day 5%)  (49s)
+LT. SURGE  box  7/30: 24 mons, team ['buneary→lopunny', 'meowthgalar→perrserker', 'pikachu', 'rockruff→lycanrocmidnight', 'veluza', 'wimpod→golisopod'] -> win   17% deaths/mon 0.97 deathless 0%; Pawmot killed 21, missing cutiefly (PEWTER CITY / grass_day 5%); Electrode-Hisui killed 4, missing tarountula (FOREST EXPANSION / grass_night 20%)  (49s)
+LT. SURGE  box  2/30: 24 mons, team ['cyndaquil→typhlosion', 'chinchou→lanturn', 'sentret→furret', 'spritzee', 'timburr→gurdurr', 'wooloo→dubwool'] -> win   33% deaths/mon 0.78 deathless 0%; Pawmot killed 10, missing cutiefly (PEWTER CITY / grass_day 5%); Electrode-Hisui killed 6, missing tarountula (FOREST EXPANSION / grass_night 20%)  (49s)
+LT. SURGE  box 12/30: 24 mons, team ['chinchou→lanturn', 'rowlet→decidueye', 'shroodle→grafaiai', 'slugma→magcargo', 'snubbull→granbull', 'veluza'] -> win   83% deaths/mon 0.47 deathless 0%; Ampharos killed 5, missing skiddo (PEWTER CITY / grass_night 10%); Raichu-Alola killed 5, missing seedot (ROUTE 1 / grass_night 8%)  (50s)
+LT. SURGE  box 28/30: 24 mons, team ['buneary→lopunny', 'barboach→whiscash', 'eevee→umbreon', 'marill→azumarill', 'meowthgalar→perrserker', 'purrloin→liepard'] -> win   83% deaths/mon 0.36 deathless 0%; Electrode-Hisui killed 3, missing wimpod (VERMILLION CITY / good_rod 20%); Pawmot killed 3, missing cutiefly (PEWTER CITY / grass_day 5%)  (69s)
+LT. SURGE  box  8/30: 23 mons, team ['rolycoly→coalossal', 'rockruff→lycanrocdusk', 'sentret→furret', 'shinx→luxray', 'snubbull→granbull', 'veluza'] -> win   67% deaths/mon 0.78 deathless 0%; Electrode-Hisui killed 7, missing wimpod (VERMILLION CITY / good_rod 20%); Ampharos killed 6, missing skiddo (PEWTER CITY / grass_night 10%)  (70s)
+LT. SURGE  box  3/30: 23 mons, team ['magby→magmar', 'makuhita→hariyama', 'meditite', 'roggenrola→boldore', 'swirlix', 'varoom'] -> win   17% deaths/mon 0.89 deathless 0%; Pawmot killed 14, missing cutiefly (PEWTER CITY / grass_day 5%); Raichu-Alola killed 8, missing seedot (ROUTE 1 / grass_night 8%)  (71s)
+LT. SURGE  box 18/30: 24 mons, team ['fennekin→delphox', 'mienfoo→mienshao', 'roggenrola→boldore', 'shinx→luxray', 'snubbull→granbull', 'zubat→crobat'] -> win  100% deaths/mon 0.50 deathless 0%; Electrode-Hisui killed 8, missing wimpod (VERMILLION CITY / good_rod 20%); Ampharos killed 4, missing skiddo (PEWTER CITY / grass_night 10%)  (72s)
+LT. SURGE  box 23/30: 24 mons, team ['starly→staraptor', 'barboach→whiscash', 'meowthalola→persianalola', 'nacli→naclstack', 'wimpod→golisopod', 'wurmple→dustox'] -> win  100% deaths/mon 0.44 deathless 17%; Ampharos killed 4, missing skiddo (PEWTER CITY / grass_night 10%); Hitmonlee killed 3, missing snubbull (ROUTE 22 / grass_day 10%)  (74s)
+LT. SURGE  box 13/30: 24 mons, team ['chinchou→lanturn', 'clauncher→clawitzer', 'eevee→umbreon', 'mudbray→mudsdale', 'noibat→noivern', 'skiddo→gogoat'] -> win  100% deaths/mon 0.28 deathless 17%; Ampharos killed 5, missing morelull (ROUTE 22 / grass_day 10%); Pawmot killed 3, missing cutiefly (PEWTER CITY / grass_day 5%)  (77s)
+GIOVANNI   box  2/30: 35 mons, team ['growlithe→arcanine', 'eevee→jolteon', 'eevee→vaporeon', 'grimeralola→mukalola', 'relicanth', 'vanillite→vanilluxe'] -> win  100% deaths/mon 0.22 deathless 17%; Silvally-Fairy killed 3, missing lampent (PKMN TOWER 3&5F / grass_day 2%); Moltres-Galar killed 2, missing seedot (ROUTE 1 / grass_night 8%)  (87s)
+LT. SURGE  box 29/30: 23 mons, team ['makuhita→hariyama', 'barboach→whiscash', 'finneon→lumineon', 'pachirisu', 'tinkatink→tinkatuff', 'wishiwashi'] -> win   17% deaths/mon 0.94 deathless 0%; Raichu-Alola killed 18, missing seedot (ROUTE 1 / grass_night 8%); Pawmot killed 7, missing cutiefly (PEWTER CITY / grass_day 5%)  (90s)
+LT. SURGE  box  9/30: 24 mons, team ['yamper→boltund', 'barboach→whiscash', 'dewpider→araquanid', 'psyduck→golduck', 'wishiwashi', 'woobat→swoobat'] -> win   33% deaths/mon 0.89 deathless 0%; Pawmot killed 11, missing cutiefly (PEWTER CITY / grass_day 5%); Raichu-Alola killed 8, missing seedot (ROUTE 1 / grass_night 8%)  (91s)
+GIOVANNI   box  7/30: 35 mons, team ['rockruff→lycanroc', 'eevee→vaporeon', 'mareep→ampharos', 'pawniard→bisharp', 'poliwag→poliwrath', 'wimpod→golisopod'] -> win  100% deaths/mon 0.31 deathless 17%; Silvally-Fairy killed 6, missing lampent (PKMN TOWER 3&5F / grass_day 2%); Genesect killed 3, missing salandit (ROUTE 9 / grass_night 10%)  (92s)
+LT. SURGE  box 19/30: 23 mons, team ['magby→magmar', 'nincada→shedinja', 'pidgey→pidgeot', 'ponytagalar→rapidashgalar', 'skiddo→gogoat', 'zubat→crobat'] -> win  100% deaths/mon 0.00 deathless 100%;   (92s)
+LT. SURGE  box 24/30: 24 mons, team ['numel→camerupt', 'remoraid→octillery', 'rowlet→decidueye', 'sewaddle→leavanny', 'starly→staraptor', 'wishiwashi'] -> win   33% deaths/mon 0.89 deathless 0%; Raichu-Alola killed 10, missing seedot (ROUTE 1 / grass_night 8%); Ampharos killed 9, missing skiddo (PEWTER CITY / grass_night 10%)  (99s)
+LT. SURGE  box  4/30: 23 mons, team ['chinchou→lanturn', 'burmysandy→wormadamsandy', 'eevee→umbreon', 'oddish→gloom', 'wooloo→dubwool', 'zubat→crobat'] -> win  100% deaths/mon 0.39 deathless 0%; Pawmot killed 4, missing cutiefly (PEWTER CITY / grass_day 5%); Ampharos killed 4, missing skiddo (PEWTER CITY / grass_night 10%)  (100s)
+LT. SURGE  box 10/30: 24 mons, team ['bonsly→sudowoodo', 'morelull→shiinotic', 'sentret→furret', 'wattrel→kilowattrel', 'weedle→beedrill', 'wimpod→golisopod'] -> win   83% deaths/mon 0.53 deathless 0%; Raichu-Alola killed 8, missing seedot (ROUTE 1 / grass_night 8%); Pawmot killed 5, missing cutiefly (PEWTER CITY / grass_day 5%)  (114s)
+LT. SURGE  box 30/30: 23 mons, team ['fuecoco→skeledirge', 'chinchou→lanturn', 'eevee→espeon', 'finneon→lumineon', 'frillish', 'varoom'] -> win   33% deaths/mon 0.94 deathless 0%; Hitmonlee killed 19, missing snubbull (ROUTE 22 / grass_day 10%); Ampharos-Mega killed 6, missing no counter in the pool  (116s)
+LT. SURGE  box 20/30: 24 mons, team ['fuecoco→skeledirge', 'chinchou→lanturn', 'eevee→umbreon', 'marill→azumarill', 'skwovet→greedent', 'tympole→seismitoad'] -> win  100% deaths/mon 0.19 deathless 50%; Raichu-Alola killed 4, missing seedot (ROUTE 1 / grass_night 8%); Hitmonlee killed 1, missing snubbull (ROUTE 22 / grass_day 10%)  (118s)
+LT. SURGE  box 14/30: 24 mons, team ['litleo→pyroar', 'eevee→umbreon', 'noibat→noivern', 'shroodle→grafaiai', 'sprigatito→meowscarada', 'wimpod→golisopod'] -> win   67% deaths/mon 0.75 deathless 0%; Pawmot killed 7, missing cutiefly (PEWTER CITY / grass_day 5%); Rotom-Frost killed 6, missing throh (MT MOON 1F / grass_day 1%)  (121s)
+LT. SURGE  box  5/30: 23 mons, team ['crabrawler→crabominable', 'mareep→ampharos', 'onix', 'rowlet→decidueye', 'wimpod→golisopod', 'wishiwashi'] -> win   67% deaths/mon 0.69 deathless 0%; Raichu-Alola killed 9, missing seedot (ROUTE 1 / grass_night 8%); Ampharos killed 5, missing skiddo (PEWTER CITY / grass_night 10%)  (125s)
+LT. SURGE  box 25/30: 24 mons, team ['chinchou→lanturn', 'eevee→umbreon', 'hoppip→jumpluff', 'oddish→gloom', 'rockruff→lycanrocdusk', 'zubat→crobat'] -> win   83% deaths/mon 0.42 deathless 17%; Pawmot killed 4, missing cutiefly (PEWTER CITY / grass_day 5%); Ampharos killed 4, missing skiddo (PEWTER CITY / grass_night 10%)  (126s)
+GIOVANNI   box  3/30: 34 mons, team ['shinx→luxray', 'bruxish', 'eevee→jolteon', 'eevee→vaporeon', 'magikarp→gyarados', 'polteageist'] -> win   67% deaths/mon 0.47 deathless 17%; Silvally-Fairy killed 6, missing lampent (PKMN TOWER 3&5F / grass_day 2%); Delphox killed 5, missing seedot (ROUTE 1 / grass_night 8%)  (129s)
+GIOVANNI   box  8/30: 35 mons, team ['meowthgalar→perrserker', 'eevee→vaporeon', 'frillish→jellicent', 'pachirisu', 'wishiwashi', 'yamper→boltund'] -> win  100% deaths/mon 0.28 deathless 0%; Mewtwo killed 6, missing golett (DIGLETT CAVE B1F / grass_day 14%); Genesect killed 3, missing salandit (ROUTE 9 / grass_night 10%)  (135s)
+LT. SURGE  box 15/30: 24 mons, team ['cubchoo→beartic', 'dedenne', 'eevee→umbreon', 'sentret→furret', 'snivy→serperior', 'zubat→crobat'] -> win   83% deaths/mon 0.50 deathless 0%; Pawmot killed 9, missing cutiefly (PEWTER CITY / grass_day 5%); Electrode-Hisui killed 4, missing wimpod (VERMILLION CITY / good_rod 20%)  (144s)
+GIOVANNI   box 16/30: 35 mons, team ['litten→incineroar', 'eevee→vaporeon', 'graveler→golem', 'magby→magmortar', 'magikarp→gyarados', 'tynamo→eelektross'] -> win   83% deaths/mon 0.58 deathless 0%; Moltres-Galar killed 6, missing seedot (ROUTE 1 / grass_night 8%); Genesect killed 4, missing salandit (ROUTE 9 / grass_night 10%)  (43s)
+GIOVANNI   box 11/30: 34 mons, team ['shinx→luxray', 'eevee→vaporeon', 'poliwag→politoed', 'rufflet→braviaryhisui', 'scorbunny→cinderace', 'torkoal'] -> win  100% deaths/mon 0.19 deathless 17%; Mewtwo killed 2, missing bombirdier (ROUTE 11 / grass_night 8%); Silvally-Fairy killed 2, missing lampent (PKMN TOWER 3&5F / grass_day 2%)  (48s)
+GIOVANNI   box 21/30: 34 mons, team ['grimeralola→mukalola', 'eevee→vaporeon', 'pawniard→bisharp', 'psyduck→golduck', 'veluza', 'wishiwashi'] -> win   67% deaths/mon 0.61 deathless 0%; Genesect killed 8, missing salandit (ROUTE 9 / grass_night 10%); Delphox killed 5, missing seedot (ROUTE 1 / grass_night 8%)  (44s)
+GIOVANNI   box 26/30: 34 mons, team ['blitzle→zebstrika', 'eevee→jolteon', 'eevee→vaporeon', 'shellos→gastrodon', 'wishiwashi', 'yamask→cofagrigus'] -> win   83% deaths/mon 0.47 deathless 0%; Silvally-Fairy killed 7, missing slowpokegalar (ROUTE 6 / good_rod 60%); Mewtwo killed 5, missing bombirdier (ROUTE 11 / grass_night 8%)  (48s)
+GIOVANNI   box  9/30: 34 mons, team ['magikarp→gyarados', 'eevee→vaporeon', 'remoraid→octillery', 'sentret→furret', 'tarountula→spidops', 'voltorb→electrode'] -> win   67% deaths/mon 0.78 deathless 0%; Silvally-Fairy killed 13, missing lampent (PKMN TOWER 3&5F / grass_day 2%); Genesect killed 7, missing salandit (ROUTE 9 / grass_night 10%)  (178s)
+GIOVANNI   box  4/30: 35 mons, team ['absol', 'deerling→sawsbuck', 'eevee→glaceon', 'emolga', 'krabby→kingler', 'seedot→shiftry'] -> win   50% deaths/mon 0.69 deathless 0%; Silvally-Fairy killed 10, missing lampent (PKMN TOWER 3&5F / grass_day 2%); Mewtwo killed 9, missing bombirdier (ROUTE 11 / grass_night 8%)  (185s)
+SABRINA    box  1/30: 39 mons, team ['slowpokegalar→slowbrogalar', 'cofagrigus', 'taurospaldeaaqua', 'vullaby→mandibuzz', 'wimpod→golisopod', 'wooper→quagsire'] -> win   67% deaths/mon 0.64 deathless 0%; Camerupt killed 11, missing mantyke (ROUTE 22 / good_rod 20%); Iron Hands killed 8, missing no counter in the pool  (66s)
+SABRINA    box  6/30: 40 mons, team ['eevee→espeon', 'eevee→umbreon', 'ekans→arbok', 'haunter→gengar', 'horsea→kingdra', 'tadbulb→bellibolt'] -> win    0% deaths/mon 1.00 deathless 0%; Iron Hands killed 16, missing no counter in the pool; Magearna killed 11, missing yamaskgalar (DIGLETT CAVE / grass_night 10%)  (59s)
+GIOVANNI   box 12/30: 34 mons, team ['magikarp→gyarados', 'eevee→vaporeon', 'froakie→greninja', 'ralts→gardevoir', 'rockruff→lycanroc', 'venipede→scolipede'] -> win  100% deaths/mon 0.19 deathless 33%; Silvally-Fairy killed 4, missing lampent (PKMN TOWER 3&5F / grass_day 2%); Moltres-Galar killed 2, missing seedot (ROUTE 1 / grass_night 8%)  (91s)
+GIOVANNI   box 17/30: 34 mons, team ['poochyena→mightyena', 'eevee→vaporeon', 'fletchling→talonflame', 'krabby→kingler', 'noibat→noivern', 'spiritomb'] -> win   67% deaths/mon 0.58 deathless 17%; Delphox killed 6, missing seedot (ROUTE 1 / grass_night 8%); Mewtwo killed 6, missing bombirdier (ROUTE 11 / grass_night 8%)  (90s)
+GIOVANNI   box 22/30: 34 mons, team ['poochyena→mightyena', 'eevee→vaporeon', 'inkay→malamar', 'magikarp→gyarados', 'nacli→garganacl', 'wishiwashi'] -> win  100% deaths/mon 0.28 deathless 33%; Mewtwo killed 4, missing bombirdier (ROUTE 11 / grass_night 8%); Genesect killed 4, missing salandit (ROUTE 9 / grass_night 10%)  (93s)
+GIOVANNI   box 27/30: 34 mons, team ['meowthgalar→perrserker', 'eevee→vaporeon', 'frillish→jellicent', 'lotad→ludicolo', 'sandygast→palossand', 'slugma→magcargo'] -> win   33% deaths/mon 0.81 deathless 0%; Moltres-Galar killed 17, missing seedot (ROUTE 1 / grass_night 8%); Mewtwo killed 6, missing bombirdier (ROUTE 11 / grass_night 8%)  (92s)
+GIOVANNI   box 10/30: 34 mons, team ['magikarp→gyarados', 'eevee→vaporeon', 'frillish→jellicent', 'nidoranm→nidoking', 'pansear→simisear', 'pikachu→raichu'] -> win   50% deaths/mon 0.78 deathless 0%; Delphox killed 10, missing seedot (ROUTE 1 / grass_night 8%); Mewtwo killed 6, missing bombirdier (ROUTE 11 / grass_night 8%)  (222s)
+GIOVANNI   box  5/30: 34 mons, team ['grimeralola→mukalola', 'eevee→vaporeon', 'fuecoco→skeledirge', 'pawniard→bisharp', 'poliwag→politoed', 'salandit→salazzle'] -> win  100% deaths/mon 0.28 deathless 0%; Delphox killed 6, missing seedot (ROUTE 1 / grass_night 8%); Silvally-Fairy killed 2, missing lampent (PKMN TOWER 3&5F / grass_day 2%)  (226s)
+SABRINA    box  2/30: 39 mons, team ['pikipek→toucannon', 'eevee→vaporeon', 'hatenna→hatterene', 'minccino→cinccino', 'sableye', 'stunfiskgalar'] -> win    0% deaths/mon 1.00 deathless 0%; Iron Hands killed 14, missing no counter in the pool; Glastrier killed 13, missing pineco (ROUTE 25 / grass_day 10%)  (117s)
+GIOVANNI   box 13/30: 34 mons, team ['absol', 'eevee→leafeon', 'eevee→vaporeon', 'mismagius', 'staryu→starmie', 'wishiwashi'] -> win   67% deaths/mon 0.56 deathless 0%; Delphox killed 8, missing seedot (ROUTE 1 / grass_night 8%); Silvally-Fairy killed 6, missing lampent (PKMN TOWER 3&5F / grass_day 2%)  (135s)
+GIOVANNI   box 18/30: 34 mons, team ['rhyhorn→rhyperior', 'eevee→vaporeon', 'frillish→jellicent', 'slowpokegalar→slowbrogalar', 'slugma→magcargo', 'wishiwashi'] -> win   17% deaths/mon 0.94 deathless 0%; Genesect killed 13, missing salandit (ROUTE 9 / grass_night 10%); Moltres-Galar killed 13, missing seedot (ROUTE 1 / grass_night 8%)  (136s)
+GIOVANNI   box 23/30: 34 mons, team ['ponyta→rapidash', 'eevee→vaporeon', 'grimeralola→mukalola', 'lunatone', 'voltorbhisui→electrodehisui', 'zubat→crobat'] -> win  100% deaths/mon 0.42 deathless 0%; Silvally-Fairy killed 5, missing lampent (PKMN TOWER 3&5F / grass_day 2%); Delphox killed 4, missing seedot (ROUTE 1 / grass_night 8%)  (135s)
+GIOVANNI   box 28/30: 34 mons, team ['varoom→revavroom', 'arrokuda→barraskewda', 'eevee→vaporeon', 'finneon→lumineon', 'hoothoot→noctowl', 'inkay→malamar'] -> win   83% deaths/mon 0.53 deathless 0%; Moltres-Galar killed 6, missing seedot (ROUTE 1 / grass_night 8%); Silvally-Fairy killed 5, missing lampent (PKMN TOWER 3&5F / grass_day 2%)  (138s)
+SABRINA    box  7/30: 40 mons, team ['glameow→purugly', 'clamperl→gorebyss', 'cofagrigus', 'eevee→flareon', 'runerigus', 'taurospaldeaaqua'] -> win    0% deaths/mon 1.00 deathless 0%; Camerupt killed 16, missing mantyke (ROUTE 22 / good_rod 20%); Iron Hands killed 8, missing no counter in the pool  (124s)
+SABRINA    box 11/30: 40 mons, team ['exeggcute→exeggutor', 'boldore→gigalith', 'lapras', 'magikarp→gyarados', 'teddiursa→ursaluna', 'yamaskgalar→runerigus'] -> win   67% deaths/mon 0.61 deathless 17%; Magearna killed 9, missing runerigus (PKMN TOWER 3&5F / grass_night 20%); Iron Hands killed 6, missing no counter in the pool  (60s)
+GIOVANNI   box 14/30: 35 mons, team ['shinx→luxray', 'eevee→vaporeon', 'ekans→arbok', 'magikarp→gyarados', 'nacli→garganacl', 'torkoal'] -> win   83% deaths/mon 0.31 deathless 33%; Moltres-Galar killed 8, missing seedot (ROUTE 1 / grass_night 8%); Mewtwo killed 2, missing bombirdier (ROUTE 11 / grass_night 8%)  (178s)
+GIOVANNI   box 19/30: 34 mons, team ['stunky→skuntank', 'carbink', 'eevee→vaporeon', 'nidoranm→nidoking', 'scorbunny→cinderace', 'wimpod→golisopod'] -> win  100% deaths/mon 0.28 deathless 0%; Delphox killed 5, missing seedot (ROUTE 1 / grass_night 8%); Moltres-Galar killed 3, missing seedot (ROUTE 1 / grass_night 8%)  (179s)
+GIOVANNI   box 24/30: 34 mons, team ['meowthgalar→perrserker', 'eevee→vaporeon', 'frillish→jellicent', 'haunter→gengar', 'minccino→cinccino', 'wishiwashi'] -> win   50% deaths/mon 0.61 deathless 17%; Moltres-Galar killed 9, missing seedot (ROUTE 1 / grass_night 8%); Genesect killed 9, missing salandit (ROUTE 9 / grass_night 10%)  (182s)
+SABRINA    box 16/30: 39 mons, team ['paras→parasect', 'eevee→flareon', 'golett→golurk', 'slowpokegalar→slowbrogalar', 'staryu→starmie', 'wishiwashi'] -> win   33% deaths/mon 0.83 deathless 0%; Iron Hands killed 12, missing no counter in the pool; Camerupt killed 7, missing mantyke (ROUTE 22 / good_rod 20%)  (77s)
+SABRINA    box  3/30: 39 mons, team ['eevee→espeon', 'bergmite→avalugg', 'haunter→gengar', 'lapras', 'paras→parasect', 'totodile→feraligatr'] -> win    0% deaths/mon 1.00 deathless 0%; Magearna killed 24, missing yamaskgalar (DIGLETT CAVE / grass_night 10%); Iron Hands killed 7, missing no counter in the pool  (178s)
+GIOVANNI   box 29/30: 34 mons, team ['eevee→vaporeon', 'goldeen→seaking', 'rowlet→decidueye', 'staryu→starmie', 'weedle→beedrill', 'wooper→quagsire'] -> win   17% deaths/mon 0.94 deathless 0%; Mewtwo killed 12, missing bombirdier (ROUTE 11 / grass_night 8%); Moltres-Galar killed 10, missing seedot (ROUTE 1 / grass_night 8%)  (181s)
+GIOVANNI   box 15/30: 35 mons, team ['blitzle→zebstrika', 'chewtle→drednaw', 'eevee→espeon', 'eevee→vaporeon', 'espurr→meowstic', 'geodudealola→golemalola'] -> win  100% deaths/mon 0.39 deathless 0%; Delphox killed 5, missing seedot (ROUTE 1 / grass_night 8%); Mewtwo killed 4, missing bombirdier (ROUTE 11 / grass_night 8%)  (220s)
+SABRINA    box 12/30: 39 mons, team ['slowpokegalar→slowbrogalar', 'eevee→vaporeon', 'shuckle', 'sobble→inteleon', 'tarountula→spidops', 'wishiwashi'] -> win    0% deaths/mon 1.00 deathless 0%; Glastrier killed 17, missing pineco (ROUTE 25 / grass_day 10%); Camerupt killed 7, missing mantyke (ROUTE 22 / good_rod 20%)  (113s)
+GIOVANNI   box 20/30: 34 mons, team ['fletchling→talonflame', 'eevee→umbreon', 'eevee→vaporeon', 'nacli→garganacl', 'ponytagalar→rapidashgalar', 'veluza'] -> win  100% deaths/mon 0.19 deathless 33%; Mewtwo killed 2, missing bombirdier (ROUTE 11 / grass_night 8%); Delphox killed 2, missing seedot (ROUTE 1 / grass_night 8%)  (228s)
+GIOVANNI   box 30/30: 34 mons, team ['magikarp→gyarados', 'eevee→vaporeon', 'ekans→arbok', 'grimeralola→mukalola', 'rockruff→lycanrocmidnight', 'zubat→crobat'] -> win   67% deaths/mon 0.58 deathless 0%; Moltres-Galar killed 7, missing seedot (ROUTE 1 / grass_night 8%); Genesect killed 6, missing salandit (ROUTE 9 / grass_night 10%)  (221s)
+GIOVANNI   box 25/30: 34 mons, team ['shinx→luxray', 'arrokuda→barraskewda', 'eevee→vaporeon', 'fletchling→talonflame', 'inkay→malamar', 'slowpokegalar→slowbrogalar'] -> win  100% deaths/mon 0.33 deathless 17%; Delphox killed 4, missing seedot (ROUTE 1 / grass_night 8%); Moltres-Galar killed 3, missing seedot (ROUTE 1 / grass_night 8%)  (229s)
+SABRINA    box  4/30: 39 mons, team ['clauncher→clawitzer', 'cofagrigus', 'cubone→marowak', 'mismagius', 'scorbunny→cinderace', 'taurospaldeablaze'] -> win    0% deaths/mon 1.00 deathless 0%; Glastrier killed 11, missing pineco (ROUTE 25 / grass_day 10%); Camerupt killed 7, missing mantyke (ROUTE 22 / good_rod 20%)  (226s)
+SABRINA    box 17/30: 40 mons, team ['cofagrigus', 'clamperl→gorebyss', 'eevee→flareon', 'lapras', 'onix→steelix', 'veluza'] -> win    0% deaths/mon 1.00 deathless 0%; Glastrier killed 12, missing pineco (ROUTE 25 / grass_day 10%); Iron Hands killed 11, missing no counter in the pool  (129s)
+SABRINA    box  8/30: 39 mons, team ['turtwig→torterra', 'chewtle→drednaw', 'munna→musharna', 'runerigus', 'slowpokegalar→slowbrogalar', 'wimpod→golisopod'] -> win    0% deaths/mon 1.00 deathless 0%; Iron Hands killed 25, missing no counter in the pool; Camerupt killed 8, missing mantyke (ROUTE 22 / good_rod 20%)  (212s)
+SABRINA    box 13/30: 39 mons, team ['psyduck→golduck', 'runerigus', 'sandile→krookodile', 'sandshrew→sandslash', 'taurospaldeaaqua', 'treecko→sceptile'] -> win    0% deaths/mon 1.00 deathless 0%; Magearna killed 21, missing yamaskgalar (DIGLETT CAVE / grass_night 10%); Iron Hands killed 7, missing no counter in the pool  (169s)
+SABRINA    box 21/30: 40 mons, team ['rowlet→decidueye', 'arrokuda→barraskewda', 'bergmite→avalugg', 'cofagrigus', 'lampent→chandelure', 'paras→parasect'] -> win    0% deaths/mon 1.00 deathless 0%; Iron Hands killed 11, missing no counter in the pool; Camerupt killed 9, missing mantyke (ROUTE 22 / good_rod 20%)  (58s)
+SABRINA    box  9/30: 39 mons, team ['shinx→luxray', 'graveler→golem', 'roggenrola→gigalith', 'sableye', 'shellder→cloyster', 'silicobra→sandaconda'] -> win    0% deaths/mon 1.00 deathless 0%; Magearna killed 16, missing yamaskgalar (DIGLETT CAVE / grass_night 10%); Iron Hands killed 6, missing no counter in the pool  (254s)
+PRYCE      box  6/30: 70 mons, team ['fletchling→talonflame', 'abomasnow', 'eevee→glaceon', 'mareanie→toxapex', 'slowbro', 'tentacool→tentacruel'] -> win  100% deaths/mon 0.19 deathless 33%; Clefable killed 4, missing varoom (MT MOON B2F / grass_day 20%); Arctozolt killed 2, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (53s)
+PRYCE      box  1/30: 70 mons, team ['rapidash', 'abomasnow', 'clauncher→clawitzer', 'eevee→glaceon', 'finizen→palafin', 'roselia→roserade'] -> win  100% deaths/mon 0.19 deathless 17%; Clefable killed 5, missing tinkatink (MT MOON B1F / grass_day 6%); Arctozolt killed 2, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (56s)
+SABRINA    box 26/30: 40 mons, team ['oshawott→samurott', 'cofagrigus', 'cottonee→whimsicott', 'pawmi→pawmo', 'snubbull→granbull', 'wishiwashi'] -> win   17% deaths/mon 0.89 deathless 0%; Camerupt killed 11, missing mantyke (ROUTE 22 / good_rod 20%); Iron Hands killed 7, missing no counter in the pool  (58s)
+SABRINA    box  5/30: 40 mons, team ['slowpokegalar→slowbrogalar', 'cofagrigus', 'eevee→flareon', 'eevee→vaporeon', 'lapras', 'spiritomb'] -> win    0% deaths/mon 1.00 deathless 0%; Glastrier killed 19, missing bronzor (DIGLETT CAVE / grass_day 4%); Iron Hands killed 8, missing no counter in the pool  (284s)
+SABRINA    box 22/30: 40 mons, team ['polteageist', 'barboach→whiscash', 'boldore→gigalith', 'nacli→garganacl', 'sandshrew→sandslash', 'sentret→furret'] -> win    0% deaths/mon 1.00 deathless 0%; Iron Hands killed 12, missing no counter in the pool; Magearna killed 12, missing yamaskgalar (DIGLETT CAVE / grass_night 10%)  (101s)
+SABRINA    box 18/30: 39 mons, team ['slowpokegalar→slowbrogalar', 'meowthgalar→perrserker', 'spiritomb', 'torkoal', 'wimpod→golisopod', 'wooper→quagsire'] -> win   17% deaths/mon 0.89 deathless 0%; Camerupt killed 14, missing mantyke (ROUTE 22 / good_rod 20%); Glastrier killed 6, missing pineco (ROUTE 25 / grass_day 10%)  (211s)
+PRYCE      box  2/30: 71 mons, team ['shelmet→accelgor', 'eevee→flareon', 'haunter→gengar', 'hoppip→jumpluff', 'vanilluxe', 'weedle→beedrill'] -> win   67% deaths/mon 0.47 deathless 17%; Glalie killed 8, missing cubchoo (VIRIDIAN CITY / grass_day 10%); Kyurem-Black killed 5, missing kangaskhan (SAFARI EAST (ZONE 2) / grass_day 2%)  (105s)
+PRYCE      box  7/30: 70 mons, team ['fuecoco→skeledirge', 'abomasnow', 'bonsly→sudowoodo', 'eevee→glaceon', 'eevee→jolteon', 'taurospaldeablaze'] -> win  100% deaths/mon 0.19 deathless 33%; Clefable killed 4, missing varoom (MT MOON B2F / grass_day 20%); Arctozolt killed 2, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (104s)
+SABRINA    box 27/30: 40 mons, team ['hatenna→hatterene', 'annihilape', 'eevee→flareon', 'lapras', 'sableye', 'taurospaldeablaze'] -> win    0% deaths/mon 1.00 deathless 0%; Glastrier killed 14, missing pineco (ROUTE 25 / grass_day 10%); Iron Hands killed 10, missing no counter in the pool  (113s)
+PRYCE      box 11/30: 69 mons, team ['karrablast→escavalier', 'poliwhirl→poliwrath', 'stonjourner', 'taurospaldeaaqua', 'vanilluxe', 'zebstrika'] -> win  100% deaths/mon 0.25 deathless 17%; Clefable killed 6, missing varoom (MT MOON B2F / grass_day 20%); Kyurem-Black killed 3, missing kangaskhan (SAFARI EAST (ZONE 2) / grass_day 2%)  (54s)
+SABRINA    box 10/30: 39 mons, team ['exeggcute→exeggutor', 'boldore→gigalith', 'dusclops→dusknoir', 'mismagius', 'nacli→garganacl', 'wishiwashi'] -> win    0% deaths/mon 1.00 deathless 0%; Iron Hands killed 16, missing no counter in the pool; Magearna killed 10, missing yamaskgalar (DIGLETT CAVE / grass_night 10%)  (332s)
+SABRINA    box 14/30: 40 mons, team ['ferroseed→ferrothorn', 'cubone→marowakalola', 'lapras', 'magikarp→gyarados', 'runerigus', 'taurospaldeaaqua'] -> win   83% deaths/mon 0.39 deathless 17%; Magearna killed 6, missing yamaskgalar (DIGLETT CAVE / grass_night 10%); Glastrier killed 2, missing pineco (ROUTE 25 / grass_day 10%)  (266s)
+PRYCE box 3 FAILED: AssertionError: Error with move lovelykiss. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: dryskin
+istan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move lovelykiss. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: dryskin
+
+PRYCE      box  8/30: 68 mons, team ['taurospaldeablaze', 'abomasnow', 'eevee→glaceon', 'mareanie→toxapex', 'ninetalesalola', 'slowpoke→slowbro'] -> win  100% deaths/mon 0.17 deathless 17%; Kyurem-Black killed 2, missing kangaskhan (SAFARI EAST (ZONE 2) / grass_day 2%); Arctozolt killed 2, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (154s)
+SABRINA    box 19/30: 39 mons, team ['varoom→revavroom', 'lapras', 'magikarp→gyarados', 'nacli→garganacl', 'sewaddle→leavanny', 'timburr→conkeldurr'] -> win    0% deaths/mon 1.00 deathless 0%; Glastrier killed 8, missing pineco (ROUTE 25 / grass_day 10%); Iron Hands killed 8, missing no counter in the pool  (277s)
+SABRINA    box 28/30: 39 mons, team ['magikarp→gyarados', 'espurr→meowstic', 'numel→camerupt', 'poliwag→politoed', 'runerigus', 'sableye'] -> win   50% deaths/mon 0.69 deathless 0%; Glastrier killed 17, missing pineco (ROUTE 25 / grass_day 10%); Iron Hands killed 5, missing no counter in the pool  (167s)
+SABRINA    box 23/30: 40 mons, team ['tinkatink→tinkaton', 'burmy→wormadam', 'cofagrigus', 'magikarp→gyarados', 'onix→steelix', 'smoliv→arboliva'] -> win   17% deaths/mon 0.92 deathless 0%; Glastrier killed 21, missing pineco (ROUTE 25 / grass_day 10%); Magearna killed 6, missing yamaskgalar (DIGLETT CAVE / grass_night 10%)  (178s)
+PRYCE      box 12/30: 70 mons, team ['torkoal', 'beartic', 'eevee→glaceon', 'goldeen→seaking', 'shelmet→accelgor', 'slowbrogalar'] -> win  100% deaths/mon 0.14 deathless 17%; Clefable killed 2, missing varoom (MT MOON B2F / grass_day 20%); Kyurem-Black killed 2, missing kangaskhan (SAFARI EAST (ZONE 2) / grass_day 2%)  (105s)
+PRYCE box 16 FAILED: AssertionError: Error with move shellsmash. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: skilllink
+tan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move shellsmash. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: skilllink
+
+SABRINA    box 20/30: 39 mons, team ['sunkern→sunflora', 'boldore→gigalith', 'burmysandy→wormadamsandy', 'clauncher→clawitzer', 'ekans→arbok', 'nacli→garganacl'] -> win    0% deaths/mon 1.00 deathless 0%; Camerupt killed 16, missing mantyke (ROUTE 22 / good_rod 20%); Iron Hands killed 6, missing no counter in the pool  (315s)
+PRYCE      box  4/30: 68 mons, team ['karrablast→escavalier', 'chinchou→lanturn', 'clamperl→gorebyss', 'eevee→glaceon', 'numel→camerupt', 'wishiwashi'] -> win  100% deaths/mon 0.06 deathless 67%; Arctozolt killed 1, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%); Glalie killed 1, missing cubchoo (VIRIDIAN CITY / grass_day 10%)  (206s)
+PRYCE box 13 FAILED: AssertionError: Error with move lovelykiss. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: dryskin
+istan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move lovelykiss. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: dryskin
+
+PRYCE      box  9/30: 69 mons, team ['fennekin→delphox', 'aron→aggron', 'piloswine→mamoswine', 'sandslashalola', 'sandygast→palossand', 'torkoal'] -> win  100% deaths/mon 0.11 deathless 33%; Clefable killed 3, missing varoom (MT MOON B2F / grass_day 20%); Arctozolt killed 1, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (207s)
+SABRINA    box 15/30: 39 mons, team ['slowpokegalar→slowbrogalar', 'stunfisk', 'taurospaldeaaqua', 'torkoal', 'wailmer→wailord', 'wishiwashi'] -> win   67% deaths/mon 0.67 deathless 0%; Camerupt killed 11, missing mantyke (ROUTE 22 / good_rod 20%); Iron Hands killed 7, missing no counter in the pool  (345s)
+SABRINA    box 24/30: 39 mons, team ['grimer→muk', 'bidoof→bibarel', 'exeggcute→exeggutoralola', 'lapras', 'taurospaldeaaqua', 'veluza'] -> win    0% deaths/mon 1.00 deathless 0%; Iron Hands killed 20, missing no counter in the pool; Magearna killed 8, missing yamaskgalar (DIGLETT CAVE / grass_night 10%)  (238s)
+PRYCE      box  5/30: 70 mons, team ['forretress', 'eevee→glaceon', 'haunter→gengar', 'octillery', 'pansage→simisage', 'pelipper'] -> win  100% deaths/mon 0.03 deathless 83%; Kyurem-Black killed 1, missing kangaskhan (SAFARI EAST (ZONE 2) / grass_day 2%)  (245s)
+SABRINA    box 29/30: 39 mons, team ['clauncher→clawitzer', 'bergmite→avalugg', 'cofagrigus', 'karrablast→escavalier', 'lapras', 'wishiwashi'] -> win   67% deaths/mon 0.75 deathless 0%; Magearna killed 8, missing yamaskgalar (DIGLETT CAVE / grass_night 10%); Glastrier killed 8, missing pineco (ROUTE 25 / grass_day 10%)  (247s)
+PRYCE      box 21/30: 70 mons, team ['torkoal', 'eevee→glaceon', 'minior', 'pidgey→pidgeot', 'shelmet→accelgor', 'slowpokegalar→slowbrogalar'] -> win  100% deaths/mon 0.36 deathless 0%; Glalie killed 5, missing cubchoo (VIRIDIAN CITY / grass_day 10%); Clefable killed 3, missing varoom (MT MOON B2F / grass_day 20%)  (53s)
+PRYCE      box 17/30: 70 mons, team ['nincada→shedinja', 'eevee→glaceon', 'forretress', 'haunter→gengar', 'shieldon→bastiodon', 'snivy→serperior'] -> win  100% deaths/mon 0.14 deathless 33%; Glalie killed 3, missing cubchoo (VIRIDIAN CITY / grass_day 10%); Arctozolt killed 2, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (122s)
+PRYCE box 14 FAILED: AssertionError: Error with move shellsmash. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: skilllink
+tan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move shellsmash. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: skilllink
+
+PRYCE      box 10/30: 70 mons, team ['taurospaldeablaze', 'abomasnow', 'eevee→glaceon', 'eevee→jolteon', 'octillery', 'tentacool→tentacruel'] -> win  100% deaths/mon 0.36 deathless 0%; Arctozolt killed 4, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%); Clefable killed 2, missing tinkatink (MT MOON B1F / grass_day 6%)  (261s)
+PRYCE      box 26/30: 71 mons, team ['torkoal', 'eevee→glaceon', 'garbodor', 'minccino→cinccino', 'tyrogue→hitmontop', 'voltorb→electrode'] -> win  100% deaths/mon 0.31 deathless 0%; Glalie killed 4, missing cubchoo (VIRIDIAN CITY / grass_day 10%); Kyurem-Black killed 2, missing kangaskhan (SAFARI EAST (ZONE 2) / grass_day 2%)  (61s)
+SABRINA    box 25/30: 39 mons, team ['ferroseed→ferrothorn', 'golett→golurk', 'inkay→malamar', 'runerigus', 'tyrogue→hitmontop', 'wimpod→golisopod'] -> win   17% deaths/mon 0.89 deathless 0%; Iron Hands killed 16, missing no counter in the pool; Camerupt killed 7, missing wailmer (ROUTE 24 / good_rod 60%)  (301s)
+PRYCE      box 18/30: 71 mons, team ['torkoal', 'ampharos', 'eevee→flareon', 'eevee→glaceon', 'lapras', 'talonflame'] -> win  100% deaths/mon 0.36 deathless 0%; Clefable killed 4, missing varoom (MT MOON B2F / grass_day 20%); Arctozolt killed 4, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (176s)
+PRYCE      box 22/30: 69 mons, team ['fuecoco→skeledirge', 'kabutops', 'lapras', 'ninetalesalola', 'shellder→cloyster', 'swadloon→leavanny'] -> win  100% deaths/mon 0.28 deathless 0%; Clefable killed 6, missing varoom (MT MOON B2F / grass_day 20%); Arctozolt killed 2, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (112s)
+PRYCE      box 15/30: 70 mons, team ['torkoal', 'piloswine→mamoswine', 'turtonator', 'varoom→revavroom', 'wailmer→wailord', 'zigzagoongalar→obstagoon'] -> win  100% deaths/mon 0.14 deathless 33%; Arctozolt killed 2, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%); Kyurem-Black killed 2, missing kangaskhan (SAFARI EAST (ZONE 2) / grass_day 2%)  (244s)
+SABRINA    box 30/30: 39 mons, team ['bouffalant', 'arrokuda→barraskewda', 'cofagrigus', 'hatenna→hatterene', 'solrock', 'wailmer→wailord'] -> win    0% deaths/mon 1.00 deathless 0%; Glastrier killed 11, missing pineco (ROUTE 25 / grass_day 10%); Magearna killed 10, missing yamaskgalar (DIGLETT CAVE / grass_night 10%)  (324s)
+CLAIR box 1 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+dingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+
+CLAIR box 6 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+dingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+
+PRYCE      box 27/30: 69 mons, team ['dusclops→dusknoir', 'eevee→glaceon', 'eevee→jolteon', 'haunter→gengar', 'starly→staraptor', 'stunky→skuntank'] -> win  100% deaths/mon 0.17 deathless 33%; Kyurem-Black killed 4, missing kangaskhan (SAFARI EAST (ZONE 2) / grass_day 2%); Glalie killed 2, missing beartic (SEAFOAM 1F / grass_day 20%)  (115s)
+PRYCE box 19 FAILED: AssertionError: Error with move lovelykiss. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: dryskin
+istan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move lovelykiss. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: dryskin
+
+PRYCE      box 23/30: 70 mons, team ['nincada→shedinja', 'abomasnow', 'eevee→glaceon', 'haunter→gengar', 'ninetalesalola', 'snivy→serperior'] -> win  100% deaths/mon 0.17 deathless 17%; Glalie killed 4, missing cubchoo (VIRIDIAN CITY / grass_day 10%); Arctozolt killed 1, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (166s)
+CLAIR box 16 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+an/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+
+CLAIR box 11 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+dingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+
+CLAIR      box  2/30: 74 mons, team ['krabby→kingler', 'darmanitangalar', 'electrode', 'silicobra→sandaconda', 'taurospaldeaaqua', 'tentacool→tentacruel'] -> win    0% deaths/mon 1.00 deathless 0%; Archaludon killed 16, missing meditite (ROUTE 2 / grass_day 10%); Eternatus killed 8, missing screamtail (SAFARI NORTH (ZONE 3) / grass_day 20%)  (144s)
+PRYCE      box 28/30: 69 mons, team ['litten→incineroar', 'abomasnow', 'darmanitangalar', 'diglettalola→dugtrioalola', 'eevee→glaceon', 'salazzle'] -> win  100% deaths/mon 0.33 deathless 0%; Clefable killed 4, missing varoom (MT MOON B2F / grass_day 20%); Arctozolt killed 4, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (168s)
+CLAIR box 21 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+an/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+
+CLAIR      box  7/30: 75 mons, team ['barboach→whiscash', 'eevee→sylveon', 'garchomp', 'nymble→lokix', 'sharpedo', 'wishiwashi'] -> win   33% deaths/mon 0.86 deathless 0%; Archaludon killed 12, missing meditite (ROUTE 2 / grass_day 10%); Magearna killed 7, missing volcarona (VICTORY ROAD 1F / grass_day 5%)  (133s)
+PRYCE      box 20/30: 70 mons, team ['abomasnow', 'eevee→glaceon', 'haunter→gengar', 'ninetalesalola', 'rolycoly→coalossal', 'sneasel→weavile'] -> win  100% deaths/mon 0.22 deathless 17%; Clefable killed 2, missing varoom (MT MOON B2F / grass_day 20%); Arctozolt killed 2, missing sandslashalola (SEAFOAM 1F / grass_night 20%)  (266s)
+PRYCE box 24 FAILED: AssertionError: Error with move shellsmash. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: skilllink
+tan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move shellsmash. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: skilllink
+
+CLAIR box 17 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+an/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+
+CLAIR box 12 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+dingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+
+PRYCE      box 29/30: 70 mons, team ['nincada→shedinja', 'abomasnow', 'eevee→glaceon', 'mareanie→toxapex', 'seviper', 'slowbro'] -> win  100% deaths/mon 0.06 deathless 67%; Clefable killed 2, missing varoom (MT MOON B2F / grass_day 20%)  (226s)
+PRYCE      box 25/30: 70 mons, team ['abomasnow', 'cetoddle→cetitan', 'eevee→glaceon', 'mareanie→toxapex', 'ninetalesalola', 'sobble→inteleon'] -> win   83% deaths/mon 0.36 deathless 17%; Kyurem-Black killed 5, missing kangaskhan (SAFARI EAST (ZONE 2) / grass_day 2%); Arctozolt killed 4, missing ironhands (SAFARI CENTER (ZONE 1) / grass_day 20%)  (272s)
+CLAIR box 26 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+dingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+
+CLAIR      box  3/30: 75 mons, team ['dewgong', 'eevee→flareon', 'luvdisc', 'onix→steelix', 'starly→staraptor', 'tepig→emboar'] -> win   67% deaths/mon 0.78 deathless 0%; Necrozma-Dusk-Mane killed 8, missing buneary (ROUTE 3 / grass_day 10%); Magearna killed 8, missing volcarona (VICTORY ROAD 1F / grass_day 5%)  (227s)
+CLAIR      box 22/30: 75 mons, team ['crawdaunt', 'electrode', 'poliwhirl→poliwrath', 'shellder→cloyster', 'stunfiskgalar', 'veluza'] -> win    0% deaths/mon 1.00 deathless 0%; Magearna killed 15, missing volcarona (VICTORY ROAD 1F / grass_day 5%); Eternatus killed 14, missing screamtail (SAFARI NORTH (ZONE 3) / grass_day 20%)  (156s)
+CLAIR      box  8/30: 74 mons, team ['drilbur→excadrill', 'eevee→umbreon', 'luvdisc', 'metagross', 'snubbull→granbull', 'tentacool→tentacruel'] -> win   17% deaths/mon 0.94 deathless 0%; Magearna killed 19, missing volcarona (VICTORY ROAD 1F / grass_day 5%); Archaludon killed 7, missing meditite (ROUTE 2 / grass_day 10%)  (221s)
+PRYCE      box 30/30: 70 mons, team ['tinkatink→tinkaton', 'fennekin→delphox', 'haunter→gengar', 'nidoranf→nidoqueen', 'shelmet→accelgor', 'vanilluxe'] -> win  100% deaths/mon 0.06 deathless 67%; Glalie killed 1, missing cubchoo (VIRIDIAN CITY / grass_day 10%); Kyurem-Black killed 1, missing kangaskhan (SAFARI EAST (ZONE 2) / grass_day 2%)  (273s)
+CLAIR      box 13/30: 73 mons, team ['clamperl→huntail', 'meltan→melmetal', 'nidoranm→nidoking', 'spheal→walrein', 'toedscool→toedscruel', 'toxtricity'] -> win   17% deaths/mon 0.86 deathless 0%; Archaludon killed 12, missing meditite (ROUTE 2 / grass_day 10%); Eternatus killed 10, missing screamtail (SAFARI NORTH (ZONE 3) / grass_day 20%)  (224s)
+CLAIR      box 27/30: 75 mons, team ['dracovish', 'dragonite', 'eevee→flareon', 'snorunt→glalie', 'starly→staraptor', 'wooper→quagsire'] -> win   33% deaths/mon 0.86 deathless 0%; Eternatus killed 11, missing screamtail (SAFARI NORTH (ZONE 3) / grass_day 20%); Archaludon killed 7, missing meditite (ROUTE 2 / grass_day 10%)  (123s)
+CLAIR      box 18/30: 75 mons, team ['octillery', 'gligar→gliscor', 'houndstone', 'piloswine→mamoswine', 'scizor', 'taurospaldeablaze'] -> win   17% deaths/mon 0.97 deathless 0%; Archaludon killed 12, missing meditite (ROUTE 2 / grass_day 10%); Magearna killed 9, missing volcarona (VICTORY ROAD 1F / grass_day 5%)  (213s)
+CLAIR box 4 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+an/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+
+CLAIR box 9 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+an/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+
+CLAIR      box 23/30: 74 mons, team ['barboach→whiscash', 'eevee→sylveon', 'metagross', 'sandile→krookodile', 'taurospaldeablaze', 'wimpod→golisopod'] -> win   67% deaths/mon 0.69 deathless 0%; Archaludon killed 11, missing meditite (ROUTE 2 / grass_day 10%); Magearna killed 7, missing volcarona (VICTORY ROAD 1F / grass_day 5%)  (237s)
+CLAIR box 19 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+an/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+
+CLAIR box 5 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+an/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+
+CLAIR      box 14/30: 75 mons, team ['eevee→vaporeon', 'eevee→umbreon', 'kabutops', 'mantine', 'pancham→pangoro', 'stunfiskgalar'] -> win   50% deaths/mon 0.78 deathless 0%; Magearna killed 13, missing volcarona (VICTORY ROAD 1F / grass_day 5%); Archaludon killed 6, missing meditite (ROUTE 2 / grass_day 10%)  (313s)
+CLAIR      box 28/30: 75 mons, team ['tyranitar', 'aegislash', 'ampharos', 'munchlax→snorlax', 'qwilfishhisui→overqwil', 'sandile→krookodile'] -> win   50% deaths/mon 0.81 deathless 0%; Archaludon killed 16, missing meditite (ROUTE 2 / grass_day 10%); Magearna killed 7, missing volcarona (VICTORY ROAD 1F / grass_day 5%)  (211s)
+CLAIR      box 24/30: 75 mons, team ['metagross', 'mismagius', 'sandile→krookodile', 'skuntank', 'tatsugiri', 'yamaskgalar→runerigus'] -> win   17% deaths/mon 0.92 deathless 0%; Magearna killed 12, missing volcarona (VICTORY ROAD 1F / grass_day 5%); Archaludon killed 11, missing meditite (ROUTE 2 / grass_day 10%)  (313s)
+CLAIR      box 10/30: 75 mons, team ['metagross', 'eevee→umbreon', 'ninetalesalola', 'rapidashgalar', 'taurospaldeaaqua', 'venipede→scolipede'] -> win    0% deaths/mon 1.00 deathless 0%; Archaludon killed 22, missing meditite (ROUTE 2 / grass_day 10%); Necrozma-Dusk-Mane killed 8, missing buneary (ROUTE 3 / grass_day 10%)  (374s)
+CLAIR box 20 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+an/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+
+CLAIR box 15 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+dingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+
+CLAIR box 29 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+an/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: solidrock
+
+CLAIR box 25 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+dingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+
+CLAIR box 30 FAILED: AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+dingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/battle.py", line 120, in parse_request
+    self.active_pokemon.available_moves_from_request(active_request)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^
+  File "/home/tristan/CodingProjects/nuzlock_rl/.venv/lib/python3.13/site-packages/poke_env/battle/pokemon.py", line 828, in available_moves_from_request
+    assert self.ability == "dancer" or {
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<5 lines>...
+    }.intersection(self.moves), (
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError: Error with move dragondance. Expected self.moves to contain copycat, metronome, mefirst, mirrormove, or assist, or to have the ability dancer. Got {'transform': transform (Move object)}, ability: protosynthesis
+
+LT. SURGE  30 boxes: mean win 59%, boxes with a >=50% team 63%, deaths/mon 0.65, deathless wins 9%; most missed: cutiefly vs Pawmot (PEWTER CITY / grass_day 5%) x16, seedot vs Raichu-Alola (ROUTE 1 / grass_night 8%) x14, skiddo vs Ampharos (PEWTER CITY / grass_night 10%) x10
+GIOVANNI   30 boxes: mean win 78%, boxes with a >=50% team 90%, deaths/mon 0.47, deathless wins 10%; most missed: seedot vs Delphox (ROUTE 1 / grass_night 8%) x13, seedot vs Moltres-Galar (ROUTE 1 / grass_night 8%) x13, lampent vs Silvally-Fairy (PKMN TOWER 3&5F / grass_day 2%) x11
+SABRINA    30 boxes: mean win 17%, boxes with a >=50% team 20%, deaths/mon 0.91, deathless wins 1%; most missed: pineco vs Glastrier (ROUTE 25 / grass_day 10%) x12, mantyke vs Camerupt (ROUTE 22 / good_rod 20%) x11, yamaskgalar vs Magearna (DIGLETT CAVE / grass_night 10%) x11
+PRYCE      24 boxes (6 failed): mean win 98%, boxes with a >=50% team 100%, deaths/mon 0.21, deathless wins 26%; most missed: ironhands vs Arctozolt (SAFARI CENTER (ZONE 1) / grass_day 20%) x14, varoom vs Clefable (MT MOON B2F / grass_day 20%) x11, kangaskhan vs Kyurem-Black (SAFARI EAST (ZONE 2) / grass_day 2%) x10
+CLAIR      13 boxes (17 failed): mean win 28%, boxes with a >=50% team 31%, deaths/mon 0.88, deathless wins 0%; most missed: meditite vs Archaludon (ROUTE 2 / grass_day 10%) x11, volcarona vs Magearna (VICTORY ROAD 1F / grass_day 5%) x9, screamtail vs Eternatus (SAFARI NORTH (ZONE 3) / grass_day 20%) x4
+
+Radical Red best-six probe (boxes) | hardcore bosses | hardcore legality: True | arena effects: True | field-aware calc bot: True | chooser greedy | matchup play True | death weight 6.0 | seeded | search 9,8 x n=6 | no EVs, items in hand | enemy = RR AI, full info | 18 min
+  boss       cap mean win  >=50% d/mon clean  most missed counter (vs)
+  LT. SURGE   36      59%    63%  0.65    9%  cutiefly vs Pawmot (PEWTER CITY / grass_day 5%) x16
+  SABRINA     59      17%    20%  0.91    1%  pineco vs Glastrier (ROUTE 25 / grass_day 10%) x12
+  PRYCE       73      98%   100%  0.21   26%  ironhands vs Arctozolt (SAFARI CENTER (ZONE 1) / grass_day 20%) x14
+  GIOVANNI    80      78%    90%  0.47   10%  seedot vs Delphox (ROUTE 1 / grass_night 8%) x13
+  CLAIR       81      28%    31%  0.88    0%  meditite vs Archaludon (ROUTE 2 / grass_day 10%) x11

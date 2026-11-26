@@ -3524,3 +3524,17 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   (mod_data) and best4 Normal (moves.json). B′ added it 28 times at Sabrina on a wrong type. Fixed at load
   (`rr_probe.inject_mod_data`); applied after the seed-4/7 and first held-out runs (the Pryce / Clair re-run
   has it in both arms).
+- **Held-out result** (seed 7, 30 boxes each, all paired; `results/rr_d16_ho_*`, Pryce / Clair from
+  `results/rr_d16_ho2_*`): A+B′ − A = Lt. Surge −7.2 ± 4.0, Giovanni 0.0 ± 3.5, Sabrina −2.8 ± 3.2,
+  Pryce +5.6 ± 3.3, Clair −3.3 ± 5.2; **all −1.6 ± 1.8 (se)** (A 56.4%, B′ 54.9%). The first five bosses gave
+  +3.2 ± 1.5. B′ does not generalize: it wins big where a damage-only coverage pick is the missing piece
+  (Blaine +14.7, Pryce +5.6) and loses a little where best4's utility attacks matter (U-turn, Dig, Sucker
+  Punch, Flash-likes; Lt. Surge, Misty). Note the 5 "train" bosses were where B′ was designed and debugged
+  (Koga status-move fix), so +3.2 is optimistic. → D17 (what to do with B′).
+- D17 posed (options: 1 keep best4 default, B′ opt-in; 2 battles choose best4 vs B′ per team, screening seeds
+  apart from scoring seeds; 3 teach the calc utility moves, re-test held-out). Claude's lean: 1 now, 2 next.
+  **user call: pending** (session wrapped up 2026-11-26 before the answer).
+- User note (2026-11-26, confirmed by the user): in Radical Red, an NPC in the house next to Saffron's Poké Mart
+  adjusts IVs so Hidden Power takes any type the player picks. Before Saffron it plays as Dark (all-31 IVs);
+  from Saffron on, Hidden Power is a free-type coverage move, and the calc and best4 should choose its type per
+  boss instead of fixing it to Dark (not modelled yet; gate on the Saffron progress point).
