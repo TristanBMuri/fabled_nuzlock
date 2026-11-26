@@ -3708,3 +3708,8 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   way). Not shipped: the default stays D15. A natural next step is the user's own principle (bosses = play for
   the win, routine fights = keep the team): D21 weights in routine fights, D15 at bosses. The engine reads its
   weights once per process, so that needs a per-call weights switch in the fork. → D22 when the user is back.
+- Test A extended to 36 run seeds per arm (seeds 13–36 added, user at lunch): deaths per won fight shipped D15
+  0.63 ± 0.05 vs **D21 0.50 ± 0.04** (−0.13, ~2 se; on the same fight in the same seed −0.10 ± 0.07 over 391
+  pairs), deathless won fights 61 → 69%. Fights cleared median 13 vs 14, paired +0.4 ± 0.9: no change; runs end
+  at Misty (12 / 15 of 36), Rocket grunts, Brock, Archer. So D21's fewer routine deaths are now likely real, but
+  not enough to change how far a run gets.
