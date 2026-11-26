@@ -3802,3 +3802,54 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
 - **Data run launched** `logs/rr_d23_data` (seed 23): D19's 112 trainers × 20 boxes, `--chooser cover --alt 3
   --rand 2 --n-search 16 --engine 2000`, D21 weights, 12 workers. Plan: refit `fit_teamwin.py` on D23 labels and on
   D19's, score both on the same held-out boss pairs; spot-check boss labels at 20,000 iterations.
+
+## 2026-11-26 — Performance analysis: where runs are lost, which lever is left (`results/rr_lever_d21.*`)
+
+User asked for a performance analysis and whether large improvements remain; done with a Fable 5.2 agent as an
+independent second analyst (logs only), then a paired lever test by Claude.
+- **Fable, from the logs** (96 runs in `results/rr_runs_*`, D19 / d21b box probes): runs end at Misty 38, Brock 17,
+  Grunt #16 11, Archer 10, other 20. **Misty is not an attrition loss**: mean alive box there 11.4, 87% of Misty losses
+  had ≥ 8 alive, Misty win 22% with no trend in prior deaths. Attrition binds at Brock / Archer only (~21 of 96 endings).
+  Zero-attrition counterfactual (product of D19 fresh-box win rates over the 92 fights): mean fights 11.5 → 17.3,
+  median 14 → 14. The run is a product of ~17 fights under 80%; lifting those to 95% → median 29. Box *content*
+  decides bosses (d21b Misty: top-5 boxes 83%, bottom-10 8%). Fable's reading: the HANDOFF line "the killer is
+  attrition" is wrong for Misty and the median; "fights cleared" is an insensitive gate (pinned by one ~22–50% fight).
+- **Lever test** (`results/rr_lever_d21.py`): 5 run-ending fights from `rr_runs_d21` (Misty seeds 4 / 5 / 34, Grunt #16
+  seed 9, Archer seed 28), the run's alive box replayed exactly (greedy six matches the log), 8 paired fresh battle
+  seeds per arm, D21 weights:
+
+  | chooser | engine iterations | win (40 battles) | deaths / battle | choose time | s / battle |
+  |---|---:|---:|---:|---:|---:|
+  | greedy (the runs) | 2k | 32% | 4.8 | ~6 s | 0.4 |
+  | greedy | 20k | **30%** | 4.9 | | 2–5 |
+  | greedy | 200k | 42% | 4.4 | | 20–65 |
+  | cover | 20k | **62%** | 3.4 | **0.3 s** | 2–6 |
+  | searched (24 cands × 4 screen battles) | 20k | **80%** | 2.6 | 3–10 min | 2–3 |
+  | searched | 200k | 75% | 2.9 | | 19–51 |
+
+  Per fight, greedy → searched at 20k: Misty 0 → 63%, 63 → 88%, 0 → 50%; Grunt 25 → 100%; Archer 63 → 100%. Greedy fields
+  Torkoal / Boldore / Shieldon / Petilil against Misty's rain. Search budget: 2k ≈ 20k on these teams, 200k +12 ± 11
+  on greedy, nothing on the searched six. Caveat: the five fights were picked because greedy lost them, so the gain
+  over an average fight is smaller; still the largest lever measured since phase 3.
+- Compute: a run costs ~7 s a fight (greedy chooser ~4–6 s, one 20k battle ~3 s); 36 runs = 51 core-minutes. The cover
+  chooser is 20× cheaper than greedy and better; the searched chooser is ~50–100× a fight's cost, affordable at bosses.
+- Bets: Claude (6/10) "team choice wins: searched +15–30 over greedy, 200k +5–10, 2k −10": the lever hit, the size
+  missed (+50), 200k +12 close, 2k ±0 missed. User: pending.
+- Meaning: the runs play with the weakest chooser we have (greedy was D19's data setting, copied into `rr_run.probe_args`).
+  The team builder is the bottleneck, as D17 said, but today's `cover` / `searched` choosers already close much of it.
+  Next (user's call): `rr_run.py --chooser cover` on the 36 seeds (cheap), then searched at bosses / sub-80% fights.
+- **Correction (the user: "were the 8+ alive mons any good?"; "box content is the definition of attrition"). They
+  were not.** `results/rr_misty_alive_vs_full.*`: all 15 Misty losses in `rr_runs_d21`, the run's alive box vs the same
+  run's box with nobody dead, 8 paired battles each (120 per cell), 20k:
+
+  | chooser | alive box (mean 11.7) | no-death box (mean 17.7) |
+  |---|---:|---:|
+  | greedy (the runs) | 18% | 26% |
+  | cover | 25% | **67%** |
+
+  Gyarados is dead before Misty in 7 of the 10 runs where the no-death box wins ≥ 3 more battles; Fearow, Parasect,
+  Mightyena, Donphan often too. The chooser fields its best mons in every routine fight, so they are the ones that die:
+  attrition removes quality, not count, and Fable's count-based "not attrition" was wrong. The two levers are
+  complements: a better chooser pays only on a box that still holds its answers (greedy 18 → 26 with the dead back,
+  cover 25 → 67), and keeping the answers alive pays only with a chooser that fields them. So D21's routine-death cut
+  and D14's per-mon value (spare the mons a later boss needs) are back in the picture, next to the chooser.

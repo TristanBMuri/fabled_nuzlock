@@ -1,5 +1,13 @@
 # HANDOFF — state of the project as of 2026-10-12
 
+**2026-11-26 (evening): performance analysis** (NOTEBOOK.md last entry, with a Fable agent; `results/rr_lever_d21.*`,
+`results/rr_misty_alive_vs_full.*`). Compute is not a constraint (a run is ~7 s a fight). At five run-ending fights
+the same box wins 30% with the runs' greedy chooser, 62% with `cover` (20x cheaper), 80% with `searched`; battle
+search 2k / 20k / 200k barely matters. At the 15 Misty losses, bringing the run's dead back lifts cover 25 → 67%
+(greedy 18 → 26): routine fights kill the best mons (Gyarados in most runs). Chooser and keeping key mons alive are
+complements. **Open D24:** (a) `rr_run.py --chooser cover` on the 36 seeds; (b) `searched` at bosses / sub-80% fights
+plus sparing the mons later bosses need (D14); (c) D23's learned builder with searched picks as labels.
+
 **2026-11-26 (later): team-builder data, first Nuzlocke runs, death price** (NOTEBOOK.md, decision log Steps
 22–25; branch `rr/d15-d21`, not pushed; `main` = origin/main, old tip in `backup/main-2026-11-26`).
 - D17/D18: the team builder must be learned; best4 is the baseline. `rl/fit_teamwin.py` (team-vs-boss win model
