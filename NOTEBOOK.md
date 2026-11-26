@@ -3658,3 +3658,32 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   bench mon takes the hit) cut Misty's deaths 47 → 28 then; it lives in the calc bot (rollouts / Showdown
   search). The engine search the runs use has no such rule; it prices a fainted mon at 60 evaluation points
   (`rl/engine_search.py`, POKE_ENGINE_DEATH) and still leaves low mons in. → D21.
+- User asked: doesn't a reward per surviving mon already prevent this? Checked: **the death price the runs use is
+  weak and inconsistent.** The engine search (most decisions: e.g. 138 engine vs 9 Showdown in one box) scores
+  leaves with the D15 fitted logit, trained on U = win × (1 − 0.5 × deaths/6): one death ≈ 1/12 of a win.
+  `evaluate.rs` returns the fitted logit before the hand-set death term (POKE_ENGINE_DEATH = 60) is applied, so
+  that term is off whenever fitted weights are on. The probe's `--death-weight 6` (one death = one win) reaches
+  only the Showdown fallback search. Earlier evidence of the double edge: Misty 2026-11-23, engine death 0 → 53%,
+  60 → 52%, 200 → nearly every box lost.
+
+## 2026-11-26 — D21: re-price deaths in the engine's fitted evaluation
+
+- Options: (1) retreat rule when the win is near-certain; (2) death cost up when the win is near-certain;
+  (3) leave the battler; (4) refit the engine's leaf evaluation on a label where a death costs more.
+- **user call: 4, a death = 1/6 of a win as the base** (conf not given; no bet "without knowing how (well) it
+  will be implemented"). On (1): a hard rule makes no sense without the context the search has (the switch-in,
+  its matchup, pivoting through several mons to a winning position vs staying in vs wiping). Later: per-mon
+  death weights by run importance (some mons can be sacked without worry), unless testing how far a run gets
+  deathless.
+- Plan: `fit_eval.py --death-cost 1.0` (U = win × (1 − deaths/6); a loss 0) on D15's data and recipe (R1 + R2 +
+  D15 states, `--within-team --scale 2.0`), first reproducing D15 with the old label; then (A) 12 paired run seeds
+  D15 vs D21 weights (fights cleared, deaths per won fight, what ends runs) and (B) the box probe on bosses,
+  paired (win rate and deaths: the double edge).
+- Fits (301,724 positions, 13,182 battles, within-team, scale 2): reproducing D15 with the old label gives the
+  same held-out fit (log-loss 0.4465 vs D15's 0.4473) but different weights where features are collinear:
+  `our_alive` and `our_deaths` sum to the party size, so only their difference prices a death: **shipped D15
+  0.17, reproduced 0.50, D21 (death = 1/6 win) 0.62** logit units per death (a full-HP mon's `our_hp` ≈ 1.0–1.3).
+  D21 held-out log-loss 0.4905 vs group-constant 0.5541 (Δ −0.064; the D15-label Δ is −0.069). `our_ground_hazards`
+  zeroed by hand in both, as in D15. So the shipped D15 prices deaths ~3× lower than its own recipe does today;
+  arms: shipped D15 (`rr_runs_s1`), reproduced D15 (`eval_weights_d15_repro.txt`), D21 (`eval_weights_d21.txt`),
+  12 run seeds each.

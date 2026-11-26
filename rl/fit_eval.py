@@ -32,7 +32,7 @@ from rl import convert  # noqa: E402
 HELD_OUT = {"#18", "#34", "#77", "#95"}  # every 4th boss of the data run (Misty, Erika, Lt. Surge rematch, Giovanni)
 
 
-def load(path: str, every: int, seed: int = 0) -> list[tuple]:
+def load(path: str, every: int, seed: int = 0, death_cost: float = 0.5) -> list[tuple]:
     """[(battle key, state string, U)] from a states log; every k-th decision of each battle."""
     rng = random.Random(seed)
     tag = Path(path).stem
@@ -45,7 +45,7 @@ def load(path: str, every: int, seed: int = 0) -> list[tuple]:
                 decisions.append((key, r["state"]))
         elif r["kind"] == "battle":
             dead = sum(r["fainted"]) / len(r["fainted"])
-            outcome[key] = float(r["won"]) * (1 - 0.5 * dead)
+            outcome[key] = float(r["won"]) * (1 - death_cost * dead)  # death_cost 1: a death = 1/6 of a win (D21)
     return [(k, s, outcome[k]) for k, s in decisions if k in outcome]
 
 
@@ -138,6 +138,8 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("states", nargs="+", help="<out>.states.jsonl files")
     ap.add_argument("--every", type=int, default=1, help="keep each decision with probability 1/every")
+    ap.add_argument("--death-cost", type=float, default=0.5, help="label U = win * (1 - death_cost * deaths/6): 0.5 = a death is 1/12 "
+                    "of a win (D9 / D15); 1.0 = 1/6 (D21, the user)")
     ap.add_argument("--within-team", action="store_true",
                     help="Option B: fit w on f(s)-f(s0) with a per-(boss, team) fixed effect to remove boss/box difficulty")
     ap.add_argument("--scale", type=float, default=1.0, help="multiply exported weights (and bias) by this factor")
@@ -145,7 +147,7 @@ def main() -> None:
     args = ap.parse_args()
     convert.use_rr()
     torch.manual_seed(0)
-    rows = [r for p in args.states for r in load(p, args.every)]
+    rows = [r for p in args.states for r in load(p, args.every, death_cost=args.death_cost)]
     names = convert.pe.evaluate_feature_names()
     x_all, y_all = features(rows), np.array([u for *_, u in rows], dtype=np.float32)
     held = np.array([k[0] in HELD_OUT for k, *_ in rows])
