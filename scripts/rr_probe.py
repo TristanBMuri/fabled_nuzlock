@@ -49,6 +49,13 @@ def inject_mod_data() -> dict:
         src = mod["moves" if table == "moves" else "species"]
         counts[table] = (len(set(src) - set(mine)), len(set(src) & set(mine)))
         mine.update(src)
+    for mv in g.moves.values():  # Ice Hammer's `"self": null` breaks poke-env's Move.self_boost
+        if "self" in mv and mv["self"] is None:
+            del mv["self"]
+    # Hidden Power's type comes from IVs; the player's are all 31 (gauntlet.PLAYER_IVS), so Showdown
+    # plays it as Dark. mod_data says Water and moves.json Normal: calc and best4 mistyped it (D16 sets).
+    g.moves["hiddenpower"]["type"] = "Dark"
+    gauntlet.load_game("rr")["moves"]["hiddenpower"]["type"] = "Dark"
     return counts
 
 
@@ -115,7 +122,8 @@ def pack_trainer(t: dict, cap: int | None) -> str:
     parts = []
     for d in t["mons"]:
         lv = d["level"] if d["level"] is not None else (cap or 0) + (d.get("offset") or 0)
-        parts.append("|".join([d["species"], "", dump_id(d["item"]), dump_id(d["ability"], d["species"]),
+        # Aegislash-Shield (#81) packs as Showdown's base form
+        parts.append("|".join([d["species"].removesuffix("-Shield"), "", dump_id(d["item"]), dump_id(d["ability"], d["species"]),
                                ",".join(dump_id(x) for x in d["moves"]), d["nature"], spread(d["evs"]), d["gender"],
                                spread(d["ivs"]), "", str(lv), ""]))
     return "]".join(parts)
@@ -133,14 +141,16 @@ def boss_team(name: str | int, sheet: bool = True) -> tuple[str, int, list[str]]
     order = json.load(open(RR / "order.json"))["entries"]
     t_idx = name if isinstance(name, int) else next(i for i, e in enumerate(order) if e["name"] == name)
     entry = order[t_idx]
-    if entry["name"] in DUMP_ID:
-        tr = next(x for x in dump if x["id"] == DUMP_ID[entry["name"]])
-    else:
-        block = block_of(entry)
-        want = {to_id_str(p["species"]) for p in block["pokemon"]} if block else set()
+    block = block_of(entry)
+    want = {to_id_str(p["species"]) for p in block["pokemon"]} if block else set()
+    tr = next(x for x in dump if x["id"] == DUMP_ID[entry["name"]]) if entry["name"] in DUMP_ID else None
+    if tr is not None and max((m["level"] or 0) for m in tr["mons"]) > entry["cap"] + 5:
+        tr = None  # a DUMP_ID team far over the cap is another fight: Giovanni's 0x45 is Cerulean Cave (L80), not #38 / #46
+    if tr is None:
         last = to_id_str(entry["name"].replace("(REMATCH)", "").split("&")[0].split()[-1])
         cands = [x for x in dump if want and {to_id_str(m["species"]) for m in x["mons"]} == want] or \
-                [x for x in dump if {"relli": "reli"}.get(last, last) in to_id_str(x["name"])]  # the tracker's "Relli" is the dump's "Reli"
+                [x for x in dump if {"relli": "reli"}.get(last, last) in to_id_str(x["name"])] or \
+                [x for x in dump if len(want & {to_id_str(m["species"]) for m in x["mons"]}) >= max(2, len(want) // 2)]  # "GRUNT 1": no name
         if not cands:
             raise KeyError(f"no dump trainer for #{t_idx} {entry['name']}")
         tr = max(cands, key=lambda x: (len(want & {to_id_str(m["species"]) for m in x["mons"]}), x["relative"]))
@@ -232,7 +242,8 @@ def block_of(entry: dict) -> dict | None:
             if tail == name or (segs[-1] == words[-1] and (len(words) == 1 or words[0] in tail)):
                 hits.append(x)
     loc = entry["location"].split()[0].upper()
-    return next((x for x in hits if loc in x["title"].upper()), hits[0] if hits else None)
+    return next((x for x in hits if loc in x["title"].upper()),  # then a prefix: "CERULEAN CAVE" is titled "CERULEA. CAVE"
+                next((x for x in hits if loc[:6] in x["title"].upper()), hits[0] if hits else None))
 
 
 ARENA = {"DESOLATE LAND": ("weather", "desolateland"), "PRIMORDIAL SEA": ("weather", "primordialsea"),

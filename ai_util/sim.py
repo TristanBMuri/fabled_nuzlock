@@ -31,6 +31,19 @@ _IDS = itertools.count()
 _IGNORE = Player.MESSAGES_TO_IGNORE | {"message"}
 _DEX = GenData.from_gen(9).pokedex  # base species for nickname dedupe (formes)
 
+_available_moves = Pokemon.available_moves_from_request
+
+
+def _transformed_moves(self, request):
+    """A transformed (Transform) or sketching (Sketch) mon's request lists moves poke-env's mirror
+    never learned, and poke-env asserts on them (Ditto / Smeargle boxes failed at Pryce / Clair, 2026-11-26)."""
+    if {"transform", "sketch"} & set(self.moves):
+        return [self.moves.get(m["id"]) or Move(m["id"], gen=self.gen) for m in request["moves"] if not m.get("disabled")]
+    return _available_moves(self, request)
+
+
+Pokemon.available_moves_from_request = _transformed_moves
+
 # (battle, side) -> Showdown choice string ("move tackle", "switch 2", "default")
 Brain = Callable[["SimBattle", str], str]
 

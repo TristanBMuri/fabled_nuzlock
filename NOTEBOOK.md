@@ -3512,3 +3512,15 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   value invisible to a damage-only calc), −2.8 ± 3.2 pooled, not resolved.
 - Bets settled: Claude seed 7 +2 to +4 (5) — miss, high (+4.7); Koga ≥ 0 on seed 7 hit (+1.7); pooled SPRT still
   "continue" (7) hit. User did not bet.
+- Held-out check launched (seed 7, A vs A+B′, ability tie-break in both): Lt. Surge, Giovanni, Sabrina, Pryce,
+  Clair (`results/rr_d16_ho_{a,ab}`). Two crashes on the way, both fixed: Ice Hammer's `"self": null` in
+  mod_data broke poke-env's `Move.self_boost` (the strip moved from `rl/rr_ai_diff.py` into
+  `rr_probe.inject_mod_data`), and D16's ability-changed move types skipped `effectiveness` (a "???" defender
+  had no chart row; ability immunities were skipped too, e.g. Galvanize into Volt Absorb).
+- Held-out first pass: Lt. Surge / Giovanni / Sabrina fully paired; Pryce / Clair lost 24 boxes to a poke-env
+  assert on Transform (Ditto) and Sketch (Smeargle): the request lists moves the mirror never learned. Fixed in
+  `ai_util/sim.py` (`_transformed_moves`); Pryce / Clair re-run. No earlier run had failed boxes.
+- **Hidden Power was mistyped**: player IVs are all 31, so Showdown plays it as Dark; the calc read Water
+  (mod_data) and best4 Normal (moves.json). B′ added it 28 times at Sabrina on a wrong type. Fixed at load
+  (`rr_probe.inject_mod_data`); applied after the seed-4/7 and first held-out runs (the Pryce / Clair re-run
+  has it in both arms).

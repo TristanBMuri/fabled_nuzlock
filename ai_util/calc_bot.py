@@ -117,17 +117,19 @@ ABILITY_IMMUNE_TYPE = {"levitate": "Ground", "eartheater": "Ground",
 ABILITY_IMMUNE_FLAG = {"soundproof": "sound", "bulletproof": "bullet"}
 
 
-def effectiveness(move, dfn) -> float:
+def effectiveness(move, dfn, ptype=None) -> float:
     """Type multiplier of `move` on `dfn`, zero when dfn's ability or Air Balloon voids it (known
-    under full info; the game's AI never clicks Scald into Dry Skin, so neither may the model of it)."""
-    if move.type == PokemonType.GROUND and dfn.item == "airballoon":
+    under full info; the game's AI never clicks Scald into Dry Skin, so neither may the model of it).
+    `ptype`: the move's type after the attacker's ability (Galvanize, ...; ability_power)."""
+    t = ptype or move.type
+    if t == PokemonType.GROUND and dfn.item == "airballoon":
         return 0.0
     try:
-        mult = dfn.damage_multiplier(move)
+        mult = dfn.damage_multiplier(t if ptype else move)
     except KeyError:  # a typeless ("???") move or defender type: poke-env's chart has no row; Showdown = neutral
         mult = 1.0
     ab = (dfn.ability or "").replace(" ", "").lower()
-    if ab in ABILITY_IMMUNE_TYPE and move.type is not None and move.type.name.capitalize() == ABILITY_IMMUNE_TYPE[ab]:
+    if ab in ABILITY_IMMUNE_TYPE and t is not None and t.name.capitalize() == ABILITY_IMMUNE_TYPE[ab]:
         return 0.0
     if ab in ABILITY_IMMUNE_FLAG and (move.entry.get("flags") or {}).get(ABILITY_IMMUNE_FLAG[ab]):
         return 0.0
@@ -240,7 +242,7 @@ def _dmg_frac(att, dfn, move, att_own: bool, battle=None, with_acc: bool = True)
     dmg = math.floor(base * ROLL)
     if ptype in att.types:
         dmg = math.floor(dmg * stab)
-    eff = effectiveness(move, dfn) if ptype == move.type else dfn.damage_multiplier(ptype)
+    eff = effectiveness(move, dfn, ptype if ptype != move.type else None)
     dmg = math.floor(dmg * eff) if eff else 0.0
     if RESIST_BERRY.get(dfn.item) == move.type and (eff > 1 or move.type == PokemonType.NORMAL):
         dmg = math.floor(dmg * 0.5)  # 2026-10-13: Misty's Wacan Mantine took half of every paper Electric one-shot

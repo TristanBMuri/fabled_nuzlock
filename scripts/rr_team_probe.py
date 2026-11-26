@@ -728,11 +728,12 @@ def boxes_start(args, name: str) -> dict | None:
     few seconds; the dashboard's ranking). The row's header fields, or None without team data."""
     try:
         ctx = setup(args, name)
-    except KeyError as e:
-        print(f"{name} FAILED: {e}", flush=True)
+        solo, _ = solo_stage(ctx, playable(ctx, ctx.pool + [sp for sp in rp.STARTERS if sp not in ctx.pool]))
+    except Exception as e:  # one trainer's bad data (a species the dex lacks) skips that trainer, not the run
+        import traceback
+        print(f"{name} FAILED: {type(e).__name__}: {e}\n{traceback.format_exc()[-1200:]}", flush=True)
         emit(args, "boss_failed", boss=name, error=str(e))
         return None
-    solo, _ = solo_stage(ctx, playable(ctx, ctx.pool + [sp for sp in rp.STARTERS if sp not in ctx.pool]))
     print(f"{name}: A solo scores for {len(solo)} species (pool + starters) in {time.time() - ctx.t0:.0f}s", flush=True)
     emit(args, "stage_a", boss=name, scored=len(solo), top=[(sp, round(pr, 3)) for pr, sp in solo[:SHORT]])
     ctx.bridge.close()

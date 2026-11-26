@@ -39,11 +39,6 @@ from poke_env.data import GenData, to_id_str  # noqa: E402
 from rl import convert  # noqa: E402
 import rr_probe as rp  # noqa: E402
 
-# mod_data.json stores explicit `"self": null` on some moves; poke-env's Move.self_boost
-# checks `"self" in entry and "boosts" in entry["self"]`. Strip null `"self"` in memory.
-for _mv in GenData.from_gen(9).moves.values():
-    if "self" in _mv and _mv["self"] is None:
-        del _mv["self"]
 
 
 def _canon_py(dump: dict, py_order) -> tuple[str, str]:
