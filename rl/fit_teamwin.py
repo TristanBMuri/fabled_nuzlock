@@ -18,11 +18,13 @@ that matters for choosing teams. Labels are 6 battles each, so even a perfect mo
 Caveat: every team was picked by our own chooser (mostly 'cover', which reads the same matrix), so the
 data only covers teams the chooser liked (off-policy coverage, D18).
 
-    uv run python rl/fit_teamwin.py results/rr_*.events.jsonl
+    uv run python rl/fit_teamwin.py results/rr_*.events.jsonl*
+    uv run python rl/fit_teamwin.py --split d19 --label utility results/rr_*.events.jsonl*
 """
 
 import argparse
 import json
+import lzma
 import random
 import sys
 from pathlib import Path
@@ -77,7 +79,7 @@ def load(paths: list[str]) -> list[dict]:
     rows = []
     for path in paths:
         cfg = {}
-        for line in open(path):
+        for line in (lzma.open(path, "rt") if path.endswith(".xz") else open(path)):  # big logs are kept as .xz
             try:
                 e = json.loads(line)
             except json.JSONDecodeError:

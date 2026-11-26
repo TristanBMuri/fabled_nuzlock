@@ -3713,3 +3713,32 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   pairs), deathless won fights 61 → 69%. Fights cleared median 13 vs 14, paired +0.4 ± 0.9: no change; runs end
   at Misty (12 / 15 of 36), Rocket grunts, Brock, Archer. So D21's fewer routine deaths are now likely real, but
   not enough to change how far a run gets.
+
+## 2026-11-26 — D19 result: a team model trained on route trainers judges boss teams as well as one trained on bosses
+
+- Data run `results/rr_d19_all` (now `.xz`; raw in `logs/`): 112 trainers × 20 boxes = 2,240 boxes + 6,629 `--alt`
+  variants (no trainer failed, ~4 h on 12 workers). `fit_teamwin.py` reads `.xz` logs.
+- `--split d19` (train: every non-boss trainer; held out: all gym leaders, Giovanni ×3, E4, Lance, rematches),
+  win label: held-out rank corr within boss linear 0.34 / probe 0.31; same-box pairs (3,970 on held-out bosses)
+  picks the better team 59% / 58%. Absolute calibration does not transfer (held-out log-loss 0.91 vs constant
+  1.14, train 0.28): route trainers are mostly won, bosses about half.
+- **Fair comparison** (`rl/teamwin_compare.py`, `results/teamwin_compare_d19.log`): one held-out set for every
+  model (all 1,342 logged boxes of Lt. Surge, Giovanni, Sabrina, Pryce, Clair; 713 same-box pairs), linear model,
+  win label:
+
+  | trained on | boxes | same-box picks better | pairs with ≥ 50-pt gap | rank corr |
+  |---|---:|---:|---:|---:|
+  | D18: Brock, Misty, Erika, Koga, Blaine | 5,179 | 64.5% | 77.0% (183) | 0.368 |
+  | D19: 107 non-boss trainers | 5,440 | 66.2% | 80.3% (183) | 0.369 |
+  | both | 10,619 | 64.4% | 78.1% | 0.319 |
+
+  Utility label: 61.2 / 63.9 / 62.0%. The D19 model is +1.7 to +2.7 points (about 1 se: within noise), and it
+  never saw a boss. (The earlier 61% on 125 pairs was mostly set-only pairs; team-swap pairs are easier.)
+- Meaning: what the matchup features know about teams transfers from route trainers to bosses: no sign of
+  overfitting to the training trainers, but no real gain either. The ceiling is the features (calc-matrix
+  summaries): ~65% on same-box choices, ~0.37 rank. More of the same data will not lift it; richer inputs (the
+  actual sets / per-mon matchups, not team summaries) or search-labelled data (D18 option C) would.
+- Bets: user "overfitting and not getting what we want, but still being better" (70%): overfitting no; not
+  what we want yes (~65%); better: marginally (+1.7, within noise) → mostly a miss on "overfit", hit on "not
+  what we want". Claude "not clearly better, within ±5 of 60%; rank 0.25–0.35" (70%): within ±5 of the D18
+  model yes (both ~65%), rank 0.37 slightly above the range → mostly hit.

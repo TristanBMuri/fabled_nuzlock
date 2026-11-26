@@ -1,0 +1,8 @@
+label win; held-out boxes 1342, same-box pairs 713
+  d18 (Brock..Blaine boxes)    train boxes   5179: same-box picks better 64.5% (pairs with a >=50-pt gap: 77.0%, n=183), rank corr +0.368
+  d19 (non-boss trainers)      train boxes   5440: same-box picks better 66.2% (pairs with a >=50-pt gap: 80.3%, n=183), rank corr +0.369
+  d18+d19                      train boxes  10619: same-box picks better 64.4% (pairs with a >=50-pt gap: 78.1%, n=183), rank corr +0.319
+label utility; held-out boxes 1342, same-box pairs 952
+  d18 (Brock..Blaine boxes)    train boxes   5179: same-box picks better 61.2% (pairs with a >=50-pt gap: 73.6%, n=91), rank corr +0.349
+  d19 (non-boss trainers)      train boxes   5440: same-box picks better 63.9% (pairs with a >=50-pt gap: 81.3%, n=91), rank corr +0.338
+  d18+d19                      train boxes  10619: same-box picks better 62.0% (pairs with a >=50-pt gap: 74.7%, n=91), rank corr +0.299
