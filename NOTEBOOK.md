@@ -3687,3 +3687,24 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   zeroed by hand in both, as in D15. So the shipped D15 prices deaths ~3× lower than its own recipe does today;
   arms: shipped D15 (`rr_runs_s1`), reproduced D15 (`eval_weights_d15_repro.txt`), D21 (`eval_weights_d21.txt`),
   12 run seeds each.
+- Test B launched (user allowed up to 85% of the machine for ~1 h): box probe on the 10 bosses we have used,
+  20 boxes each, seed 12, paired across arms: shipped D15, D21, reproduced D15 (`results/rr_d21b_*`).
+- **Test A** (12 run seeds per arm; `results/rr_runs_{s1,d15r,d21}`): fights cleared median 14 / 14 / 13.5, mean
+  12.4 / 10.7 / 10.8 (shipped D15 / reproduced D15 / D21); paired D21 − D15 −1.6 ± 1.4, D21 − D15r +0.2 ± 2.1.
+  Deaths per won fight 0.58 / 0.57 / **0.46** (se ≈ 0.075 each, so D21 − D15 −0.12 ± 0.10: suggestive, not
+  settled; deathless won fights 63 / 62 / 70%; before Misty 0.54 / 0.52 / 0.42). Every arm still stalls at
+  Misty (or Brock): the D21 price takes off about a fifth of routine deaths, not enough to arrive at Misty with
+  a full box. Runs are noisy (12 seeds, chaotic boxes); the deaths-per-fight number pools ~130–150 fights each.
+- **Test B** (10 bosses × 20 boxes, seed 12, the same 200 teams in every arm, paired battle seeds;
+  `results/rr_d21b_{d15,d21,d15r}`): boss win 50.1 / 50.2 / 46.6% (shipped D15 / reproduced D15 / D21), deaths per
+  mon 0.68 / 0.68 / 0.68, deathless wins 5.0 / 5.4 / 10.1%. Paired D21 − D15: **win −3.5 ± 1.4 pts, deathless
+  +5.1 ± 1.0 pts**, deaths/mon −0.004 ± 0.008. Reproduced − shipped D15: +0.2 ± 1.0 win, 0 deaths: the 3× death
+  price gap between those two does nothing in play. Per boss D21 − D15 (win): Brock +2.5, Misty 0, Surge −5.8,
+  Erika −4.2, Giovanni −8.3, Sabrina −6.7 ± 2.5, Koga 0, Pryce +1.7, Blaine −5.8, Clair −8.3 ± 4.4.
+- Meaning: the user's double edge, measured. The D21 label makes the search keep more of a winning team (deathless
+  wins double at bosses, routine deaths about −20% in runs) and lose a few more boss fights (−3.5). Its weights
+  moved beyond the death term too (our_hp 1.28 → 1.00, safest_switch_in −0.42 → −0.07, ko_first 0.45 → 0.23), so
+  "the death price" is not the only change. Runs cleared the same number of fights (they stall at Misty either
+  way). Not shipped: the default stays D15. A natural next step is the user's own principle (bosses = play for
+  the win, routine fights = keep the team): D21 weights in routine fights, D15 at bosses. The engine reads its
+  weights once per process, so that needs a per-call weights switch in the fork. → D22 when the user is back.
