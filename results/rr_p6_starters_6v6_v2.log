@@ -1,0 +1,60 @@
+Built duel routing tables for 6 bosses in 33.3s
+
+=== 6v6 STARTER HALVING R1 (27->14) (6 boxes x 2 battles @ 4000 iters, 228s) ===
+  starter                     liftU  liftW   BROCK  MISTY LT. SU  ERIKA   KOGA BLAINE
+  rowlet→decidueyehisui      +0.072 +6.9%  +0.194 +0.090 +0.000 +0.000 +0.104 +0.042
+  scorbunny→cinderace        +0.054 +5.6%  +0.167 +0.014 +0.000 +0.000 +0.000 +0.146
+  treecko→sceptile           +0.052 +5.6%  +0.160 +0.028 +0.000 +0.000 +0.125 +0.000
+  mudkip→swampert            +0.043 +2.8%  +0.104 +0.069 +0.000 +0.083 +0.000 +0.000
+  fuecoco→skeledirge         +0.038 +4.2%  +0.083 +0.007 +0.000 +0.000 +0.049 +0.090
+  quaxly→quaquaval           +0.037 +4.2%  +0.076 +0.049 +0.000 +0.000 +0.097 +0.000
+  litten→incineroar          +0.032 +2.8%  +0.146 +0.049 +0.000 +0.000 +0.000 +0.000
+  torchic→blaziken           +0.030 +2.8%  +0.181 +0.000 +0.000 +0.000 +0.000 +0.000
+  grookey→rillaboom          +0.030 +2.8%  +0.181 +0.000 +0.000 +0.000 +0.000 +0.000
+  popplio→primarina          +0.029 +4.2%  +0.097 +0.000 +0.000 +0.063 +0.014 +0.000
+  chimchar→infernape         +0.028 +2.8%  +0.167 +0.000 +0.000 +0.000 +0.000 +0.000
+  tepig→emboar               +0.028 +2.8%  +0.167 +0.000 +0.000 +0.000 +0.000 +0.000
+  sobble→inteleon            +0.027 +2.8%  +0.153 +0.000 +0.000 +0.007 +0.000 +0.000
+  oshawott→samurotthisui     +0.023 +2.8%  +0.139 +0.000 +0.000 +0.000 +0.000 +0.000
+  charmander→charizard       +0.023 +2.8%  +0.125 +0.014 +0.000 +0.000 +0.000 +0.000
+  squirtle→blastoise         +0.022 +2.8%  +0.132 +0.000 +0.000 +0.000 +0.000 +0.000
+  totodile→feraligatr        +0.021 +2.8%  +0.125 +0.000 +0.000 +0.000 +0.000 +0.000
+  froakie→greninja           +0.021 +1.4%  +0.083 +0.042 +0.000 +0.000 +0.000 +0.000
+  sprigatito→meowscarada     +0.019 +1.4%  +0.021 +0.090 +0.000 +0.000 +0.000 +0.000
+  fennekin→delphox           +0.017 +1.4%  +0.062 +0.042 +0.000 +0.000 +0.000 +0.000
+  cyndaquil→typhlosion       +0.015 +1.4%  +0.090 +0.000 +0.000 +0.000 +0.000 +0.000
+  snivy→serperior            +0.014 +2.8%  +0.042 +0.028 +0.000 +0.014 +0.000 +0.000
+  chespin→chesnaught         +0.010 +1.4%  +0.000 +0.000 +0.000 +0.000 +0.062 +0.000
+  chikorita→meganium         +0.010 +0.0%  +0.000 +0.062 +0.000 +0.000 +0.000 +0.000
+  bulbasaur→venusaur         +0.009 +0.0%  +0.007 +0.049 +0.000 +0.000 +0.000 +0.000
+  turtwig→torterra           +0.008 +1.4%  +0.000 +0.000 +0.000 +0.000 +0.049 +0.000
+  piplup→empoleon            +0.007 +0.0%  +0.042 +0.000 +0.000 +0.000 +0.000 +0.000
+
+=== 6v6 STARTER HALVING R2 (14->7) (10 boxes x 4 battles @ 10000 iters, 660s) ===
+  starter                     liftU  liftW   BROCK  MISTY LT. SU  ERIKA   KOGA BLAINE
+  scorbunny→cinderace        +0.049 +7.1%  +0.108 +0.000 +0.000 +0.000 +0.000 +0.187
+  rowlet→decidueyehisui      +0.040 +3.8%  +0.131 +0.006 +0.000 +0.000 +0.100 +0.000
+  litten→incineroar          +0.037 +4.2%  +0.046 +0.000 +0.000 +0.000 +0.138 +0.042
+  popplio→primarina          +0.025 +2.5%  +0.042 +0.000 +0.000 +0.031 +0.079 +0.000
+  chimchar→infernape         +0.020 +2.1%  +0.092 +0.000 +0.000 +0.029 +0.000 +0.000
+  sobble→inteleon            +0.020 +2.1%  +0.115 +0.000 +0.004 +0.000 +0.000 +0.000
+  quaxly→quaquaval           +0.019 +2.5%  +0.000 +0.004 +0.000 +0.000 +0.113 +0.000
+  oshawott→samurotthisui     +0.018 +1.7%  +0.106 +0.000 +0.000 +0.000 +0.000 +0.000
+  grookey→rillaboom          +0.017 +2.9%  +0.044 +0.000 +0.000 +0.000 +0.060 +0.000
+  tepig→emboar               +0.015 +1.2%  +0.090 +0.000 +0.000 +0.000 +0.000 +0.000
+  treecko→sceptile           +0.014 +2.1%  +0.040 +0.000 +0.000 +0.000 +0.000 +0.042
+  mudkip→swampert            +0.010 +0.4%  +0.000 +0.000 +0.056 +0.002 +0.000 +0.000
+  torchic→blaziken           +0.007 +0.8%  +0.044 +0.000 +0.000 +0.000 +0.000 +0.000
+  fuecoco→skeledirge         +0.006 +0.4%  +0.035 +0.000 +0.000 +0.000 +0.000 +0.002
+
+=== 6v6 STARTER HALVING R3 (final 7) (16 boxes x 6 battles @ 20000 iters, 1679s) ===
+  starter                     liftU  liftW   BROCK  MISTY LT. SU  ERIKA   KOGA BLAINE
+  rowlet→decidueyehisui      +0.052 +5.2%  +0.098 +0.000 +0.000 +0.000 +0.175 +0.037
+  scorbunny→cinderace        +0.050 +6.9%  +0.069 +0.000 +0.000 +0.000 +0.000 +0.234
+  litten→incineroar          +0.048 +5.7%  +0.042 +0.000 +0.000 +0.000 +0.150 +0.097
+  popplio→primarina          +0.041 +4.7%  +0.049 +0.000 +0.024 +0.000 +0.171 +0.000
+  sobble→inteleon            +0.014 +1.6%  +0.076 +0.000 +0.000 +0.000 +0.000 +0.010
+  quaxly→quaquaval           +0.013 +2.3%  +0.002 +0.000 +0.000 +0.000 +0.078 +0.000
+  chimchar→infernape         +0.012 +0.9%  +0.070 +0.000 +0.000 +0.000 +0.000 +0.000
+
+6v6 starter ranking finished in 42.8 min.

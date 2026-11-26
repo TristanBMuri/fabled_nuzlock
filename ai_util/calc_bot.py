@@ -35,6 +35,36 @@ TERRAIN_BOOST = {Field.ELECTRIC_TERRAIN: PokemonType.ELECTRIC, Field.GRASSY_TERR
                  Field.PSYCHIC_TERRAIN: PokemonType.PSYCHIC}
 
 
+# D16 (2026-11-25): attacker abilities that scale a class of moves; Showdown's numbers, Radical Red's
+# Iron Fist is x1.3 (gen9rr/abilities.ts). The calc and gauntlet's best4 both read ability_power.
+FLAG_BOOST = {"sharpness": ("slicing", 1.5), "ironfist": ("punch", 5325 / 4096), "strongjaw": ("bite", 1.5),
+              "toughclaws": ("contact", 5325 / 4096), "megalauncher": ("pulse", 1.5), "punkrock": ("sound", 5325 / 4096)}
+TYPE_BOOST = {"steelworker": ("Steel", 1.5), "transistor": ("Electric", 5325 / 4096), "dragonsmaw": ("Dragon", 1.5),
+              "rockypayload": ("Rock", 1.5), "waterbubble": ("Water", 2.0)}
+ATE = {"aerilate": "Flying", "pixilate": "Fairy", "refrigerate": "Ice", "galvanize": "Electric"}
+
+
+def ability_power(ab: str, entry: dict, bp: float) -> tuple[float, str, float]:
+    """(base power, type, STAB multiplier) of a move (its Showdown entry) used under ability id `ab`:
+    the -ate abilities (Normal -> their type, x1.2), Technician, Sheer Force, Reckless, the flag and
+    type boosts above, Adaptability (STAB x2)."""
+    t = entry.get("type", "")
+    if ab in ATE and t == "Normal":
+        t, bp = ATE[ab], bp * 4915 / 4096
+    if ab == "technician" and bp <= 60:
+        bp *= 1.5
+    if ab == "sheerforce" and (entry.get("secondary") is not None or entry.get("secondaries")  # Stone Axe: {}
+                               or entry.get("hasSheerForceBoost")):
+        bp *= 5325 / 4096
+    if ab == "reckless" and (entry.get("recoil") or entry.get("hasCrashDamage")):
+        bp *= 4915 / 4096
+    if ab in FLAG_BOOST and (entry.get("flags") or {}).get(FLAG_BOOST[ab][0]):
+        bp *= FLAG_BOOST[ab][1]
+    if ab in TYPE_BOOST and t == TYPE_BOOST[ab][0]:
+        bp *= TYPE_BOOST[ab][1]
+    return bp, t, 2.0 if ab == "adaptability" else 1.5
+
+
 def _ability(mon) -> str:
     return (mon.ability or "").replace(" ", "").lower()
 
@@ -192,12 +222,13 @@ def _dmg_frac(att, dfn, move, att_own: bool, battle=None, with_acc: bool = True)
     if move.id == "knockoff" and dfn.item:
         bp = int(bp * 1.5)
     ab = _ability(att)
-    if ab == "technician" and bp <= 60:
-        bp = int(bp * 1.5)
-    if ab == "sheerforce" and (move.entry.get("secondary") or move.entry.get("secondaries")):
-        bp = int(bp * 1.3)
+    bp, mtype, stab = ability_power(ab, move.entry, bp)
+    ptype = PokemonType.from_name(mtype) if mtype and mtype != move.entry.get("type") else move.type
     phys = move.category == MoveCategory.PHYSICAL
-    a = stat(att, "atk" if phys else "spa", att_own, battle)
+    if move.entry.get("overrideOffensivePokemon") == "target":  # Foul Play: the target's Attack and stages
+        a = stat(dfn, "atk", not att_own, battle)
+    else:
+        a = stat(att, "atk" if phys else "spa", att_own, battle)
     d = stat(dfn, move.entry.get("overrideDefensiveStat") or ("def" if phys else "spd"), not att_own, battle)  # Psyshock
     if ab in ("purepower", "hugepower") and phys:
         a *= 2
@@ -207,9 +238,9 @@ def _dmg_frac(att, dfn, move, att_own: bool, battle=None, with_acc: bool = True)
         d *= 1.5
     base = math.floor(math.floor(math.floor(2 * att.level / 5 + 2) * bp * math.floor(a) / math.floor(d)) / 50) + 2
     dmg = math.floor(base * ROLL)
-    if move.type in att.types:
-        dmg = math.floor(dmg * 1.5)
-    eff = effectiveness(move, dfn)
+    if ptype in att.types:
+        dmg = math.floor(dmg * stab)
+    eff = effectiveness(move, dfn) if ptype == move.type else dfn.damage_multiplier(ptype)
     dmg = math.floor(dmg * eff) if eff else 0.0
     if RESIST_BERRY.get(dfn.item) == move.type and (eff > 1 or move.type == PokemonType.NORMAL):
         dmg = math.floor(dmg * 0.5)  # 2026-10-13: Misty's Wacan Mantine took half of every paper Electric one-shot

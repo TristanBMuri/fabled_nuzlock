@@ -38,6 +38,9 @@ def use_rr(on: bool = True) -> None:
     _RR_ITEMS.update({k: "z" if v.get("zMove") else "mega" for k, v in mod["items"].items()
                       if v.get("zMove") or v.get("megaStone")})
     _RR_MEGAS.update(k for k, v in mod["species"].items() if v.get("isMega"))
+    # not in the engine's item enum (normal-mode Surge / Erika): dropped like a Z crystal, else
+    # those fights fall back to Showdown search; the dump still carries the exact terrain turns left
+    _RR_ITEMS["terrainextender"] = "z"
 
 
 STATUS = {"": "none", "brn": "burn", "par": "paralyze", "slp": "sleep", "frz": "freeze",

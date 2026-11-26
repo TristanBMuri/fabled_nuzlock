@@ -929,6 +929,13 @@
 },
 "gifts": [
 {
+"species": "finizen",
+"level": 5,
+"t": 77,
+"kind": "gift",
+"how": "gift: CERULEAN CITY'S GYM \u2014 Defeat Misty in a Rematch Battle for the first time"
+},
+{
 "species": "magikarp",
 "level": 5,
 "t": 10,
@@ -967,6 +974,13 @@
 "t": 44,
 "kind": "gift",
 "how": "gift: SILPH CO. 7F \u2014 Defeat your rival and talk to the guy behind him"
+},
+{
+"species": "ogerpon",
+"level": 5,
+"t": 79,
+"kind": "gift",
+"how": "gift: CELADON CITY'S GYM \u2014 Defeat Erika in a Rematch Battle"
 },
 {
 "species": "kubfu",

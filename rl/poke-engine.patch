@@ -20,6 +20,18 @@ index 173baf4..6d49673 100644
  champions = []
  bss = ["champions"]
  terastallization = ["gen9"]
+diff --git a/data/benchmark.rs b/data/benchmark.rs
+index 5d1e710..e05da9c 100644
+--- a/data/benchmark.rs
++++ b/data/benchmark.rs
+@@ -56,6 +56,7 @@ fn main() {
+                 side_two_options,
+                 std::time::Duration::from_millis(0),
+                 args.iterations,
++                None,
+             );
+         }
+         println!("{}", i);
 diff --git a/poke-engine-py-rr/Cargo.lock b/poke-engine-py-rr/Cargo.lock
 new file mode 100644
 index 0000000..46b5643
@@ -674,30 +686,58 @@ index 60a7af3..8e2864e 100644
 +default = ["poke-engine/gen8"]
 +rr = ["poke-engine/rr"]
 diff --git a/poke-engine-py/python/poke_engine/__init__.py b/poke-engine-py/python/poke_engine/__init__.py
-index e352950..5cd07c7 100644
+index e352950..95af253 100644
 --- a/poke-engine-py/python/poke_engine/__init__.py
 +++ b/poke-engine-py/python/poke_engine/__init__.py
-@@ -166,6 +166,16 @@ def monte_carlo_tree_search(
-     return MctsResult._from_rust(mcts(state, duration_ms, iterations, threads))
+@@ -147,7 +147,8 @@ class MctsResult:
  
  
+ def monte_carlo_tree_search(
+-    state: State, duration_ms: int = 1000, iterations: int = 0, threads: int = 1
++    state: State, duration_ms: int = 1000, iterations: int = 0, threads: int = 1,
++    seed: int | None = None,
+ ) -> MctsResult:
+     """
+     Perform monte-carlo-tree-search on the given state and for the given duration
+@@ -160,10 +161,24 @@ def monte_carlo_tree_search(
+     :type iterations: int
+     :param threads: number of threads to use for the search
+     :type threads: int
++    :param seed: seeds the search; replayable with iterations > 0 and threads == 1 only
+     :return: the result of the search
+     :rtype: MctsResult
+     """
+-    return MctsResult._from_rust(mcts(state, duration_ms, iterations, threads))
++    return MctsResult._from_rust(mcts(state, duration_ms, iterations, threads, seed))
++
++
 +if "mcts_vs_ai" in globals():
 +    def monte_carlo_tree_search_vs_ai(
-+        state: State, duration_ms: int = 1000, iterations: int = 0
++        state: State, duration_ms: int = 1000, iterations: int = 0, seed: int | None = None,
++        p_model: float = 1.0,
 +    ) -> MctsResult:
 +        """
-+        Perform MCTS where side two plays the Radical Red scripted AI (uniform over ties).
++        Perform MCTS where side two is a mixture opponent: at each of its decisions the Radical
++        Red scripted AI (its weighted choices, see rr_ai_choice_weighted) with probability
++        p_model, else UCB over all its options (p_model=0: plain MCTS).
 +        """
-+        return MctsResult._from_rust(mcts_vs_ai(state, duration_ms, iterations))
-+
-+
++        return MctsResult._from_rust(mcts_vs_ai(state, duration_ms, iterations, seed, p_model))
+ 
+ 
  def iterative_deepening_expectiminimax(
-     state: State, duration_ms: int = 1000
- ) -> IterativeDeepeningResult:
 diff --git a/poke-engine-py/python/poke_engine/poke_engine.pyi b/poke-engine-py/python/poke_engine/poke_engine.pyi
-index 96306e4..4794da1 100644
+index 96306e4..79d380b 100644
 --- a/poke-engine-py/python/poke_engine/poke_engine.pyi
 +++ b/poke-engine-py/python/poke_engine/poke_engine.pyi
+@@ -434,7 +434,7 @@ class MctsResult:
+     iteration_count: int
+ 
+ def mcts(
+-    py_state: State, duration_ms: int, iterations: int, threads: int
++    py_state: State, duration_ms: int, iterations: int, threads: int, seed: int | None = None
+ ) -> MctsResult:
+     """
+     Perform Monte Carlo Tree Search on the given state.
 @@ -478,3 +478,9 @@ def calculate_damage(
      :return: List of damage values
      """
@@ -709,21 +749,46 @@ index 96306e4..4794da1 100644
 +    """
 +    ...
 diff --git a/poke-engine-py/src/lib.rs b/poke-engine-py/src/lib.rs
-index 032da2e..78f6402 100644
+index 032da2e..9a8b383 100644
 --- a/poke-engine-py/src/lib.rs
 +++ b/poke-engine-py/src/lib.rs
-@@ -11,6 +11,10 @@ use poke_engine::engine::generate_instructions::{
+@@ -11,6 +11,12 @@ use poke_engine::engine::generate_instructions::{
  use poke_engine::engine::items::Items;
  use poke_engine::engine::state::{MoveChoice, PokemonVolatileStatus, Terrain, Weather};
  use poke_engine::instruction::{Instruction, StateInstructions};
 +#[cfg(feature = "rr")]
 +use poke_engine::engine::rr_ai::rr_ai_choice as engine_rr_ai_choice;
 +#[cfg(feature = "rr")]
++use poke_engine::engine::rr_ai::rr_ai_choice_weighted as engine_rr_ai_choice_weighted;
++#[cfg(feature = "rr")]
 +use poke_engine::mcts::perform_mcts_vs_ai;
  use poke_engine::mcts::{perform_mcts, MctsResult, MctsSideResult};
  use poke_engine::mcts_threaded::perform_mcts_shared_tree;
  use poke_engine::pokemon::PokemonName;
-@@ -1041,6 +1045,17 @@ impl PyInstruction {
+@@ -927,11 +933,13 @@ impl PyIterativeDeepeningResult {
+ }
+ 
+ #[pyfunction]
++#[pyo3(signature = (py_state, duration_ms, iterations, threads, seed=None))]
+ fn mcts(
+     py_state: PyState,
+     duration_ms: u64,
+     mut iterations: u32,
+     threads: usize,
++    seed: Option<u64>,
+ ) -> PyResult<PyMctsResult> {
+     let mut state: State = py_state.into();
+     let duration = Duration::from_millis(duration_ms);
+@@ -944,7 +952,7 @@ fn mcts(
+             &mut state, s1_options, s2_options, duration, iterations, threads,
+         )
+     } else {
+-        perform_mcts(&mut state, s1_options, s2_options, duration, iterations)
++        perform_mcts(&mut state, s1_options, s2_options, duration, iterations, seed)
+     };
+ 
+     let py_mcts_result = PyMctsResult::from_mcts_result(mcts_result, &state);
+@@ -1041,6 +1049,17 @@ impl PyInstruction {
      }
  }
  
@@ -741,15 +806,13 @@ index 032da2e..78f6402 100644
  #[pyfunction]
  fn generate_instructions(
      py_state: PyState,
-@@ -1123,6 +1138,46 @@ fn calculate_damage(
+@@ -1123,6 +1142,80 @@ fn calculate_damage(
      Ok((s1_py_rolls, s2_py_rolls))
  }
  
 +#[cfg(feature = "rr")]
-+#[pyfunction]
-+fn rr_ai_choice(py_state: PyState, side: String) -> PyResult<Vec<String>> {
-+    let state: State = py_state.into();
-+    let side_ref = match side.to_lowercase().as_str() {
++fn side_reference(side: &str) -> PyResult<poke_engine::state::SideReference> {
++    Ok(match side.to_lowercase().as_str() {
 +        "side_one" | "sideone" | "s1" | "p1" | "1" => poke_engine::state::SideReference::SideOne,
 +        "side_two" | "sidetwo" | "s2" | "p2" | "2" => poke_engine::state::SideReference::SideTwo,
 +        _ => {
@@ -758,7 +821,14 @@ index 032da2e..78f6402 100644
 +                side
 +            )))
 +        }
-+    };
++    })
++}
++
++#[cfg(feature = "rr")]
++#[pyfunction]
++fn rr_ai_choice(py_state: PyState, side: String) -> PyResult<Vec<String>> {
++    let state: State = py_state.into();
++    let side_ref = side_reference(&side)?;
 +    let choices = engine_rr_ai_choice(&state, side_ref);
 +    let side_obj = state.get_side_immutable(&side_ref);
 +    Ok(choices
@@ -767,13 +837,29 @@ index 032da2e..78f6402 100644
 +        .collect())
 +}
 +
++/// The AI's options with probabilities (summing to 1; ties and CFRU's random rolls split)
 +#[cfg(feature = "rr")]
 +#[pyfunction]
-+#[pyo3(signature = (py_state, duration_ms=1000, iterations=0))]
++fn rr_ai_choice_weighted(py_state: PyState, side: String) -> PyResult<Vec<(String, f32)>> {
++    let state: State = py_state.into();
++    let side_ref = side_reference(&side)?;
++    let choices = engine_rr_ai_choice_weighted(&state, side_ref);
++    let side_obj = state.get_side_immutable(&side_ref);
++    Ok(choices
++        .iter()
++        .map(|(m, w)| (movechoice_to_string(side_obj, m), *w))
++        .collect())
++}
++
++#[cfg(feature = "rr")]
++#[pyfunction]
++#[pyo3(signature = (py_state, duration_ms=1000, iterations=0, seed=None, p_model=1.0))]
 +fn mcts_vs_ai(
 +    py_state: PyState,
 +    duration_ms: u64,
 +    mut iterations: u32,
++    seed: Option<u64>,
++    p_model: f32,
 +) -> PyResult<PyMctsResult> {
 +    let mut state: State = py_state.into();
 +    let duration = Duration::from_millis(duration_ms);
@@ -781,14 +867,27 @@ index 032da2e..78f6402 100644
 +    if s1_options.len() <= 1 {
 +        iterations = 100;
 +    }
-+    let mcts_result = perform_mcts_vs_ai(&mut state, s1_options, duration, iterations);
++    let mcts_result = perform_mcts_vs_ai(&mut state, s1_options, duration, iterations, seed, p_model);
 +    Ok(PyMctsResult::from_mcts_result(mcts_result, &state))
++}
++
++/// The leaf-evaluation features of a state, side one's view (`evaluate_feature_names` order)
++#[cfg(feature = "rr")]
++#[pyfunction]
++fn evaluate_features(py_state: PyState) -> Vec<f32> {
++    poke_engine::engine::evaluate::evaluate_features(&py_state.into())
++}
++
++#[cfg(feature = "rr")]
++#[pyfunction]
++fn evaluate_feature_names() -> Vec<String> {
++    poke_engine::engine::evaluate::evaluate_feature_names()
 +}
 +
  #[pymodule]
  #[pyo3(name = "poke_engine")]
  fn py_poke_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
-@@ -1130,6 +1185,12 @@ fn py_poke_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
+@@ -1130,6 +1223,15 @@ fn py_poke_engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
      m.add_function(wrap_pyfunction!(generate_instructions, m)?)?;
      m.add_function(wrap_pyfunction!(id, m)?)?;
      m.add_function(wrap_pyfunction!(mcts, m)?)?;
@@ -796,7 +895,10 @@ index 032da2e..78f6402 100644
 +    #[cfg(feature = "rr")]
 +    {
 +        m.add_function(wrap_pyfunction!(rr_ai_choice, m)?)?;
++        m.add_function(wrap_pyfunction!(rr_ai_choice_weighted, m)?)?;
 +        m.add_function(wrap_pyfunction!(mcts_vs_ai, m)?)?;
++        m.add_function(wrap_pyfunction!(evaluate_features, m)?)?;
++        m.add_function(wrap_pyfunction!(evaluate_feature_names, m)?)?;
 +    }
      m.add_class::<PyState>()?;
      m.add_class::<PySide>()?;
@@ -1683,7 +1785,7 @@ index c86df03..adbd928 100644
      }
  }
 diff --git a/src/genx/choice_effects.rs b/src/genx/choice_effects.rs
-index 714b126..69eabf6 100644
+index 714b126..bdc9a3b 100644
 --- a/src/genx/choice_effects.rs
 +++ b/src/genx/choice_effects.rs
 @@ -61,7 +61,9 @@ pub fn modify_choice(
@@ -1736,7 +1838,25 @@ index 714b126..69eabf6 100644
                      _ => {
                          attacker_choice.heal = Some(Heal {
                              target: MoveTarget::User,
-@@ -601,6 +605,7 @@ pub fn modify_choice(
+@@ -328,6 +332,17 @@ pub fn modify_choice(
+                 attacker_choice.base_power = 0.0;
+             }
+         }
++        Choices::SYNCHRONOISE => {
++            // hits only a target that shares a type with the user (Showdown's onTryImmunity)
++            let attacker = attacking_side.get_active_immutable();
++            let defender = defending_side.get_active_immutable();
++            if ![attacker.types.0, attacker.types.1]
++                .iter()
++                .any(|t| *t != PokemonType::TYPELESS && defender.has_type(t))
++            {
++                attacker_choice.base_power = 0.0;
++            }
++        }
+         Choices::PSYBLADE => {
+             if state.terrain.terrain_type == Terrain::ELECTRICTERRAIN {
+                 attacker_choice.base_power *= 1.5;
+@@ -601,6 +616,7 @@ pub fn modify_choice(
                  attacker_choice.base_power += 20.0 * total_boosts as f32;
              }
          }
@@ -1744,7 +1864,7 @@ index 714b126..69eabf6 100644
          Choices::BARBBARRAGE => {
              let defending_pkmn_status = defending_side.get_active_immutable().status;
              if defending_pkmn_status == PokemonStatus::POISON
-@@ -681,6 +686,8 @@ pub fn modify_choice(
+@@ -681,6 +697,8 @@ pub fn modify_choice(
          }
          _ => {}
      }
@@ -1753,7 +1873,7 @@ index 714b126..69eabf6 100644
  }
  
  pub fn choice_after_damage_hit(
-@@ -691,8 +698,17 @@ pub fn choice_after_damage_hit(
+@@ -691,8 +709,17 @@ pub fn choice_after_damage_hit(
      hit_sub: bool,
  ) {
      let (attacking_side, defending_side) = state.get_both_sides(attacking_side_ref);
@@ -1772,7 +1892,7 @@ index 714b126..69eabf6 100644
          let instruction = Instruction::ApplyVolatileStatus(ApplyVolatileStatusInstruction {
              side_ref: attacking_side_ref.clone(),
              volatile_status: PokemonVolatileStatus::MUSTRECHARGE,
-@@ -853,7 +869,7 @@ pub fn choice_after_damage_hit(
+@@ -853,7 +880,7 @@ pub fn choice_after_damage_hit(
                  defender_active.item = Items::NONE;
              }
          }
@@ -1781,7 +1901,7 @@ index 714b126..69eabf6 100644
              let attacker_active = attacking_side.get_active();
              let defender_active = defending_side.get_active();
              if defender_active.item_can_be_removed()
-@@ -976,8 +992,12 @@ pub fn choice_before_move(
+@@ -976,8 +1003,12 @@ pub fn choice_before_move(
  
      destinybond_before_move(attacking_side, attacking_side_ref, choice, instructions);
  
@@ -1795,7 +1915,7 @@ index 714b126..69eabf6 100644
      {
          add_remove_status_instructions(
              instructions,
-@@ -1016,15 +1036,34 @@ pub fn choice_before_move(
+@@ -1016,15 +1047,34 @@ pub fn choice_before_move(
                  }));
              attacker.hp = 0;
          }
@@ -1833,7 +1953,7 @@ index 714b126..69eabf6 100644
          }
          Choices::METEORBEAM | Choices::ELECTROSHOT if choice.flags.charge => {
              apply_boost_instruction(
-@@ -1038,6 +1077,8 @@ pub fn choice_before_move(
+@@ -1038,6 +1088,8 @@ pub fn choice_before_move(
          }
          _ => {}
      }
@@ -1842,7 +1962,7 @@ index 714b126..69eabf6 100644
      let attacking_side = state.get_side(attacking_side_ref);
      let attacker = attacking_side.get_active();
      if choice.flags.charge
-@@ -1119,6 +1160,20 @@ pub fn choice_hazard_clear(
+@@ -1119,6 +1171,20 @@ pub fn choice_hazard_clear(
          Choices::DEFOG
              if defending_side.get_active_immutable().ability != Abilities::GOODASGOLD =>
          {
@@ -1863,7 +1983,7 @@ index 714b126..69eabf6 100644
              if state.terrain.terrain_type != Terrain::NONE {
                  instructions
                      .instruction_list
-@@ -1299,6 +1354,19 @@ pub fn choice_special_effect(
+@@ -1299,6 +1365,19 @@ pub fn choice_special_effect(
  ) {
      let (attacking_side, defending_side) = state.get_both_sides(attacking_side_ref);
      match choice.move_id {
@@ -1883,7 +2003,7 @@ index 714b126..69eabf6 100644
          Choices::BELLYDRUM => {
              let boost_amount = 6 - attacking_side.attack_boost;
              let attacker = attacking_side.get_active();
-@@ -1398,7 +1466,13 @@ pub fn choice_special_effect(
+@@ -1398,7 +1477,13 @@ pub fn choice_special_effect(
          Choices::REFRESH => {
              let active_index = attacking_side.active_index;
              let active_pkmn = attacking_side.get_active();
@@ -1898,7 +2018,7 @@ index 714b126..69eabf6 100644
                  add_remove_status_instructions(
                      instructions,
                      active_index,
-@@ -1428,7 +1502,15 @@ pub fn choice_special_effect(
+@@ -1428,7 +1513,15 @@ pub fn choice_special_effect(
              let attacking_side = state.get_side(attacking_side_ref);
              let active_index = attacking_side.active_index;
              let active_pkmn = attacking_side.get_active();
@@ -1915,7 +2035,7 @@ index 714b126..69eabf6 100644
                  let heal_amount = active_pkmn.maxhp - active_pkmn.hp;
                  instructions
                      .instruction_list
-@@ -1608,6 +1690,13 @@ pub fn choice_special_effect(
+@@ -1608,6 +1701,13 @@ pub fn choice_special_effect(
                  .push(change_defender_item_instruction);
          }
          Choices::SUNNYDAY => {
@@ -1929,7 +2049,7 @@ index 714b126..69eabf6 100644
              if state.weather.weather_type != Weather::SUN
                  && !state.weather.strong_winds_block_weather()
              {
-@@ -1615,15 +1704,22 @@ pub fn choice_special_effect(
+@@ -1615,15 +1715,22 @@ pub fn choice_special_effect(
                      .instruction_list
                      .push(Instruction::ChangeWeather(ChangeWeather {
                          new_weather: Weather::SUN,
@@ -1954,7 +2074,7 @@ index 714b126..69eabf6 100644
              if state.weather.weather_type != Weather::RAIN
                  && !state.weather.strong_winds_block_weather()
              {
-@@ -1631,15 +1727,22 @@ pub fn choice_special_effect(
+@@ -1631,15 +1738,22 @@ pub fn choice_special_effect(
                      .instruction_list
                      .push(Instruction::ChangeWeather(ChangeWeather {
                          new_weather: Weather::RAIN,
@@ -1979,7 +2099,7 @@ index 714b126..69eabf6 100644
              if state.weather.weather_type != Weather::SAND
                  && !state.weather.strong_winds_block_weather()
              {
-@@ -1647,15 +1750,22 @@ pub fn choice_special_effect(
+@@ -1647,15 +1761,22 @@ pub fn choice_special_effect(
                      .instruction_list
                      .push(Instruction::ChangeWeather(ChangeWeather {
                          new_weather: Weather::SAND,
@@ -2004,7 +2124,7 @@ index 714b126..69eabf6 100644
              if state.weather.weather_type != Weather::HAIL
                  && !state.weather.strong_winds_block_weather()
              {
-@@ -1663,15 +1773,22 @@ pub fn choice_special_effect(
+@@ -1663,15 +1784,22 @@ pub fn choice_special_effect(
                      .instruction_list
                      .push(Instruction::ChangeWeather(ChangeWeather {
                          new_weather: Weather::HAIL,
@@ -2029,7 +2149,7 @@ index 714b126..69eabf6 100644
              if state.weather.weather_type != Weather::SNOW
                  && !state.weather.strong_winds_block_weather()
              {
-@@ -1679,12 +1796,12 @@ pub fn choice_special_effect(
+@@ -1679,12 +1807,12 @@ pub fn choice_special_effect(
                      .instruction_list
                      .push(Instruction::ChangeWeather(ChangeWeather {
                          new_weather: Weather::SNOW,
@@ -2044,7 +2164,7 @@ index 714b126..69eabf6 100644
              }
          }
          Choices::ELECTRICTERRAIN => {
-@@ -1745,6 +1862,8 @@ pub fn choice_special_effect(
+@@ -1745,6 +1873,8 @@ pub fn choice_special_effect(
          }
          _ => {}
      }
@@ -2053,7 +2173,7 @@ index 714b126..69eabf6 100644
  }
  
  pub fn charge_choice_to_volatile(choice: &Choices) -> PokemonVolatileStatus {
-@@ -1766,6 +1885,7 @@ pub fn charge_choice_to_volatile(choice: &Choices) -> PokemonVolatileStatus {
+@@ -1766,6 +1896,7 @@ pub fn charge_choice_to_volatile(choice: &Choices) -> PokemonVolatileStatus {
          Choices::SKYDROP => PokemonVolatileStatus::SKYDROP,
          Choices::SOLARBEAM => PokemonVolatileStatus::SOLARBEAM,
          Choices::SOLARBLADE => PokemonVolatileStatus::SOLARBLADE,
@@ -2380,12 +2500,30 @@ index 8270d91..3bcfab9 100644
          if defending_side.side_conditions.light_screen > 0 {
              damage *= 0.5
 diff --git a/src/genx/evaluate.rs b/src/genx/evaluate.rs
-index f42e9d1..0ece4cf 100644
+index f42e9d1..cac8cc9 100644
 --- a/src/genx/evaluate.rs
 +++ b/src/genx/evaluate.rs
-@@ -45,6 +45,13 @@ const AURORA_VEIL: f32 = 40.0;
+@@ -1,8 +1,13 @@
+ use super::abilities::Abilities;
++use super::damage_calc::type_effectiveness_modifier;
+ use super::items::Items;
+ use super::state::PokemonVolatileStatus;
+ use crate::choices::MoveCategory;
+-use crate::state::{Pokemon, PokemonStatus, Side, State};
++#[cfg(feature = "rr")]
++use crate::pokemon::PokemonName;
++#[cfg(feature = "rr")]
++use crate::state::SideReference;
++use crate::state::{Pokemon, PokemonStatus, PokemonType, Side, State};
+ 
+ const POKEMON_ALIVE: f32 = 30.0;
+ const POKEMON_HP: f32 = 100.0;
+@@ -43,8 +48,15 @@ const REFLECT: f32 = 20.0;
+ const LIGHT_SCREEN: f32 = 20.0;
+ const AURORA_VEIL: f32 = 40.0;
  const SAFE_GUARD: f32 = 5.0;
- const TAILWIND: f32 = 7.0;
+-const TAILWIND: f32 = 7.0;
++const TAILWIND: f32 = 7.0; // per turn left, capped at 4 (a permanent 99 scores as a fresh one)
  const HEALING_WISH: f32 = 30.0;
 +// Nuzlocke (rr): extra points lost per fainted mon on side one (the searcher), on top of the
 +// generic POKEMON_ALIVE; env POKE_ENGINE_DEATH, default 0 (poke-engine's own evaluation).
@@ -2397,7 +2535,18 @@ index f42e9d1..0ece4cf 100644
  
  const STEALTH_ROCK: f32 = -10.0;
  const SPIKES: f32 = -7.0;
-@@ -204,6 +211,11 @@ pub fn evaluate(state: &State) -> f32 {
+@@ -157,6 +169,10 @@ fn evaluate_pokemon(pokemon: &Pokemon) -> f32 {
+ }
+ 
+ pub fn evaluate(state: &State) -> f32 {
++    #[cfg(feature = "rr")]
++    if let Some(w) = EVAL_WEIGHTS.as_deref() {
++        return fitted_logit(w, state);
++    }
+     let mut score = 0.0;
+ 
+     let mut iter = state.side_one.pokemon.into_iter();
+@@ -204,6 +220,11 @@ pub fn evaluate(state: &State) -> f32 {
      if s1_used_tera {
          score += USED_TERA;
      }
@@ -2409,8 +2558,377 @@ index f42e9d1..0ece4cf 100644
      let mut iter = state.side_two.pokemon.into_iter();
      let mut s2_used_tera = false;
      while let Some(pkmn) = iter.next() {
+@@ -255,15 +276,366 @@ pub fn evaluate(state: &State) -> f32 {
+     score += state.side_one.side_conditions.light_screen as f32 * LIGHT_SCREEN;
+     score += state.side_one.side_conditions.aurora_veil as f32 * AURORA_VEIL;
+     score += state.side_one.side_conditions.safeguard as f32 * SAFE_GUARD;
+-    score += state.side_one.side_conditions.tailwind as f32 * TAILWIND;
++    score += state.side_one.side_conditions.tailwind.min(4) as f32 * TAILWIND;
+     score += state.side_one.side_conditions.healing_wish as f32 * HEALING_WISH;
+ 
+     score -= state.side_two.side_conditions.reflect as f32 * REFLECT;
+     score -= state.side_two.side_conditions.light_screen as f32 * LIGHT_SCREEN;
+     score -= state.side_two.side_conditions.aurora_veil as f32 * AURORA_VEIL;
+     score -= state.side_two.side_conditions.safeguard as f32 * SAFE_GUARD;
+-    score -= state.side_two.side_conditions.tailwind as f32 * TAILWIND;
++    score -= state.side_two.side_conditions.tailwind.min(4) as f32 * TAILWIND;
+     score -= state.side_two.side_conditions.healing_wish as f32 * HEALING_WISH;
+ 
+     score
+ }
++
++// ---------------------------------------------------------------------------
++// Fitted leaf evaluation (rr, plan v3 phase 4, D9 / D10): the evaluate() terms as plain
++// features, a linear fit of battle outcomes on them (rl/fit_eval.py), and the MCTS leaf value.
++// ---------------------------------------------------------------------------
++
++/// Per side (prefixed `our_` / `their_`), the evaluate() term families without their constants;
++/// alive mons only, like evaluate() (its clamp of a mon's score at 0 is left out).
++#[cfg(feature = "rr")]
++const SIDE_FEATURES: [&str; 18] = [
++    "hp",             // Σ hp / maxhp
++    "alive",          // alive mons
++    "items",          // alive mons holding an item
++    "brn",            // Σ evaluate_burned / −25: physical moves, halved for special attackers; −2 Guts-likes
++    "par",            // paralysed mons
++    "slp_frz",        // asleep or frozen mons
++    "tox",            // Σ evaluate_poison(−30) / −30: 1 a mon, < 0 for Poison Heal / Guts-likes
++    "psn",            // same for regular poison (−10)
++    "rocks",          // Σ Stealth Rock switch-in damage / current HP, capped at 1 (no Boots / Magic Guard)
++    "ground_hazards", // Σ same for Spikes on grounded mons, + (Toxic Spikes + Sticky Web layers) / 8
++    "seed",           // active Leech Seeded
++    "sub",            // active behind a Substitute
++    "confusion",      // active confused
++    "boost_off",      // active: boost curve (evaluate's 1, 2, 2.5, 3, ...) of Atk + SpA
++    "boost_def",      // active: same of Def + SpD
++    "boost_spe",      // active: same of Speed
++    "screens",        // Reflect + Light Screen + 2 × Aurora Veil, on (0 / 1 each)
++    "tailwind",       // Tailwind turns, capped at 4 (permanent 99 = 4)
++];
++
++/// Turn-independent matchup features (hit fractions are rr_ai's calc_bot estimate, mean roll):
++#[cfg(feature = "rr")]
++const MATCHUP_FEATURES: [&str; 10] = [
++    "our_deaths",       // fainted mons of our party
++    "dmg_out",          // our active's best hit on theirs, ÷ their current HP, capped at 1
++    "dmg_in",           // their active's best hit on ours, ÷ our current HP, capped at 1
++    "move_first",       // our best move goes first: priority, then speed (boosts, para, Tailwind,
++                        // weather abilities; Trick Room flips); tie 0.5
++    "ko_first",         // we KO their active in fewer hits than they KO ours (ties: move_first)
++    "answers",          // our alive mons that beat their active (active: 1v1; bench: after eating 1 hit)
++    "unanswered",       // their alive mons that none of our alive mons beats that way
++    "safest_switch_in", // min (take / hp_frac) capped at 1 over our alive bench vs their active (1 if none)
++    "bench_answers",    // alive bench mons that beat their active after eating a switch-in hit
++    "sweep_exposure",   // our alive mons OHKO'd by their active (boost-aware)
++];
++
++#[cfg(feature = "rr")]
++pub const N_FEATURES: usize = 2 * SIDE_FEATURES.len() + MATCHUP_FEATURES.len();
++
++/// The feature names, in `evaluate_features` order.
++#[cfg(feature = "rr")]
++pub fn evaluate_feature_names() -> Vec<String> {
++    ["our", "their"]
++        .iter()
++        .flat_map(|p| SIDE_FEATURES.iter().map(move |n| format!("{}_{}", p, n)))
++        .chain(MATCHUP_FEATURES.iter().map(|n| n.to_string()))
++        .collect()
++}
++
++#[cfg(feature = "rr")]
++fn side_features(side: &Side, out: &mut Vec<f32>) {
++    let mut f = [0.0f32; 18];
++    let mut iter = side.pokemon.into_iter();
++    while let Some(p) = iter.next() {
++        if p.hp <= 0 {
++            continue;
++        }
++        f[0] += p.hp as f32 / p.maxhp as f32;
++        f[1] += 1.0;
++        f[2] += (p.item != Items::NONE) as u8 as f32;
++        match p.status {
++            PokemonStatus::BURN => f[3] += evaluate_burned(p) / POKEMON_BURNED,
++            PokemonStatus::PARALYZE => f[4] += 1.0,
++            PokemonStatus::SLEEP | PokemonStatus::FREEZE => f[5] += 1.0,
++            PokemonStatus::TOXIC => f[6] += evaluate_poison(p, POKEMON_TOXIC) / POKEMON_TOXIC,
++            PokemonStatus::POISON => {
++                f[7] += evaluate_poison(p, POKEMON_POISONED) / POKEMON_POISONED
++            }
++            PokemonStatus::NONE => {}
++        }
++        let sc = &side.side_conditions;
++        if p.item != Items::HEAVYDUTYBOOTS {
++            // D15 (2026-11-25): what the next switch-in costs this mon, as a fraction of its
++            // current HP (capped at 1): rocks by type (a 4x-weak Ho-Oh 0.5, a resist 0.06),
++            // Spikes by layers; Toxic Spikes / Sticky Web stay per layer, in 1/8 units. The
++            // count of mons hit treated a 4x-weak mon and a resist alike.
++            let grounded = p.is_grounded();
++            let hp = (p.hp as f32).max(1.0);
++            #[cfg(feature = "rr")]
++            let rock_immune = p.ability == Abilities::MOUNTAINEER;
++            #[cfg(not(feature = "rr"))]
++            let rock_immune = false;
++            if p.ability != Abilities::MAGICGUARD {
++                if sc.stealth_rock > 0 && !rock_immune {
++                    let dmg = p.maxhp as f32 * type_effectiveness_modifier(&PokemonType::ROCK, &p) / 8.0;
++                    f[8] += (dmg / hp).min(1.0);
++                }
++                if grounded && sc.spikes > 0 {
++                    let num = match sc.spikes { 1 => 3.0, 2 => 4.0, _ => 6.0 };
++                    f[9] += (p.maxhp as f32 * num / 24.0 / hp).min(1.0);
++                }
++                if grounded {
++                    f[9] += sc.toxic_spikes as f32 / 8.0;
++                }
++            }
++            if grounded {
++                f[9] += sc.sticky_web as f32 / 8.0;
++            }
++        }
++        if iter.pokemon_index == side.active_index {
++            let v = &side.volatile_statuses;
++            f[10] = v.contains(&PokemonVolatileStatus::LEECHSEED) as u8 as f32;
++            f[11] = v.contains(&PokemonVolatileStatus::SUBSTITUTE) as u8 as f32;
++            f[12] = v.contains(&PokemonVolatileStatus::CONFUSION) as u8 as f32;
++            f[13] = get_boost_multiplier(side.attack_boost)
++                + get_boost_multiplier(side.special_attack_boost);
++            f[14] = get_boost_multiplier(side.defense_boost)
++                + get_boost_multiplier(side.special_defense_boost);
++            f[15] = get_boost_multiplier(side.speed_boost);
++        }
++    }
++    let sc = &side.side_conditions;
++    f[16] = (sc.reflect > 0) as u8 as f32
++        + (sc.light_screen > 0) as u8 as f32
++        + 2.0 * (sc.aurora_veil > 0) as u8 as f32;
++    f[17] = sc.tailwind.min(4) as f32;
++    out.extend_from_slice(&f);
++}
++
++/// The best hit (fraction of max HP, rr_ai's estimate) of `att` on `def`, and that move's priority.
++#[cfg(feature = "rr")]
++fn best_hit(state: &State, att: &Pokemon, atk: (i8, i8), def: &Pokemon, dfb: (i8, i8)) -> (f32, i8) {
++    super::rr_ai::attacks_of(att)
++        .map(|c| (super::rr_ai::pair_hit_frac(state, att, atk, def, dfb, c), c.priority))
++        .fold((0.0, 0), |b, x| if x.0 > b.0 { x } else { b })
++}
++
++/// Each side's active Atk / SpA and Def / SpD stages; bench mons fight at 0.
++#[cfg(feature = "rr")]
++fn stages(side: &Side, active: bool) -> ((i8, i8), (i8, i8)) {
++    if active {
++        (
++            (side.attack_boost, side.special_attack_boost),
++            (side.defense_boost, side.special_defense_boost),
++        )
++    } else {
++        ((0, 0), (0, 0))
++    }
++}
++
++#[cfg(feature = "rr")]
++fn frac(p: &Pokemon) -> f32 {
++    p.hp as f32 / p.maxhp as f32
++}
++
++/// Approximate effective speed of `p` on `side` (paralysis, Tailwind, active speed boost).
++#[cfg(feature = "rr")]
++fn approx_speed(side: &Side, p: &Pokemon, active: bool) -> f32 {
++    let mut s = p.speed as f32;
++    if active {
++        let b = side.speed_boost;
++        s *= if b >= 0 { (2 + b) as f32 / 2.0 } else { 2.0 / (2 - b) as f32 };
++    }
++    if p.status == PokemonStatus::PARALYZE {
++        s *= 0.5;
++    }
++    if side.side_conditions.tailwind > 0 {
++        s *= 2.0;
++    }
++    s
++}
++
++/// Does `p` (with remaining HP fraction `hp_p`) beat `foe` (with `hp_f`) in a 1v1?
++#[cfg(feature = "rr")]
++fn beats_1v1(hp_p: f32, out: f32, p1: i8, spd_p: f32, hp_f: f32, take: f32, p2: i8, spd_f: f32, tr: bool) -> bool {
++    if hp_p <= 0.0 || out <= 0.0 {
++        return false;
++    }
++    let n_out = (hp_f / out).ceil();
++    let n_in = if take > 0.0 { (hp_p / take).ceil() } else { f32::INFINITY };
++    if n_out < n_in {
++        true
++    } else if n_out > n_in {
++        false
++    } else if p1 != p2 {
++        p1 > p2
++    } else if tr {
++        spd_p <= spd_f
++    } else {
++        spd_p >= spd_f
++    }
++}
++
++/// Does our mon `p` answer `foe`? If both are active, 1v1 directly; otherwise `p` must survive a
++/// switch-in hit first (`hp_after = frac(p) - take`) and still beat `foe`.
++#[cfg(feature = "rr")]
++fn mon_answers(state: &State, i: usize, p: &Pokemon, foe: &Pokemon, foe_active: bool) -> bool {
++    let (s1, s2) = (&state.side_one, &state.side_two);
++    let p_active = i == s1.active_index as usize;
++    let (atk, def) = stages(s1, p_active);
++    let (f_atk, f_def) = stages(s2, foe_active);
++    let (out, p1) = best_hit(state, p, atk, foe, f_def);
++    let (take, p2) = best_hit(state, foe, f_atk, p, def);
++    let hp_p = if p_active && foe_active { frac(p) } else { frac(p) - take };
++    beats_1v1(
++        hp_p, out, p1, approx_speed(s1, p, p_active),
++        frac(foe), take, p2, approx_speed(s2, foe, foe_active),
++        state.trick_room.active,
++    )
++}
++
++/// Side one's view of the position, `evaluate_feature_names()` order, no weights applied.
++#[cfg(feature = "rr")]
++pub fn evaluate_features(state: &State) -> Vec<f32> {
++    let (s1, s2) = (&state.side_one, &state.side_two);
++    let mut out = Vec::with_capacity(N_FEATURES);
++    side_features(s1, &mut out);
++    side_features(s2, &mut out);
++    let party = s1.pokemon.into_iter().filter(|p| p.id != PokemonName::NONE);
++    out.push(party.filter(|p| p.hp <= 0).count() as f32);
++
++    let (a1, a2) = (s1.get_active_immutable(), s2.get_active_immutable());
++    let (mut ans_active, mut safest_sw, mut bench_ans, mut sweep_exp) = (0.0f32, 1.0f32, 0.0f32, 0.0f32);
++    if a1.hp > 0 && a2.hp > 0 {
++        let (atk1, def1) = stages(s1, true);
++        let (atk2, def2) = stages(s2, true);
++        let (out_hit, p1) = best_hit(state, a1, atk1, a2, def2);
++        let (in_hit, p2) = best_hit(state, a2, atk2, a1, def1);
++        let (h1, h2) = (frac(a1), frac(a2));
++        let first = if p1 != p2 {
++            (p1 > p2) as u8 as f32
++        } else {
++            let (v1, v2) = (
++                super::rr_ai::py_speed(state, SideReference::SideOne),
++                super::rr_ai::py_speed(state, SideReference::SideTwo),
++            );
++            let faster = if state.trick_room.active { v1 < v2 } else { v1 > v2 };
++            if v1 == v2 { 0.5 } else { faster as u8 as f32 }
++        };
++        let hits = |hp: f32, hit: f32| if hit > 0.0 { (hp / hit).ceil() } else { f32::INFINITY };
++        let (n_out, n_in) = (hits(h2, out_hit), hits(h1, in_hit));
++        let ko_first = if n_out < n_in {
++            1.0
++        } else if n_out > n_in || n_out.is_infinite() {
++            0.0
++        } else {
++            first
++        };
++        let spd2 = approx_speed(s2, a2, true);
++        let tr = state.trick_room.active;
++        for (i, p) in s1.pokemon.into_iter().enumerate() {
++            if p.hp <= 0 {
++                continue;
++            }
++            let hp_p = frac(p);
++            if i == s1.active_index as usize {
++                if in_hit >= hp_p {
++                    sweep_exp += 1.0;
++                }
++                if ko_first >= 0.5 {
++                    ans_active += 1.0;
++                }
++            } else {
++                let (take, fp) = best_hit(state, a2, atk2, p, (0, 0));
++                let (hit_back, mp) = best_hit(state, p, (0, 0), a2, def2);
++                safest_sw = safest_sw.min((take / hp_p).min(1.0));
++                if take >= hp_p {
++                    sweep_exp += 1.0;
++                }
++                if beats_1v1(hp_p - take, hit_back, mp, approx_speed(s1, p, false), h2, take, fp, spd2, tr) {
++                    ans_active += 1.0;
++                    bench_ans += 1.0;
++                }
++            }
++        }
++        out.extend_from_slice(&[
++            (out_hit / h2).min(1.0),
++            (in_hit / h1).min(1.0),
++            first,
++            ko_first,
++            ans_active,
++        ]);
++    } else {
++        out.extend_from_slice(&[0.0; 5]);
++    }
++    // their active's answer count is already in `ans_active` when both actives stand
++    let cached = if a1.hp > 0 && a2.hp > 0 { Some(s2.active_index as usize) } else { None };
++    let unanswered = s2.pokemon.into_iter().enumerate().filter(|(j, p)| {
++        let active = *j == s2.active_index as usize;
++        p.hp > 0
++            && !(if cached == Some(*j) {
++                ans_active > 0.0
++            } else {
++                s1.pokemon.into_iter().enumerate().any(|(i, q)| q.hp > 0 && mon_answers(state, i, q, p, active))
++            })
++    });
++    out.push(unanswered.count() as f32);
++    out.extend_from_slice(&[safest_sw, bench_ans, sweep_exp]);
++    out
++}
++
++/// env POKE_ENGINE_EVAL_WEIGHTS: a file of whitespace-separated floats, the bias first, then one
++/// weight per feature (rl/fit_eval.py --out). Set: evaluate() is the fitted logit and the MCTS
++/// leaf value is absolute (`fitted_leaf_value`). Unset: the hand evaluation, unchanged.
++#[cfg(feature = "rr")]
++pub static EVAL_WEIGHTS: std::sync::LazyLock<Option<Vec<f32>>> = std::sync::LazyLock::new(|| {
++    let path = std::env::var("POKE_ENGINE_EVAL_WEIGHTS").ok().filter(|p| !p.is_empty())?;
++    let text = std::fs::read_to_string(&path)
++        .unwrap_or_else(|e| panic!("POKE_ENGINE_EVAL_WEIGHTS={}: {}", path, e));
++    let w: Vec<f32> = text
++        .split_whitespace()
++        .map(|t| t.parse().unwrap_or_else(|_| panic!("{}: not a float: {}", path, t)))
++        .collect();
++    assert_eq!(w.len(), 1 + N_FEATURES, "{}: want bias + {} weights", path, N_FEATURES);
++    Some(w)
++});
++
++/// bias + w · features (`weights` = [bias, w...]).
++#[cfg(feature = "rr")]
++pub fn fitted_logit(weights: &[f32], state: &State) -> f32 {
++    let f = evaluate_features(state);
++    weights[0] + weights[1..].iter().zip(&f).map(|(w, x)| w * x).sum::<f32>()
++}
++
++/// The user's utility of a finished battle (D1): U = win · (1 − 0.5 · fainted / party).
++#[cfg(feature = "rr")]
++pub fn terminal_utility(state: &State) -> f32 {
++    if state.battle_is_over() <= 0.0 {
++        return 0.0;
++    }
++    let party = state.side_one.pokemon.into_iter().filter(|p| p.id != PokemonName::NONE);
++    let (dead, size) = party.fold((0, 0), |(d, n), p| (d + (p.hp <= 0) as u32, n + 1));
++    1.0 - 0.5 * dead as f32 / size.max(1) as f32
++}
++
++/// The MCTS leaf value under fitted weights: U for a finished battle, else sigmoid(logit).
++#[cfg(feature = "rr")]
++// env POKE_ENGINE_EVAL_RELATIVE=1: an open leaf is sigmoid(logit - root logit), centred on the
++// search's start like the hand evaluation's sigmoid(eval - root_eval), so the leaf stays sensitive
++// in lopsided fights (an absolute sigmoid saturates near 0 / 1 there); read once
++pub static EVAL_RELATIVE: std::sync::LazyLock<bool> =
++    std::sync::LazyLock::new(|| std::env::var("POKE_ENGINE_EVAL_RELATIVE").map(|v| v == "1").unwrap_or(false));
++
++#[cfg(feature = "rr")]
++pub fn fitted_leaf_value(weights: &[f32], state: &State, root_logit: f32) -> f32 {
++    if state.battle_is_over() != 0.0 {
++        return terminal_utility(state);
++    }
++    let centre = if *EVAL_RELATIVE { root_logit } else { 0.0 };
++    1.0 / (1.0 + (-(fitted_logit(weights, state) - centre)).exp())
++}
 diff --git a/src/genx/generate_instructions.rs b/src/genx/generate_instructions.rs
-index 2a8d2cd..f91aa1a 100644
+index 2a8d2cd..ca76a80 100644
 --- a/src/genx/generate_instructions.rs
 +++ b/src/genx/generate_instructions.rs
 @@ -1,7 +1,7 @@
@@ -3298,10 +3816,50 @@ index 2a8d2cd..f91aa1a 100644
  }
  
  fn moves_first(
-@@ -2709,6 +3093,44 @@ fn moves_first(
+@@ -2709,6 +3093,84 @@ fn moves_first(
      }
  }
  
++/// Quick Draw (Showdown): a non-status move goes first in its priority bracket with chance 3/10,
++/// rolled for each holder. Returns the order with P(side one first) (0.5 for a plain speed tie);
++/// a chance order comes back as SpeedTie. The engine's mean-damage view mispriced every Quick
++/// Draw holder (Galarian Slowbro) as always moving at its speed (found 2026-11-24, engine_diff
++/// --from-states: 7 / 40 Showdown forks moved first where the engine had 0).
++fn quick_draw_order(
++    state: &State,
++    side_one_choice: &Choice,
++    side_two_choice: &Choice,
++    order: SideMovesFirst,
++) -> (SideMovesFirst, f32) {
++    let chance = |pkmn: &crate::state::Pokemon, choice: &Choice| {
++        if pkmn.ability == Abilities::QUICKDRAW
++            && choice.category != MoveCategory::Status
++            && choice.category != MoveCategory::Switch
++        {
++            0.3
++        } else {
++            0.0
++        }
++    };
++    let q1 = chance(state.side_one.get_active_immutable(), side_one_choice);
++    let q2 = chance(state.side_two.get_active_immutable(), side_two_choice);
++    let base = match order {
++        SideMovesFirst::SideOne => 1.0,
++        SideMovesFirst::SideTwo => 0.0,
++        SideMovesFirst::SpeedTie => 0.5,
++    };
++    if (q1 == 0.0 && q2 == 0.0) || side_one_choice.priority != side_two_choice.priority {
++        return (order, base);
++    }
++    let (only1, only2) = (q1 * (1.0 - q2), q2 * (1.0 - q1));
++    let p = only1 + (1.0 - only1 - only2) * base;
++    match p {
++        p if p >= 1.0 => (SideMovesFirst::SideOne, 1.0),
++        p if p <= 0.0 => (SideMovesFirst::SideTwo, 0.0),
++        p => (SideMovesFirst::SpeedTie, p),
++    }
++}
++
 +/// Rollout / Ice Ball (Showdown's basePowerCallback): power doubles per hit done in this lock-in
 +/// (ROLLOUT<n>), Defense Curl doubles it once more. Using it ends the lock; a hit before the
 +/// 5th starts the next one, so a miss, Protect, an immunity or not getting to move ends it.
@@ -3343,7 +3901,7 @@ index 2a8d2cd..f91aa1a 100644
  fn get_active_protosynthesis(side: &Side) -> Option<PokemonVolatileStatus> {
      if side
          .volatile_statuses
-@@ -2777,6 +3199,38 @@ fn on_weather_end(
+@@ -2777,6 +3239,38 @@ fn on_weather_end(
      incoming_instructions: &mut StateInstructions,
  ) {
      match state.weather.weather_type {
@@ -3382,7 +3940,7 @@ index 2a8d2cd..f91aa1a 100644
          Weather::SUN => {
              for side_ref in sides {
                  let side = state.get_side(side_ref);
-@@ -2902,31 +3356,33 @@ fn add_end_of_turn_instructions(
+@@ -2902,31 +3396,42 @@ fn add_end_of_turn_instructions(
          }
      }
  
@@ -3413,8 +3971,17 @@ index 2a8d2cd..f91aa1a 100644
 +    if state.terrain_is_active(&Terrain::GRASSYTERRAIN) {
 +        for side_ref in sides {
 +            let side = state.get_side(side_ref);
++            // Roost drops the Flying type until the end of the turn, after this heal (Showdown)
++            let roosting = side
++                .volatile_statuses
++                .contains(&PokemonVolatileStatus::ROOST);
 +            let active_pkmn = side.get_active();
-+            if active_pkmn.hp == 0 || !active_pkmn.is_grounded() {
++            let grounded = active_pkmn.is_grounded()
++                || (roosting
++                    && active_pkmn.ability != Abilities::LEVITATE
++                    && active_pkmn.ability != Abilities::EELEVATE
++                    && active_pkmn.item != Items::AIRBALLOON);
++            if active_pkmn.hp == 0 || !grounded {
 +                continue;
 +            }
 +            let heal_amount = cmp::min(
@@ -3439,7 +4006,17 @@ index 2a8d2cd..f91aa1a 100644
          let terrain_dissipate_instruction = Instruction::DecrementTerrainTurnsRemaining;
          incoming_instructions
              .instruction_list
-@@ -3002,12 +3458,13 @@ fn add_end_of_turn_instructions(
+@@ -2986,7 +3491,8 @@ fn add_end_of_turn_instructions(
+                 ));
+             side.side_conditions.aurora_veil -= 1;
+         }
+-        if side.side_conditions.tailwind > 0 {
++        // >= 90 turns is a permanent Tailwind (a Radical Red arena effect): never counts down
++        if side.side_conditions.tailwind > 0 && side.side_conditions.tailwind < 90 {
+             incoming_instructions
+                 .instruction_list
+                 .push(Instruction::ChangeSideCondition(
+@@ -3002,12 +3508,13 @@ fn add_end_of_turn_instructions(
  
      // Weather Damage
      for side_ref in sides {
@@ -3454,7 +4031,7 @@ index 2a8d2cd..f91aa1a 100644
                  || active_pkmn.has_type(&PokemonType::ICE)
              {
                  continue;
-@@ -3029,6 +3486,9 @@ fn add_end_of_turn_instructions(
+@@ -3029,6 +3536,9 @@ fn add_end_of_turn_instructions(
              if active_pkmn.hp == 0
                  || active_pkmn.ability == Abilities::MAGICGUARD
                  || active_pkmn.ability == Abilities::OVERCOAT
@@ -3464,7 +4041,7 @@ index 2a8d2cd..f91aa1a 100644
                  || active_pkmn.has_type(&PokemonType::GROUND)
                  || active_pkmn.has_type(&PokemonType::STEEL)
                  || active_pkmn.has_type(&PokemonType::ROCK)
-@@ -3126,44 +3586,62 @@ fn add_end_of_turn_instructions(
+@@ -3126,44 +3636,62 @@ fn add_end_of_turn_instructions(
  
          match active_pkmn.status {
              PokemonStatus::BURN => {
@@ -3559,7 +4136,7 @@ index 2a8d2cd..f91aa1a 100644
                      || other_side_active.ability == Abilities::NEUTRALIZINGGAS
                  {
                      let toxic_multiplier = (1.0 / 16.0) * toxic_count + (1.0 / 16.0);
-@@ -3197,6 +3675,24 @@ fn add_end_of_turn_instructions(
+@@ -3197,6 +3725,24 @@ fn add_end_of_turn_instructions(
                      .instruction_list
                      .push(toxic_counter_increment_instruction);
              }
@@ -3584,7 +4161,7 @@ index 2a8d2cd..f91aa1a 100644
              _ => {}
          }
      }
-@@ -3204,6 +3700,10 @@ fn add_end_of_turn_instructions(
+@@ -3204,6 +3750,10 @@ fn add_end_of_turn_instructions(
      // ability/item end-of-turn effects
      for side_ref in sides {
          let side = state.get_side(side_ref);
@@ -3595,7 +4172,7 @@ index 2a8d2cd..f91aa1a 100644
          let active_pkmn = side.get_active();
          if active_pkmn.hp == 0 {
              continue;
-@@ -3211,6 +3711,17 @@ fn add_end_of_turn_instructions(
+@@ -3211,6 +3761,17 @@ fn add_end_of_turn_instructions(
  
          item_end_of_turn(state, side_ref, &mut incoming_instructions);
          ability_end_of_turn(state, side_ref, &mut incoming_instructions);
@@ -3613,7 +4190,7 @@ index 2a8d2cd..f91aa1a 100644
      }
  
      // leechseed sap
-@@ -3568,17 +4079,46 @@ fn add_end_of_turn_instructions(
+@@ -3568,17 +4129,46 @@ fn add_end_of_turn_instructions(
                  break;
              }
          }
@@ -3666,7 +4243,7 @@ index 2a8d2cd..f91aa1a 100644
              incoming_instructions
                  .instruction_list
                  .push(Instruction::ChangeSideCondition(
-@@ -3616,12 +4156,32 @@ fn run_move(
+@@ -3616,12 +4206,32 @@ fn run_move(
      final_instructions: &mut Vec<StateInstructions>,
  ) {
      let mut hit_sub = false;
@@ -3701,7 +4278,7 @@ index 2a8d2cd..f91aa1a 100644
                  &attacking_side,
                  &mut instructions,
              );
-@@ -3662,6 +4222,44 @@ fn run_move(
+@@ -3662,6 +4272,44 @@ fn run_move(
        // but the way this engine was structured makes it difficult to implement
        // without some performance hits.
  
@@ -3746,7 +4323,7 @@ index 2a8d2cd..f91aa1a 100644
      if let Some(boost) = &choice.boost {
          get_instructions_from_boosts(state, boost, &attacking_side, &mut instructions);
      }
-@@ -3838,6 +4436,8 @@ fn after_move_finish(state: &mut State, final_instructions: &mut Vec<StateInstru
+@@ -3838,6 +4486,8 @@ fn after_move_finish(state: &mut State, final_instructions: &mut Vec<StateInstru
                          }));
                  }
              }
@@ -3755,7 +4332,7 @@ index 2a8d2cd..f91aa1a 100644
          }
          state.reverse_instructions(&state_instructions.instruction_list);
      }
-@@ -3918,10 +4518,7 @@ fn mega_evolve(state: &mut State, side_ref: SideReference, instructions: &mut St
+@@ -3918,10 +4568,7 @@ fn mega_evolve(state: &mut State, side_ref: SideReference, instructions: &mut St
      let active_pkmn = side.get_active();
  
      // assumes that you can mega-evolve if this function is called
@@ -3767,7 +4344,7 @@ index 2a8d2cd..f91aa1a 100644
              panic!(
                  "cannot mega evolve {:?} with {:?}",
                  active_pkmn.id, active_pkmn.item
-@@ -4201,15 +4798,16 @@ pub fn generate_instructions_from_move_pair(
+@@ -4201,15 +4848,16 @@ pub fn generate_instructions_from_move_pair(
      }
  
      // run switches
@@ -3787,7 +4364,7 @@ index 2a8d2cd..f91aa1a 100644
          generate_instructions_from_switch(
              state,
              *switch_id,
-@@ -4217,6 +4815,11 @@ pub fn generate_instructions_from_move_pair(
+@@ -4217,6 +4865,11 @@ pub fn generate_instructions_from_move_pair(
              &mut incoming_instructions,
          );
      }
@@ -3799,7 +4376,7 @@ index 2a8d2cd..f91aa1a 100644
      if s1_tera {
          state.side_one.get_active().terastallized = true;
          incoming_instructions
-@@ -4243,15 +4846,28 @@ pub fn generate_instructions_from_move_pair(
+@@ -4243,15 +4896,31 @@ pub fn generate_instructions_from_move_pair(
      modify_choice_priority(&state, &SideReference::SideOne, &mut side_one_choice);
      modify_choice_priority(&state, &SideReference::SideTwo, &mut side_two_choice);
  
@@ -3824,6 +4401,9 @@ index 2a8d2cd..f91aa1a 100644
          &mut incoming_instructions,
 -    ) {
 +    );
++    // P(side one moves first) when the order is a chance event: a speed tie, or Quick Draw
++    let (order, side_one_first) =
++        quick_draw_order(&state, &side_one_choice, &side_two_choice, order);
 +    if let Some(applied) = mega_applied {
 +        state.reverse_instructions(&applied);
 +    }
@@ -3832,7 +4412,7 @@ index 2a8d2cd..f91aa1a 100644
          SideMovesFirst::SideOne => {
              handle_both_moves(
                  state,
-@@ -4271,6 +4887,13 @@ pub fn generate_instructions_from_move_pair(
+@@ -4271,6 +4940,13 @@ pub fn generate_instructions_from_move_pair(
                      || state.side_two.force_switch)
                  {
                      add_end_of_turn_instructions(state, state_instruction, &SideReference::SideOne);
@@ -3846,7 +4426,7 @@ index 2a8d2cd..f91aa1a 100644
                  }
                  state.reverse_instructions(&state_instruction.instruction_list);
              }
-@@ -4293,6 +4916,13 @@ pub fn generate_instructions_from_move_pair(
+@@ -4293,14 +4969,21 @@ pub fn generate_instructions_from_move_pair(
                      || state.side_two.force_switch)
                  {
                      add_end_of_turn_instructions(state, state_instruction, &SideReference::SideTwo);
@@ -3860,7 +4440,17 @@ index 2a8d2cd..f91aa1a 100644
                  }
                  state.reverse_instructions(&state_instruction.instruction_list);
              }
-@@ -4320,6 +4950,13 @@ pub fn generate_instructions_from_move_pair(
+         }
+         SideMovesFirst::SpeedTie => {
+             let mut side_one_moves_first_instruction = incoming_instructions.clone();
+-            incoming_instructions.update_percentage(0.5);
+-            side_one_moves_first_instruction.update_percentage(0.5);
++            incoming_instructions.update_percentage(1.0 - side_one_first);
++            side_one_moves_first_instruction.update_percentage(side_one_first);
+ 
+             // side_one moves first
+             handle_both_moves(
+@@ -4320,6 +5003,13 @@ pub fn generate_instructions_from_move_pair(
                      || state.side_two.force_switch)
                  {
                      add_end_of_turn_instructions(state, state_instruction, &SideReference::SideOne);
@@ -3874,7 +4464,7 @@ index 2a8d2cd..f91aa1a 100644
                  }
                  state.reverse_instructions(&state_instruction.instruction_list);
              }
-@@ -4343,6 +4980,13 @@ pub fn generate_instructions_from_move_pair(
+@@ -4343,6 +5033,13 @@ pub fn generate_instructions_from_move_pair(
                      || state.side_two.force_switch)
                  {
                      add_end_of_turn_instructions(state, state_instruction, &SideReference::SideTwo);
@@ -3888,7 +4478,7 @@ index 2a8d2cd..f91aa1a 100644
                  }
                  state.reverse_instructions(&state_instruction.instruction_list);
              }
-@@ -4995,7 +5639,7 @@ mod tests {
+@@ -4995,7 +5692,7 @@ mod tests {
                  percentage: 63.0,
                  instruction_list: vec![Instruction::Damage(DamageInstruction {
                      side_ref: SideReference::SideTwo,
@@ -3897,7 +4487,7 @@ index 2a8d2cd..f91aa1a 100644
                  })],
              },
              StateInstructions {
-@@ -5003,7 +5647,7 @@ mod tests {
+@@ -5003,7 +5700,7 @@ mod tests {
                  instruction_list: vec![
                      Instruction::Damage(DamageInstruction {
                          side_ref: SideReference::SideTwo,
@@ -3906,7 +4496,7 @@ index 2a8d2cd..f91aa1a 100644
                      }),
                      Instruction::ApplyVolatileStatus(ApplyVolatileStatusInstruction {
                          side_ref: SideReference::SideTwo,
-@@ -6384,7 +7028,11 @@ mod tests {
+@@ -6384,7 +7081,11 @@ mod tests {
  
          let expected_instructions = vec![StateInstructions {
              percentage: 100.0,
@@ -3919,7 +4509,7 @@ index 2a8d2cd..f91aa1a 100644
          }];
  
          assert_eq!(instructions, expected_instructions)
-@@ -6411,7 +7059,13 @@ mod tests {
+@@ -6411,7 +7112,13 @@ mod tests {
  
          let expected_instructions = vec![StateInstructions {
              percentage: 100.0,
@@ -3934,7 +4524,7 @@ index 2a8d2cd..f91aa1a 100644
                  new_terrain: Terrain::NONE,
                  new_terrain_turns_remaining: 0,
                  previous_terrain: Terrain::ELECTRICTERRAIN,
-@@ -6446,6 +7100,11 @@ mod tests {
+@@ -6446,6 +7153,11 @@ mod tests {
          let expected_instructions = vec![StateInstructions {
              percentage: 100.0,
              instruction_list: vec![
@@ -3946,7 +4536,7 @@ index 2a8d2cd..f91aa1a 100644
                  Instruction::ChangeTerrain(ChangeTerrain {
                      new_terrain: Terrain::NONE,
                      new_terrain_turns_remaining: 0,
-@@ -6710,7 +7369,7 @@ mod tests {
+@@ -6710,7 +7422,7 @@ mod tests {
              instruction_list: vec![
                  Instruction::Damage(DamageInstruction {
                      side_ref: SideReference::SideTwo,
@@ -3955,7 +4545,7 @@ index 2a8d2cd..f91aa1a 100644
                  }),
                  Instruction::ChangeSideCondition(ChangeSideConditionInstruction {
                      side_ref: SideReference::SideOne,
-@@ -6806,7 +7465,7 @@ mod tests {
+@@ -6806,7 +7518,7 @@ mod tests {
              instruction_list: vec![
                  Instruction::Damage(DamageInstruction {
                      side_ref: SideReference::SideTwo,
@@ -3964,7 +4554,7 @@ index 2a8d2cd..f91aa1a 100644
                  }),
                  Instruction::ChangeSideCondition(ChangeSideConditionInstruction {
                      side_ref: SideReference::SideOne,
-@@ -6866,7 +7525,7 @@ mod tests {
+@@ -6866,7 +7578,7 @@ mod tests {
              instruction_list: vec![
                  Instruction::Damage(DamageInstruction {
                      side_ref: SideReference::SideTwo,
@@ -3973,7 +4563,7 @@ index 2a8d2cd..f91aa1a 100644
                  }),
                  Instruction::Boost(BoostInstruction {
                      side_ref: SideReference::SideOne,
-@@ -7278,7 +7937,7 @@ mod tests {
+@@ -7278,7 +7990,7 @@ mod tests {
              percentage: 100.0,
              instruction_list: vec![Instruction::Damage(DamageInstruction {
                  side_ref: SideReference::SideTwo,
@@ -4453,10 +5043,10 @@ index fcab748..0b8d104 100644
  pub mod state;
 diff --git a/src/genx/rr_abilities.rs b/src/genx/rr_abilities.rs
 new file mode 100644
-index 0000000..7b2ffac
+index 0000000..79703b4
 --- /dev/null
 +++ b/src/genx/rr_abilities.rs
-@@ -0,0 +1,1035 @@
+@@ -0,0 +1,1021 @@
 +#![allow(unused_variables)]
 +use super::abilities::{ignores_target_ability, Abilities};
 +use super::damage_calc::{damage_parts, type_effectiveness_modifier};
@@ -5264,20 +5854,6 @@ index 0000000..7b2ffac
 +    }
 +}
 +
-+pub fn rr_needs_last_used_move(state: &State) -> bool {
-+    for s in [&state.side_one, &state.side_two] {
-+        for pkmn in s.pokemon.into_iter() {
-+            if matches!(
-+                pkmn.ability,
-+                Abilities::BULLRUSH | Abilities::QUILLRUSH | Abilities::THELOOK
-+            ) {
-+                return true;
-+            }
-+        }
-+    }
-+    false
-+}
-+
 +pub fn rr_ignores_evasion(state: &State, attacking_side_ref: &SideReference) -> bool {
 +    let (attacking_side, defending_side) = state.get_both_sides_immutable(attacking_side_ref);
 +    if defending_side.get_active_immutable().ability == Abilities::NEUTRALIZINGGAS {
@@ -5494,26 +6070,21 @@ index 0000000..7b2ffac
 +}
 diff --git a/src/genx/rr_ai.rs b/src/genx/rr_ai.rs
 new file mode 100644
-index 0000000..bf4bbc8
+index 0000000..efc5de6
 --- /dev/null
 +++ b/src/genx/rr_ai.rs
-@@ -0,0 +1,1858 @@
+@@ -0,0 +1,2098 @@
 +//! Radical Red / CFRU trainer AI port (singles) for poke-engine (`rr` feature).
 +//!
 +//! Mirrors `ai_util/rr_ai.py`: fighting-style class, negative/positive move scoring tiers,
 +//! voluntary switching triggers (`ai_switching.c`), and post-KO switch-in scoring.
-+//! Uses poke-engine's own damage calculation (`calculate_damage` at the mean 0.925 roll
-+//! with choice/ability/item modifiers) and effective speed. Returns all choices tied for
-+//! the top score (usually one).
++//! Damage and speed are the Python AI's own (calc_bot's formula at the mean 0.925 roll and
++//! calc_bot.stat's speed: `hit_frac`, `py_speed`), not poke-engine's mechanics: the port
++//! models what the enemy believes. Returns all choices tied for the top score (usually one).
 +
-+use super::abilities::{
-+    ability_modify_attack_against, ability_modify_attack_being_used, ignores_target_ability,
-+    Abilities,
-+};
-+use super::choice_effects::modify_choice;
-+use super::damage_calc::{calculate_damage, type_effectiveness_modifier, DamageRolls};
-+use super::generate_instructions::get_effective_speed;
-+use super::items::{item_modify_attack_against, item_modify_attack_being_used, Items};
++use super::abilities::Abilities;
++use super::damage_calc::type_effectiveness_modifier;
++use super::items::Items;
 +use super::state::{MoveChoice, PokemonVolatileStatus, Terrain, Weather};
 +use crate::choices::{
 +    Choice, Choices, Effect, MoveCategory, MoveTarget, MultiHitMove, StatBoosts,
@@ -5643,6 +6214,80 @@ index 0000000..bf4bbc8
 +    res
 +}
 +
++/// CFRU's random rolls, enumerated. `roll(n)` is uniform over 0..n; a fresh `Coins` returns 0
++/// for every roll, which is the deterministic reading `rr_ai_choice` has always used. `next`
++/// moves to the next unexplored sequence of outcomes (depth-first), so re-running the AI until
++/// it returns false visits every random branch once, each with probability `prob()`.
++/// Covered (as in ai_util/rr_ai.py): the 50% consecutive-Protect penalty, ShouldRecover's 50%
++/// roll, the save-the-sweeper randrange(4) branch, and ties (split uniformly by the caller),
++/// including equally ranked bench mons (`first_ok`, `top_tied_switches`).
++#[derive(Default)]
++struct Coins {
++    script: Vec<u8>,
++    arity: Vec<u8>,
++    pos: usize,
++}
++
++impl Coins {
++    fn roll(&mut self, n: u8) -> u8 {
++        if self.pos == self.script.len() {
++            self.script.push(0);
++            self.arity.push(n);
++        }
++        self.pos += 1;
++        self.script[self.pos - 1]
++    }
++    fn prob(&self) -> f32 {
++        self.arity[..self.pos].iter().map(|&n| 1.0 / n as f32).product()
++    }
++    fn next(&mut self) -> bool {
++        self.script.truncate(self.pos);
++        self.arity.truncate(self.pos);
++        self.pos = 0;
++        while let (Some(r), Some(&n)) = (self.script.last_mut(), self.arity.last()) {
++            *r += 1;
++            if *r < n {
++                return true;
++            }
++            self.script.pop();
++            self.arity.pop();
++        }
++        false
++    }
++}
++
++/// The AI's choices with their probabilities (summing to 1): every random branch, ties split
++/// uniformly. Same options as `rr_ai_choice`, plus the ones only a random branch picks.
++pub fn rr_ai_choice_weighted(state: &State, side: SideReference) -> Vec<(MoveChoice, f32)> {
++    rr_ai_choice_weighted_mut(&mut state.clone(), side)
++}
++
++pub fn rr_ai_choice_weighted_mut(state: &mut State, side: SideReference) -> Vec<(MoveChoice, f32)> {
++    let (s1_opts, s2_opts) = state.root_get_all_options();
++    let options = match side {
++        SideReference::SideOne => s1_opts,
++        SideReference::SideTwo => s2_opts,
++    };
++    if options.len() <= 1 {
++        return options.into_iter().map(|o| (o, 1.0)).collect();
++    }
++    let mut coins = Coins::default();
++    let mut out: Vec<(MoveChoice, f32)> = Vec::with_capacity(4);
++    loop {
++        let tied = rr_ai_choose_from_options(state, side, &options, &mut coins);
++        let p = coins.prob() / tied.len() as f32;
++        for c in tied {
++            match out.iter_mut().find(|(m, _)| *m == c) {
++                Some(entry) => entry.1 += p,
++                None => out.push((c, p)),
++            }
++        }
++        if !coins.next() {
++            return out;
++        }
++    }
++}
++
 +/// Public entry point: returns all tied top choices for `side` according to the RR AI.
 +pub fn rr_ai_choice(state: &State, side: SideReference) -> Vec<MoveChoice> {
 +    let (s1_opts, s2_opts) = state.root_get_all_options();
@@ -5659,7 +6304,7 @@ index 0000000..bf4bbc8
 +        return rr_ai_choose_from_options_immut(state, side, &options);
 +    }
 +    let mut cloned = state.clone();
-+    rr_ai_choose_from_options(&mut cloned, side, &options)
++    rr_ai_choose_from_options(&mut cloned, side, &options, &mut Coins::default())
 +}
 +
 +/// Zero-clone entry point for MCTS (which already owns `&mut State`).
@@ -5672,7 +6317,7 @@ index 0000000..bf4bbc8
 +    if options.len() <= 1 {
 +        return options;
 +    }
-+    rr_ai_choose_from_options(state, side, &options)
++    rr_ai_choose_from_options(state, side, &options, &mut Coins::default())
 +}
 +
 +fn rr_ai_choose_from_options_immut(
@@ -5689,13 +6334,14 @@ index 0000000..bf4bbc8
 +    if avail_moves.is_empty() {
 +        return options.to_vec();
 +    }
-+    score_and_pick_moves(state, side, &avail_moves, &[]).0
++    score_and_pick_moves(state, side, &avail_moves, &[], &mut Coins::default()).0
 +}
 +
 +fn rr_ai_choose_from_options(
 +    state: &mut State,
 +    side: SideReference,
 +    options: &[MoveChoice],
++    coins: &mut Coins,
 +) -> Vec<MoveChoice> {
 +    let mut avail_moves: Vec<(MoveChoice, PokemonMoveIndex)> = Vec::with_capacity(4);
 +    let mut avail_switches: Vec<PokemonIndex> = Vec::with_capacity(5);
@@ -5730,10 +6376,10 @@ index 0000000..bf4bbc8
 +        ranked_switches(state, side, &avail_switches)
 +    };
 +
-+    let (tied_moves, best_score) = score_and_pick_moves(state, side, &avail_moves, &ranked);
++    let (tied_moves, best_score) = score_and_pick_moves(state, side, &avail_moves, &ranked, coins);
 +
 +    if !ranked.is_empty() {
-+        if let Some(switch_targets) = switch_target(state, side, best_score, &ranked) {
++        if let Some(switch_targets) = switch_target(state, side, best_score, &ranked, coins) {
 +            return switch_targets;
 +        }
 +    }
@@ -5770,6 +6416,7 @@ index 0000000..bf4bbc8
 +    side: SideReference,
 +    avail_moves: &[(MoveChoice, PokemonMoveIndex)],
 +    ranked: &[RankedSwitch],
++    coins: &mut Coins,
 +) -> (Vec<MoveChoice>, i32) {
 +    let (my_side, foe_side) = state.get_both_sides_immutable(&side);
 +    let active = my_side.get_active_immutable();
@@ -5783,7 +6430,7 @@ index 0000000..bf4bbc8
 +    for &(opt, mi) in avail_moves {
 +        let choice = &active.moves[&mi].choice;
 +        let score = BASE_SCORE
-+            + negatives(state, side, choice, foe_move)
++            + negatives(state, side, choice, foe_move, coins)
 +            + positives(
 +                state,
 +                side,
@@ -5793,6 +6440,7 @@ index 0000000..bf4bbc8
 +                foe_best,
 +                avail_moves,
 +                ranked,
++                coins,
 +            );
 +        if score > best_score {
 +            best_score = score;
@@ -5816,6 +6464,16 @@ index 0000000..bf4bbc8
 +    } else {
 +        (mon.hp.max(0) as f32) / (mon.maxhp as f32)
 +    }
++}
++
++/// The player's HP as the Python AI reads it: Showdown's public health, a percentage rounded up
++/// and 99 until full (poke-env's opponent HP). The AI's own mons are exact (`hp_frac`).
++fn foe_hp_frac(mon: &Pokemon) -> f32 {
++    if mon.maxhp <= 0 || mon.hp <= 0 {
++        return 0.0;
++    }
++    let pct = (100.0 * mon.hp as f32 / mon.maxhp as f32).ceil();
++    (if pct >= 100.0 && mon.hp < mon.maxhp { 99.0 } else { pct }) / 100.0
 +}
 +
 +fn is_first_turn(side: &Side) -> bool {
@@ -5994,156 +6652,251 @@ index 0000000..bf4bbc8
 +    }
 +}
 +
-+fn is_immune_damaging(attacker: &Pokemon, defender: &Pokemon, choice: &Choice) -> bool {
-+    if choice.category == MoveCategory::Status {
-+        return false;
++/// Stage multiplier as calc_bot.stat applies it: (2 + b) / 2 up, 2 / (2 - b) down.
++fn boost_mult(b: i8) -> f32 {
++    if b >= 0 {
++        (2.0 + b as f32) / 2.0
++    } else {
++        2.0 / (2.0 - b as f32)
 +    }
-+    let mtype = choice.move_type;
-+    if mtype == PokemonType::GROUND && defender.item == Items::AIRBALLOON {
-+        return true;
-+    }
-+    let mult = type_effectiveness_modifier(&mtype, defender);
-+    if mult == 0.0 {
-+        let scrappy = matches!(attacker.ability, Abilities::SCRAPPY | Abilities::MINDSEYE)
-+            && matches!(mtype, PokemonType::NORMAL | PokemonType::FIGHTING)
-+            && defender.has_type(&PokemonType::GHOST);
-+        if !scrappy {
-+            return true;
-+        }
-+    }
-+    if !ignores_target_ability(attacker, choice, &defender.ability) {
-+        match defender.ability {
-+            Abilities::LEVITATE | Abilities::EELEVATE | Abilities::EARTHEATER
-+                if mtype == PokemonType::GROUND =>
-+            {
-+                return true;
-+            }
-+            Abilities::WATERABSORB | Abilities::DRYSKIN | Abilities::STORMDRAIN
-+                if mtype == PokemonType::WATER =>
-+            {
-+                return true;
-+            }
-+            Abilities::VOLTABSORB | Abilities::LIGHTNINGROD | Abilities::MOTORDRIVE
-+                if mtype == PokemonType::ELECTRIC =>
-+            {
-+                return true;
-+            }
-+            Abilities::FLASHFIRE | Abilities::WELLBAKEDBODY if mtype == PokemonType::FIRE => {
-+                return true;
-+            }
-+            Abilities::SAPSIPPER if mtype == PokemonType::GRASS => return true,
-+            Abilities::SOUNDPROOF if choice.flags.sound => return true,
-+            Abilities::BULLETPROOF if choice.flags.bullet => return true,
-+            Abilities::WONDERGUARD if mult < 2.0 => return true,
-+            _ => {}
-+        }
-+    }
-+    false
 +}
 +
-+/// Expected fraction of defender's max HP removed by one use of `raw_choice` (without accuracy),
-+/// using poke-engine's damage calculation and choice/ability/item modifiers.
-+fn hit_frac(state: &State, att_side_ref: SideReference, raw_choice: &Choice) -> f32 {
-+    if raw_choice.category == MoveCategory::Status || raw_choice.category == MoveCategory::Switch {
++/// The speed the Python AI compares (calc_bot.stat "spe"): stat, stage, paralysis, the weather
++/// speed abilities, Surge Surfer, Tailwind. No Choice Scarf, Unburden, Trick Room.
++pub(crate) fn py_speed(state: &State, side: SideReference) -> f32 {
++    let s = state.get_side_immutable(&side);
++    let m = s.get_active_immutable();
++    let mut v = m.speed as f32 * boost_mult(s.speed_boost);
++    if m.status == PokemonStatus::PARALYZE {
++        v *= 0.5;
++    }
++    let w = state.weather.weather_type;
++    let doubled = match m.ability {
++        Abilities::SWIFTSWIM => matches!(w, Weather::RAIN | Weather::HEAVYRAIN),
++        Abilities::CHLOROPHYLL => matches!(w, Weather::SUN | Weather::HARSHSUN),
++        Abilities::SANDRUSH => w == Weather::SAND,
++        Abilities::SLUSHRUSH => matches!(w, Weather::HAIL | Weather::SNOW),
++        Abilities::SURGESURFER => state.terrain.terrain_type == Terrain::ELECTRICTERRAIN,
++        _ => false,
++    };
++    if doubled {
++        v *= 2.0;
++    }
++    if s.side_conditions.tailwind > 0 {
++        v *= 2.0;
++    }
++    v
++}
++
++/// calc_bot.effectiveness: the type chart, zeroed by Air Balloon (Ground), the absorbing and
++/// Levitate-like abilities, Soundproof / Bulletproof and Wonder Guard. No Mold Breaker, Scrappy.
++fn py_effectiveness(defender: &Pokemon, choice: &Choice) -> f32 {
++    let t = choice.move_type;
++    if t == PokemonType::GROUND && defender.item == Items::AIRBALLOON {
 +        return 0.0;
 +    }
++    let mult = type_effectiveness_modifier(&t, defender);
++    let immune = match defender.ability {
++        Abilities::LEVITATE | Abilities::EARTHEATER => t == PokemonType::GROUND,
++        Abilities::WATERABSORB | Abilities::DRYSKIN | Abilities::STORMDRAIN => {
++            t == PokemonType::WATER
++        }
++        Abilities::VOLTABSORB | Abilities::LIGHTNINGROD | Abilities::MOTORDRIVE => {
++            t == PokemonType::ELECTRIC
++        }
++        Abilities::FLASHFIRE | Abilities::WELLBAKEDBODY => t == PokemonType::FIRE,
++        Abilities::SAPSIPPER => t == PokemonType::GRASS,
++        Abilities::SOUNDPROOF => choice.flags.sound,
++        Abilities::BULLETPROOF => choice.flags.bullet,
++        Abilities::WONDERGUARD => mult < 2.0,
++        _ => false,
++    };
++    if immune {
++        0.0
++    } else {
++        mult
++    }
++}
++
++fn grounded(mon: &Pokemon) -> bool {
++    !mon.has_type(&PokemonType::FLYING)
++        && mon.ability != Abilities::LEVITATE
++        && mon.item != Items::AIRBALLOON
++}
++
++/// Expected fraction of the defender's max HP one use of `choice` removes (accuracy left out):
++/// ai_util/calc_bot.py `_dmg_frac`, the formula the Python AI decides by, term for term, so the
++/// port sees the numbers the enemy sees. Base power and type are the move's data (no Gyro Ball,
++/// Acrobatics, Ivy Cudgel mask or Weather Ball changes: their data value, 0 for the callback
++/// powers); the modifiers are calc_bot's short list (Technician, Sheer Force, Pure / Huge Power,
++/// Life Orb, Choice Band / Specs, Eviolite, Knock Off, burn, resist berries, charge turns, field).
++fn hit_frac(state: &State, att_side_ref: SideReference, choice: &Choice) -> f32 {
 +    let (att_side, def_side) = state.get_both_sides_immutable(&att_side_ref);
-+    let attacker = att_side.get_active_immutable();
-+    let defender = def_side.get_active_immutable();
-+    if defender.maxhp <= 0 {
-+        return 0.0;
-+    }
-+
-+    let fixed_opt = raw_choice
-+        .move_id
-+        .fixed_damage(attacker, defender)
-+        .or(match raw_choice.move_id {
-+            Choices::DRAGONRAGE => Some(40),
-+            Choices::SONICBOOM => Some(20),
-+            _ => None,
-+        });
-+    if let Some(fixed) = fixed_opt {
-+        let ignores_type = matches!(
-+            raw_choice.move_id,
-+            Choices::NATURESMADNESS | Choices::RUINATION
-+        );
-+        if !ignores_type && is_immune_damaging(attacker, defender, raw_choice) {
-+            return 0.0;
-+        }
-+        return (fixed.min(defender.maxhp) as f32) / (defender.maxhp as f32);
-+    }
-+
-+    let mut choice = raw_choice.clone();
-+    choice.first_move = true;
-+    let dummy_def = Choice {
-+        category: MoveCategory::Physical,
-+        base_power: 40.0,
-+        ..Default::default()
-+    };
-+
-+    modify_choice(state, &mut choice, &dummy_def, &att_side_ref);
-+    ability_modify_attack_being_used(state, &mut choice, &dummy_def, &att_side_ref);
-+    ability_modify_attack_against(state, &mut choice, &dummy_def, &att_side_ref);
-+    item_modify_attack_being_used(state, &mut choice, &att_side_ref);
-+    item_modify_attack_against(state, &mut choice, &att_side_ref);
-+
-+    if choice.category == MoveCategory::Status || choice.base_power <= 0.0 {
-+        return 0.0;
-+    }
-+
-+    let Some((dmg, _)) = calculate_damage(state, &att_side_ref, &choice, DamageRolls::Average)
-+    else {
-+        return 0.0;
-+    };
-+    let mut total = dmg as f32;
-+    if total <= 0.0 {
-+        return 0.0;
-+    }
-+
-+    // Resist berries are consumed in item_before_move rather than item_modify_attack_against.
-+    if let Some(berry_type) = resist_berry_type(defender.item) {
-+        if berry_type == choice.move_type {
-+            let eff = type_effectiveness_modifier(&choice.move_type, defender);
-+            if eff > 1.0 || choice.move_type == PokemonType::NORMAL {
-+                total = (total * 0.5).floor();
-+            }
-+        }
-+    }
-+
-+    // Multi-hit expected hits (poke-engine calculates a single hit).
-+    let hits = match choice.multi_hit() {
-+        MultiHitMove::None => 1.0,
-+        MultiHitMove::DoubleHit => 2.0,
-+        MultiHitMove::TripleHit | MultiHitMove::TripleAxel => 3.0,
-+        MultiHitMove::QuadHit => 4.0,
-+        MultiHitMove::TwoToFiveHits => {
-+            if attacker.ability == Abilities::SKILLLINK {
-+                5.0
-+            } else if attacker.item == Items::LOADEDDICE {
-+                4.5
-+            } else {
-+                3.166_666_7
-+            }
-+        }
-+        MultiHitMove::PopulationBomb => 10.0,
-+    };
-+    total *= hits;
-+
-+    // Two-turn charge moves deal half damage per turn unless sun/rain/Power Herb skips charge.
-+    let weather = state.get_weather();
-+    let skip_charge = attacker.item == Items::POWERHERB
-+        || (matches!(choice.move_id, Choices::SOLARBEAM | Choices::SOLARBLADE)
-+            && matches!(weather, Weather::SUN | Weather::HARSHSUN))
-+        || (choice.move_id == Choices::ELECTROSHOT
-+            && matches!(weather, Weather::RAIN | Weather::HEAVYRAIN));
-+    if choice.flags.charge && !skip_charge {
-+        total *= 0.5;
-+    }
-+
-+    total / (defender.maxhp as f32)
++    pair_hit_frac(
++        state,
++        att_side.get_active_immutable(),
++        (att_side.attack_boost, att_side.special_attack_boost),
++        def_side.get_active_immutable(),
++        (def_side.defense_boost, def_side.special_defense_boost),
++        choice,
++    )
 +}
 +
-+fn attacks_of<'a>(mon: &'a Pokemon) -> impl Iterator<Item = &'a Choice> {
++/// `hit_frac` for any attacker / defender pair (bench mons too): `atk` = (Atk, SpA) stages of
++/// the attacker, `def` = (Def, SpD) stages of the defender.
++pub(crate) fn pair_hit_frac(
++    state: &State,
++    attacker: &Pokemon,
++    atk: (i8, i8),
++    defender: &Pokemon,
++    def: (i8, i8),
++    choice: &Choice,
++) -> f32 {
++    if choice.category == MoveCategory::Status || choice.category == MoveCategory::Switch {
++        return 0.0;
++    }
++    let hp = defender.maxhp as f32;
++    if hp <= 0.0 {
++        return 0.0;
++    }
++    let fixed = match choice.move_id {
++        Choices::SEISMICTOSS | Choices::NIGHTSHADE => Some(attacker.level as f32),
++        Choices::SONICBOOM => Some(20.0),
++        Choices::DRAGONRAGE => Some(40.0),
++        _ => None,
++    };
++    if let Some(d) = fixed {
++        return d.min(hp) / hp;
++    }
++    // poke-env's data where poke-engine's differs: Return / Sonic Slash have no base power there,
++    // the triple kicks are 20 a hit with their own expected-hits figure
++    let (mut bp, hits) = match choice.move_id {
++        Choices::RETURN | Choices::SONICSLASH => (0.0, 1.0),
++        Choices::TRIPLEAXEL | Choices::TRIPLEKICK => (20.0, 5.23),
++        _ => (
++            choice.base_power,
++            match choice.multi_hit() {
++                MultiHitMove::None => 1.0,
++                MultiHitMove::DoubleHit => 2.0,
++                MultiHitMove::TripleHit | MultiHitMove::TripleAxel => 3.0,
++                MultiHitMove::QuadHit => 4.0,
++                MultiHitMove::TwoToFiveHits => 3.166_666_7,
++                MultiHitMove::PopulationBomb => 10.0,
++            },
++        ),
++    };
++    if bp <= 0.0 {
++        return 0.0;
++    }
++    if choice.move_id == Choices::KNOCKOFF && defender.item != Items::NONE {
++        bp = (bp * 1.5).floor();
++    }
++    if attacker.ability == Abilities::TECHNICIAN && bp <= 60.0 {
++        bp = (bp * 1.5).floor();
++    }
++    if attacker.ability == Abilities::SHEERFORCE && choice.secondaries.is_some() {
++        bp = (bp * 1.3).floor();
++    }
++    let phys = choice.category == MoveCategory::Physical;
++    let mut a = if phys {
++        attacker.attack as f32 * boost_mult(atk.0)
++    } else {
++        attacker.special_attack as f32 * boost_mult(atk.1)
++    };
++    let uses_def = phys
++        || matches!(
++            choice.move_id,
++            Choices::PSYSHOCK | Choices::PSYSTRIKE | Choices::SECRETSWORD
++        );
++    let mut d = if uses_def {
++        defender.defense as f32 * boost_mult(def.0)
++    } else {
++        defender.special_defense as f32 * boost_mult(def.1)
++    };
++    if phys && matches!(attacker.ability, Abilities::PUREPOWER | Abilities::HUGEPOWER) {
++        a *= 2.0;
++    }
++    match attacker.item {
++        Items::LIFEORB => a *= 1.3,
++        Items::CHOICEBAND if phys => a *= 1.5,
++        Items::CHOICESPECS if !phys => a *= 1.5,
++        _ => {}
++    }
++    if defender.item == Items::EVIOLITE {
++        d *= 1.5;
++    }
++    let level_term = (2.0 * attacker.level as f32 / 5.0 + 2.0).floor();
++    let base = ((level_term * bp * a.floor() / d.floor().max(1.0)).floor() / 50.0).floor() + 2.0;
++    let mut dmg = (base * 0.925).floor();
++    let t = choice.move_type;
++    if attacker.has_type(&t) {
++        dmg = (dmg * 1.5).floor();
++    }
++    let eff = py_effectiveness(defender, choice);
++    if eff == 0.0 {
++        return 0.0;
++    }
++    dmg = (dmg * eff).floor();
++    if resist_berry_type(defender.item) == Some(t) && (eff > 1.0 || t == PokemonType::NORMAL) {
++        dmg = (dmg * 0.5).floor();
++    }
++    let mut m = hits;
++    if attacker.status == PokemonStatus::BURN && phys {
++        m *= 0.5;
++    }
++    let w = state.weather.weather_type;
++    let sun = matches!(w, Weather::SUN | Weather::HARSHSUN);
++    if choice.flags.charge && !(choice.move_id == Choices::SOLARBEAM && sun) {
++        m *= 0.5;
++    }
++    // calc_bot.field_mod
++    if matches!(w, Weather::RAIN | Weather::HEAVYRAIN) {
++        if t == PokemonType::WATER {
++            m *= 1.5;
++        } else if t == PokemonType::FIRE {
++            m *= if w == Weather::HEAVYRAIN { 0.0 } else { 0.5 };
++        }
++    } else if sun {
++        if t == PokemonType::FIRE {
++            m *= 1.5;
++        } else if t == PokemonType::WATER {
++            m *= if w == Weather::HARSHSUN { 0.0 } else { 0.5 };
++        }
++    } else if w == Weather::SAND {
++        if choice.category == MoveCategory::Special && defender.has_type(&PokemonType::ROCK) {
++            m /= 1.5;
++        }
++    } else if matches!(w, Weather::HAIL | Weather::SNOW) {
++        if phys && defender.has_type(&PokemonType::ICE) {
++            m /= 1.5;
++        }
++    }
++    let terrain = state.terrain.terrain_type;
++    let boosted_type = match terrain {
++        Terrain::ELECTRICTERRAIN => Some(PokemonType::ELECTRIC),
++        Terrain::GRASSYTERRAIN => Some(PokemonType::GRASS),
++        Terrain::PSYCHICTERRAIN => Some(PokemonType::PSYCHIC),
++        _ => None,
++    };
++    if boosted_type == Some(t) && grounded(attacker) {
++        m *= 1.3;
++    }
++    if terrain == Terrain::GRASSYTERRAIN
++        && matches!(
++            choice.move_id,
++            Choices::EARTHQUAKE | Choices::BULLDOZE | Choices::MAGNITUDE
++        )
++        && grounded(defender)
++    {
++        m *= 0.5;
++    }
++    if terrain == Terrain::MISTYTERRAIN && t == PokemonType::DRAGON && grounded(defender) {
++        m *= 0.5;
++    }
++    dmg * m / hp
++}
++
++pub(crate) fn attacks_of<'a>(mon: &'a Pokemon) -> impl Iterator<Item = &'a Choice> {
 +    mon.moves
 +        .into_iter()
 +        .filter(|m| m.id != Choices::NONE && m.choice.category != MoveCategory::Status)
@@ -6154,9 +6907,12 @@ index 0000000..bf4bbc8
 +    mon.moves.into_iter().any(|m| m.id == id)
 +}
 +
-+fn can_ko(state: &State, att_side: SideReference, hits: f32) -> bool {
++/// `att_side` KOs the other side's active in `hits` hits. `ai_attacks`: the defender is the
++/// player's mon, so its HP is the public percentage (`foe_hp_frac`).
++fn can_ko(state: &State, att_side: SideReference, hits: f32, ai_attacks: bool) -> bool {
 +    let (att, def) = state.get_both_sides_immutable(&att_side);
-+    let dfn_hp = hp_frac(def.get_active_immutable());
++    let def = def.get_active_immutable();
++    let dfn_hp = if ai_attacks { foe_hp_frac(def) } else { hp_frac(def) };
 +    attacks_of(att.get_active_immutable()).any(|c| hits * hit_frac(state, att_side, c) >= dfn_hp)
 +}
 +
@@ -6192,7 +6948,7 @@ index 0000000..bf4bbc8
 +    if p != q {
 +        return p > q;
 +    }
-+    get_effective_speed(state, &my_side) > get_effective_speed(state, &my_side.get_other_side())
++    py_speed(state, my_side) > py_speed(state, my_side.get_other_side())
 +}
 +
 +fn n_remaining(side: &Side) -> usize {
@@ -6399,6 +7155,7 @@ index 0000000..bf4bbc8
 +    side: SideReference,
 +    choice: &Choice,
 +    foe_move: Option<&Choice>,
++    coins: &mut Coins,
 +) -> i32 {
 +    let (my_side, foe_side) = state.get_both_sides_immutable(&side);
 +    let active = my_side.get_active_immutable();
@@ -6409,9 +7166,11 @@ index 0000000..bf4bbc8
 +        return -10;
 +    }
 +    if is_protect_move(choice.move_id) && my_side.side_conditions.protect > 0 {
-+        return -10;
++        // CFRU: a second consecutive Protect is penalised half the time, a third always
++        let penalised = my_side.side_conditions.protect >= 2 || coins.roll(2) == 0;
++        return if penalised { -10 } else { 0 };
 +    }
-+    if choice.category != MoveCategory::Status && is_immune_damaging(active, foe, choice) {
++    if choice.category != MoveCategory::Status && py_effectiveness(foe, choice) == 0.0 {
 +        return if is_absorb_ability(foe.ability) {
 +            -20
 +        } else {
@@ -6498,7 +7257,7 @@ index 0000000..bf4bbc8
 +fn status_viability(cls: FightingStyle, boost: i32, state: &State, side: SideReference) -> i32 {
 +    match cls {
 +        FightingStyle::SetupStats => {
-+            if !can_ko(state, side.get_other_side(), 2.0) {
++            if !can_ko(state, side.get_other_side(), 2.0, false) {
 +                3
 +            } else {
 +                0
@@ -6554,6 +7313,7 @@ index 0000000..bf4bbc8
 +    choice: &Choice,
 +    foe_move: Option<&Choice>,
 +    foe_best: f32,
++    coins: &mut Coins,
 +) -> bool {
 +    let active = state.get_side_immutable(&side).get_active_immutable();
 +    let hp = hp_frac(active);
@@ -6562,8 +7322,8 @@ index 0000000..bf4bbc8
 +        if foe_best >= hp && foe_best < hp + heal {
 +            return true;
 +        }
-+        // CFRU's 50% roll when 2*d >= hp && heal > hp is approximated deterministically as false.
-+        return false;
++        // CFRU's 50% roll
++        return 2.0 * foe_best >= hp && heal > hp && coins.roll(2) == 1;
 +    }
 +    foe_best < hp && 2.0 * foe_best >= hp && hp - foe_best + heal > foe_best
 +}
@@ -6580,7 +7340,7 @@ index 0000000..bf4bbc8
 +        || foe_side
 +            .volatile_statuses
 +            .contains(&PokemonVolatileStatus::LEECHSEED);
-+    if dot_status && hp_frac(foe) <= 0.125 {
++    if dot_status && foe_hp_frac(foe) <= 0.125 {
 +        return true;
 +    }
 +    hurt && 2.0 * foe_best >= hp_frac(active)
@@ -6688,8 +7448,7 @@ index 0000000..bf4bbc8
 +            fs > fp
 +        }
 +        PokemonBoostableStat::Speed => {
-+            get_effective_speed(state, &side)
-+                <= get_effective_speed(state, &side.get_other_side())
++            py_speed(state, side) <= py_speed(state, side.get_other_side())
 +        }
 +        _ => false,
 +    }
@@ -6717,8 +7476,8 @@ index 0000000..bf4bbc8
 +            | FightingStyle::ScreensSweeper
 +    );
 +    let flags = ranked[0].flags;
-+    let we_ko = can_ko(state, side, 1.0);
-+    let we_2hko = can_ko(state, side, 2.0);
++    let we_ko = can_ko(state, side, 1.0, true);
++    let we_2hko = can_ko(state, side, 2.0, true);
 +    let hp = hp_frac(active);
 +    let boosted = damager && (my_side.attack_boost > 0 || my_side.special_attack_boost > 0);
 +
@@ -6786,7 +7545,7 @@ index 0000000..bf4bbc8
 +    let (my_side, foe_side) = state.get_both_sides_immutable(&side);
 +    let active = my_side.get_active_immutable();
 +    let foe = foe_side.get_active_immutable();
-+    let foe_hp = hp_frac(foe);
++    let foe_hp = foe_hp_frac(foe);
 +    let my_hp = hp_frac(active);
 +    let d = hit_frac(state, side, choice);
 +    let kos = d >= foe_hp;
@@ -6883,6 +7642,7 @@ index 0000000..bf4bbc8
 +    foe_best: f32,
 +    avail_moves: &[(MoveChoice, PokemonMoveIndex)],
 +    ranked: &[RankedSwitch],
++    coins: &mut Coins,
 +) -> i32 {
 +    let (my_side, foe_side) = state.get_both_sides_immutable(&side);
 +    let active = my_side.get_active_immutable();
@@ -6921,8 +7681,8 @@ index 0000000..bf4bbc8
 +                    bonus += sv(boost);
 +                }
 +                PokemonStatus::PARALYZE => {
-+                    let me = get_effective_speed(state, &side) as f32;
-+                    let them = get_effective_speed(state, &side.get_other_side()) as f32;
++                    let me = py_speed(state, side);
++                    let them = py_speed(state, side.get_other_side());
 +                    bonus += sv(if them >= me && me > them * 0.5 { 2 } else { 1 });
 +                }
 +                PokemonStatus::BURN => {
@@ -6955,7 +7715,7 @@ index 0000000..bf4bbc8
 +    // Recovery & draining moves
 +    let heals = is_recovery_move(choice)
 +        || (choice.drain.is_some() && choice.category != MoveCategory::Status);
-+    if heals && should_recover(state, side, choice, foe_move, foe_best) {
++    if heals && should_recover(state, side, choice, foe_move, foe_best, coins) {
 +        if choice.drain.is_some() {
 +            bonus += if cls == FightingStyle::Stall { sv(2) } else { 3 };
 +        } else if matches!(cls, FightingStyle::Stall | FightingStyle::Phazer) {
@@ -7057,18 +7817,18 @@ index 0000000..bf4bbc8
 +        let (my_side, foe_side) = st.get_both_sides_immutable(&side);
 +        let mon = my_side.get_active_immutable();
 +        let foe = foe_side.get_active_immutable();
-+        let foe_hp = hp_frac(foe);
++        let foe_hp = foe_hp_frac(foe);
 +        let my_hp = hp_frac(mon);
 +
 +        let mut score: i32 = 0;
 +        let mut flags = SwitchFlags::default();
 +
-+        if get_effective_speed(st, &side) >= get_effective_speed(st, &foe_side_ref) {
++        if py_speed(st, side) >= py_speed(st, foe_side_ref) {
 +            score += 14;
 +            flags.outspeeds = true;
 +        }
 +        let has_attacks = attacks_of(mon).next().is_some();
-+        if can_ko(st, side, 1.0) {
++        if can_ko(st, side, 1.0, true) {
 +            score += 31;
 +            flags.ko = true;
 +            if attacks_of(mon).any(|c| c.priority > 0 && hit_frac(st, side, c) >= foe_hp) {
@@ -7079,7 +7839,7 @@ index 0000000..bf4bbc8
 +                    flags.outspeeds = true;
 +                }
 +            }
-+        } else if can_ko(st, side, 2.0) {
++        } else if can_ko(st, side, 2.0, true) {
 +            score += 2;
 +            flags.two_hko = true;
 +        } else if !has_attacks {
@@ -7191,8 +7951,29 @@ index 0000000..bf4bbc8
 +            .any(|m| m.id != Choices::NONE && is_recovery_move(&m.choice));
 +        2.0 * d >= 1.0
 +            && has_heal
-+            && get_effective_speed(st, &side) > get_effective_speed(st, &foe_side_ref)
++            && py_speed(st, side) > py_speed(st, foe_side_ref)
 +    })
++}
++
++/// The first of `ranked[..limit]` that `ok` accepts, as Python picks it: `_ranked_switches`
++/// breaks score ties at random, so every candidate tied with that one (same score and faints)
++/// that `ok` accepts is an equally likely pick.
++fn first_ok(
++    state: &mut State,
++    ranked: &[RankedSwitch],
++    limit: usize,
++    mut ok: impl FnMut(&mut State, RankedSwitch) -> bool,
++) -> Option<Vec<MoveChoice>> {
++    let first = *ranked.iter().take(limit).find(|&&c| ok(state, c))?;
++    let tied = |c: &&RankedSwitch| c.score == first.score && c.flags.faints == first.flags.faints;
++    Some(
++        ranked
++            .iter()
++            .filter(tied)
++            .filter(|&&c| c.index == first.index || ok(state, c))
++            .map(|c| MoveChoice::Switch(c.index))
++            .collect(),
++    )
 +}
 +
 +fn switch_target(
@@ -7200,6 +7981,7 @@ index 0000000..bf4bbc8
 +    side: SideReference,
 +    best_score: i32,
 +    ranked: &[RankedSwitch],
++    coins: &mut Coins,
 +) -> Option<Vec<MoveChoice>> {
 +    let foe_side_ref = side.get_other_side();
 +    let foe_move_owned = predict_foe_move(state, side).cloned();
@@ -7236,11 +8018,10 @@ index 0000000..bf4bbc8
 +        .into_iter()
 +        .any(|m| m.id != Choices::NONE && self_boosts(&m.choice).is_some());
 +
-+    let we_ko = can_ko(state, side, 1.0);
++    let we_ko = can_ko(state, side, 1.0, true);
 +    let foe_hit_active = foe_move.map_or(0.0, |fm| hit_frac(state, foe_side_ref, fm));
 +    let they_ko = foe_move.is_some() && foe_hit_active >= active_hp;
-+    let faster = get_effective_speed(state, &side) > get_effective_speed(state, &foe_side_ref);
-+    let top2 = &ranked[..ranked.len().min(2)];
++    let faster = py_speed(state, side) > py_speed(state, foe_side_ref);
 +
 +    // 1. Absorb the predicted move (Flash Fire, Volt/Water Absorb, Dry Skin, Sap Sipper...)
 +    if let Some(fm) = foe_move {
@@ -7255,31 +8036,30 @@ index 0000000..bf4bbc8
 +            && !(faster && we_ko)
 +            && !(!they_ko && we_ko && boosted)
 +        {
-+            for &cand in ranked {
-+                let mon = &state.get_side_immutable(&side).pokemon[cand.index];
-+                if ability_absorbs_type(mon.ability, mtype) {
-+                    if hp_frac(mon) >= 1.0
++            // a full-HP healer gains nothing from a hit the active takes twice
++            let absorbs = |st: &mut State, cand: RankedSwitch| {
++                let mon = &st.get_side_immutable(&side).pokemon[cand.index];
++                ability_absorbs_type(mon.ability, mtype)
++                    && !(hp_frac(mon) >= 1.0
 +                        && matches!(
 +                            mon.ability,
 +                            Abilities::VOLTABSORB | Abilities::WATERABSORB | Abilities::DRYSKIN
 +                        )
-+                        && 2.0 * foe_hit_active < active_hp
-+                    {
-+                        continue;
-+                    }
-+                    return Some(vec![MoveChoice::Switch(cand.index)]);
-+                }
++                        && 2.0 * foe_hit_active < active_hp)
++            };
++            if let Some(t) = first_ok(state, ranked, ranked.len(), absorbs) {
++                return Some(t);
 +            }
 +        }
 +    }
 +
 +    // 2. Only bad moves left: go to a top-2 mon that outspeeds/walls/resists and takes the hit
 +    if best_score < BASE_SCORE && !fresh {
-+        for &cand in top2 {
-+            if cand.flags.outspeeds_walls_or_resists() && wont_take_much(state, side, cand, foe_move)
-+            {
-+                return Some(vec![MoveChoice::Switch(cand.index)]);
-+            }
++        let ok = |st: &mut State, c: RankedSwitch| {
++            c.flags.outspeeds_walls_or_resists() && wont_take_much(st, side, c, foe_move)
++        };
++        if let Some(t) = first_ok(state, ranked, 2, ok) {
++            return Some(t);
 +        }
 +    }
 +
@@ -7299,22 +8079,21 @@ index 0000000..bf4bbc8
 +        && !(active_status == PokemonStatus::PARALYZE && active_hp < 1.0 / 3.0)
 +        && (active_hp > 0.2 || ranked[0].score >= 70)
 +    {
-+        for &cand in ranked {
++        let ok = |st: &mut State, c: RankedSwitch| {
 +            let immune_in = foe_move.map_or(false, |fm| {
-+                let mon = &state.get_side_immutable(&side).pokemon[cand.index];
-+                is_immune_damaging(&foe_active_clone, mon, fm)
++                py_effectiveness(&st.get_side_immutable(&side).pokemon[c.index], fm) == 0.0
 +            });
-+            if (cand.flags.outspeeds_walls_or_resists() && immune_in)
-+                || ((cand.flags.walls_or_resists() || (cand.flags.ko && cand.flags.outspeeds))
-+                    && wont_take_much(state, side, cand, foe_move))
-+            {
-+                return Some(vec![MoveChoice::Switch(cand.index)]);
-+            }
++            (c.flags.outspeeds_walls_or_resists() && immune_in)
++                || ((c.flags.walls_or_resists() || (c.flags.ko && c.flags.outspeeds))
++                    && wont_take_much(st, side, c, foe_move))
++        };
++        if let Some(t) = first_ok(state, ranked, ranked.len(), ok) {
++            return Some(t);
 +        }
 +    }
 +
 +    // 5. Offensive stats at -3 with only that kind of attack, and foe cannot KO
-+    let foe_can_ko = can_ko(state, foe_side_ref, 1.0);
++    let foe_can_ko = can_ko(state, foe_side_ref, 1.0, false);
 +    if !fresh && damager {
 +        let low = (atk_boost <= -3 && has_phys && !has_spec)
 +            || (spa_boost <= -3 && has_spec && !has_phys)
@@ -7329,33 +8108,70 @@ index 0000000..bf4bbc8
 +        }
 +    }
 +
-+    // 6. Save the sweeper for later (deterministic part; CFRU's random 25/50% branch omitted)
++    // 6. Save the sweeper for later. CFRU's r = randrange(4): `r & 1 && (!2HKO || r & 2)` is
++    // a 50% roll, then another 50% roll when we 2HKO (25% in all)
 +    if !fresh
 +        && damager
 +        && !we_ko
 +        && !matches!(active_status, PokemonStatus::FREEZE | PokemonStatus::PARALYZE)
 +    {
-+        if (foe_can_ko && !active_heals) || (!boosted && !active_setup && ranked[0].flags.ko) {
++        let resists_all = attacks_of(&foe_active_clone)
++            .all(|c| 3.0 * hit_frac(state, foe_side_ref, c) < active_hp);
++        let save = (foe_can_ko && !active_heals)
++            || (!boosted
++                && !active_setup
++                && (ranked[0].flags.ko
++                    || (!resists_all
++                        && coins.roll(2) == 1
++                        && (!can_ko(state, side, 2.0, true) || coins.roll(2) == 1))));
++        if save {
 +            if foe_can_ko {
-+                for &cand in top2 {
-+                    if cand.flags.ko
-+                        && cand.flags.outspeeds
-+                        && wont_take_much(state, side, cand, foe_move)
-+                    {
-+                        return Some(vec![MoveChoice::Switch(cand.index)]);
-+                    }
++                let ok = |st: &mut State, c: RankedSwitch| {
++                    c.flags.ko && c.flags.outspeeds && wont_take_much(st, side, c, foe_move)
++                };
++                if let Some(t) = first_ok(state, ranked, 2, ok) {
++                    return Some(t);
 +                }
 +            }
-+            for &cand in ranked {
-+                if cand.flags.resists {
-+                    return Some(vec![MoveChoice::Switch(cand.index)]);
-+                }
-+            }
++            return first_ok(state, ranked, ranked.len(), |_, c| c.flags.resists);
 +        }
 +    }
 +
 +    None
 +}
++
++#[cfg(test)]
++mod tests {
++    use super::Coins;
++
++    #[test]
++    fn coins_enumerate_nested_rolls() {
++        // the save-the-sweeper shape: a 50% roll, then a second 50% roll on one side only
++        let mut coins = Coins::default();
++        let mut seen = Vec::new();
++        loop {
++            let outcome = coins.roll(2) == 1 && coins.roll(2) == 1;
++            seen.push((outcome, coins.prob()));
++            if !coins.next() {
++                break;
++            }
++        }
++        assert_eq!(seen, vec![(false, 0.5), (false, 0.25), (true, 0.25)]);
++    }
++
++    #[test]
++    fn foe_hp_is_showdowns_public_percentage() {
++        use super::{foe_hp_frac, hp_frac};
++        use crate::state::Pokemon;
++        let mon = |hp, maxhp| Pokemon { hp, maxhp, ..Default::default() };
++        assert_eq!(foe_hp_frac(&mon(42, 48)), 0.88); // 87.5% rounds up: a 0.875 hit no longer KOs
++        assert_eq!(foe_hp_frac(&mon(199, 200)), 0.99); // 99 until full
++        assert_eq!(foe_hp_frac(&mon(48, 48)), 1.0);
++        assert_eq!(hp_frac(&mon(42, 48)), 0.875); // the AI's own mons: exact
++    }
++}
++
++
 diff --git a/src/genx/rr_mega.rs b/src/genx/rr_mega.rs
 new file mode 100644
 index 0000000..2958db6
@@ -9131,7 +9947,7 @@ index 0000000..4eb5558
 +    rr_try_flat_heal_item(side_ref, side, instructions);
 +}
 diff --git a/src/genx/state.rs b/src/genx/state.rs
-index dffb267..0ebf29b 100644
+index dffb267..f112de5 100644
 --- a/src/genx/state.rs
 +++ b/src/genx/state.rs
 @@ -85,6 +85,15 @@ impl MoveChoice {
@@ -9361,7 +10177,7 @@ index dffb267..0ebf29b 100644
              self.terrain.terrain_type
          } else {
              Terrain::NONE
-@@ -1553,6 +1665,25 @@ impl State {
+@@ -1553,6 +1665,27 @@ impl State {
          ]) {
              self.use_last_used_move = true
          }
@@ -9380,8 +10196,10 @@ index dffb267..0ebf29b 100644
 +                }
 +            }
 +        }
++        // RR: always; the RR AI's first-turn rules read it (rr_ai.rs is_first_turn), and a line
++        // built from generate_instructions kept a stale one (2026-11-24, rl/line.py vs Showdown)
 +        #[cfg(feature = "rr")]
-+        if super::rr_abilities::rr_needs_last_used_move(self) {
++        {
 +            self.use_last_used_move = true;
 +        }
      }
@@ -9401,6 +10219,26 @@ index 237b1e1..c3a6b5c 100644
          assert_eq!(align_of::<Instruction>(), 2);
      }
  }
+diff --git a/src/io.rs b/src/io.rs
+index 8f3c629..b2633c8 100644
+--- a/src/io.rs
++++ b/src/io.rs
+@@ -319,6 +319,7 @@ pub fn main() {
+                         side_two_options.clone(),
+                         std::time::Duration::from_millis(mcts.time_to_search_ms),
+                         mcts.iterations,
++                        None,
+                     )
+                 };
+                 print_mcts_result(&state, result);
+@@ -585,6 +586,7 @@ fn command_loop(mut io_data: IOData) {
+                         side_two_options.clone(),
+                         std::time::Duration::from_millis(max_time_ms),
+                         0,
++                        None,
+                     );
+                     let elapsed = start_time.elapsed();
+                     pprint_mcts_result(&io_data.state, result);
 diff --git a/src/lib.rs b/src/lib.rs
 index 17a5e48..682bff0 100644
 --- a/src/lib.rs
@@ -9415,46 +10253,148 @@ index 17a5e48..682bff0 100644
  pub mod state;
  
 diff --git a/src/mcts.rs b/src/mcts.rs
-index 0a082f4..636a1ad 100644
+index 0a082f4..38e8fb3 100644
 --- a/src/mcts.rs
 +++ b/src/mcts.rs
-@@ -89,21 +89,47 @@ impl Node {
+@@ -1,10 +1,12 @@
+ use crate::engine::evaluate::evaluate;
+ use crate::engine::generate_instructions::generate_instructions_from_move_pair;
+ use crate::engine::state::MoveChoice;
++use crate::pokemon::PokemonName;
+ use crate::instruction::StateInstructions;
+ use crate::state::State;
+ use rand::prelude::*;
+ use rand::rng;
++use rand::rngs::StdRng;
+ use std::collections::HashMap;
+ use std::time::Duration;
+ 
+@@ -14,6 +16,24 @@ use web_time::Instant;
+ #[cfg(not(target_arch = "wasm32"))]
+ use std::time::Instant;
+ 
++// env POKE_ENGINE_BRANCH_ALL=1: branch on crits and damage-roll KOs at every depth, not only
++// the first two levels (default: poke-engine's behaviour)
++static BRANCH_ALL: std::sync::LazyLock<bool> =
++    std::sync::LazyLock::new(|| std::env::var("POKE_ENGINE_BRANCH_ALL").as_deref() == Ok("1"));
++
++/// Side two's options under the RR AI model with their probabilities (none when p_model = 0).
++fn ai_weights(state: &mut State, p_model: f32) -> Vec<(MoveChoice, f32)> {
++    #[cfg(feature = "rr")]
++    if p_model > 0.0 {
++        return crate::engine::rr_ai::rr_ai_choice_weighted_mut(
++            state,
++            crate::state::SideReference::SideTwo,
++        );
++    }
++    let _ = (state, p_model);
++    Vec::new()
++}
++
+ fn sigmoid(x: f32) -> f32 {
+     // Tuned so that ~200 points is very close to 1.0
+     1.0 / (1.0 + (-0.0125 * x).exp())
+@@ -37,7 +57,7 @@ pub struct Node {
+ }
+ 
+ impl Node {
+-    fn new() -> Node {
++    pub fn new() -> Node {
+         Node {
+             root: false,
+             parent: std::ptr::null_mut(),
+@@ -49,23 +69,28 @@ impl Node {
+             s2_options: None,
+         }
+     }
+-    unsafe fn populate(&mut self, s1_options: Vec<MoveChoice>, s2_options: Vec<MoveChoice>) {
+-        let s1_options_vec: Vec<MoveNode> = s1_options
+-            .iter()
+-            .map(|x| MoveNode {
+-                move_choice: x.clone(),
+-                total_score: 0.0,
+-                visits: 0,
+-            })
+-            .collect();
+-        let s2_options_vec: Vec<MoveNode> = s2_options
+-            .iter()
+-            .map(|x| MoveNode {
+-                move_choice: x.clone(),
+-                total_score: 0.0,
+-                visits: 0,
+-            })
+-            .collect();
++    /// `ai`: the enemy model's weights on side two's options; an AI pick missing from
++    /// `s2_options` is added, options the AI never picks keep weight 0
++    unsafe fn populate(
++        &mut self,
++        s1_options: Vec<MoveChoice>,
++        s2_options: Vec<MoveChoice>,
++        ai: Vec<(MoveChoice, f32)>,
++    ) {
++        let node = |x: &MoveChoice| MoveNode {
++            move_choice: x.clone(),
++            total_score: 0.0,
++            visits: 0,
++            weight: 0.0,
++        };
++        let s1_options_vec: Vec<MoveNode> = s1_options.iter().map(node).collect();
++        let mut s2_options_vec: Vec<MoveNode> = s2_options.iter().map(node).collect();
++        for (choice, w) in ai {
++            match s2_options_vec.iter_mut().find(|m| m.move_choice == choice) {
++                Some(m) => m.weight = w,
++                None => s2_options_vec.push(MoveNode { weight: w, ..node(&choice) }),
++            }
++        }
+ 
+         self.s1_options = Some(s1_options_vec);
+         self.s2_options = Some(s2_options_vec);
+@@ -84,26 +109,56 @@ impl Node {
+         choice
+     }
+ 
++    /// An option drawn by the enemy model's weights (uniform if none has weight)
++    fn sample_weighted(side_map: &[MoveNode], rng: &mut impl Rng) -> usize {
++        let total: f32 = side_map.iter().map(|m| m.weight).sum();
++        if total <= 0.0 {
++            return rng.random_range(0..side_map.len());
++        }
++        let mut threshold = rng.random_range(0.0..total);
++        let mut last = 0;
++        for (index, node) in side_map.iter().enumerate() {
++            if node.weight > 0.0 {
++                threshold -= node.weight;
++                last = index;
++                if threshold < 0.0 {
++                    return index;
++                }
++            }
++        }
++        last // float rounding
++    }
++
+     pub unsafe fn selection(
+         &mut self,
          state: &mut State,
          children: &mut HashMap<(usize, usize, usize), Box<[Node]>>,
          rng: &mut impl Rng,
-+        vs_ai: bool,
++        p_model: f32,
      ) -> (*mut Node, usize, usize) {
          if self.s1_options.is_none() {
--            let (s1_options, s2_options) = state.get_all_options();
-+            let (s1_options, s2_options) = if vs_ai {
-+                #[cfg(feature = "rr")]
-+                {
-+                    let (s1, _) = state.get_all_options();
-+                    let s2 = crate::engine::rr_ai::rr_ai_choice_mut(
-+                        state,
-+                        crate::state::SideReference::SideTwo,
-+                    );
-+                    (s1, s2)
-+                }
-+                #[cfg(not(feature = "rr"))]
-+                {
-+                    state.get_all_options()
-+                }
-+            } else {
-+                state.get_all_options()
-+            };
-             self.populate(s1_options, s2_options);
+             let (s1_options, s2_options) = state.get_all_options();
+-            self.populate(s1_options, s2_options);
++            let ai = ai_weights(state, p_model);
++            self.populate(s1_options, s2_options, ai);
          }
  
          let s1_mc_index = self.maximize_ucb_for_side(self.s1_options.as_ref().unwrap());
 -        let s2_mc_index = self.maximize_ucb_for_side(self.s2_options.as_ref().unwrap());
 +        let s2_opts = self.s2_options.as_ref().unwrap();
-+        let s2_mc_index = if vs_ai {
-+            if s2_opts.len() <= 1 {
-+                0
-+            } else {
-+                rng.random_range(0..s2_opts.len())
-+            }
++        // mixture opponent: the enemy model with probability p_model, else UCB (minimax-like)
++        let use_model = s2_opts.len() > 1
++            && (p_model >= 1.0 || (p_model > 0.0 && rng.random::<f32>() < p_model));
++        let s2_mc_index = if use_model {
++            Self::sample_weighted(s2_opts, rng)
 +        } else {
 +            self.maximize_ucb_for_side(s2_opts)
 +        };
@@ -9465,49 +10405,81 @@ index 0a082f4..636a1ad 100644
                  let chosen_child = self.sample_node(child_vec_ptr, rng);
                  state.apply_instructions(&(*chosen_child).instructions.instruction_list);
 -                (*chosen_child).selection(state, children, rng)
-+                (*chosen_child).selection(state, children, rng, vs_ai)
++                (*chosen_child).selection(state, children, rng, p_model)
              }
              None => (self as *mut Node, s1_mc_index, s2_mc_index),
          }
-@@ -195,7 +221,9 @@ impl Node {
+@@ -146,7 +201,7 @@ impl Node {
+         {
+             return self as *mut Node;
+         }
+-        let should_branch_on_damage = self.root || (*self.parent).root;
++        let should_branch_on_damage = self.root || (*self.parent).root || *BRANCH_ALL;
+         let mut new_instructions =
+             generate_instructions_from_move_pair(state, s1_move, s2_move, should_branch_on_damage);
+         let mut this_pair_vec = Vec::with_capacity(new_instructions.len());
+@@ -194,7 +249,19 @@ impl Node {
+     }
  
      pub fn rollout(&mut self, state: &mut State, root_eval: &f32) -> f32 {
++        // fitted evaluation (env POKE_ENGINE_EVAL_WEIGHTS): absolute sigmoid, U at terminals
++        #[cfg(feature = "rr")]
++        if let Some(w) = crate::engine::evaluate::EVAL_WEIGHTS.as_deref() {
++            return crate::engine::evaluate::fitted_leaf_value(w, state, *root_eval);
++        }
          let battle_is_over = state.battle_is_over();
--        if battle_is_over == 0.0 {
-+        // Nuzlocke (rr): a won battle is worth what it cost; the evaluation charges every death
-+        // on side one (evaluate.rs NUZLOCKE_DEATH), so a win with deaths scores below a clean one
-+        if battle_is_over == 0.0 || (cfg!(feature = "rr") && battle_is_over == 1.0) {
++        // Nuzlocke (rr): a win always beats an open fight (0.55) and scales with the survivors,
++        // so the search still prefers a clean win but never avoids a trade that wins
++        if cfg!(feature = "rr") && battle_is_over == 1.0 {
++            let party = state.side_one.pokemon.into_iter().filter(|p| p.id != PokemonName::NONE);
++            let (alive, size) = party.fold((0, 0), |(a, n), p| (a + (p.hp > 0) as u32, n + 1));
++            return 0.55 + 0.45 * alive as f32 / size.max(1) as f32;
++        }
+         if battle_is_over == 0.0 {
              let eval = evaluate(state);
              sigmoid(eval - root_eval)
-         } else {
-@@ -259,8 +287,10 @@ fn mcts_iteration(
+@@ -213,6 +280,7 @@ pub struct MoveNode {
+     pub move_choice: MoveChoice,
+     pub total_score: f32,
+     pub visits: u32,
++    pub weight: f32, // the enemy model's probability of this option (side two, vs the AI)
+ }
+ 
+ impl MoveNode {
+@@ -259,8 +327,10 @@ fn mcts_iteration(
      root_eval: &f32,
      children: &mut HashMap<(usize, usize, usize), Box<[Node]>>,
      rng: &mut impl Rng,
-+    vs_ai: bool,
++    p_model: f32,
  ) {
 -    let (mut new_node, s1_move, s2_move) = unsafe { root_node.selection(state, children, rng) };
 +    let (mut new_node, s1_move, s2_move) =
-+        unsafe { root_node.selection(state, children, rng, vs_ai) };
++        unsafe { root_node.selection(state, children, rng, p_model) };
      new_node = unsafe { (*new_node).expand(state, s1_move, s2_move, children, rng) };
      let rollout_result = unsafe { (*new_node).rollout(state, root_eval) };
      unsafe { (*new_node).backpropagate(rollout_result, state) }
-@@ -277,12 +307,13 @@ fn run_mcts_loop(
+@@ -277,12 +347,18 @@ fn run_mcts_loop(
      root_eval: &f32,
      children: &mut HashMap<(usize, usize, usize), Box<[Node]>>,
      limit: SearchLimit,
-+    vs_ai: bool,
++    p_model: f32,
++    seed: Option<u64>,
  ) {
-     let mut rng = rng();
+-    let mut rng = rng();
++    // a seed makes the search replayable for an iteration limit only (a time limit varies)
++    let mut rng = match seed {
++        Some(s) => StdRng::seed_from_u64(s),
++        None => StdRng::from_rng(&mut rng()),
++    };
      let start_time = Instant::now();
      loop {
          for _ in 0..1000 {
 -            mcts_iteration(root_node, state, root_eval, children, &mut rng);
-+            mcts_iteration(root_node, state, root_eval, children, &mut rng, vs_ai);
++            mcts_iteration(root_node, state, root_eval, children, &mut rng, p_model);
          }
          if root_node.times_visited >= 10_000_000 {
              break;
-@@ -302,12 +333,13 @@ fn run_mcts_loop(
+@@ -302,16 +378,19 @@ fn run_mcts_loop(
      }
  }
  
@@ -9518,15 +10490,23 @@ index 0a082f4..636a1ad 100644
      side_two_options: Vec<MoveChoice>,
      max_time: Duration,
      max_iterations: u32,
-+    vs_ai: bool,
++    p_model: f32,
++    seed: Option<u64>,
  ) -> MctsResult {
      let mut root_node = Node::new();
++    let ai = ai_weights(state, p_model);
      unsafe {
-@@ -328,9 +360,10 @@ pub fn perform_mcts(
+-        root_node.populate(side_one_options, side_two_options);
++        root_node.populate(side_one_options, side_two_options, ai);
+     }
+     root_node.root = true;
+     let mut children: HashMap<(usize, usize, usize), Box<[Node]>> = HashMap::new();
+@@ -328,9 +407,11 @@ pub fn perform_mcts(
          &root_eval,
          &mut children,
          search_limit,
-+        vs_ai,
++        p_model,
++        seed,
      );
  
 -    let result = MctsResult {
@@ -9534,7 +10514,7 @@ index 0a082f4..636a1ad 100644
          s1: root_node
              .s1_options
              .as_ref()
-@@ -354,7 +387,45 @@ pub fn perform_mcts(
+@@ -354,7 +435,52 @@ pub fn perform_mcts(
              })
              .collect(),
          iteration_count: root_node.times_visited,
@@ -9549,6 +10529,7 @@ index 0a082f4..636a1ad 100644
 +    side_two_options: Vec<MoveChoice>,
 +    max_time: Duration,
 +    max_iterations: u32,
++    seed: Option<u64>,
 +) -> MctsResult {
 +    run_mcts_with_mode(
 +        state,
@@ -9556,28 +10537,34 @@ index 0a082f4..636a1ad 100644
 +        side_two_options,
 +        max_time,
 +        max_iterations,
-+        false,
++        0.0,
++        seed,
 +    )
 +}
 +
++/// MCTS with side two as a mixture opponent: at each side-two node the enemy option is drawn
++/// from the RR AI's weights with probability `p_model`, else picked by UCB over all of side
++/// two's options (1.0: the AI model only; 0.0: plain decoupled UCB as in `perform_mcts`).
 +#[cfg(feature = "rr")]
 +pub fn perform_mcts_vs_ai(
 +    state: &mut State,
 +    side_one_options: Vec<MoveChoice>,
 +    max_time: Duration,
 +    max_iterations: u32,
++    seed: Option<u64>,
++    p_model: f32,
 +) -> MctsResult {
 +    let prev_lum = state.use_last_used_move;
 +    state.use_last_used_move = true;
-+    let side_two_options =
-+        crate::engine::rr_ai::rr_ai_choice_mut(state, crate::state::SideReference::SideTwo);
++    let (_, side_two_options) = state.root_get_all_options();
 +    let res = run_mcts_with_mode(
 +        state,
 +        side_one_options,
 +        side_two_options,
 +        max_time,
 +        max_iterations,
-+        true,
++        p_model,
++        seed,
 +    );
 +    state.use_last_used_move = prev_lum;
 +    res
@@ -10481,6 +11468,56 @@ index 8cf8f58..9a773ff 100644
              instruction_list: vec![
                  Instruction::Damage(DamageInstruction {
                      side_ref: SideReference::SideTwo,
+diff --git a/tests/test_branch_all.rs b/tests/test_branch_all.rs
+new file mode 100644
+index 0000000..daa71c7
+--- /dev/null
++++ b/tests/test_branch_all.rs
+@@ -0,0 +1,44 @@
++#![cfg(feature = "rr")]
++// Its own test binary: POKE_ENGINE_BRANCH_ALL is read once per process.
++
++use poke_engine::choices::Choices;
++use poke_engine::engine::state::MoveChoice;
++use poke_engine::mcts::{MoveNode, Node};
++use poke_engine::pokemon::PokemonName;
++use poke_engine::state::{PokemonIndex, PokemonMoveIndex, State};
++use rand::rngs::StdRng;
++use rand::SeedableRng;
++use std::collections::HashMap;
++
++#[test]
++fn test_branch_all_branches_crits_below_depth_one() {
++    std::env::set_var("POKE_ENGINE_BRANCH_ALL", "1");
++    let mut state = State::default();
++    for side in [&mut state.side_one, &mut state.side_two] {
++        let mon = &mut side.pokemon[PokemonIndex::P0];
++        mon.id = PokemonName::PIKACHU;
++        mon.replace_move(PokemonMoveIndex::M0, Choices::TACKLE);
++    }
++    let tackle = || {
++        Some(vec![MoveNode {
++            move_choice: MoveChoice::Move(PokemonMoveIndex::M0),
++            total_score: 0.0,
++            visits: 0,
++            weight: 0.0,
++        }])
++    };
++    // root -> child -> grandchild: the grandchild expands at depth 2
++    let mut nodes: Vec<Box<Node>> = (0..3).map(|_| Box::new(Node::new())).collect();
++    nodes[0].root = true;
++    for i in 1..3 {
++        nodes[i].parent = &mut *nodes[i - 1];
++    }
++    nodes[2].s1_options = tackle();
++    nodes[2].s2_options = tackle();
++    let mut children = HashMap::new();
++    let mut rng = StdRng::seed_from_u64(0);
++    unsafe { nodes[2].expand(&mut state, 0, 0, &mut children, &mut rng) };
++    let n = children.values().next().unwrap().len();
++    // without the switch this node would get a single (mean damage, no crit) child
++    assert!(n > 1, "{} children", n);
++}
 diff --git a/tests/test_rr_abilities.rs b/tests/test_rr_abilities.rs
 new file mode 100644
 index 0000000..5b26968
@@ -12391,17 +13428,18 @@ index 0000000..5b26968
 +}
 diff --git a/tests/test_rr_ai.rs b/tests/test_rr_ai.rs
 new file mode 100644
-index 0000000..17d5445
+index 0000000..86cf4d3
 --- /dev/null
 +++ b/tests/test_rr_ai.rs
-@@ -0,0 +1,368 @@
+@@ -0,0 +1,514 @@
 +#![cfg(feature = "rr")]
 +
 +use poke_engine::choices::Choices;
 +use poke_engine::engine::abilities::Abilities;
-+use poke_engine::engine::rr_ai::rr_ai_choice;
++use poke_engine::engine::rr_ai::{rr_ai_choice, rr_ai_choice_weighted};
 +use poke_engine::engine::state::MoveChoice;
-+use poke_engine::mcts::perform_mcts_vs_ai;
++use poke_engine::engine::generate_instructions::generate_instructions_from_move_pair;
++use poke_engine::mcts::{perform_mcts, perform_mcts_vs_ai, Node};
 +use poke_engine::pokemon::PokemonName;
 +use poke_engine::state::{
 +    LastUsedMove, Pokemon, PokemonIndex, PokemonMoveIndex, PokemonStatus, PokemonType,
@@ -12719,10 +13757,12 @@ index 0000000..17d5445
 +    state.side_two.last_used_move = LastUsedMove::Move(PokemonMoveIndex::M0);
 +
 +    let (s1_opts, _) = state.root_get_all_options();
-+    let res = perform_mcts_vs_ai(&mut state, s1_opts, Duration::from_millis(500), 1000);
-+    // Side two's only option at root must be Surf (M1).
-+    assert_eq!(res.s2.len(), 1);
-+    assert_eq!(res.s2[0].move_choice, MoveChoice::Move(PokemonMoveIndex::M1));
++    let res = perform_mcts_vs_ai(&mut state, s1_opts, Duration::from_millis(500), 1000, None, 1.0);
++    // p_model = 1: side two only ever plays the AI's pick, Surf (M1).
++    for r in &res.s2 {
++        let surf = r.move_choice == MoveChoice::Move(PokemonMoveIndex::M1);
++        assert_eq!(r.visits > 0, surf, "{:?}", r.move_choice);
++    }
 +    assert!(res.iteration_count >= 1000);
 +}
 +
@@ -12762,6 +13802,149 @@ index 0000000..17d5445
 +
 +    let picks = rr_ai_choice(&state, SideReference::SideTwo);
 +    assert_eq!(picks, vec![MoveChoice::Move(PokemonMoveIndex::M1)]);
++}
++
++fn duel() -> State {
++    let mut state = empty_state();
++    let moves = [Choices::TACKLE, Choices::SURF];
++    let types = (PokemonType::NORMAL, PokemonType::TYPELESS);
++    state.side_one.pokemon[PokemonIndex::P0] =
++        make_mon(PokemonName::PIKACHU, types, 100, 100, 90, 90, 90, 90, 90, &moves);
++    state.side_one.pokemon[PokemonIndex::P1] =
++        make_mon(PokemonName::RAICHU, types, 100, 100, 90, 90, 90, 90, 90, &moves);
++    state.side_two.pokemon[PokemonIndex::P0] =
++        make_mon(PokemonName::STARMIE, types, 100, 100, 90, 90, 90, 90, 90, &moves);
++    state
++}
++
++#[test]
++fn test_seeded_search_is_replayable() {
++    let visits = |seed| {
++        let mut state = duel();
++        let (s1, _) = state.root_get_all_options();
++        let res = perform_mcts_vs_ai(&mut state, s1, Duration::from_secs(60), 3000, Some(seed), 1.0);
++        res.s1.iter().map(|r| r.visits).collect::<Vec<_>>()
++    };
++    assert_eq!(visits(7), visits(7));
++}
++
++#[test]
++fn test_seeded_mixture_search_is_replayable() {
++    let visits = |seed| {
++        let mut state = duel();
++        let (s1, _) = state.root_get_all_options();
++        let res = perform_mcts_vs_ai(&mut state, s1, Duration::from_secs(60), 3000, Some(seed), 0.5);
++        let s2: Vec<u32> = res.s2.iter().map(|r| r.visits).collect();
++        (res.s1.iter().map(|r| r.visits).collect::<Vec<_>>(), s2)
++    };
++    assert_eq!(visits(7), visits(7));
++}
++
++#[test]
++fn test_mixture_p0_is_plain_mcts() {
++    let mut state = duel();
++    let (s1, s2) = state.root_get_all_options();
++    let ai = perform_mcts_vs_ai(&mut state, s1.clone(), Duration::from_secs(60), 3000, Some(3), 0.0);
++    state.use_last_used_move = true; // as perform_mcts_vs_ai sets it
++    let plain = perform_mcts(&mut state, s1, s2, Duration::from_secs(60), 3000, Some(3));
++    let side = |r: &[poke_engine::mcts::MctsSideResult]| {
++        r.iter().map(|x| (x.move_choice, x.visits)).collect::<Vec<_>>()
++    };
++    assert_eq!(side(&ai.s2), side(&plain.s2));
++    assert_eq!(side(&ai.s1), side(&plain.s1));
++}
++
++fn sum_weights(w: &[(MoveChoice, f32)]) -> f32 {
++    w.iter().map(|(_, p)| p).sum()
++}
++
++#[test]
++fn test_rr_ai_weighted_splits_ties() {
++    let mut state = duel(); // two Tackles: the same score
++    state.side_two.pokemon[PokemonIndex::P0].replace_move(PokemonMoveIndex::M1, Choices::TACKLE);
++    let w = rr_ai_choice_weighted(&state, SideReference::SideTwo);
++    assert_eq!(rr_ai_choice(&state, SideReference::SideTwo).len(), 2);
++    assert_eq!(w.len(), 2, "{:?}", w);
++    assert!(w.iter().all(|(_, p)| (p - 0.5).abs() < 1e-6), "{:?}", w);
++    assert!((sum_weights(&w) - 1.0).abs() < 1e-6);
++}
++
++#[test]
++fn test_rr_ai_weighted_consecutive_protect_is_a_coin() {
++    // second Protect in a row: CFRU penalises it (-10) half the time; penalised, it loses to
++    // Toxic (which fails on a poisoned foe), unpenalised it wins
++    let mut state = duel();
++    state.side_one.pokemon[PokemonIndex::P0].status = PokemonStatus::TOXIC;
++    let mon = &mut state.side_two.pokemon[PokemonIndex::P0];
++    mon.replace_move(PokemonMoveIndex::M0, Choices::PROTECT);
++    mon.replace_move(PokemonMoveIndex::M1, Choices::TOXIC);
++    state.side_two.side_conditions.protect = 1;
++    let (protect, toxic) = (MoveChoice::Move(PokemonMoveIndex::M0), MoveChoice::Move(PokemonMoveIndex::M1));
++    let w = rr_ai_choice_weighted(&state, SideReference::SideTwo);
++    assert!((sum_weights(&w) - 1.0).abs() < 1e-6, "{:?}", w);
++    assert!(w.contains(&(protect, 0.5)) && w.contains(&(toxic, 0.5)), "{:?}", w);
++    assert_eq!(rr_ai_choice(&state, SideReference::SideTwo), vec![toxic]); // the roll's outcome 0
++    // a third Protect is always penalised
++    state.side_two.side_conditions.protect = 2;
++    let w = rr_ai_choice_weighted(&state, SideReference::SideTwo);
++    assert_eq!(w, vec![(toxic, 1.0)]);
++}
++
++#[test]
++fn test_permanent_tailwind_does_not_count_down() {
++    let mut state = duel();
++    state.side_one.side_conditions.tailwind = 99;
++    let m = MoveChoice::Move(PokemonMoveIndex::M0);
++    for branch in generate_instructions_from_move_pair(&mut state, &m, &m, false) {
++        state.apply_instructions(&branch.instruction_list);
++        assert_eq!(state.side_one.side_conditions.tailwind, 99);
++        state.reverse_instructions(&branch.instruction_list);
++    }
++}
++
++#[test]
++fn test_won_terminal_scores_by_survivors() {
++    let mut state = empty_state();
++    for idx in [PokemonIndex::P0, PokemonIndex::P1, PokemonIndex::P2, PokemonIndex::P3] {
++        state.side_one.pokemon[idx].id = PokemonName::PIKACHU;
++        state.side_one.pokemon[idx].hp = 50;
++    }
++    for idx in [PokemonIndex::P4, PokemonIndex::P5] {
++        state.side_one.pokemon[idx].id = PokemonName::PIKACHU; // fainted
++    }
++    let score = Node::new().rollout(&mut state, &0.0);
++    assert!((score - 0.85).abs() < 1e-6, "{score}");
++}
++
++// fitted leaf evaluation (plan v3 phase 4)
++
++#[test]
++fn test_eval_features_match_names() {
++    use poke_engine::engine::evaluate::{evaluate_feature_names, evaluate_features, EVAL_WEIGHTS};
++    assert!(EVAL_WEIGHTS.is_none()); // the env var is unset under test: the default path
++    let f = evaluate_features(&duel());
++    assert_eq!(f.len(), evaluate_feature_names().len());
++    let get = |n: &str| f[evaluate_feature_names().iter().position(|x| x == n).unwrap()];
++    assert_eq!((get("our_alive"), get("their_alive"), get("our_deaths")), (2.0, 1.0, 0.0));
++    assert_eq!(get("move_first"), 0.5); // mirror speeds
++}
++
++#[test]
++fn test_fitted_leaf_value_and_terminal_utility() {
++    use poke_engine::engine::evaluate::{fitted_leaf_value, N_FEATURES};
++    let mut w = vec![0.0; 1 + N_FEATURES];
++    w[0] = 0.7;
++    let mut state = duel();
++    let v = fitted_leaf_value(&w, &state, 0.0);
++    assert!((v - 1.0 / (1.0 + (-0.7f32).exp())).abs() < 1e-6, "{v}");
++    // won with one of two fainted: U = 1 - 0.5 * 1/2
++    state.side_one.pokemon[PokemonIndex::P1].hp = 0;
++    state.side_two.pokemon[PokemonIndex::P0].hp = 0;
++    assert!((fitted_leaf_value(&w, &state, 0.0) - 0.75).abs() < 1e-6);
++    // lost: 0
++    state.side_two.pokemon[PokemonIndex::P0].hp = 50;
++    state.side_one.pokemon[PokemonIndex::P0].hp = 0;
++    assert_eq!(fitted_leaf_value(&w, &state, 0.0), 0.0);
 +}
 diff --git a/tests/test_rr_conformance.rs b/tests/test_rr_conformance.rs
 new file mode 100644

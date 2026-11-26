@@ -96,10 +96,13 @@ def choice_encounters() -> list[tuple[str, int, dict[str, list[str]]]]:
     return out
 
 
-def _base_args(seed: int = 0, workers: int = 1, engine: int = 20000, n_search: int = 6) -> argparse.Namespace:
+def _base_args(seed: int = 0, workers: int = 1, engine: int = 20000, n_search: int = 6,
+               normal: bool = False) -> argparse.Namespace:
+    """Probe args; normal = normal mode's boss sets and caps with the easier player rules (no
+    hardcore bans or ability swaps); otherwise tp.setup applies rp.hardcore() (legal=True)."""
     return argparse.Namespace(
         bosses="", n_solo=3, n_team=4, n_search=n_search, n_duel=4, search="9,8", seed=seed,
-        workers=workers, legal=True, normal=False, arena=True, blind_field=False, repair=False,
+        workers=workers, legal=not normal, normal=normal, arena=True, blind_field=False, repair=False,
         boxes=0, chooser="cover", cands=24, n_screen=4, matchup=True, death_weight=6.0,
         no_items=False, items=True, engine=engine, engine_p=0.8, enemy="python", states=False,
         engine_opp="ai", out=None,
@@ -119,16 +122,16 @@ def _mega_species(base_sp: str, known: dict, progress: int) -> str | None:
 
 
 DUEL_CACHE_DIR = ROOT / "logs" / "duel_cache"
-DUEL_CACHE_VERSION = 3
+DUEL_CACHE_VERSION = 5  # 4: no dead Water moves under Desolate Land, Palafin duels as Hero; 5: D16 ability-aware sets + calc
 
 
-def _duel_chunk_worker(boss: str, keys: list[str], enemy_names: list[str], n_duel: int, seed: int) -> dict[str, dict[str, list[float]]]:
+def _duel_chunk_worker(boss: str, keys: list[str], enemy_names: list[str], n_duel: int, seed: int,
+                       normal: bool = False) -> dict[str, dict[str, list[float]]]:
     """Run real Showdown 1v1 duels (calc_bot vs RadicalRedAI, with Mega Stones / items / arena)
     for a chunk of candidate species/branch keys on one boss."""
     import logging
     logging.getLogger("poke-env").setLevel(logging.ERROR)
-    rp.hardcore()
-    args = _base_args(seed=seed)
+    args = _base_args(seed=seed, normal=normal)
     args.n_duel = n_duel
     ctx = tp.setup(args, boss, announce=False)
     out: dict[str, dict[str, list[float]]] = {}
@@ -142,13 +145,14 @@ def _duel_chunk_worker(boss: str, keys: list[str], enemy_names: list[str], n_due
     return out
 
 
-def _load_or_run_duels(boss: str, ctx, eval_keys: list[str], n_duel: int = 2, seed: int = 0, workers: int = 4) -> dict[str, dict[str, list[float]]]:
+def _load_or_run_duels(boss: str, ctx, eval_keys: list[str], n_duel: int = 2, seed: int = 0, workers: int = 4,
+                       normal: bool = False) -> dict[str, dict[str, list[float]]]:
     """Compute or load cached Showdown duel matrix `{key: {enemy_id: [win, hp]}}` for `boss`."""
     import hashlib
     enemy_names = [x.split("|")[0] for x in ctx.enemy_packed.split("]")]
     sig_payload = json.dumps({
         "v": DUEL_CACHE_VERSION, "boss": boss, "progress": ctx.progress, "cap": ctx.cap,
-        "arena": ctx.arena, "n_duel": n_duel, "seed": seed, "enemies": enemy_names,
+        "arena": ctx.arena, "n_duel": n_duel, "seed": seed, "enemies": enemy_names, "normal": normal,
     }, sort_keys=True)
     sig = hashlib.sha1(sig_payload.encode()).hexdigest()[:12]
     DUEL_CACHE_DIR.mkdir(parents=True, exist_ok=True)
@@ -165,11 +169,11 @@ def _load_or_run_duels(boss: str, ctx, eval_keys: list[str], n_duel: int = 2, se
         if n_w > 1 and len(missing) >= 12:
             chunks = [missing[i::n_w] for i in range(n_w)]
             with mp.get_context("spawn").Pool(n_w) as pool:
-                parts = pool.starmap(_duel_chunk_worker, [(boss, ch, enemy_names, n_duel, seed) for ch in chunks if ch])
+                parts = pool.starmap(_duel_chunk_worker, [(boss, ch, enemy_names, n_duel, seed, normal) for ch in chunks if ch])
             for part in parts:
                 cached.update(part)
         else:
-            cached.update(_duel_chunk_worker(boss, missing, enemy_names, n_duel, seed))
+            cached.update(_duel_chunk_worker(boss, missing, enemy_names, n_duel, seed, normal))
         cache_path.write_text(json.dumps(cached))
     return cached
 
@@ -181,6 +185,7 @@ def build_boss_table(
     scorer: str = "duel",
     n_duel: int = 2,
     workers: int = 4,
+    normal: bool = False,
 ) -> dict:
     """Precompute per-species matchup rows & flags for `boss`, expanding all legal branched
     evolutions (e.g. Eevee -> 8 Eeveelutions, Dartrix -> Decidueye / Decidueye-Hisui,
@@ -188,7 +193,7 @@ def build_boss_table(
     - `scorer="duel"` (default): runs real Showdown 1v1 duels (cached in `logs/duel_cache/`)
       combining real win rate & HP left with a 0.15x continuous paper tie-break.
     - `scorer="paper"`: fast static 1v1 damage heuristic (`cell_score`)."""
-    args = _base_args(seed=seed)
+    args = _base_args(seed=seed, normal=normal)
     ctx = tp.setup(args, boss, announce=False)
     base_list = list(dict.fromkeys(list(ctx.pool) + list(rp.STARTERS) + list(extra_species or [])))
     dex9 = GenData.from_gen(9).pokedex
@@ -227,7 +232,7 @@ def build_boss_table(
         mega_list = sorted(set(mega_map.values()))
         rs.info(ctx, [s for s in mega_list if s not in ctx.info])
 
-    duels = _load_or_run_duels(boss, ctx, eval_keys, n_duel=n_duel, seed=seed, workers=workers) if scorer == "duel" else {}
+    duels = _load_or_run_duels(boss, ctx, eval_keys, n_duel=n_duel, seed=seed, workers=workers, normal=normal) if scorer == "duel" else {}
 
     def _cont_row(sp_id: str, moves: list[str]) -> dict[str, float]:
         inf = ctx.info[sp_id]
@@ -736,25 +741,175 @@ def advise_next_catches(box_species: set[str], t: int, tables: list[dict], top_k
     return recs[:top_k]
 
 
+def _duel_pick_team(ctx, species: list[str], duel_cells: dict, enemy_order: list[str],
+                    force_base: str | None = None) -> tuple[str, ...]:
+    """Build a 6-mon team from `species` using cached Showdown duel cells + branch expansion.
+    If `force_base` is set (e.g. testing a starter in 6v6), includes the starter's best legal
+    branch first, then fills the remaining 5 slots with `cover()` on uncovered enemy threats."""
+    from ai_util.matchup import cover, edge, race, safe
+    exp = tp.expand_box(ctx, species)
+    sub_rows = {k: duel_cells[k] for k in exp if k in duel_cells}
+    enemies = enemy_order or [to_id_str(x.split("|")[0]) for x in ctx.enemy_packed.split("]")]
+    if not sub_rows:
+        return tp.choose(ctx, species)
+    limits = dict(getattr(ctx, "slot_limits", {}) or {})
+    picked: list[str] = []
+    rem_enemies = list(enemies)
+    if force_base is not None:
+        st_cands = [k for k in sub_rows if base_species(k) == force_base]
+        if st_cands:
+            best_st = max(st_cands, key=lambda c: (
+                sum(safe(sub_rows[c][e]) for e in enemies if e in sub_rows[c]),
+                sum(race(sub_rows[c][e]) for e in enemies if e in sub_rows[c]),
+                sum(edge(sub_rows[c][e]) for e in enemies if e in sub_rows[c]),
+            ))
+            picked.append(best_st)
+            rem_enemies = [e for e in enemies if not (e in sub_rows[best_st] and race(sub_rows[best_st][e]))] or list(enemies)
+            limits[force_base] = max(0, limits.get(force_base, 1) - 1)
+    rem_rows = {k: v for k, v in sub_rows.items() if k not in picked and limits.get(base_species(k), 1) > 0}
+    if len(picked) < 6 and rem_rows:
+        picked += cover(rem_rows, rem_enemies, 6 - len(picked), limits=limits, group_fn=base_species)
+    lead_e = enemies[0]
+    lead = max(sorted(picked), key=lambda c: (
+        safe(sub_rows[c][lead_e]), race(sub_rows[c][lead_e]), edge(sub_rows[c][lead_e])
+    ) if lead_e in sub_rows.get(c, {}) else (False, False, -9.0))
+    return (lead,) + tuple(sorted(c for c in picked if c != lead))
+
+
+def _eval_6v6_team_job(args, boss: str, box_species: list[str], duel_cells: dict, enemy_order: list[str],
+                       force_base: str | None) -> dict:
+    """Play `args.n_search` paired 6v6 MCTS battles for one (boss, box, optional starter) team."""
+    import logging
+    logging.getLogger("poke-env").setLevel(logging.ERROR)
+    ctx = tp.worker_ctx(args, boss)
+    species = [sp for sp in box_species if tp.mon_of(ctx, sp) is not None]
+    team = _duel_pick_team(ctx, species, duel_cells, enemy_order, force_base=force_base)
+    n = args.n_search
+    bs = [tp.battle_job(args, boss, team, j) for j in range(n)]
+    w, d, _, _, cl = tp.fold(bs)
+    u = sum(rs.score(b, False, len(team)) for b in bs) / n
+    return {"win": w, "deaths_per_mon": d, "deathless": cl, "U": u, "team": tp.evolved_names(ctx, team)}
+
+
+def rank_starters_6v6(args, bosses: list[str], tables_by_boss: dict[str, dict]) -> list[dict]:
+    """True 6v6 MCTS starter ranking across all 27 starters via 3-round sequential halving.
+    For every (boss, box_i), evaluates a starter-less routed base box ONCE (`U_base`), then
+    each surviving starter on the EXACT same paired box & battle seeds (`U_with`).
+    Per-boss lift = `max(0, mean_boxes[U_with - U_base])`, capturing true 6v6 synergy
+    (Battle Bond sweeps, Unaware, Intimidate, Megas, Hisuian branches) while allowing
+    benching a starter on gyms where it doesn't help."""
+    known = load_game("rr")["species"]
+    by_boss, _ = rp.pools()
+    all_tables = [tables_by_boss[b] for b in bosses]
+
+    # 3-round halving schedule: (n_starters_keep_next, n_boxes, n_battles, mcts_iters)
+    rounds = [
+        ("R1 (27->14)", 14, 6, 2, 4000),
+        ("R2 (14->7)", 7, 10, 4, 10000),
+        ("R3 (final 7)", 7, 16, 6, 20000),
+    ]
+    if args.fast_6v6:
+        rounds = [
+            ("R1 (27->10)", 10, 4, 2, 3000),
+            ("R2 (final 10)", 10, 8, 4, 10000),
+        ]
+
+    # Pre-generate strictly paired starter-less base boxes for every (boss, box_i)
+    max_boxes = max(r[2] for r in rounds)
+    base_boxes: dict[tuple[str, int], list[str]] = {}
+    for boss in bosses:
+        t = by_boss[boss][3]
+        for i in range(max_boxes):
+            # Generate routed box with a non-species sentinel starter, then strip slot 0 so all
+            # 27 starters share identical wild catches + ALL accepted story gifts (incl. Magikarp)
+            b = routed_box(f"s6v6-{boss}-{args.seed}-{i}", t, known, all_tables, starter="__none__",
+                           route_methods=True, include_celadon_egg=False, include_choices=False)
+            base_boxes[boss, i] = [sp for sp, wh in b if wh != "starter"]
+
+    alive = list(rp.STARTERS)
+    history: dict[str, dict] = {}
+    t_start = time.time()
+
+    for rname, keep, n_boxes, n_bat, iters in rounds:
+        rt0 = time.time()
+        probe_args = _base_args(seed=args.seed, workers=args.workers, engine=iters, n_search=n_bat, normal=args.normal)
+        # 1. Evaluate starter-less baseline once per (boss, box_i)
+        base_jobs = [
+            (probe_args, boss, base_boxes[boss, i], tables_by_boss[boss].get("duel_cells", {}),
+             tables_by_boss[boss].get("enemy_order", []), None)
+            for boss in bosses for i in range(n_boxes)
+        ]
+        # 2. Evaluate every surviving starter on those exact same boxes & seeds
+        st_jobs = [
+            (probe_args, boss, [st] + [sp for sp in base_boxes[boss, i] if sp != st],
+             tables_by_boss[boss].get("duel_cells", {}), tables_by_boss[boss].get("enemy_order", []), st)
+            for st in alive for boss in bosses for i in range(n_boxes)
+        ]
+        all_jobs = base_jobs + st_jobs
+        if args.workers > 1:
+            with mp.get_context("spawn").Pool(min(args.workers, len(all_jobs))) as pool:
+                all_res = pool.starmap(_eval_6v6_team_job, all_jobs)
+        else:
+            all_res = [_eval_6v6_team_job(*j) for j in all_jobs]
+
+        base_res = {}
+        idx = 0
+        for boss in bosses:
+            for i in range(n_boxes):
+                base_res[boss, i] = all_res[idx]
+                idx += 1
+
+        ranked = []
+        for st in alive:
+            per_boss_lift, per_boss_raw, per_boss_win = {}, {}, {}
+            for boss in bosses:
+                d_u, d_w = [], []
+                for i in range(n_boxes):
+                    r = all_res[idx]
+                    idx += 1
+                    b0 = base_res[boss, i]
+                    d_u.append(r["U"] - b0["U"])
+                    d_w.append(r["win"] - b0["win"])
+                raw_u = sum(d_u) / len(d_u)
+                raw_w = sum(d_w) / len(d_w)
+                per_boss_raw[boss] = raw_u
+                per_boss_lift[boss] = max(0.0, raw_u)
+                per_boss_win[boss] = max(0.0, raw_w)
+            mean_lift = sum(per_boss_lift.values()) / len(bosses)
+            mean_raw = sum(per_boss_raw.values()) / len(bosses)
+            mean_wlift = sum(per_boss_win.values()) / len(bosses)
+            rec = {
+                "starter": st, "label": label_sp(st, all_tables), "round": rname,
+                "lift_U": mean_lift, "raw_U": mean_raw, "lift_win": mean_wlift,
+                "per_boss": per_boss_lift, "per_boss_raw": per_boss_raw,
+            }
+            ranked.append(rec)
+            history[st] = rec
+
+        ranked.sort(key=lambda r: (-r["lift_U"], -r["raw_U"]))
+        print(f"\n=== 6v6 STARTER HALVING {rname} ({n_boxes} boxes x {n_bat} battles @ {iters} iters, {time.time()-rt0:.0f}s) ===", flush=True)
+        hdr = "  " + f"{'starter':<26} {'liftU':>6} {'liftW':>6}  " + " ".join(f"{b[:6]:>6}" for b in bosses)
+        print(hdr, flush=True)
+        for r in ranked:
+            cols = " ".join(f"{r['per_boss'][b]:+6.3f}" for b in bosses)
+            print(f"  {r['label']:<26} {r['lift_U']:+6.3f} {r['lift_win']:+5.1%}  {cols}", flush=True)
+        alive = [r["starter"] for r in ranked[:keep]]
+
+    final_ranked = sorted(history.values(), key=lambda r: (r["round"] != rounds[-1][0], -r["lift_U"], -r["raw_U"]))
+    print(f"\n6v6 starter ranking finished in {(time.time() - t_start)/60:.1f} min.", flush=True)
+    if args.out:
+        Path(args.out).write_text(json.dumps(final_ranked, indent=2))
+    return final_ranked
+
+
 def _eval_box_job(args, boss: str, i: int, box: list[tuple[str, str]], duel_cells: dict | None = None,
                   enemy_order: list[str] | None = None) -> dict:
     """Evaluate one pre-built box on one boss using duel-judged cover (when `duel_cells` is
     provided) or paper cover (with branch expansion) + default Phase 4 R2 battler."""
-    from ai_util.matchup import cover, edge, race, safe
-    rp.hardcore()
     ctx = tp.worker_ctx(args, boss)
     species = [sp for sp, _ in box if tp.mon_of(ctx, sp) is not None]
     if duel_cells:
-        exp = tp.expand_box(ctx, species)
-        sub_rows = {k: duel_cells[k] for k in exp if k in duel_cells}
-        enemies = enemy_order or [to_id_str(x.split("|")[0]) for x in ctx.enemy_packed.split("]")]
-        if sub_rows:
-            picked = cover(sub_rows, enemies, 6, limits=getattr(ctx, "slot_limits", None), group_fn=base_species)
-            lead_e = enemies[0]
-            lead = max(sorted(picked), key=lambda c: (safe(sub_rows[c][lead_e]), race(sub_rows[c][lead_e]), edge(sub_rows[c][lead_e])) if lead_e in sub_rows.get(c, {}) else (False, False, -9.0))
-            team = (lead,) + tuple(sorted(c for c in picked if c != lead))
-        else:
-            team = tp.choose(ctx, species)
+        team = _duel_pick_team(ctx, species, duel_cells, enemy_order or [])
     else:
         team = tp.choose(ctx, species)
     w, d, _, _, cl = tp.searched(ctx, team)
@@ -775,7 +930,7 @@ def run_benchmark(args, bosses: list[str], tables_by_boss: dict[str, dict]) -> N
         ("routed+egg", True, True, False),
         ("routed+full", True, True, True),
     ]
-    probe_args = _base_args(seed=args.seed, workers=args.workers, engine=args.engine, n_search=args.n_search)
+    probe_args = _base_args(seed=args.seed, workers=args.workers, engine=args.engine, n_search=args.n_search, normal=args.normal)
     summary = {v[0]: {} for v in variants}
 
     for boss in bosses:
@@ -836,7 +991,9 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--bosses", default="BROCK,MISTY,LT. SURGE,ERIKA,KOGA,BLAINE")
     ap.add_argument("--boss", default="ERIKA", help="current boss for --advise")
-    ap.add_argument("--starters", action="store_true", help="rank all 27 starters across --bosses")
+    ap.add_argument("--starters", action="store_true", help="rank all 27 starters across --bosses (1v1 duel/paper table)")
+    ap.add_argument("--starters-6v6", action="store_true", help="rank all 27 starters by real 6v6 MCTS sequential halving")
+    ap.add_argument("--fast-6v6", action="store_true", help="faster 2-round halving schedule for --starters-6v6")
     ap.add_argument("--celadon-eggs", action="store_true", help="rank the 4 Celadon Mansion Shard Eggs")
     ap.add_argument("--advise", action="store_true", help="print 'what to catch next' + D14 death costs for a box")
     ap.add_argument("--my-box", help="JSON file of your current box species (list of strings or dicts with 'species')")
@@ -852,9 +1009,12 @@ def main() -> None:
     ap.add_argument("--seed", type=int, default=5)
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--out", help="output prefix for benchmark events")
+    ap.add_argument("--normal", action="store_true",
+                    help="normal mode: its boss sets and caps, no hardcore bans or ability swaps (default: hardcore)")
     args = ap.parse_args()
 
-    rp.hardcore()
+    if not args.normal:
+        rp.hardcore()
     bosses = [b.strip() for b in args.bosses.split(",") if b.strip()]
     t0 = time.time()
     extra = list(rp.STARTERS)
@@ -862,7 +1022,7 @@ def main() -> None:
         for sps in opts.values():
             extra += sps
     tables_by_boss = {
-        b: build_boss_table(b, extra_species=extra, seed=args.seed, scorer=args.scorer, n_duel=args.n_duel, workers=args.workers)
+        b: build_boss_table(b, extra_species=extra, seed=args.seed, scorer=args.scorer, n_duel=args.n_duel, workers=args.workers, normal=args.normal)
         for b in bosses
     }
     tables = [tables_by_boss[b] for b in bosses]
@@ -924,6 +1084,9 @@ def main() -> None:
                 print(f"  {label_sp(r['species'], after):<24} d14_w={r['d14_weight']:.3f} (raw={r['raw_cost']:.3f})  {why}")
             exp = [label_sp(r["species"], after) for r in costs if r["raw_cost"] < 1e-6]
             print(f"  Expendable (0 future cost, {len(exp)} mons): {', '.join(exp[:12])}")
+
+    if args.starters_6v6:
+        rank_starters_6v6(args, bosses, tables_by_boss)
 
     if args.benchmark:
         run_benchmark(args, bosses, tables_by_boss)

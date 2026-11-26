@@ -154,16 +154,20 @@ def make_set(ctx, sp: str, moves: list, item=None) -> dict:
 
 
 def default_set(ctx, sp: str) -> dict:
-    """Attacks from the shortlist by marginal row gain while they gain, then the best4 set's moves."""
+    """The best4 set's status moves kept (the calc scores damage only: D16's B dropped Thunder Wave /
+    Will-O-Wisp / screens), the other slots attacks from the shortlist by marginal row gain while they
+    gain, then the best4 set's moves."""
     cache = ctx.__dict__.setdefault("defaults", {})
     if sp not in cache:
         i, moves = ctx.info[sp], []
+        keep = [x for x in i["base"] if x not in i["dmg"]]
         val = lambda mv: sum(row(ctx, sp, mv).values())
-        while len(moves) < 4:
+        while len(moves) < 4 - len(keep):
             best = max((x for x in i["short"] if x in i["dmg"] and x not in moves), key=lambda x: val(moves + [x]), default=None)
             if best is None or val(moves + [best]) <= val(moves) + 1e-9:
                 break
             moves.append(best)
+        moves += keep
         moves += [x for x in i["base"] + i["short"] if x not in moves][:4 - len(moves)]
         cache[sp] = make_set(ctx, sp, moves)
     return dict(cache[sp])
@@ -427,7 +431,7 @@ def load_box(ctx, path: str) -> list[str]:
         lvl = int(x.get("level") or ctx.cap)
         known = [to_id_str(m) for m in x.get("moves", [])]
         ab = x.get("ability") if ctx.progress < capsule else rp.choose_ability(sp, ctx.known, ctx.boss_types, ctx.arena, hidden=ctx.progress >= patch)
-        m = Mon(sp, lvl, (known or gauntlet.encounter_moves(sp, lvl, "best4", progress=ctx.progress))[:4], ability=ab, caught_level=5, nature=x.get("nature"))
+        m = Mon(sp, lvl, (known or gauntlet.encounter_moves(sp, lvl, "best4", progress=ctx.progress, dead=rp.dead_types(ctx.arena, ab), ability=ab))[:4], ability=ab, caught_level=5, nature=x.get("nature"))
         m.evs, m.known = dict.fromkeys(gauntlet.STATS, 0), known
         ctx.mons[sp] = m
         limits[sp] = limits.get(sp, 0) + 1

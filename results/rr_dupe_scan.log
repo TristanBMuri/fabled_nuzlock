@@ -1,0 +1,61 @@
+
+=== KOGA (trainer #80, cap 68; 487 species valued; best overall: ralts→gallade 12.1, mudkip→swampert 11.9, dewpider→araquanid 10.1, teddiursa→ursaluna 9.6, golisopod 9.6) ===
+  location / method                  target                     rank value  P(0/1/2/3 blockers)   blockers (in order)
+  ROUTE 24 / grass_day               ralts→gallade                 1  12.1    4%   5%   7%   8%   granbull, lilligant, boltund
+  ROUTE 24 / grass_night             ralts→gallade                 1  12.1    4%   5%   7%   8%   granbull, cottonee, boltund
+  ROUTE 13 / good_rod                dewpider→araquanid            3  10.1   20%  50% 100% 100%   overqwil, dragalge
+  ROUTE 25 / good_rod                dewpider→araquanid            3  10.1   60%  75% 100% 100%   mantine, goldeen
+  ROUTE 9 / grass_day                dewpider→araquanid            3  10.1   10%  12%  17%  20%   accelgor, exeggcute, darmanitan
+  ROUTE 9 / grass_night              dewpider→araquanid            3  10.1   10%  12%  17%  20%   accelgor, exeggcute, salandit
+  MT MOON B1F / grass_day            teddiursa→ursaluna            4   9.6   10%  12%  17%  20%   paras, garganacl, carkol
+  MT MOON B1F / grass_night          teddiursa→ursaluna            4   9.6   10%  12%  17%  20%   paras, garganacl, boldore
+  S.S. ANNE / old_rod                golisopod                     5   9.6   70% 100% 100% 100%   finneon
+  VERMILLION CITY / good_rod         golisopod                     5   9.6   20%  50% 100% 100%   frillish, starmie
+  ROUTE 14 / grass_day               golisopod                     5   9.6    2%   2%   3%   5%   pelipper, leavanny, torkoal
+  ROUTE 14 / grass_night             golisopod                     5   9.6    2%   2%   3%   5%   pelipper, leavanny, torkoal
+  ROUTE 22 / super_rod               wailmer→wailord               7   9.3    5%  25% 100% 100%   luvdisc, basculegion
+  ROUTE 24 / good_rod                wailmer→wailord               7   9.3   60%  75% 100% 100%   wishiwashi, clobbopus
+  ROUTE 12 / old_rod                 dewgong                       9   9.3   30% 100% 100% 100%   sealeo
+  ROUTE 12 / super_rod               dewgong                       9   9.3   15%  75%  94% 100%   dondozo, bruxish, chewtle
+  ROUTE 12 / grass_day               dewgong                       9   9.3   20%  25%  29%  33%   sneasel, sealeo, froslass
+  ROUTE 12 / grass_night             dewgong                       9   9.3   20%  25%  29%  33%   sneasel, sealeo, froslass
+  ROUTE 25 / grass_day               altaria                      11   8.7   21%  26%  30%  36%   swellow, forretress, bellibolt
+  ROUTE 25 / grass_night             altaria                      11   8.7   21%  26%  30%  36%   swellow, venomoth, bellibolt
+  ROUTE 18 / grass_day               altaria                      11   8.7   10%  12%  17%  20%   natu, charjabug, politoed
+  ROUTE 18 / grass_night             altaria                      11   8.7   10%  12%  17%  20%   natu, charjabug, politoed
+  DIGLETT CAVE B1F / grass_day       golett→golurk                13   8.3   14%  25%  30%  39%   diglett, stunfisk, sandaconda
+  MT MOON 1F / grass_day             throh                        14   8.2    1%   1%   2%   2%   geodude, crobat, lycanroc
+  ROUTE 6 / grass_day                centiskorch                  15   8.1   10%  12%  17%  20%   sunflora, cherrim, gulpin
+  ROUTE 6 / grass_night              centiskorch                  15   8.1   10%  12%  17%  20%   bounsweet, eldegoss, garbodor
+  ROUTE 13 / grass_night             centiskorch                  15   8.1    2%   2%   3%   4%   fletchinder, litleo, arcanine
+
+=== BLAINE (trainer #90, cap 76; 575 species valued; best overall: gastly→gengar 10.5, haunter→gengar 10.5, screamtail 10.2, tropius 9.8, centiskorch 9.7) ===
+  location / method                  target                     rank value  P(0/1/2/3 blockers)   blockers (in order)
+  PKMN TOWER 3&5F / grass_day        gastly→gengar                 1  10.5   20%  25%  33%  40%   cofagrigus, misdreavus, dusclops
+  PKMN TOWER 3&5F / grass_night      gastly→gengar                 1  10.5   20%  25%  33%  40%   runerigus, misdreavus, dusclops
+  PKMN TOWER 4F / grass_day          gastly→gengar                 1  10.5   20%  25%  33%  40%   cofagrigus, misdreavus, dusclops
+  PKMN TOWER 4F / grass_night        gastly→gengar                 1  10.5   20%  25%  33%  40%   runerigus, misdreavus, dusclops
+  PKMN TOWER 6F / grass_day          gastly→gengar                 1  10.5   20%  25%  33%  40%   cofagrigus, annihilape, dusclops
+  PKMN TOWER 6F / grass_night        gastly→gengar                 1  10.5   20%  25%  33%  40%   runerigus, annihilape, dusclops
+  PKMN TOWER 7F / grass_day          gastly→gengar                 1  10.5   20%  25%  33%  40%   cofagrigus, misdreavus, dusclops
+  PKMN TOWER 7F / grass_night        gastly→gengar                 1  10.5   20%  25%  33%  40%   runerigus, misdreavus, dusclops
+  PEWTER CITY / grass_night          gastly→gengar                 1  10.5    5%   6%   8%  10%   grimeralola, staraptor, exeggcute
+  SAFARI NORTH (ZONE 3) / grass_day  screamtail                    3  10.2   20%  25%  33%  50%   klefki, sandyshocks, bisharp
+  ROUTE 9 / grass_day                tropius                       4   9.8    8%  10%  13%  16%   accelgor, exeggcute, darmanitan
+  ROUTE 9 / grass_night              tropius                       4   9.8    8%  10%  13%  16%   accelgor, exeggcute, salandit
+  ROUTE 6 / grass_day                centiskorch                   5   9.7   10%  12%  17%  20%   sunflora, cherrim, gulpin
+  ROUTE 6 / grass_night              centiskorch                   5   9.7   10%  12%  17%  20%   bounsweet, eldegoss, garbodor
+  ROUTE 13 / grass_night             centiskorch                   5   9.7    2%   2%   3%   4%   fletchinder, litleo, arcanine
+  ROCK TUNNEL B1F / grass_night      cryogonal                     8   8.9   10%  12%  17%  20%   avalugg, rhydon, mamoswine
+  SEAFOAM B1F / grass_day            cryogonal                     8   8.9    8%  10%  13%  20%   mamoswine, darmanitangalar, vanillish
+  SEAFOAM B1F / grass_night          cryogonal                     8   8.9    8%  10%  13%  20%   sandshrewalola, darmanitangalar, vanillish
+  ROUTE 21A / grass_day              capsakid→scovillain           9   8.9    2%   2%   3%   5%   quagsire, lechonk, wiglett
+  SAFARI FAR-WEST (ZONE 5) / grass_d applin→appletun              10   8.5   20%  25%  33%  40%   carnivine, eiscue, chatot
+  SAFARI FAR-WEST (ZONE 5) / grass_n applin→appletun              10   8.5   20%  25%  33%  40%   carnivine, eiscue, chatot
+  ROUTE 7 / grass_day                applin→appletun              10   8.5   10%  12%  17%  25%   deerling, inkay, braviary
+  ROUTE 7 / grass_night              applin→appletun              10   8.5   10%  12%  17%  25%   deerling, inkay, mandibuzz
+  ROUTE 22 / grass_night             applin→appletun              10   8.5    6%   7%  10%  12%   staraptor, sandshrewalola, annihilape
+  SAFARI EAST (ZONE 2) / grass_day   kangaskhan                   13   8.3    2%   3%   4%   7%   hawlucha, castform, wobbuffet
+  SAFARI EAST (ZONE 2) / grass_night kangaskhan                   13   8.3    2%   2%   3%   5%   hawlucha, castform, wobbuffet
+  SAFARI CENTER (ZONE 1) / grass_day chansey→blissey              14   7.9    2%   2%   3%   5%   kecleon, spinda, ironhands
+  SAFARI CENTER (ZONE 1) / grass_nig chansey→blissey              14   7.9    2%   2%   3%   5%   kecleon, spinda, ironmoth

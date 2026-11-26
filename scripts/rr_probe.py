@@ -174,6 +174,7 @@ def tracker_id(name: str, kind: str) -> str:
     if not _MOD:
         _MOD.update(json.load(open(RR / "mod_data.json")))
     x, table = to_id_str(name or ""), _MOD[kind]
+    x = {"heavydboots": "heavydutyboots"}.get(x, x)  # "HeavyD. Boots": the word rule cannot split it
     if x in ("", "none", "noitem") or x in table:
         return "" if x in ("none", "noitem") else x
     if kind == "moves" and x.startswith("hp") and x[2:] in TYPES:  # Showdown's alias, as the dump's names
@@ -240,6 +241,15 @@ ARENA = {"DESOLATE LAND": ("weather", "desolateland"), "PRIMORDIAL SEA": ("weath
          "ELECTRIC TERRAIN": ("terrain", "electricterrain"), "GRASSY TERRAIN": ("terrain", "grassyterrain"),
          "MISTY TERRAIN": ("terrain", "mistyterrain"), "PSYCHIC TERRAIN": ("terrain", "psychicterrain"),
          "TRICK ROOM": ("pseudo", "trickroom"), "TAILWIND": ("p2", "tailwind")}
+
+
+def dead_types(arena: dict, ability: str | None) -> set[str]:
+    """Attack types that fail outright in this arena: Water under Desolate Land, Fire under
+    Primordial Sea; Cloud Nine / Air Lock lift the weather (the user's catch, 2026-11-25:
+    best4 handed Swampert / Greninja / Palafin dead Water moves at Blaine)."""
+    if to_id_str(ability or "") in ("cloudnine", "airlock"):
+        return set()
+    return {"desolateland": {"Water"}, "primordialsea": {"Fire"}}.get(arena.get("weather", ""), set())
 
 
 def arena(effect: str) -> tuple[dict, list[str]]:
@@ -360,7 +370,8 @@ _CONDITIONAL_ABILITIES = {
 }
 
 
-def choose_ability(species: str, known: dict, boss_types: set, arena: dict, hidden: bool = True) -> str | None:
+def choose_ability(species: str, known: dict, boss_types: set, arena: dict, hidden: bool = True,
+                   tiebreak=None) -> str | None:
     """Capsules (and with `hidden` the Dream Patch) make the slots available:
     1. Boss-specific synergy (+10 each): immunity to a boss attack type (not Dry Skin into Fire/Sun),
        active gym weather/terrain boost (Swift Swim / Chlorophyll / Solar Power / Sand Rush /
@@ -369,7 +380,9 @@ def choose_ability(species: str, known: dict, boss_types: set, arena: dict, hidd
        Unaware 4.0, Magic Guard 4.0, Sharpness 3.5, Tinted Lens 4.0, Bad Company 4.0,
        Quill Rush 3.5, Self Sufficient 3.0, Iron Fist 3.0, Battle Bond 3.5, Protean 4.5 vs
        Overgrow/Blaze/Torrent 2.0), keeping conditional weather/drawback abilities at 0 unless
-       their condition is active. Each slot is scored after Hardcore swaps (`player_ability`)."""
+       their condition is active. Each slot is scored after Hardcore swaps (`player_ability`).
+    3. Ties by `tiebreak(ability)` (run_ability: the best4 set's power; Kleavor's Sheer Force and
+       Sharpness are both 3.5, and Sheer Force also cancels Stone Axe's rocks)."""
     from ai_util.calc_bot import ABILITY_IMMUNE_TYPE
     slots = {k: player_ability(species, v) for k, v in known.get(species, {}).get("abilities", {}).items()}
     if not slots:
@@ -402,7 +415,8 @@ def choose_ability(species: str, known: dict, boss_types: set, arena: dict, hidd
             s += ratings.get(a, 0.0)
         return s
 
-    return max((slots[k] for k in ("0", "1", "H")[:3 if hidden else 2] if k in slots), key=score)
+    return max((slots[k] for k in ("0", "1", "H")[:3 if hidden else 2] if k in slots),
+               key=lambda ab: (score(ab), tiebreak(ab) if tiebreak else 0))
 
 
 @functools.cache
@@ -423,13 +437,16 @@ def ability_gates() -> tuple[int, int]:
     return capsule, patch
 
 
-def run_ability(species: str, evolved: str, seed, progress: int, known: dict, boss_types: set, arena: dict) -> str | None:
+def run_ability(species: str, evolved: str, seed, progress: int, known: dict, boss_types: set, arena: dict,
+                level: int | None = None) -> str | None:
     """The ability the player's mon has at trainer `progress`: rolled at catch before capsules
     are in hand, the best slot for this boss after, the hidden slot too once the patch is."""
     capsule, patch = ability_gates()
     if progress < capsule:
         return catch_ability(species, evolved, seed)
-    return choose_ability(evolved, known, boss_types, arena, hidden=progress >= patch)
+    tb = level and (lambda ab: gauntlet.encounter_moves(evolved, level, "strength", progress,
+                                                        dead=dead_types(arena, ab), ability=ab))
+    return choose_ability(evolved, known, boss_types, arena, hidden=progress >= patch, tiebreak=tb)
 
 
 def catch_ability(species: str, evolved: str, seed) -> str | None:

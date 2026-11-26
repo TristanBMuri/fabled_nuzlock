@@ -3257,3 +3257,258 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   - Fixed `Mon.pack()` (`Greninja-Bond`) and upgraded `rr_probe.choose_ability()` to use `mod_data.json` ability
     ratings below boss-specific immunities/weather/Cloud Nine/Intimidate (gating weather/drawback abilities to
     active weather); bumped `DUEL_CACHE_VERSION = 3`. Tests: 21/21 passing.
+
+### 2026-11-25 — 6v6 starter halving (hardcore + normal), hazard probe, and three set-builder fixes
+
+- **6v6 starter sequential halving** (`rr_route.py --starters-6v6`, 3 rounds, R3 = 16 boxes × 6 battles × 6
+  bosses @ 20k iters; paired starter-less routed base box; lift = max(0, ΔU) per boss).
+  - Hardcore (`results/rr_p6_starters_6v6.log`): Decidueye-Hisui **+0.076 U / +8.2% win** (Koga +0.164, Blaine
+    +0.222), Incineroar +0.046, Cinderace +0.034, Meganium +0.028, Rillaboom +0.024, Infernape +0.018,
+    Meowscarada +0.014. Swampert cut in R1 (#15).
+  - Normal (`results/rr_p6_starters_6v6_normal.log`, ran from the now-deleted `rr_normal_starters.py`):
+    Incineroar +0.050, Venusaur +0.033, Cinderace +0.025, Decidueye +0.021, Emboar +0.019, Quaquaval +0.012,
+    Chesnaught +0.009. Lifts are smaller: the starter-less box already clears most normal gyms.
+  - Incineroar is top 2 in both modes. R1 at 6 boxes × 2 battles is noisy (R1 and R2 orders disagree a lot).
+  - user bet: "Swampert stays winning" — miss (cut in R1). Caveat: Swampert ran a dead Liquidation at Blaine
+    (fix below), so its hardcore number was handicapped. Gemini's bet: Swampert top 2 (70%) miss, Greninja top 14
+    (60%) hit.
+- **Hazard probe (user's ask: force Stone Axe Kleavor / Ceaseless Edge Samurott-Hisui).** Stealth Rock, Spikes etc.
+  are hardcore-banned; these two slicing moves are not and set rocks / spikes in Showdown and poke-engine. Paired
+  8 boxes × 4 battles @ 10k, forced mon(s) lead, replacing the base team's last slot(s):
+  - Koga: base 31.2%, Kleavor lead 12.5%, Samurott-H lead 21.9%, both 15.6% — fragile leads lose to Koga's fast
+    Tapu Lele / Hoopa-U under permanent Tailwind.
+  - Blaine: base 56.2%, Kleavor lead 62.5% (+6.2), Samurott-H lead 40.6% (−15.6), both 68.8% (+12.5). Blaine has
+    Ho-Oh (4× weak to rocks) and a Focus Sash Venusaur, so rocks have real targets there.
+  - n = 32 battles per arm: ±~9 pts, so only the Koga drop is clearly real. Blaine's +12.5 is a lead worth a
+    proper test (more boxes, slot dropped by duel value rather than "the last one"), not a result.
+- **Fixes** (tests 61/61; `DUEL_CACHE_VERSION = 4`, so duel tables recompute):
+  - `best4` no longer picks attacks of a type the arena kills (`rr_probe.dead_types`: Water under Desolate Land,
+    Fire under Primordial Sea, lifted by Cloud Nine / Air Lock). At Blaine: Swampert earthquake / superpower /
+    takedown / dig (was liquidation), Greninja darkpulse / icebeam / gunkshot / nightslash (was surf + hydropump),
+    Golduck (Cloud Nine) keeps Surf. User's catch.
+  - 1v1 duels play Palafin as Palafin-Hero (`rr_team_probe.duel`): alone it can never switch out to transform
+    (verified in the sim: 298 Atk vs 147). 6v6 keeps Palafin; poke-engine implements Zero to Hero. User's catch.
+  - Normal mode folded into `rr_route.py --normal` (normal boss sets / caps, no hardcore bans or swaps, duel cache
+    keyed on mode); `rr_normal_starters.py` deleted. The two data bugs it patched are fixed at the source:
+    `rr_probe.tracker_id` maps "HeavyD. Boots" → heavydutyboots, and `rl/convert.py` drops Terrain Extender
+    (not in the engine's item enum; without this normal Surge / Erika fell back to slow Showdown search).
+  - Not re-run yet: the hardcore 6v6 halving with the Blaine fix (water starters were handicapped there).
+
+### 2026-11-25 — Blaine hazard probe, proper (`scripts/rr_hazard_probe.py`, `results/rr_p6_hazards_blaine.log`)
+
+- 40 starter-less routed boxes × 6 battles @ 20k iters, paired on box + seed (240 battles / arm). Forced Sharpness
+  Jolly mon(s) lead, replacing the weakest base member by duel value. Controls swap the hazard move for a
+  no-hazard move: Kleavor Stone Axe → Stone Edge, Samurott-H Ceaseless Edge → Knock Off.
+
+  | arm | win | Δwin vs base (±se) | ΔU (±se) |
+  |---|---:|---:|---:|
+  | base | 44.2% | — | — |
+  | Kleavor (Stone Axe) | 47.1% | +2.9 (4.5) | +0.022 (0.038) |
+  | Kleavor ctrl (Stone Edge) | 34.6% | −9.6 (4.2) | −0.082 (0.034) |
+  | Samurott-H (Ceaseless Edge) | 52.9% | **+8.8 (4.0)** | +0.056 (0.032) |
+  | Samurott-H ctrl (Knock Off) | 45.0% | +0.8 (4.4) | −0.011 (0.036) |
+  | both | 53.8% | **+9.6 (4.6)** | +0.049 (0.035) |
+
+- Reading: **the hazards themselves pay at Blaine**: hazard arm minus its control is +12.5 pts (Kleavor) and
+  +8.0 pts (Samurott-H). The Kleavor control is a bit unfair (Stone Edge 80% acc, no Sharpness: ~10% less expected
+  damage than Stone Axe), the Samurott one is close (Knock Off 100% acc, removes items). Kleavor as a mon is no
+  better than what it replaces; with rocks it breaks even. Samurott-H and both are ~2 se over base on win rate,
+  ~1.5 se on U; five arms against one base, so treat as "likely real, about +9 pts", not settled.
+- Hazards earn their keep here because Blaine's team has Ho-Oh (4× rocks) and a Focus Sash Venusaur. At Koga
+  (first probe, n = 32) the fragile leads lost clearly.
+- user bet: hazards underperform — miss (both hazard arms beat their controls; Samurott-H and both are the
+  best arms). The user meant "the hazard mon is worse than the better mon it displaces" (vs base, not
+  vs control): on that reading Kleavor held (+2.9 ± 4.5, a wash), Samurott-H missed (+8.8 ± 4.0). The probe
+  displaced the *weakest* member; displacing a strong one would likely confirm the user's version. Note the 1v1
+  duel scorer cannot see hazards at all (no switches in a duel), like Palafin's Zero to Hero. Claude's bet: both does not beat base by 2 se (7) — narrow miss on win (2.1 se), held on U
+  (1.4 se); hazard ≈ control (5) — miss.
+
+### 2026-11-25 — D15: teach the leaf evaluation about hazards we set
+
+- Finding: in `eval_weights_r2.txt` the enemy-side `rocks` / `ground_hazards` weights are exactly 0 (hardcore bans
+  our hazard moves, so the replay buffer never had enemy-side hazards; `fit_eval.py` zeroes constant features).
+  The search credits Stone Axe / Ceaseless Edge only for switch-ins inside its tree. The features also count
+  mons, not damage (a 4× weak Ho-Oh = a resisting mon). The RR AI's own switches are in the tree (Rust port,
+  97% agreement), so baiting switches is reachable; valuing the hazard that punishes them is not.
+- Options: A leave; B hand-set an effectiveness-weighted weight; C refit with hazard battles in the data;
+  D measure switch-ins first.
+- user call: C (Samurott-Hisui is a viable starter with guaranteed hazard access, so the battler should learn it).
+- Claude: agree with C, with B's feature fix underneath (refitting a mon-count feature learns one average weight
+  for Ho-Oh and resisters) and D's counts logged for free from the data run. Note Ceaseless Edge sets Spikes,
+  which Flying Ho-Oh ignores; the Ho-Oh lever is Kleavor's Stone Axe.
+
+### 2026-11-25 — Hardcore 6v6 starter halving re-run after the dead-move fix (`results/rr_p6_starters_6v6_v2.log`)
+
+- Same schedule and seed as `rr_p6_starters_6v6.log`; changes: no dead Water moves under Desolate Land,
+  Palafin-Hero duels (duel cache v4). R3 (16 boxes × 6 battles @ 20k): Decidueye-Hisui +0.052 (Koga +0.175),
+  Cinderace +0.050 (Blaine +0.234), Incineroar +0.048, Primarina +0.041 (Koga +0.171), Inteleon +0.014,
+  Quaquaval +0.013, Infernape +0.012. Swampert reached R2 (#4 in R1), cut at #12.
+- Stable across both runs: Decidueye-H, Cinderace, Incineroar in the top 3 (now a three-way tie within noise).
+  Meganium, Rillaboom, Meowscarada out; Primarina, Inteleon, Quaquaval in. The new Water entrants gain at
+  Brock / Koga, not Blaine, so the swap is mostly R1 noise; the Blaine fix shows as smaller starter lifts there
+  (Decidueye-H Blaine +0.222 → +0.037) because the base boxes' own Water mons now carry live moves.
+- user bet: no change — miss (3 of 7 changed). Claude: no Water starter in the final 7 (7) — miss (3);
+  at least one of the 7 swaps (7) — hit; Decidueye-H stays #1 (7) — hit, by 0.002.
+
+### 2026-11-25 — Purposeful duping scan (`scripts/rr_dupe_scan.py`, `results/rr_dupe_scan.log`)
+
+- The user's encounter rules (new): one encounter per area (any method), delayable, dupes clause by evolution
+  line rerolling until new. `routed_box` differs (species-level dupes, 4 rerolls, free delay per boss box).
+- Scan: per boss, each table's best mon by duel-table value, if it ranks top 15 among all species valued at that
+  boss, with its odds owning 0–3 of the table's most common other lines.
+- Grass tables have ~10 lines, so blocking barely helps (Gengar in Pokémon Tower 20 → 40% with 3 blockers).
+  Duping works on the small fishing tables, and they hold Koga answers:
+  - Golisopod (Koga #5): S.S. Anne old rod 70%, **100% owning the Finneon line**; Vermilion good rod 20 → 100%
+    owning Frillish + Staryu lines.
+  - Araquanid (Koga #3): Route 25 good rod 60 → 75 → **100% owning Mantine + Goldeen lines**; Route 13 good rod
+    20 → 100% with Qwilfish + Skrelp lines.
+  - Wailord (#7): Route 24 good rod 60 → 100% (Wishiwashi, Clobbopus); Dewgong (#9): Route 12 old rod 30 → 100%
+    owning the Spheal line.
+  - Blaine: nothing close to guaranteed; its top mons (Gengar, Scream Tail, Tropius, Centiskorch) sit in big
+    grass tables.
+- Caveats: value is the 1v1 duel row (same blind spots as routing); each blocker costs another area's encounter,
+  so the cheap ones are blockers you would keep anyway. Not yet checked in 6v6.
+
+### 2026-11-25 — D15 run: hazard data, feature fix, refit (gates pending)
+
+- **Data** (`scripts/rr_hazard_probe.py --states`): Samurott-H / Kleavor-led routed teams at #26 #34 #38 #44 #46
+  #80 #90, 20 boxes × 6 battles each half: on-policy R2 (`logs/d15_r2.*`, seed 10) and hand evaluation
+  (`logs/d15_hand.*`, seed 11; the hand eval values hazards: −10 rocks / −7 Spikes a mon). 4,560 battles,
+  ~105k positions; enemy rocks up 19% / 29%, Spikes 8% / 20%. Kleavor was also put in at #34–#46 where Scyther
+  is not yet catchable (the setter only checks the evolution and the move); fine for a value fit.
+- Found while building it: the ability picker gives Kleavor Sheer Force, which cancels Stone Axe's rocks
+  (Showdown `!move.hasSheerForce`); the probe forces Sharpness once the Dream Patch is in hand. Under R2 the
+  search often switched the setter out on turn 1 (enemy-hazard weights 0).
+- **Feature** (`poke-engine` `evaluate.rs` `side_features`): `rocks` / `ground_hazards` = Σ switch-in damage /
+  current HP, capped at 1 (rocks by type effectiveness, Mountaineer immune; Spikes by layers, grounded), Toxic
+  Spikes / Sticky Web layers / 8. Was: the count of mons hit.
+- **Refit** (`fit_eval.py` R1 + R2 + D15, `--within-team --scale 2.0` → `data/rr/eval_weights_d15.txt`, 301,724
+  positions, 13,182 battles): their_rocks 0 → +0.46, their_ground_hazards 0 → +1.00 (their_hp −0.46: a unit of
+  switch-in damage ≈ a unit of HP already lost). Held-out within-team log-loss 0.4473 (R2's fit: 0.4470), flat:
+  hazard positions are a minority. `our_ground_hazards` came out +1.15 on Toxic Spikes alone (2% of positions,
+  two bosses, ×8 from the /8 rescale; poisoning is already in `our_tox`): set to 0 by hand (hazards on our side
+  cannot help).
+- **Baselines under R2 on today's code** (`results/rr_d15_gate_r2.log`, `results/rr_d15_fresh_r2.*`):
+  - Blaine probe with the run's own sets (setter = tp.mon_of + hazard move first): base 44.2%; Kleavor +1.2,
+    Kleavor ctrl −16.2, **Samurott-H −9.2**, Samurott-H ctrl −6.7, both −5.4 (se ~4.5–5). The earlier +8.8 for
+    Samurott-H came from the hand-picked Jolly set (Sucker Punch / Night Slash / Sacred Sword), not from Spikes:
+    best4 gives it Foul Play / Megahorn. Kleavor's rocks beat its control under both sets (+12 / +17).
+  - Fresh seed 4 (30 boxes, `--legal --arena --matchup --death-weight 6 --engine 20000`): Brock 93 / Misty 48 /
+    Erika 78 / Koga 7 / Blaine 37. Below the Phase 4 fresh run (96 / 65 / 84 / 11 / 44) on unchanged seeds:
+    the box pool and abilities changed since (Phase 6: 131 vs 129 species, ability ratings) — to look into.
+- **Gates under D15** (`POKE_ENGINE_EVAL_WEIGHTS=data/rr/eval_weights_d15.txt`, same boxes and seeds):
+
+  | Blaine probe arm (win) | R2 | D15 |
+  |---|---:|---:|
+  | base | 44.2% | 38.8% |
+  | Kleavor (Stone Axe) | 45.4% | **55.8%** |
+  | Kleavor ctrl (Stone Edge) | 27.9% | 33.3% |
+  | Samurott-H (Ceaseless Edge) | 35.0% | 36.2% |
+  | Samurott-H ctrl (Knock Off) | 37.5% | 30.8% |
+  | both | 38.8% | **54.2%** |
+
+  Kleavor +10.4 and both +15.4 over the same arms under R2 (unpaired se ~4.5); within D15 Kleavor is +17.1 ± 5.9
+  over base. Samurott-H unchanged: its best4 set, not the evaluation, holds it back. Base −5.4 has no hazards
+  in it; read as noise (fresh-seed Blaine moved the other way, 37 → 41).
+  Fresh seed 4 (`results/rr_d15_fresh_d15.*`): Brock 91 / Misty 48 / Erika 73 / Koga 7 / Blaine 41; paired vs
+  R2 **−0.7 ± 2.6 pts, +0.017 ± 0.017 d/mon, SPRT δ 5% H0 (no difference)**. No regression.
+- Bets: Claude — Kleavor gains > 5 pts (5) hit; Samurott-H stays negative (7) hit; fresh within ±3 (7) hit.
+  User did not bet.
+- **Adopted (user, 2026-11-25):** `eval_weights_d15.txt` is the default in `rl/engine_search.py` and `rl/line.py`.
+
+### 2026-11-25 — Why fresh-seed Misty fell 65 → 48% (investigation)
+
+- Same seed, but no box is the same as in `rr_p4_fresh_r2`: the box sampler's draws changed with Phase 6
+  (`order.json` gift kinds, branched evolutions), so seed 4 now means different starters and rolls.
+- The structural change: **Carnivine** (in-game trade, give Snom at Cerulean) was in all 30 old Misty boxes and
+  in 17 of 30 chosen teams. Phase 6 applies the user's trade rule (only if the box owns the give line), and no
+  sampled box owns Snom, so it is gone; gifts per Misty box 1.8 → 0.8. The old Misty number was inflated by an
+  illegal free Grass answer. Correction (same day): the D15 runs used the probe's default `--chooser greedy`,
+  Phase 4's fresh runs `--chooser cover`, so the 65 → 48 gap also mixes in a chooser change; Carnivine's loss
+  is real, its share of the gap is not measured. Owning a Snom early would make the trade a plannable action
+  (like the dupe shaping).
+
+### 2026-11-25 — Movesets: diagnosis (D16 pending)
+
+- Samurott-H at Blaine: hand-picked Jolly Sharpness set (Ceaseless Edge / Sacred Sword / Sucker Punch / Night
+  Slash) +8.8 vs base; best4 + Ceaseless Edge (Foul Play / Megahorn / Sacred Sword) −9.2: an 18-point swing from
+  the moves alone.
+- `best4` scores power × accuracy × STAB × category fit: no attacker abilities, no priority, no boss. The calc
+  (`ai_util/calc_bot._dmg_frac`, used by duels, the calc bot and `rr_search.default_set`) models Technician,
+  Sheer Force, Huge / Pure Power only. Showdown and poke-engine apply Sharpness etc. in battle; only the set
+  builders ignore them.
+- Scan of the Koga / Blaine pools (491 / 580 species as built): 19 / 23 have a flag ability (Sharpness, Iron
+  Fist, Strong Jaw, Tough Claws, Mega Launcher, Punk Rock, Reckless) and use fewer than 2 boosted moves; ~37 / 41
+  more carry Adaptability, -ate, Technician, Sheer Force etc. that best4 ignores; **38 / 46 pick Foul Play**,
+  scored as a 95-power move off the user's own Attack (it uses the target's).
+
+### 2026-11-25 — D16: movesets (user call: A + B)
+
+- user call: A + B. Priority: the user notes it matters only against faster foes or foes with priority, so no
+  flat priority bonus; `ai_util.matchup.pair`'s "faster" is speed only (priority not modelled), a later fix.
+  Samurott-H as starter: the user is sure it is not the best pick; no re-run for that.
+- **A** (`ai_util/calc_bot.ability_power`, used by `_dmg_frac` and `gauntlet.encounter_moves(ability=)`):
+  Sharpness / Iron Fist (RR: ×1.3) / Strong Jaw / Tough Claws / Mega Launcher / Punk Rock / Reckless /
+  Technician / Sheer Force / -ate / Steelworker-likes / Adaptability; Foul Play off the target's Attack (calc) or
+  a base-100 Attack (best4); Huge / Pure Power in best4's fit. Calc vs Showdown, Sharpness Night Slash into Great
+  Tusk: 13.7% vs 12.7–14.8% over 10 hits. New best4 at Blaine: Samurott-H Night Slash / Sacred Sword /
+  X-Scissor / Foul Play, Kabutops Stone Axe, Clawitzer four pulses, Drednaw bites. Kleavor still gets Sheer Force
+  from the ability picker. `DUEL_CACHE_VERSION = 5`.
+- **B** (`rr_team_probe.py --sets boss`, `team_mons`): moves and nature from `rr_search.default_set` (calc damage
+  on this boss's team) for every battle.
+- Gates (fresh seed 4, `--chooser greedy` as the D15 runs): A vs `rr_d15_fresh_d15`, A+B vs A.
+- **Results** (150 paired boxes each; `results/rr_d16_fresh_{a,ab}.*`; per boss: mean paired diff ± se):
+
+  | boss | D15 | A | A+B | A − D15 | A+B − A |
+  |---|---:|---:|---:|---:|---:|
+  | Brock | 91% | 92% | 93% | +1.1 ± 0.8 | +1.7 ± 1.5 |
+  | Misty | 48% | 42% | 41% | −6.1 ± 4.9 | −0.6 ± 4.6 |
+  | Erika | 73% | 77% | 81% | +3.3 ± 5.3 | +4.4 ± 4.1 |
+  | Koga | 7% | 12% | 8% | +5.0 ± 3.9 | −3.9 ± 2.2 |
+  | Blaine | 41% | 38% | 46% | −3.3 ± 7.4 | +7.8 ± 6.9 |
+
+  Overall (sprt.py, 95% intervals): A vs D15 **−0.0 ± 4.3 pts**, A+B vs A **+1.9 ± 3.8**, A+B vs D15 +1.9 ± 4.6;
+  all SPRT "continue". No measurable change yet; A is kept on correctness (the calc now matches Showdown).
+- Bets: Claude — A +2 to +4 (5) miss (0.0); B +3 more, mostly Erika / Blaine (5) miss on size (+1.9), right on
+  where (Erika +4.4, Blaine +7.8). User did not bet.
+
+### 2026-11-25 — D16 follow-up: Misty / Koga diagnosis, B′, ability tie-break
+
+- **Misty −6 under A is team choice, not a set bug.** Same 30 boxes, but only 10/30 chosen teams match D15's
+  (Koga 2/30): same-team boxes −1.7 pts, changed-team boxes −8.3. A shifts stage-A solo scores slightly
+  (Marill 0.195 → under the top-24 cut at ~0.167; 12 seeded solos: A set 0.171, D15's Mild set 0.183, both
+  0 wins), so the greedy chooser's candidates and its 4 screening battles land on other teams. Any change that
+  touches the calc reshuffles teams: set comparisons are only clean on fixed teams (A → A+B: 30/30 same).
+- **Koga −3.9 under B is a set bug: `default_set` is damage-only.** It dropped Thunder Wave (Aggron, Lanturn),
+  Will-O-Wisp (Houndstone, Sableye, Runerigus) and Light Screen for a fourth attack. **B′**: keep best4's
+  status moves, the calc picks only the attacks (`rr_search.default_set`; also the seed set of rr_search's
+  set search). Gates queued: seed 7 A vs A+B′ (`results/rr_d16_s7_{a,ab}`), seed 4 A+B′ vs A
+  (`results/rr_d16_fresh_abk`).
+- **Ability tie-break** (parked in a patch until the queued runs start, so they stay clean): Sheer Force and
+  Sharpness both rate 3.5 and slot order picked Sheer Force for Kleavor (which also cancels Stone Axe's
+  rocks). `choose_ability` now breaks ties by best4's attack power under each ability (`encounter_moves`
+  rule "strength"). Changes 3/372 at Erika, 12/490 at Koga, 11/579 at Blaine: Kleavor → Sharpness, Dracovish
+  → Strong Jaw, Golem-Alola → Galvanize, Conkeldurr / Hariyama / Cetitan → Sheer Force, Feraligatr → Strong
+  Jaw. Also the calc missed Sheer Force on Stone Axe / Ceaseless Edge / Diamond Storm (their data has
+  `secondary: {}`, falsy in Python; Showdown boosts them) and Electro Shot / Order Up (`hasSheerForceBoost`).
+- Bets (B′ gates): Claude — seed 7 A+B′ − A **+2 to +4 pts**, Koga ≥ 0 (5); pooled over seeds 4 + 7 still SPRT
+  "continue" (7).
+- **B′ results** (`results/rr_d16_s7_{a,ab}`, `results/rr_d16_fresh_abk`; paired diff ± se):
+
+  | boss | seed 7 A | A+B′ | diff | seed 4 A+B′ − A | pooled (60 boxes) |
+  |---|---:|---:|---:|---:|---:|
+  | Brock | 93% | 95% | +2.2 ± 3.8 | +1.1 ± 2.1 | +1.7 ± 2.2 |
+  | Misty | 34% | 29% | −5.0 ± 5.0 | −0.6 ± 4.0 | −2.8 ± 3.2 |
+  | Erika | 69% | 74% | +4.4 ± 4.5 | +2.2 ± 5.2 | +3.3 ± 3.4 |
+  | Koga | 8% | 10% | +1.7 ± 3.3 | −3.9 ± 2.6 | −1.1 ± 2.1 |
+  | Blaine | 27% | 47% | **+20.0 ± 5.7** | +9.4 ± 6.9 | **+14.7 ± 4.5** |
+  | all | | | +4.7 ± 4.1 (95%) | +1.7 ± 4.0 (95%) | **+3.2 ± 1.5 (se)** |
+
+  SPRT (δ 5%) "continue" on each seed (the effect sits between 0 and 5). Pooled ~2.1 se: B′ helps, almost all
+  at Blaine (Energy Ball / Rock Slide / Psychic in for Shadow Ball / Thunderbolt: coverage for this boss's
+  team). **Koga correction:** B vs B′ on seed 4 is 0.0 at Koga (identical), so the dropped status moves were
+  not Koga's −3.9; B vs B′ overall is noise (Erika −2.2 ± 4.4, Blaine +1.7 ± 6.1). Misty: the calc swaps
+  U-turn / Dig / Thief / Sucker Punch for Bullet Seed / Dual Wingbeat / Aerial Ace (pivot and priority
+  value invisible to a damage-only calc), −2.8 ± 3.2 pooled, not resolved.
+- Bets settled: Claude seed 7 +2 to +4 (5) — miss, high (+4.7); Koga ≥ 0 on seed 7 hit (+1.7); pooled SPRT still
+  "continue" (7) hit. User did not bet.

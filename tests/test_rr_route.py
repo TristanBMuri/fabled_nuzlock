@@ -123,9 +123,12 @@ def test_gifts_accepted_and_trades_require_owned_mon():
         species = [sp for sp, _ in box]
         assert "floetteeternal" not in species
         assert "mimikyu" not in species
-        # Story gifts ARE accepted: Magikarp, Lapras, and BOTH Eevees (Route 5 + Celadon 4F)
+        # Story gifts ARE accepted: Magikarp, Lapras, BOTH Eevees (Route 5 + Celadon 4F),
+        # plus pre-Koga gym rematch gifts Finizen (Misty Rematch #76) and Ogerpon (Erika Rematch #78)
         assert "magikarp" in species
         assert "lapras" in species
+        assert "finizen" in species
+        assert "ogerpon" in species
         assert species.count("eevee") == 2
         # eligible_trades only triggers when the required line is owned
         assert rp.eligible_trades(["bulbasaur", "magikarp"], 85, known) == []

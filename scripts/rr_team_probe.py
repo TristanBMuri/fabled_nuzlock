@@ -114,10 +114,13 @@ def build_mon(species: str, cap: int, known: dict, progress: int, boss: dict | N
     (Minimal Grinding Mode)."""
     base, _ = split_evo_key(species)
     ev = evolve(species, cap, None, caught_level=5, trainer_idx=progress)
-    moves = encounter_moves(ev, cap, "best4", progress=progress)
-    if not moves or ev not in known:
+    if ev not in known:
         return None
-    m = Mon(ev, cap, moves, ability=rp.run_ability(base, ev, seed, progress, known, boss_types, arena), item=mega_stone(ev, progress), caught_level=5,
+    ability = rp.run_ability(base, ev, seed, progress, known, boss_types, arena, level=cap)
+    moves = encounter_moves(ev, cap, "best4", progress=progress, dead=rp.dead_types(arena, ability), ability=ability)
+    if not moves:
+        return None
+    m = Mon(ev, cap, moves, ability=ability, item=mega_stone(ev, progress), caught_level=5,
             nature=rp.choose_nature(ev, moves, known, boss, cap))
     m.evs = dict.fromkeys(STATS, 0)
     return m
@@ -129,8 +132,17 @@ def show(m: Mon) -> str:
 
 def team_mons(ctx, team) -> list[Mon]:
     """The six as played: copies of the cached mons, holding the items in hand by this boss under
-    --items (gauntlet.assign_items: one per mon, greedy by item_value, deterministic in the team)."""
+    --items (gauntlet.assign_items: one per mon, greedy by item_value, deterministic in the team).
+    --sets boss (D16): moves and nature from rr_search.default_set, chosen by calc damage on this
+    boss's team (legal: the relearner and reusable TMs let a set change between bosses)."""
     mons = [copy.copy(mon_of(ctx, s)) for s in team]
+    if getattr(ctx.args, "sets", "best4") == "boss":
+        import rr_search as rs
+        rs.info(ctx, list(team))
+        for m, s in zip(mons, team):
+            if s in ctx.info:
+                d = rs.default_set(ctx, s)
+                m.moves, m.nature = list(d["moves"]), d["nature"]
     if ctx.args.items:
         assign_items(mons, ctx.progress)
     return mons
@@ -488,6 +500,9 @@ def duel(ctx, sp: str, enemy_mon: str, n: int) -> tuple[float, float]:
     mon = mon_of(ctx, sp)
     if packed is None or mon is None:
         return 0.0, 0.0
+    if mon.species == "palafin":  # alone it can never switch out to turn Hero; in a team it does (poke-engine has it)
+        mon = copy.copy(mon)
+        mon.species = "palafinhero"
     wins, hp = 0, 0.0
     for i in range(n):
         sb = SimBattle(ctx.bridge, rp.FMT, pack_team([mon]), packed, full_info=True, arena=ctx.arena, seed=ctx.seeds[i % len(ctx.seeds)])
@@ -782,6 +797,8 @@ def main() -> None:
     ap.add_argument("--engine-opp", choices=("minimax", "ai"), default="ai",
                     help="--engine's model of the boss: both sides search, or the RR AI in Rust mixed with search "
                          "(--engine-p; the default since D4, 2026-11-24: +11 points, -0.13 deaths/mon on fresh seeds)")
+    ap.add_argument("--sets", choices=("best4", "boss"), default="best4",
+                    help="battle movesets: generic best4, or boss-aware rr_search.default_set (D16)")
     ap.add_argument("--out")
     args = ap.parse_args()
     args.items = not args.no_items

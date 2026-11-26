@@ -293,16 +293,29 @@ def progression() -> None:
         if mid not in tms or (w or 999) < tms[mid]["before_trainer"]:
             tms[mid] = {"name": cells[0][0], "before_trainer": w if w is not None else 999, "from": f"tutor: {place}"}
     # gifts and in-game trades: species, level (a trade keeps the given mon's level: None), the trainer
-    # index at which they are in hand (rematch rewards and the Sevii Islands never), kind, how
+    # index at which they are in hand (postgame Z-Ring / Sevii rematches excluded; main-story pre-Koga
+    # gym rematches Misty #76 -> Finizen and Erika #78 -> Ogerpon ARE included), kind, how
+    rematch_t = {
+        "MISTY": next((i + 1 for i, e in enumerate(entries) if _norm(e["name"]) == "MISTY REMATCH"), None),
+        "ERIKA": next((i + 1 for i, e in enumerate(entries) if _norm(e["name"]) == "ERIKA REMATCH"), None),
+    }
     gifts = []
     for g in enc["gifts"]:
         if g["location"] == "SAFFRON CITY'S DOJO" and norm_species(g["species"]) == "taurospaldeaaqua":
             continue  # merged spreadsheet cell with Tauros-Blaze; recorded as choice_options below
-        w = when(f"{g['location']}, {g['requirements']}")
-        lv = re.search(r"Lv\. ?(\d+)", g.get("info", "") + g.get("requirements", ""))
+        req = g.get("requirements", "")
+        lv = re.search(r"Lv\. ?(\d+)", g.get("info", "") + req)
+        w = None
+        if "rematch" in req.lower() and "z-ring" not in req.lower():
+            for leader, rt in rematch_t.items():
+                if leader in req.upper() and rt is not None:
+                    w = rt
+                    break
+        else:
+            w = when(f"{g['location']}, {req}")
         if w is not None and lv:
             rec = {"species": norm_species(g["species"]), "level": int(lv.group(1)), "t": w,
-                   "kind": "gift", "how": f"gift: {g['location']} — {g['requirements']}"}
+                   "kind": "gift", "how": f"gift: {g['location']} — {req}"}
             if g["location"] == "SAFFRON CITY'S DOJO" and rec["species"] == "taurospaldeablaze":
                 rec["choice"] = "SAFFRON DOJO"
                 rec["choice_options"] = ["taurospaldeablaze", "taurospaldeaaqua"]

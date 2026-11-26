@@ -1,0 +1,45 @@
+Built matchup-cover tables for 5 bosses in 8.5s
+Top routed starter across ['BROCK', 'MISTY', 'ERIKA', 'KOGA', 'BLAINE']: bulbasaur
+BROCK    random       (30 boxes): win 93.3%  >=50% 100%  d/mon 0.30
+BROCK    routed       (30 boxes): win 95.6%  >=50%  97%  d/mon 0.30
+BROCK    routed+egg   (30 boxes): win 95.6%  >=50%  97%  d/mon 0.30
+BROCK    routed+full  (30 boxes): win 95.6%  >=50% 100%  d/mon 0.25
+MISTY    random       (30 boxes): win 64.4%  >=50%  80%  d/mon 0.61
+MISTY    routed       (30 boxes): win 70.6%  >=50%  70%  d/mon 0.56
+MISTY    routed+egg   (30 boxes): win 70.6%  >=50%  70%  d/mon 0.56
+MISTY    routed+full  (30 boxes): win 77.2%  >=50%  83%  d/mon 0.51
+ERIKA    random       (30 boxes): win 78.3%  >=50%  90%  d/mon 0.46
+ERIKA    routed       (30 boxes): win 71.1%  >=50%  73%  d/mon 0.50
+ERIKA    routed+egg   (30 boxes): win 75.0%  >=50%  87%  d/mon 0.44
+ERIKA    routed+full  (30 boxes): win 70.6%  >=50%  83%  d/mon 0.51
+KOGA     random       (30 boxes): win 18.3%  >=50%  13%  d/mon 0.90
+KOGA     routed       (30 boxes): win 14.4%  >=50%  10%  d/mon 0.92
+KOGA     routed+egg   (30 boxes): win 12.8%  >=50%  10%  d/mon 0.93
+KOGA     routed+full  (30 boxes): win 16.7%  >=50%  13%  d/mon 0.90
+BLAINE   random       (30 boxes): win 48.3%  >=50%  60%  d/mon 0.75
+BLAINE   routed       (30 boxes): win 40.6%  >=50%  50%  d/mon 0.80
+BLAINE   routed+egg   (30 boxes): win 37.2%  >=50%  43%  d/mon 0.81
+BLAINE   routed+full  (30 boxes): win 48.3%  >=50%  57%  d/mon 0.78
+
+=== PAIRED SUMMARY VS RANDOM-METHOD BOXES ===
+  routed       BROCK   : win  +2.2% ±  6.4%  |  d/mon -0.000 ± 0.087
+  routed       MISTY   : win  +6.1% ± 13.5%  |  d/mon -0.054 ± 0.114
+  routed       ERIKA   : win  -7.2% ± 13.6%  |  d/mon +0.049 ± 0.107
+  routed       KOGA    : win  -3.9% ±  9.5%  |  d/mon +0.021 ± 0.058
+  routed       BLAINE  : win  -7.8% ± 15.2%  |  d/mon +0.050 ± 0.078
+  routed       OVERALL : win  -2.1% ±  5.4%  |  d/mon +0.013 ± 0.041  (n=150)
+
+  routed+egg   BROCK   : win  +2.2% ±  6.4%  |  d/mon -0.000 ± 0.087
+  routed+egg   MISTY   : win  +6.1% ± 13.5%  |  d/mon -0.054 ± 0.114
+  routed+egg   ERIKA   : win  -3.3% ± 12.9%  |  d/mon -0.019 ± 0.103
+  routed+egg   KOGA    : win  -5.6% ±  9.8%  |  d/mon +0.031 ± 0.060
+  routed+egg   BLAINE  : win -11.1% ± 14.6%  |  d/mon +0.063 ± 0.077
+  routed+egg   OVERALL : win  -2.3% ±  5.3%  |  d/mon +0.004 ± 0.040  (n=150)
+
+  routed+full  BROCK   : win  +2.2% ±  5.8%  |  d/mon -0.048 ± 0.085
+  routed+full  MISTY   : win +12.8% ± 14.1%  |  d/mon -0.102 ± 0.119
+  routed+full  ERIKA   : win  -7.8% ± 13.2%  |  d/mon +0.057 ± 0.109
+  routed+full  KOGA    : win  -1.7% ± 10.3%  |  d/mon +0.005 ± 0.068
+  routed+full  BLAINE  : win  +0.0% ± 15.1%  |  d/mon +0.026 ± 0.074
+  routed+full  OVERALL : win  +1.1% ±  5.5%  |  d/mon -0.012 ± 0.042  (n=150)
+

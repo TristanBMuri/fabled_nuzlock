@@ -1,0 +1,12 @@
+
+=== hazard probe: 40 boxes x 6 battles @ 20000 iters, paired on box + seed (499s) ===
+
+BLAINE
+  arm               win    dWin  +-se  d/mon      U      dU   +-se
+  base            38.8%                 0.83  0.280
+  kleavor         55.8% +17.1%  5.9%   0.71  0.425  +0.145  0.047
+  kleavor_ctrl    33.3%  -5.4%  5.4%   0.85  0.242  -0.037  0.043
+  samurott        36.2%  -2.5%  3.9%   0.84  0.264  -0.016  0.029
+  samurott_ctrl   30.8%  -7.9%  5.2%   0.88  0.214  -0.066  0.039
+  both            54.2% +15.4%  6.7%   0.75  0.398  +0.118  0.049
+  example teams: {'base': ['leavanny', 'mukalola', 'gengar', 'ironhands', 'qwilfish', 'screamtail'], 'kleavor': ['kleavor', 'leavanny', 'mukalola', 'gengar', 'qwilfish', 'screamtail'], 'kleavor_ctrl': ['kleavor', 'leavanny', 'mukalola', 'gengar', 'qwilfish', 'screamtail'], 'samurott': ['samurotthisui', 'leavanny', 'mukalola', 'gengar', 'qwilfish', 'screamtail'], 'samurott_ctrl': ['samurotthisui', 'leavanny', 'mukalola', 'gengar', 'qwilfish', 'screamtail'], 'both': ['kleavor', 'samurotthisui', 'leavanny', 'mukalola', 'gengar', 'screamtail']}

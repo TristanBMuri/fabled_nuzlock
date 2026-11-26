@@ -28,8 +28,10 @@ from rl.route import GAPS, turn_gaps
 RR_GAPS = {}
 # Phase 4 fitted leaf evaluation (R1+R2 replay buffer, within-team fixed effects, relative 2x):
 # +11.0 ± 4.1 pts, -0.022 d/mon vs hand on untouched fresh seed 4 (SPRT LLR +9.61 -> H1).
+# D15 (2026-11-25): + hazard battles, hazards as switch-in damage (evaluate.rs) -> eval_weights_d15.txt:
+# Blaine Kleavor lead 45 -> 56%, fresh seed 4 -0.7 +- 2.6 pts vs R2 (SPRT: no difference). NOTEBOOK.md.
 # Set POKE_ENGINE_EVAL_WEIGHTS="" to revert to the hand-written evaluation.
-DEFAULT_EVAL_WEIGHTS = Path(__file__).resolve().parents[1] / "data" / "rr" / "eval_weights_r2.txt"
+DEFAULT_EVAL_WEIGHTS = Path(__file__).resolve().parents[1] / "data" / "rr" / "eval_weights_d15.txt"
 
 
 class EngineSearcher:

@@ -208,7 +208,8 @@ def legal_pool(species: str, level: int, progress: int | None = None) -> list[st
 
 
 def encounter_moves(species: str, level: int, rule: str = "best4",
-                    progress: int | None = None) -> list[str]:
+                    progress: int | None = None, dead: set[str] = frozenset(),
+                    ability: str | None = None) -> list[str]:
     """A mon's moves at `level` under the moveset rule; progress = the trainer
     index reached (None = no TMs): under best4 the pool also holds every TM
     handed out before it that the species can learn (tms.json; reusable).
@@ -223,32 +224,47 @@ def encounter_moves(species: str, level: int, rule: str = "best4",
             with the TM pool raw power chose Hyper Beam / Hydro Pump for
             everyone). Variable-damage
             attacks (Seismic Toss, Low Kick) count as 50 power; NO_SLOT_MOVES
-            (self-KO, recharge, conditional) never get a slot."""
+            (self-KO, recharge, conditional) never get a slot. `dead`: attack
+            types that fail in this fight (rr_probe.dead_types: Water under
+            Desolate Land), never picked under best4. `ability`: the mon's, so
+            its move boosts count (ai_util.calc_bot.ability_power: Sharpness,
+            Iron Fist, -ate, Adaptability ...; D16, 2026-11-25); Foul Play
+            counts as off a base-100 Attack (it uses the target's).
+    strength — best4's attacks' summed power (rr_probe.run_ability's tie-break)."""
     game = load_game()
     pool = legal_pool(species, level)
     if rule == "last4" or not pool:
         return pool[-4:]
     pool = legal_pool(species, level, progress)
-    md, sp = game["moves"], game["species"].get(species, {})
+    from ai_util.calc_bot import ability_power
+    from poke_env.data import GenData
+    md, sp, sd = game["moves"], game["species"].get(species, {}), GenData.from_gen(9).moves
     stab, bs = set(sp.get("types", [])), sp.get("baseStats", {"atk": 1, "spa": 1})
-    fit = {"Physical": bs["atk"], "Special": bs["spa"]}
+    ab = to_id_str(ability or "")
+    fit = {"Physical": bs["atk"] * (2 if ab in ("hugepower", "purepower") else 1), "Special": bs["spa"]}
+    eff = {m: ability_power(ab, {**sd.get(m, {}), "type": md[m]["type"]}, md[m]["power"] or 50) for m in pool}
+    mtype = lambda m: eff[m][1]  # noqa: E731  (-ate abilities change Normal moves' type)
 
     def power(m):  # expected damage scale: power x accuracy x STAB x category fit
         acc = md[m]["accuracy"]
-        return ((md[m]["power"] or 50) * (1.0 if acc is True else acc / 100) * (1.5 if md[m]["type"] in stab else 1.0)
-                * fit[md[m]["category"]] / max(bs["atk"], bs["spa"]))
-    attacks = sorted((m for m in pool if md[m]["category"] != "Status" and m not in NO_SLOT_MOVES),
+        bp, t, stab_x = eff[m]
+        user = 100 if sd.get(m, {}).get("overrideOffensivePokemon") == "target" else fit[md[m]["category"]]
+        return bp * (1.0 if acc is True else acc / 100) * (stab_x if t in stab else 1.0) * user / max(fit.values())
+    attacks = sorted((m for m in pool if md[m]["category"] != "Status" and m not in NO_SLOT_MOVES
+                      and mtype(m) not in dead),
                      key=lambda m: (-power(m), -pool.index(m)))
     picks = []
-    for cond in (lambda m: md[m]["type"] in stab,
-                 lambda m: not picks or md[m]["type"] != md[picks[0]]["type"],
-                 lambda m: md[m]["type"] not in {md[p]["type"] for p in picks}):  # coverage
+    for cond in (lambda m: mtype(m) in stab,
+                 lambda m: not picks or mtype(m) != mtype(picks[0]),
+                 lambda m: mtype(m) not in {mtype(p) for p in picks}):  # coverage
         nxt = next((m for m in attacks if m not in picks and cond(m)), None)
         if nxt:
             picks.append(nxt)
     picks += [m for m in STATUS_MOVES if m in pool][:1]
     picks += [m for m in attacks if m not in picks]
-    picks += [m for m in reversed(pool) if m not in picks and m not in NO_SLOT_MOVES]
+    if rule == "strength":
+        return sum(power(m) for m in picks[:4] if m in attacks)
+    picks += [m for m in reversed(pool) if m not in picks and m not in NO_SLOT_MOVES and mtype(m) not in dead]
     return picks[:4]
 
 
