@@ -10,8 +10,9 @@
   fights (~0.6 deaths per won fight) guts the box before Misty. D20 (safe chooser): no effect.
 - D21: `fit_eval.py --death-cost 1.0` (a death = 1/6 win) → `data/rr/eval_weights_d21.txt`: deaths per won
   fight 0.63 → 0.50, deathless boss wins 5 → 10%, boss wins −3.5 pts, fights cleared unchanged. Not shipped
-  (D15 default). Open D22 (user's call pending): D21 in routine fights, D15 at bosses (needs a per-call weights
-  switch in the fork), per-mon death weights later.
+  (D15 default). **D22 (user call b): D21 is now the default everywhere** (`engine_search.DEFAULT_EVAL_WEIGHTS`).
+  Rivalry never chosen; typed Hidden Power from #44 (Silph Co., the type NPC; `rr_probe.HP_NPC`). Branch pushed.
+  Open D23: how the team builder gets its next gear (richer inputs / engine-labelled data / search labels).
 
 **2026-11-26: D16 movesets, D17 open** (NOTEBOOK.md last entries, decision log Step 21). Boss-aware sets
 B′ (`rr_team_probe.py --sets boss`, `rr_search.default_set`) gain +3.2 ± 1.5 on the five bosses they were tuned
