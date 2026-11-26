@@ -283,9 +283,12 @@ def solo_stage(ctx, species: list[str]) -> tuple[list, dict]:
 
 
 def team_value(ctx, team: tuple) -> float:
+    """The greedy chooser's score of a (partial) team over n_team calc-bot battles: the enemy share KO'd;
+    --chooser safe (D20): the share of the team still alive after a win (0 on a loss), progress breaking ties."""
     if team not in ctx.team_score:
-        ctx.team_score[team] = play(ctx.bridge, ctx.calc, ctx.enemy, [mon_of(ctx, s) for s in team], ctx.enemy_packed, ctx.args.n_team,
-                                    arena=ctx.arena, seeds=ctx.seeds)[2]
+        w, d, pr, *_ = play(ctx.bridge, ctx.calc, ctx.enemy, [mon_of(ctx, s) for s in team], ctx.enemy_packed, ctx.args.n_team,
+                            arena=ctx.arena, seeds=ctx.seeds)
+        ctx.team_score[team] = w * (1 - d) + 0.001 * pr if ctx.args.chooser == "safe" else pr
     return ctx.team_score[team]
 
 
@@ -378,7 +381,7 @@ def choose(ctx, species: list[str]) -> tuple:
     species = expand_box(ctx, species)
     if ctx.args.chooser in ("cover", "duel"):
         return lead_first(ctx, cover_team(ctx, species))
-    if ctx.args.chooser == "greedy":
+    if ctx.args.chooser in ("greedy", "safe"):
         return lead_first(ctx, greedy(ctx, species))
     if ctx.args.chooser == "searched":
         n_s, n_c = ctx.args.n_search, ctx.args.n_screen
@@ -811,8 +814,8 @@ def main() -> None:
     ap.add_argument("--blind-field", action="store_true", help="the calc bot ignores weather / terrain (the pre-2026-10-11 bot)")
     ap.add_argument("--repair", action="store_true", help="offer the counters to the greedy build and play the result too")
     ap.add_argument("--boxes", type=int, default=0, help="sampled-box mode: N boxes per boss drawn by rarity, the chooser picks six from each")
-    ap.add_argument("--chooser", choices=("greedy", "cover", "duel", "searched"), default="greedy",
-                    help="six by calc-bot progress (greedy), by matchup cover on the paper matrix (cover), by cover with every cell judged by n-duel one-on-ones (duel), or by screening --cands sixes built from each boss mon's best answers with searched battles (searched; pool mode)")
+    ap.add_argument("--chooser", choices=("greedy", "safe", "cover", "duel", "searched"), default="greedy",
+                    help="six by calc-bot progress (greedy), by calc-bot survivors after a win (safe, D20), by matchup cover on the paper matrix (cover), by cover with every cell judged by n-duel one-on-ones (duel), or by screening --cands sixes built from each boss mon's best answers with searched battles (searched; pool mode)")
     ap.add_argument("--cands", type=int, default=24, help="--chooser searched: candidate sixes screened per boss")
     ap.add_argument("--n-screen", type=int, default=4, help="--chooser searched: searched battles per candidate in the screen (own seeds)")
     ap.add_argument("--matchup", action="store_true", help="the calc bot (and so the rollouts) switches on the matchup matrix")

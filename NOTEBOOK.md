@@ -3614,3 +3614,47 @@ Implemented `scripts/rr_route.py` (`tests/test_rr_route.py` 3/3):
   `--alt 3`, greedy chooser, best4 sets, engine 20000, 12 workers (user gaming). Doubles fights play as singles.
 - Claude bet (before results): the d19 model is **not** clearly better than d18 on the held-out bosses'
   same-box pairs (within ±5 points of 60%), but ranks boxes on bosses about as well (0.25–0.35); 70%.
+
+## 2026-11-26 — First simulated Nuzlocke runs (`scripts/rr_run.py`, `results/rr_runs_s1`)
+
+- User asked for a few small full runs "to get a feel for how far it would go". `rr_run.py`: random starter,
+  box grows as locations open (one random encounter per location, dupes skipped, gifts), the box probe's
+  settings per mandatory fight (93 of the order's entries: greedy chooser over the living box, cap level,
+  items in hand, one engine-searched battle), fainted = dead, a loss ends the run, healed between fights.
+  Not modelled: doubles (as singles), optional fights, eggs, trades, the player's route / catch choices.
+- 6 runs (seeds 1–6), 0.3–3 min each: cleared 4, 4, 14, 14, 14, 26 of 93. Lost to Brock ×2 (box 4–5 alive),
+  Misty ×3 (box 6–10 alive), Super Nerd Aidan ×1 (cap 36). Deaths before the loss: 8–24.
+- **The killer is attrition, not bosses.** Routine trainers that are won 100% still cost ~0.3–0.6 deaths per
+  fight early and ~1 at Rocket grunts / Archer (the run deaths match the D19 box probe's deaths/battle on the
+  same trainers). 13 fights before Misty ≈ 10 dead, so the box is gutted when the boss comes. A real Nuzlocke
+  needs ~0 deaths in routine fights. So: the team builder's label must weigh deaths (D19 `--label utility`),
+  and the battler's play in won-anyway fights is the bigger lever (death weight 6 = one death costs a win
+  still loses mons when the win is certain; the search does not price a mon's future value, cf. D14).
+
+## 2026-11-26 — D20: cutting deaths in routine fights → the team picker minimises deaths
+
+- Options: (1) the battle search prices deaths higher; (2) the team picker minimises expected deaths;
+  (3) a per-mon future value in the search (D14 death costs).
+- **user call: 2, 90%.** "Maximising win chance and not worrying about death amounts is the sole reason
+  nuzlockers say the champion fights are usually one of the easiest in the game. Reducing deaths per fight via
+  the battler would also start increasing the risk of a total wipe: not impossible but double-edged."
+  (Deaths matter in every fight but the last; the battler should keep playing to win, the choice of six
+  should carry the safety.)
+- `--chooser safe`: the greedy chooser scored by the share of the team alive after a win (0 on a loss) over
+  its n_team calc-bot battles, progress breaking ties (`team_value`). Test: `rr_run.py --chooser safe` on seeds
+  1–12 vs greedy on the same seeds (1–6 already run).
+- Claude bet (before results): safe cuts routine-fight deaths a little (deaths per fight before Misty down
+  ~20–40%) but median fights cleared moves less than +5 (the calc-bot's 4 battles are a noisy death signal,
+  and the searched battle, not the chooser, decides most deaths); 60%.
+- **D20 result** (12 paired seeds, `results/rr_runs_safe` vs `results/rr_runs_s1`): fights cleared median 14 vs 14,
+  paired −0.8 ± 1.1 (safe − greedy); deaths per won fight before Misty 0.53 vs 0.54. No effect: early boxes hold
+  ~9 mons (median), so there is little to choose, and 6 of 12 runs played identically. Bets: Claude's "deaths
+  −20–40%" missed (0%), "cleared < +5" hit. User did not bet.
+- How mons die in routine fights (`rr_deaths.py`, run teams, death weight 6, matchup; NB this tool plays the
+  Showdown search without items, not the engine search the runs use, so its win rates at #9 / #20 (50%) are not
+  the runs' (~100%)): in WON fights the deaths are low-HP mons. #4 Catcher Sammy 12/12 wins, 9 deaths: 8 under
+  half HP, 6 on the turn they switched in (sacked to bring another mon in). #16 Grunt 12/12 wins, 15 deaths:
+  14 under half HP, 13 left in until KO'd. The 2026-10-11 preserve rule (retreat a mon under 40% when a healthy
+  bench mon takes the hit) cut Misty's deaths 47 → 28 then; it lives in the calc bot (rollouts / Showdown
+  search). The engine search the runs use has no such rule; it prices a fainted mon at 60 evaluation points
+  (`rl/engine_search.py`, POKE_ENGINE_DEATH) and still leaves low mons in. → D21.
