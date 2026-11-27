@@ -38,6 +38,9 @@ just shown the result.
   `user call: <choice> <conf>%` in that `NOTEBOOK.md` entry, then give your recommendation and let
   the user decide (auto-off after 3 consecutive `rec`/`skip`s until re-enabled). Routine
   engineering (bug fixes, plumbing) needs no stop.
+- Model design is planned with the user before any model code: inputs, architecture, heads and labels, loss,
+  split and gates, stop criteria, one choice at a time as small decisions. Write the agreed design into
+  `NOTEBOOK.md`, then build exactly that; a change to it goes back to the user first.
 - When launching a multi-minute experiment run in the background, ask once while it runs: *"Bet
   before it finishes? (outcome + 5/7/9, or `skip`)"*; if answered, post your own honest live bet
   before reading results and record `user bet: ...` in that run's `NOTEBOOK.md` entry for

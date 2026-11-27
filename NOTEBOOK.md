@@ -3923,20 +3923,29 @@ independent second analyst (logs only), then a paired lever test by Claude.
    one move for a random legal move from its pool (`rr_search.info()` pool).
 5. **D24 data run** (~4–5 h, 12 workers, check `free -g`): the D23 config (2k iterations, 16 battles, `--alt 3
    --rand 2`, seed 24) plus `--move-rand 1` and the per-mon fields. Ask for bets while it runs.
-6. **The model** (`rl/team_net.py`, ~150 lines; trains in minutes on CPU or the GPU). Tokens: each of our six and each
+6. **Model design with the user: a hard stop before any model code.** The user wants to be deeply involved in
+   planning the model (2026-11-27). Before `rl/team_net.py` exists, go through the design one choice at a time
+   with the user, each as its own small decision (options, basis, "Your call first?", then a recommendation):
+   (a) the inputs per mon and per move (which features, how moves the matrix ignores are described), (b) the
+   architecture (Deep Sets pair MLP vs attention vs a bigger linear model), (c) the heads and their labels,
+   (d) the loss and the head weights, (e) the train / held-out split and the gates, (f) what would make us stop.
+   Write the agreed design into this notebook, then build exactly that. Same for any later change to it. The
+   sketch below is a starting point for that conversation, not a decision.
+7. **The model, sketch** (`rl/team_net.py`, ~150 lines; trains in minutes on CPU or the GPU). Tokens: each of our six and each
    enemy mon as a feature vector (types, base stats, level, speed tier, ability flags, its four moves' features
    pooled); pair features from the existing matrix cells (hit, take, ko_them, ko_us, faster, heals, safe, race).
    A pair MLP over (ours, theirs, cell) → mean-pooled per mon and per team (*Deep Sets*: permutation-invariant by
    construction, no attention, so no NaN pitfall). Heads: team win (sigmoid), each of our mons' death chance, each
    pair's P(ours KOs theirs) and P(theirs KOs ours). Loss: BCE on soft labels, aux heads weighted (start 0.5).
    No species ids (generality rule).
-   While the run goes: train the win head alone on D23 data (no per-mon labels needed) as the first comparison.
-7. **Gates** (train on non-boss trainers, score on bosses only, as `rl/teamwin_compare.py`):
+   The design session can happen while the data run goes; once agreed, the win head alone on D23 data (no per-mon
+   labels needed) is the first comparison.
+8. **Gates** (train on non-boss trainers, score on bosses only, as `rl/teamwin_compare.py`):
    - win head: same-box hard pairs ≥ 75% (+3.5 over 71.6, ~2 se), old held-out not below 65%;
    - death head: Brier skill ≥ 10% over "every mon dies at the team's rate", and beats the matrix heuristic (min ko_us);
    - counter head: AUC on held-out bosses, reported per enemy;
    - ablation: win head alone vs with aux heads on the same data (does the extra signal help the win head?).
-8. **Next decision (D25)**, from the result: wire the judge into the chooser and play runs (`rr_run.py`), use the
+9. **Next decision (D25)**, from the result: wire the judge into the chooser and play runs (`rr_run.py`), use the
    death head to spare key mons, or expert iteration (C) with the judge as the prior.
 
 Also still open: the 20k spot-check of boss labels; `rr_run.py --chooser cover` on the 36 seeds (the performance

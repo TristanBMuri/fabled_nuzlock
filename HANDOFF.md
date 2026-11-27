@@ -4,8 +4,9 @@
 judge becomes a small set network (Deep Sets over our six × their mons, moves as features, no species ids) with
 three heads: team win, each of our mons' death chance, who KOs whom. Order: move audit (`rl/move_audit.py`) →
 per-mon logging in `rr_team_probe.fold()` (nothing per-mon is logged today) + `--move-rand` variants → D24 data run
-(~4–5 h) → `rl/team_net.py` → gates vs the D23 linear judge (71.6% on hard boss pairs). D23 result: 16-battle labels
-sharpened the measurement; the 20 summary features are the ceiling. Branch `rr/d15-d21` (pushed).
+(~4–5 h) → **model design with the user, one choice at a time, before any model code** (NOTEBOOK step 6) →
+`rl/team_net.py` → gates vs the D23 linear judge (71.6% on hard boss pairs). D23 result: 16-battle labels
+sharpened the measurement; the 20 summary features are the ceiling. Work on branch `rr/d24` (from `main`, which holds everything to here).
 
 **2026-11-26 (evening): performance analysis** (NOTEBOOK.md last entry, with a Fable agent; `results/rr_lever_d21.*`,
 `results/rr_misty_alive_vs_full.*`). Compute is not a constraint (a run is ~7 s a fight). At five run-ending fights
