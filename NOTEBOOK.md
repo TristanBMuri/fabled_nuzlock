@@ -3879,3 +3879,65 @@ independent second analyst (logs only), then a paired lever test by Claude.
   boss labels.
 - Bets: user none. Claude (posted before reading) "D23 judge within ±3 of D19's on the old held-out pairs, 60%":
   hit (−0.7).
+
+## 2026-11-27 — D24: the team judge's next step → A+ (richer inputs, several heads); plan for the next session
+
+- Options were (A) richer inputs (all matchups + movesets, a set network), (C) search-chosen labels, (D) wire the
+  current 71.6% judge into the chooser, (E) the 20k boss-label spot-check first.
+- **user call: A, extended — 90% on the direction, 50% on first-try success.** Extension: make the judge "half a
+  battle predictor": what counters what, the win chance, and a death chance per mon (each mon, not an average), so it
+  gives several signals, not one. The user named the main problem: moves the battler and the builder do not use or
+  understand.
+- Claude's recommendation: the same. Why the extra heads should help: a team's win label is 16 win/loss outcomes; per-mon deaths
+  (6 per battle) and who-KO'd-whom (6 × enemy count per battle) give many times more signal per labelled team
+  (*auxiliary tasks / multi-task learning*: extra prediction targets that shape a shared representation; recalled,
+  e.g. UNREAL). The per-mon death head is also what the run layer needs to spare key mons (performance analysis:
+  routine fights kill Gyarados before Misty; D14). Claude's first-try estimate: win head beats 71.6% by ≥ 3.5 pts ~40%;
+  death head beats the matrix heuristic ~75%.
+- Facts that shape the plan (checked today):
+  1. **No per-mon labels are logged.** `box` / `box_alt` events keep `deaths_by` keyed by the *enemy* killer only.
+     `one_battle()` already returns `fainted_sp` and `rr_postmortem.attribution()` knows who was on the field at each
+     faint; `fold()` drops both. A new data run is needed for the death and counter heads.
+  2. **Move coverage**: D23 sets hold 412 distinct moves, enemy sets 380, of which 129 we never carry. best4 does pick
+     some status moves (Roost, Thunder Wave, Will-O-Wisp, Reflect) but never most utility moves. A judge can only
+     learn a move it has seen in labelled battles, so (a) moves enter as **features** (type, power, category, priority,
+     status / boost / heal / pivot / hazard flags from moves.json), never ids, and (b) the next data run also
+     **randomises one move per mon** in some variants (off-policy coverage for moves, like the random sixes were for
+     teams).
+  3. Labels measure "this team with our battler", which is the target the builder needs. Moves the battler misplays
+     (engine gaps fall back to Showdown, so the rules are right; the play may be weak) will look weak in the labels;
+     the move audit below separates "bad move" from "move we play badly".
+
+### Plan (next session; one heavy job at a time)
+
+1. **Bookkeeping**: done today (this entry, decision log Step 29, HANDOFF).
+2. **Move audit** (read-only, ~40 lines, `rl/move_audit.py`): per move in D23 sets and enemy sets: count, category,
+   whether `matchup.rows_for` scores it (damage only?), whether best4 ever picks it, whether it is an engine gap
+   (`rl/route.GAPS`, `engine_search.RR_GAPS`), and the label difference when one of our sets carries it (same-box
+   pairs). Output: the list of moves nobody understands, ranked by how often bosses use them.
+3. **Per-mon logging** (~25 lines, `scripts/rr_team_probe.py`): `fold()` keeps per-battle `fainted_sp` and an
+   attribution of pairs (our mon on the field when an enemy faints / the enemy on the field when ours faints) → each
+   `box` / `box_alt` event gets `per_mon = {ours: {died: frac, ko: {enemy: n}, killed_by: {enemy: n}}}`. Test on
+   one boss before the run.
+4. **Move-randomised variants** (~15 lines): `--move-rand K` = K extra variants of the cover six where each mon swaps
+   one move for a random legal move from its pool (`rr_search.info()` pool).
+5. **D24 data run** (~4–5 h, 12 workers, check `free -g`): the D23 config (2k iterations, 16 battles, `--alt 3
+   --rand 2`, seed 24) plus `--move-rand 1` and the per-mon fields. Ask for bets while it runs.
+6. **The model** (`rl/team_net.py`, ~150 lines; trains in minutes on CPU or the GPU). Tokens: each of our six and each
+   enemy mon as a feature vector (types, base stats, level, speed tier, ability flags, its four moves' features
+   pooled); pair features from the existing matrix cells (hit, take, ko_them, ko_us, faster, heals, safe, race).
+   A pair MLP over (ours, theirs, cell) → mean-pooled per mon and per team (*Deep Sets*: permutation-invariant by
+   construction, no attention, so no NaN pitfall). Heads: team win (sigmoid), each of our mons' death chance, each
+   pair's P(ours KOs theirs) and P(theirs KOs ours). Loss: BCE on soft labels, aux heads weighted (start 0.5).
+   No species ids (generality rule).
+   While the run goes: train the win head alone on D23 data (no per-mon labels needed) as the first comparison.
+7. **Gates** (train on non-boss trainers, score on bosses only, as `rl/teamwin_compare.py`):
+   - win head: same-box hard pairs ≥ 75% (+3.5 over 71.6, ~2 se), old held-out not below 65%;
+   - death head: Brier skill ≥ 10% over "every mon dies at the team's rate", and beats the matrix heuristic (min ko_us);
+   - counter head: AUC on held-out bosses, reported per enemy;
+   - ablation: win head alone vs with aux heads on the same data (does the extra signal help the win head?).
+8. **Next decision (D25)**, from the result: wire the judge into the chooser and play runs (`rr_run.py`), use the
+   death head to spare key mons, or expert iteration (C) with the judge as the prior.
+
+Also still open: the 20k spot-check of boss labels; `rr_run.py --chooser cover` on the 36 seeds (the performance
+analysis' cheap lever); the Hidden Power paired test.

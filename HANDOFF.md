@@ -1,5 +1,12 @@
 # HANDOFF — state of the project as of 2026-10-12
 
+**2026-11-27: D24 = A+ (user call), plan written; start here.** NOTEBOOK.md last entry has the full plan. The team
+judge becomes a small set network (Deep Sets over our six × their mons, moves as features, no species ids) with
+three heads: team win, each of our mons' death chance, who KOs whom. Order: move audit (`rl/move_audit.py`) →
+per-mon logging in `rr_team_probe.fold()` (nothing per-mon is logged today) + `--move-rand` variants → D24 data run
+(~4–5 h) → `rl/team_net.py` → gates vs the D23 linear judge (71.6% on hard boss pairs). D23 result: 16-battle labels
+sharpened the measurement; the 20 summary features are the ceiling. Branch `rr/d15-d21` (pushed).
+
 **2026-11-26 (evening): performance analysis** (NOTEBOOK.md last entry, with a Fable agent; `results/rr_lever_d21.*`,
 `results/rr_misty_alive_vs_full.*`). Compute is not a constraint (a run is ~7 s a fight). At five run-ending fights
 the same box wins 30% with the runs' greedy chooser, 62% with `cover` (20x cheaper), 80% with `searched`; battle
